@@ -1,7 +1,7 @@
 // FUA
     // add code below the table parsing to examine the txt.body after the table we just iterated over of class="txt-body"
     // check whether other possible elit file formats that dont fit this specified mold
-    // add further code under body content
+    // add further code under body content to check whether an existing field has been filled up under a diff recognised name and dont edit if so (eg. judgement and conclusion)
     // format final output text to be as easy to read as possible using pure html and css and ask gpt to help me format this
     // allow the extension to run when the button is clicked
 
@@ -17,6 +17,8 @@ var page = {
     caseCoram: "",
     caseCounsel: "",
     caseParties: "",
+    caseLegalIssues: "",
+    caseIntro: "",
     caseFacts: "",
     caseJudgmentConclusion: ""
 };
@@ -45,10 +47,6 @@ for (var i=0; i < infoTable.rows.length; i++) {
             page.caseCounsel = cells[q].innerText;
         } else if (i === 5 && q === 2) {
             page.caseParties = cells[q].innerText;
-        } else if (i === 6 && q === 2) {
-            page.caseFacts = cells[q].innerText;
-        } else if (i === 7 && q === 2) {
-            page.caseJudgmentConclusion = cells[q].innerText;
         } else {
             console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
         }
