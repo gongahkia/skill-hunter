@@ -8,6 +8,7 @@
             // responsive HTML and CSS
             // might have to add another html file here that is later generated dynamically if rendering doesn't work out, or change the core page content fundamentally 
             // allow toggling of page content
+            // add further frontend using this https://www.linkedin.com/posts/praveen-shrivastav_unique-html-elements-ugcPost-7136674622204166144-NYvx?utm_source=share&utm_medium=member_desktop
         // extension specific (manifest.json)
             // allow the extension to run when the button is clicked
             // clean up extension description as well, make manifest.json code cleaner
