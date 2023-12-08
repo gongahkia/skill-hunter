@@ -4,6 +4,7 @@
     // add further code under body content to check whether an existing field has been filled up under a diff recognised name and dont edit if so (eg. judgement and conclusion)
     // format final output text to be as easy to read as possible using pure html and css and ask gpt to help me format this
     // allow the extension to run when the button is clicked
+    // optionally allowing displaying of components via folding so that no important information is omitted
 
 // -------------------- THIS CODE GOES IN CHRONOLOGICAL ORDER --------------------
 
