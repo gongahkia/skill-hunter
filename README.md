@@ -23,25 +23,39 @@ Browser extension that formats cases to be more readable.
 
 ## Installation
 
+### CLI
+
 ```console
 $ git clone https://github.com/gongahkia/cfp
 ```
+
+### GUI
+
+1. Click *Code*
+
+![](sample/install-1.png)
+
+2. Click *Download ZIP*
+
+![](sample/install-2.png)
+
+3. Unzip the ZIP file. 
 
 ## Usage
 
 ### Firefox
 1. Open this [link](about:debugging#/runtime/this-firefox).
 2. Click *load temporary add-on*.
-3. Open the `CFP` repo, select `./src/manifest.json`
-4. Open any **elit** page
-5. Click the toggle button
+3. Open the `CFP` repo, select `./src/manifest.json`.
+4. Open any **elit** page.
+5. Click the toggle button.
 
 ### Chrome
 
-1. Open this [link](chrome://extensions/)
-2. Click *load unpacked*
-3. Open the `CFP` repo, select `./src/manifest.json`
-4. Open any **elit** page
-5. Click the toggle button
+1. Open this [link](chrome://extensions/).
+2. Click *load unpacked*.
+3. Open the `CFP` repo, select `./src/manifest.json`.
+4. Open any **elit** page.
+5. Click the toggle button.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
