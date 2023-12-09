@@ -1,8 +1,4 @@
 // FUA
-    // 2 implement
-        // extension specific (manifest.json)
-            // allow the extension to run when the button is clicked
-            // clean up extension description as well, make manifest.json code cleaner
     // playtest 
         // check other possible elit file formats that dont fit this specified mold
         // check other browsers that might not support this extension
@@ -30,12 +26,12 @@ var count = 0;
 
 // case title
 var a = document.querySelector(".caseTitle");
-a.style.backgroundColor = "green";
+// a.style.backgroundColor = "green";
 page.caseTitle = a.textContent.trim();
 
 // case summary data
 var infoTable = document.querySelector("#info-table");
-infoTable.style.backgroundColor = "yellow";
+// infoTable.style.backgroundColor = "yellow";
 for (var i=0; i < infoTable.rows.length; i++) {
     var cells = infoTable.rows[i].cells;
     for (var q=0; q< cells.length; q++) {
@@ -60,7 +56,7 @@ for (var i=0; i < infoTable.rows.length; i++) {
 
 // case legal issues
 var legalIssues = document.querySelector("div.txt-body");
-legalIssues.style.backgroundColor = "magenta";
+// legalIssues.style.backgroundColor = "magenta";
 if (legalIssues) {
     legalIssues.childNodes.forEach((childNode) => {
         if (childNode.nodeType === 1 && childNode.textContent != "") {
@@ -93,10 +89,10 @@ imp.forEach(function(paragraph) {
             // alert(buffer);
             buffer = [];
         }
-        paragraph.style.backgroundColor = "yellow";
+        // paragraph.style.backgroundColor = "yellow";
     } else if (paragraph.classList.contains("Judg-1")) { 
         if (secNumberCheck(paragraph.textContent.trim())) {
-            paragraph.style.backgroundColor = "blue";
+            // paragraph.style.backgroundColor = "blue";
             buffer.push(paragraph.textContent.trim());
         }
     } else {
