@@ -44,5 +44,4 @@ $ git clone https://github.com/gongahkia/cfp
 4. Open any **elit** page
 5. Click the toggle button
 
-> Working out support for other browsers
-> Add video here later
+Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
