@@ -27,6 +27,8 @@ Browser extension that formats cases to be more readable.
 
 ```console
 $ git clone https://github.com/gongahkia/cfp
+$ cd cfp
+$ rm -r README.md sample
 ```
 
 ### GUI
