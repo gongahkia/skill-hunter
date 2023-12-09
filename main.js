@@ -1,11 +1,5 @@
 // FUA
     // 2 implement
-        // frontend (main.js)
-            // format final output text to be as easy to read as possible using pure html and css and ask gpt to help me format this
-            // responsive HTML and CSS
-            // might have to add another html file here that is later generated dynamically if rendering doesn't work out, or change the core page content fundamentally 
-            // allow toggling of page content
-            // add further frontend using this https://www.linkedin.com/posts/praveen-shrivastav_unique-html-elements-ugcPost-7136674622204166144-NYvx?utm_source=share&utm_medium=member_desktop
         // extension specific (manifest.json)
             // allow the extension to run when the button is clicked
             // clean up extension description as well, make manifest.json code cleaner
@@ -58,8 +52,8 @@ for (var i=0; i < infoTable.rows.length; i++) {
         } else if (i === 5 && q === 2) {
             page.caseParties = cells[q].innerText;
         } else {
-            console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
-            console.log(`Incorrect number of arguments for case summary table. Logged 'i':${i}, 'q':${q}.`);
+            // console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+            // console.log(`Incorrect number of arguments for case summary table. Logged 'i':${i}, 'q':${q}.`);
         }
     }
 }
@@ -74,8 +68,8 @@ if (legalIssues) {
         }
     });
 } else {
-    console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
-    console.log("No legal issues found.");
+    // console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+    // console.log("No legal issues found.");
 }
 
 // console.log(`Case title: ${page.caseTitle}\nCase date: ${page.caseDate}\nCase tribunal / Courts: ${page.caseTribunalCourt}\nCase coram: ${page.caseCoram}\nCase counsel: ${page.caseCounsel}\nCase parties: ${page.caseParties}\nCase legal issues: ${page.caseLegalIssues}`);
@@ -107,18 +101,13 @@ imp.forEach(function(paragraph) {
         }
     } else {
         count += 1;
-        console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
-        console.log("Unexpected conditional case hit.");
+        // console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+        // console.log("Unexpected conditional case hit.");
     }
 });
 page.caseBody[secName] = buffer;
 
-// console.log(`Case body: ${JSON.stringify(page)}`);
-// console.log(`Case body: ${JSON.stringify(page.caseBody)}`);
-
-// ---------- FRONT-END CREATION ----------
-
-// ---------- POP-UP and CHANGE HTML CONTENT ----------
+// ---------- FRONT-END CREATION ---------- DONE!!!
 
 function sanitise(b) {
     return b.replace(/^\s*\d+\s*/gm, "");
@@ -163,6 +152,12 @@ function simplifyContent(page) {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
+    .line {
+        margin-bottom: 1em;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5em;
+    }
+
     details {
         margin-bottom: 1em;
     }
@@ -195,6 +190,13 @@ function simplifyContent(page) {
     </header>
 
     <main id="dynamic-body">
+        <div class="line" id="case-num"></div>
+        <div class="line" id="case-date"></div>
+        <div class="line" id="case-tribunal-court"></div>
+        <div class="line" id="case-coram"></div>
+        <div class="line" id="case-counsel"></div>
+        <div class="line" id="case-parties"></div>
+        <div class="line" id="case-legal-issues"></div>
     </main>
 
     <div class="github-credit">
@@ -212,24 +214,26 @@ function simplifyContent(page) {
         document.head.appendChild(newStyleEl);
     }
 
-    // add code here to add each case info as additional choice
-
+    var caseNumber = document.getElementById("case-num");
+    caseNumber.innerHTML = `<b>Case number:</b> ${page.caseNumber}`;
+    var caseDate = document.getElementById("case-date");
+    caseDate.innerHTML = `<b>Date: </b> ${page.caseDate}`;
+    var caseTribunalCourt = document.getElementById("case-tribunal-court");
+    caseTribunalCourt.innerHTML = `<b>Tribunal / Court: </b> ${page.caseTribunalCourt}`;
+    var caseCoram = document.getElementById("case-coram");
+    caseCoram.innerHTML = `<b>Coram: </b> ${page.caseCoram}`;
+    var caseCounsel = document.getElementById("case-counsel");
+    caseCounsel.innerHTML = `<b>Counsel: </b> ${page.caseCounsel}`;
+    var caseParties = document.getElementById("case-parties");
+    caseParties.innerHTML = `<b>Parties: </b> ${page.caseParties}`;
+    var caseLegalIssuesArray = document.getElementById("case-legal-issues");
+    caseLegalIssuesArray.innerHTML = `<b>Legal issues: </b><ul>${page.caseLegalIssues.map(function(legalIssue) { return `<li>${legalIssue}</li>`; }).join("")}</ul>`;
+    
     caseTitle = page.caseTitle;
-    caseNumber = page.caseNumber;
-    caseDate = page.caseDate;
-    caseTribunalCourt = page.caseTribunalCourt;
-    caseCoram = page.caseCoram;
-    caseCounsel = page.caseCounsel;
-    caseParties = page.caseParties;
-    caseLegalIssuesArray = page.caseLegalIssues;
-    caseBodyArray = page.caseBody;
-
     var dynHead = document.getElementById("dynamic-header");
     dynHead.textContent = caseTitle;
 
-    // document.body.innerText = "edit ass please thanks"; 
-    // document.body.innerText = `${caseTitle}\n${caseNumber}\n${caseDate}\n${caseTribunalCourt}\n${caseCoram}\n${caseCounsel}\n${caseParties}\n${caseLegalIssuesArray}\n\n\n`;
-
+    caseBodyArray = page.caseBody;
     for (el in caseBodyArray) {
         buf = "";
         for (var q=0; q < caseBodyArray[el].length; q++) {
