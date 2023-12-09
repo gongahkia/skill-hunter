@@ -48,7 +48,7 @@ $ rm -r README.md sample
 ### Firefox
 1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
 2. Click *load temporary add-on*.
-3. Open the `CFP` repo, select `./src/manifest.json`.
+3. Open the `CFP` repo, select `manifest.json`.
 4. Open any **elit** page.
 5. Click the toggle button.
 
@@ -56,7 +56,7 @@ $ rm -r README.md sample
 
 1. Copy and paste this link in the search bar *chrome://extensions/*.
 2. Click *load unpacked*.
-3. Open the `CFP` repo, select `./src/manifest.json`.
+3. Open the `CFP` repo, select `manifest.json`.
 4. Open any **elit** page.
 5. Click the toggle button.
 
