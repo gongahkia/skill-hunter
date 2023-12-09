@@ -120,11 +120,34 @@ page.caseBody[secName] = buffer;
 
 // ---------- POP-UP and CHANGE HTML CONTENT ----------
 
+function sanitise(b) {
+    fin = "";
+    return fin;
+}
+
 function simplifyContent(page) {
     var backup = document.body.innerHTML;
     document.body.innerHTML = "";
+    caseTitle = page.caseTitle;
+    caseNumber = page.caseNumber;
+    caseDate = page.caseDate;
+    caseTribunalCourt = page.caseTribunalCourt;
+    caseCoram = page.caseCoram;
+    caseCounsel = page.caseCounsel;
+    caseParties = page.caseParties;
+    caseLegalIssuesArray = page.caseLegalIssues;
+    caseBodyArray = page.caseBody;
     // document.body.innerText = "edit ass please thanks"; 
-    document.body.innerText = `${JSON.stringify(page)}`; // EDIT THIS LINE HERE to include body content
+    a = `${caseTitle}\n${caseNumber}\n${caseDate}\n${caseTribunalCourt}\n${caseCoram}\n${caseCounsel}\n${caseParties}\n${caseLegalIssuesArray}\n`;
+
+    // add a function to sanitise the string
+    for (el in caseBodyArray) {
+        for (var q=0; q < caseBodyArray[el].length; q++) {
+            a = a.concat(el, "=>", q, "=>", caseBodyArray[el][q], "\n\n\n");
+        }
+    }
+
+    document.body.innerText = a;
     return backup;
 }
 
