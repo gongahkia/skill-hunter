@@ -1,4 +1,6 @@
 // FUA
+    // 2 implement 
+        // add a pop-up that appears the first time you access elit, and will not appear again after that stating CFP can be used
     // playtest 
         // check other possible elit file formats that dont fit this specified mold
         // check other browsers that might not support this extension
