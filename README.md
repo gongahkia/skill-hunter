@@ -57,7 +57,7 @@ $ rm -r README.md sample
 1. Copy and paste this link in the search bar *chrome://extensions/*.
 2. Toggle *Developer mode* on.
 3. Click *load unpacked*.
-4. Open the `CFP` repo, select `manifest.json`.
+4. Open the `CFP` repo, click *select*.
 5. Open any **elit** page.
 6. Click the toggle button.
 
