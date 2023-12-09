@@ -96,7 +96,7 @@ imp.forEach(function(paragraph) {
         } else {
             page.caseBody[secName] = buffer;
             secName = paragraph.textContent.trim();
-            alert(buffer);
+            // alert(buffer);
             buffer = [];
         }
         paragraph.style.backgroundColor = "yellow";
@@ -118,3 +118,30 @@ page.caseBody[secName] = buffer;
 
 // ---------- FRONT-END CREATION ----------
 
+// ---------- POP-UP and CHANGE HTML CONTENT ----------
+
+function simplifyContent(page) {
+    var backup = document.body.innerHTML;
+    document.body.innerHTML = "";
+    // document.body.innerText = "edit ass please thanks"; 
+    document.body.innerText = `${JSON.stringify(page)}`; // EDIT THIS LINE HERE to include body content
+    return backup;
+}
+
+function restoreContent(backup) {
+    document.body.innerHTML = backup || "";
+}
+
+simplifiedState = false;
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.toggle) {
+    if (simplifiedState) {
+        restoreContent(backup);
+        simplifiedState = false;
+    } else {
+        backup = simplifyContent(page);
+        simplifiedState = true;
+    }
+  }
+});
