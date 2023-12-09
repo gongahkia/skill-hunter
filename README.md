@@ -33,11 +33,11 @@ $ rm -r README.md sample
 
 ### GUI
 
-1. Click *Code*
+1. Click *Code*.
 
 ![](sample/install-1.png)
 
-2. Click *Download ZIP*
+2. Click *Download ZIP*.
 
 ![](sample/install-2.png)
 
