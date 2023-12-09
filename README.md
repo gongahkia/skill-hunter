@@ -55,9 +55,10 @@ $ rm -r README.md sample
 ### Chrome
 
 1. Copy and paste this link in the search bar *chrome://extensions/*.
-2. Click *load unpacked*.
-3. Open the `CFP` repo, select `manifest.json`.
-4. Open any **elit** page.
-5. Click the toggle button.
+2. Toggle *Developer mode* on.
+3. Click *load unpacked*.
+4. Open the `CFP` repo, select `manifest.json`.
+5. Open any **elit** page.
+6. Click the toggle button.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
