@@ -1,8 +1,5 @@
 // FUA
     // 2 implement
-        // specific body content (main.js)
-            // change and trim existing code 
-            // add display of all headers of class:"Judg-Heading-1" via folding so that no important information is omitted
         // frontend (main.js)
             // format final output text to be as easy to read as possible using pure html and css and ask gpt to help me format this
             // responsive HTML and CSS
@@ -15,6 +12,9 @@
     // playtest 
         // check other possible elit file formats that dont fit this specified mold
         // check other browsers that might not support this extension
+        // https://www.elitigation.sg/gdviewer/s/2009_SGCA_3
+        // https://www.elitigation.sg/gdviewer/s/2005_SGCA_2
+        // https://www.elitigation.sg/gd/s/2006_SGCA_40
 
 // -------------------- THIS CODE GOES IN CHRONOLOGICAL ORDER --------------------
 
@@ -59,6 +59,7 @@ for (var i=0; i < infoTable.rows.length; i++) {
             page.caseParties = cells[q].innerText;
         } else {
             console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+            console.log(`Incorrect number of arguments for case summary table. Logged 'i':${i}, 'q':${q}.`);
         }
     }
 }
@@ -74,34 +75,46 @@ if (legalIssues) {
     });
 } else {
     console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+    console.log("No legal issues found.");
 }
 
-// alert(`Case title: ${page.caseTitle}\nCase date: ${page.caseDate}\nCase tribunal / Courts: ${page.caseTribunalCourt}\nCase coram: ${page.caseCoram}\nCase counsel: ${page.caseCounsel}\nCase parties: ${page.caseParties}\nCase legal issues: ${page.caseLegalIssues}`);
+// console.log(`Case title: ${page.caseTitle}\nCase date: ${page.caseDate}\nCase tribunal / Courts: ${page.caseTribunalCourt}\nCase coram: ${page.caseCoram}\nCase counsel: ${page.caseCounsel}\nCase parties: ${page.caseParties}\nCase legal issues: ${page.caseLegalIssues}`);
 
-// ---------- SPECIFIC BODY CONTENT -----------
+// ---------- SPECIFIC BODY CONTENT ----------- DONE!!!
 
-var imp = document.querySelectorAll(".Judg-Heading-1");
-imp.forEach(function (paragraph) {
-    switch (paragraph.textContent.trim()) {
-        case "Introduction":
-            paragraph.style.backgroundColor = "yellow";
-            break;
-        case "The decision in the court below":
-            break;
-        case "Factual background":
-            paragraph.style.backgroundColor = "yellow";
-            break
-        case "Our decision":
-            break
-        case "Judgment":
-            paragraph.style.backgroundColor = "yellow";
-            break;
-        case "Conclusion":
-            paragraph.style.backgroundColor = "yellow";
-            break;
-        default:
-            count += 1
-            console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
-            console.log(`Heading found: ${paragraph.textContent.trim()}`);
+function secNumberCheck(a) {
+    return /^\d/.test(a);
+}
+
+var imp = document.querySelectorAll("p");
+var secName = "";
+var buffer = [];
+imp.forEach(function(paragraph) {
+    if (paragraph.classList.contains("Judg-Heading-1")) {
+        if (secName === "") {
+            secName = paragraph.textContent.trim();
+        } else {
+            page.caseBody[secName] = buffer;
+            secName = paragraph.textContent.trim();
+            alert(buffer);
+            buffer = [];
+        }
+        paragraph.style.backgroundColor = "yellow";
+    } else if (paragraph.classList.contains("Judg-1")) { 
+        if (secNumberCheck(paragraph.textContent.trim())) {
+            paragraph.style.backgroundColor = "blue";
+            buffer.push(paragraph.textContent.trim());
+        }
+    } else {
+        count += 1;
+        console.log(`Edge case ${String(count).padStart(3,'0')} hit. Report any issues to @gongahkia.`);
+        console.log("Unexpected conditional case hit.");
     }
 });
+page.caseBody[secName] = buffer;
+
+// console.log(`Case body: ${JSON.stringify(page)}`);
+// console.log(`Case body: ${JSON.stringify(page.caseBody)}`);
+
+// ---------- FRONT-END CREATION ----------
+

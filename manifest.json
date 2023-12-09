@@ -29,6 +29,7 @@
   "content_scripts":[
     {
      "matches":[
+        "https://www.elitigation.sg/gd/*",
         "https://www.elitigation.sg/gdviewer/*"
      ],
      "js":[
