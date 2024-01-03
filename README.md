@@ -1,14 +1,16 @@
-![Static Badge](https://img.shields.io/badge/CFP_1.0-passing-green)
+![Static Badge](https://img.shields.io/badge/Judgeman_1.0-passing-green)
 
-# Case Facts Parser
+# Judgeman
 
 Browser extension that formats cases to be more readable.
+
+![](https://i0.wp.com/www.spielanime.com/wp-content/uploads/2023/11/Jujutsu-Kaisen-244-spoilers-Can-Judgeman-defeat-Sukuna-4.webp?resize=1007%2C527&ssl=1)
 
 ## Motivation
 
 [ELIT](https://www.elitigation.sg/_layouts/IELS/HomePage/Pages/Home.aspx) is one of the largest publicly available repositories for Singapore's law cases. However, the website is hard to navigate through and makes cases difficult to read. Important information is often lost in walls of text.
 
-`CFP` reduces the overly complex DOM structure of the webpage to one that is easily understood and can be parsed by lawyers and programmers alike.
+`Judgeman` reduces the overly complex DOM structure of the webpage to one that is easily understood and can be parsed by lawyers and programmers alike.
 
 ## Purpose
 
@@ -26,8 +28,8 @@ Browser extension that formats cases to be more readable.
 ### CLI
 
 ```console
-$ git clone https://github.com/gongahkia/cfp
-$ cd cfp
+$ git clone https://github.com/gongahkia/judgeman
+$ cd judgeman
 $ rm -r README.md sample
 ```
 
@@ -48,7 +50,7 @@ $ rm -r README.md sample
 ### Firefox
 1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
 2. Click *load temporary add-on*.
-3. Open the `CFP` repo, select `manifest.json`.
+3. Open the `judgeman` repo, select `manifest.json`.
 4. Open any **elit** page.
 5. Click the toggle button.
 
@@ -57,7 +59,7 @@ $ rm -r README.md sample
 1. Copy and paste this link in the search bar *chrome://extensions/*.
 2. Toggle *Developer mode* on.
 3. Click *load unpacked*.
-4. Open the `CFP` repo, click *select*.
+4. Open the `judgeman` repo, click *select*.
 5. Open any **elit** page.
 6. Click the toggle button.
 
