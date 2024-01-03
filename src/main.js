@@ -1,13 +1,3 @@
-// FUA
-    // 2 implement 
-        // add a pop-up that appears the first time you access elit, and will not appear again after that stating CFP can be used
-    // playtest 
-        // check other possible elit file formats that dont fit this specified mold
-        // check other browsers that might not support this extension
-        // https://www.elitigation.sg/gdviewer/s/2009_SGCA_3
-        // https://www.elitigation.sg/gdviewer/s/2005_SGCA_2
-        // https://www.elitigation.sg/gd/s/2006_SGCA_40
-
 // -------------------- THIS CODE GOES IN CHRONOLOGICAL ORDER --------------------
 
 // ---------- UNIVERSAL HEADER ---------- DONE!!!
@@ -198,10 +188,10 @@ function simplifyContent(page) {
     </main>
 
     <div class="github-credit">
-        Designed and built by <a href="https://gongahkia.github.io/">Gabriel Ong</a> | <a href="https://github.com/gongahkia/cfp">Source</a>
+        Designed and built by <a href="https://gongahkia.github.io/">Gabriel Ong</a> | <a href="https://github.com/gongahkia/judgeman">Source</a>
     </div>
     `;
-    document.title = "CFP";
+    document.title = "Judgeman";
 
     var styleEl = document.querySelector("style");
     if (styleEl) {
