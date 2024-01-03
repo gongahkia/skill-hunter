@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/Judgeman_1.0-passing-green)
+![Static Badge](https://img.shields.io/badge/judgeman_1.0-passing-green)
 
 # Judgeman
 
