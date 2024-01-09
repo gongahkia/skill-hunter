@@ -1,14 +1,21 @@
 // FUA 
-    // restructure how data is stored
+    // implement the following check
+        // !! amendNote should be removed from the text to be printed
+        // !! def should be included, maybe add extra tag to pay attention to this => specify it is a definition section and can retroactively add the definitons within the "" by searching for the definiton in previous sections, effectively achieving what SSOparser on github did
+            // this should be nested within the existing general provTxtHdrRegex check
+        // !! section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
+        // implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
+            // frontend wise each provTxtX should then be under the provHdrX section with an indent
+    // !!! debug the issue with lazy loading for longer sites where despite clicking get full document, the parser can't detect or save more than one PART (eg in penal code or poha, only PART 1 is shown, is there a way I can circumvent this so all text is rendered?)
+    // further develop understanding of structure of SSO website, class names are quite specific
+        // structure of SSO website
+            // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
+            // amendNote should be removed from the text to be printed
+            // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
+            // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
     // work out how to preserve tabs and newlines and existing formatting
-    // further check what other page information needs to be extracted
-    // general structure of SSO website
-        // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
-        // each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
-        // each provTxtX should then be under the provHdrX section with an indent
-    // implement parser in a main.js file first
-    // add later popups and other functions seperately
-    // allow reformatting to include a gruvbox theme
+    // add popups and other functions seperately later
+    // allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
 
 // 2 implement
     // when this project's parsing is done, add this to git
@@ -18,13 +25,16 @@
     // work out how to port this over to manifest 3.0 for firefox and chrome later after implementing it in 2.0
     // upload this on firefox website
 
+// ---------- CODE STARTS HERE ----------
+
 alert("walahi");
 
 // ---------- PARSING ----------
 
 var pageData = {
     statuteTitle:"",
-    statuteBody:[]
+    statuteBody:[],
+    statuteDefinitions:[]
 }
 
 var section = {
@@ -32,12 +42,19 @@ var section = {
     sectionBody:"",
 }
 
-var regex = /^prov\d+(Txt|Hdr)$/; // matching regex for prov1Hdr or prov1Txt
+
+// SEARCH PARAMETERS
+
+var provTxtHdrRegex = /^prov\d+(Txt|Hdr)$/; // matching regex for prov1Hdr or prov1Txt
+var legislationTitle = "legis-title";
+
+// ACTUAL LOGIC
+
 var elements = document.querySelectorAll('*'); 
-var txtElements = [];
-var hdrElements = [];
 Array.from(elements).forEach(function(element) {
-    if (regex.test(element.className)) {
+    if (element.className === legislationTitle) {
+        pageData.statuteTitle = element.textContent.trim();
+    } else if (provTxtHdrRegex.test(element.className)) {
         if (element.className.endsWith('Hdr')) {
             if (section.sectionTitle === "") {
                 section.sectionTitle = element.textContent.trim();
@@ -52,8 +69,6 @@ Array.from(elements).forEach(function(element) {
         } else if (element.className.endsWith('Txt')) {
             section.sectionBody += element.textContent.trim();
         }
-    } else if (element.className === "legis-title") {
-        pageData.statuteTitle = element.textContent.trim();
     }
 });
 pageData.statuteBody.push(section);
