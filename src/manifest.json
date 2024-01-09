@@ -1,0 +1,46 @@
+{
+  "manifest_version":2,
+  "version":"1.0",
+  "name":"Easy SSO", 
+  "description":"I make SSO easier to read. Report issues @gongahkia on Github",
+  "icons": {
+    "16": "asset/skill-hunter-16.png",
+    "24": "asset/skill-hunter-24.png",
+    "32": "asset/skill-hunter-32.png",
+    "64": "asset/skill-hunter-64.png",
+    "128": "asset/skill-hunter-128.png"
+  },
+  "web_accessible_resources": [
+    "asset/skill-hunter-16.png",
+    "asset/skill-hunter-24.png",
+    "asset/skill-hunter-32.png",
+    "asset/skill-hunter-64.png",
+    "asset/skill-hunter-128.png"
+  ],
+  "browser_action": {
+    "default_icon": {
+      "16": "asset/skill-hunter-16.png",
+      "24": "asset/skill-hunter-24.png",
+      "32": "asset/skill-hunter-32.png",
+      "64": "asset/skill-hunter-64.png",
+      "128": "asset/skill-hunter-128.png"
+    }
+  },
+  "content_scripts":[
+    {
+     "matches":[
+        "https://sso.agc.gov.sg/Act/*"
+     ],
+     "js":[
+         "main.js"
+     ]
+    }
+  ],
+  "background": {
+    "scripts": [
+    ]
+  },
+  "permissions": [
+    "activeTab"
+  ]
+}
