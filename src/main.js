@@ -1,6 +1,10 @@
 // FUA 
+    // !! work on front-end format of simple.html
+    // !! debug why the toggle button isn't working
     // !! work out how to preserve tabs and newlines and existing formatting
-    // !! include a search of existing words and if a word is a definition, then edit it in the html to show a tag that will appear w different color and shows definition when hovered over as per test.html
+    // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
+    // !! make popup button look nicer
+    // allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
     // implement the following check
         // !! def should be included, maybe add extra tag to pay attention to this => specify it is a definition section and can retroactively add the definitons within the "" by searching for the definiton in previous sections, effectively achieving what SSOparser on github did
             // this should be nested within the existing general provTxtHdrRegex check
@@ -13,9 +17,8 @@
             // amendNote should be removed from the text to be printed
             // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
             // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
+    // !! decide whether i want to bypass SSO CSP by opening a new tab, or if I want to retain CSP by using an external stylesheet instead and then reintegrate toggling formatting
     // continue testing if the amendNote check I've implemented works
-    // add popups and other functions seperately later
-    // allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
 
 // 2 implement
     // when this project's parsing is done, add this to git
@@ -51,6 +54,18 @@ var amendNoteClass = ".amendNote";
 var definitionClass = ".def";
 var amendNote = [];
 
+// HELPER FUNCTIONS
+
+function integrateDefinition(pageData) {
+    pageData.statuteBody.forEach(section => {
+        pageData.statuteDefinitions.forEach(definitionPair => {
+            if (section.sectionBody.includes(definitionPair.term)) {
+                section.sectionBody = section.sectionBody.split(definitionPair.term).join(`<div class="statuteTerm-container">${definitionPair.term}<div class="statuteDefinition-content">${definitionPair.definition}</div></div>`);
+            }
+        });
+    });
+}
+
 // ACTUAL LOGIC
 
 var elements = document.querySelectorAll('*'); 
@@ -80,7 +95,7 @@ Array.from(elements).forEach(function(element) {
                 
                 amendNote.forEach(function (word) {
                     // console.log(amendNote);
-                    section.sectionBody = section.sectionBody.split(word).join("\n");
+                    section.sectionBody = section.sectionBody.split(word).join("<br>");
                     // section.sectionBody = section.sectionBody.replace(new RegExp("\\b" + word + "\\b", 'g'), "");
                 });
             }
@@ -109,7 +124,24 @@ pageData.statuteDefinitions.forEach(definitionPair => {
         definitionPair.definition = definitionPair.definition.split(am).join("");
     });
 });
-console.log(pageData);
+
+// console.log(pageData);
 
 // --------- REFORMATTING ----------
     // add tags for definitions here
+
+integrateDefinition(pageData);
+
+// console.log(pageData);
+
+// ---------- FRONT-END ----------
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.toggle) {
+    // console.log("nice");
+    chrome.tabs.create({
+        url: `chrome-extension://${chrome.runtime.id}/simple.html`,
+        active: true
+    });
+    }
+});

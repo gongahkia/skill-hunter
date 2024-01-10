@@ -1,0 +1,48 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.statuteTerm-container {
+    position: relative;
+    display: inline-block;
+    color: darkGreen; /* Change the color as needed */
+}
+
+.statuteDefinition-content {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    max-width: 300px; /* Adjust as needed */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    white-space: pre-wrap; /* Preserve line breaks */
+    width: auto; /* Allow dynamic sizing based on content */
+}
+
+.statuteTerm-container:hover .statuteDefinition-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.statuteTerm-container:hover {
+    color: lightgreen; /* Change the color when hovered over */
+} 
+
+.github-credit {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 12px;
+    color: #555;
+}
