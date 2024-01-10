@@ -1,8 +1,9 @@
 // FUA 
+    // !! rework line 58's function to split each section by line or a non character and space, then to run the check on that small test case to prevent recursive definitions
+        // !! PERHAPS JUST ADD CODE TO SANITISE THE EXISTING reucrsive html CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
+    // !! OTHERWISE MIGHT NEED TO REWORK ENTIRE SYSTEM OF INTEGRATING DEFINITIONS INTO THE TEXT, perhaps including a count to check if a term has already been defined using further regex
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
-    // !! implement a check that replaces all instances once within a section instead of split and join, then checking the count and passing an iteration when count is one to prevent recursive definitions
-        // !! handle situations of recursive definitions, where one interpreted term is nested in another term, and resolve those instances accordingly
     // !! work out how to preserve tabs and newlines and existing formatting
     // !! add a div class called section that sections off each statute nicely
     // !! handle situations s of words beginning at the start, perhaps sort the array by length to avoid this issue?
@@ -128,7 +129,8 @@ pageData.statuteDefinitions.forEach(definitionPair => {
     });
 });
 
-// console.log(pageData);
+pageData.statuteDefinitions.sort((a,b) => b.term.length - a.term.length);
+console.log(pageData);
 
 // --------- REFORMATTING ----------
     // add tags for definitions here
@@ -164,7 +166,7 @@ function simplifyContent(pageData) {
         top: 100%;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #333;
+        background-color: rgba(51, 51, 51, 1);
         color: #fff;
         padding: 10px;
         border-radius: 5px;
@@ -173,7 +175,7 @@ function simplifyContent(pageData) {
         min-width: 200px; /* Adjust the min-width as needed */
         max-height: 300px; /* Adjust the max-height as needed */
         overflow-y: auto; /* Add scroll if content exceeds max-height */
-        opacity: 0;
+        opacity: 1;
         visibility: hidden;
         transition: opacity 0.3s, visibility 0.3s;
         white-space: pre-wrap; /* Preserve line breaks */
@@ -183,6 +185,7 @@ function simplifyContent(pageData) {
     .statuteTerm-container:hover .statuteDefinition-content {
         opacity: 1;
         visibility: visible;
+        z-index: 2;
     }
 
     .statuteTerm-container:hover {
