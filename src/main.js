@@ -1,4 +1,5 @@
 // FUA 
+    // !! debug why the formatted div is having issues displaying itself in line 62
     // !! work on front-end format of simplifyContent
     // !! work out how to preserve tabs and newlines and existing formatting
     // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
@@ -130,7 +131,7 @@ pageData.statuteDefinitions.forEach(definitionPair => {
 
 integrateDefinition(pageData);
 
-console.log(pageData);
+// console.log(pageData);
 
 // ---------- FRONT-END ----------
 
@@ -190,15 +191,12 @@ function simplifyContent(pageData) {
     }
     `;
 
-    document.body.innerHTML = "";
-
-    /*
     document.body.innerHTML = `
+    <div id="sectionBody"></div>
     <div class="github-credit">
         Designed and built by <a href="https://gongahkia.github.io/">Gabriel Ong</a> | <a href="https://github.com/gongahkia/skill-hunter">Source</a>
     </div>
     `;
-    */
 
     document.title = "Skill Hunter";
 
@@ -212,6 +210,11 @@ function simplifyContent(pageData) {
     }
 
     // FUA add more formatting html code here
+
+    console.log(pageData);
+
+    var sectionBody = document.getElementById("sectionBody");
+    sectionBody.innerHTML = JSON.stringify(pageData.statuteBody);
 
     return [backupTitle, backup];
 
