@@ -1,6 +1,5 @@
 // FUA 
-    // !! work on front-end format of simple.html
-    // !! debug why the toggle button isn't working
+    // !! work on front-end format of simplifyContent
     // !! work out how to preserve tabs and newlines and existing formatting
     // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
     // !! make popup button look nicer
@@ -17,7 +16,6 @@
             // amendNote should be removed from the text to be printed
             // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
             // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
-    // !! decide whether i want to bypass SSO CSP by opening a new tab, or if I want to retain CSP by using an external stylesheet instead and then reintegrate toggling formatting
     // continue testing if the amendNote check I've implemented works
 
 // 2 implement
@@ -132,16 +130,111 @@ pageData.statuteDefinitions.forEach(definitionPair => {
 
 integrateDefinition(pageData);
 
-// console.log(pageData);
+console.log(pageData);
 
 // ---------- FRONT-END ----------
 
+function simplifyContent(pageData) {
+
+    const backupTitle = document.title;
+    const backup = document.body.innerHTML;
+
+    var styleContent = `
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f8f8;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .statuteTerm-container {
+        position: relative;
+        display: inline-block;
+        color: darkGreen; /* Change the color as needed */
+    }
+
+    .statuteDefinition-content {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        max-width: 300px; /* Adjust as needed */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        white-space: pre-wrap; /* Preserve line breaks */
+        width: auto; /* Allow dynamic sizing based on content */
+    }
+
+    .statuteTerm-container:hover .statuteDefinition-content {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .statuteTerm-container:hover {
+        color: lightgreen; /* Change the color when hovered over */
+    } 
+
+    .github-credit {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 12px;
+        color: #555;
+    }
+    `;
+
+    document.body.innerHTML = "";
+
+    /*
+    document.body.innerHTML = `
+    <div class="github-credit">
+        Designed and built by <a href="https://gongahkia.github.io/">Gabriel Ong</a> | <a href="https://github.com/gongahkia/skill-hunter">Source</a>
+    </div>
+    `;
+    */
+
+    document.title = "Skill Hunter";
+
+    var styleEl = document.querySelector("style");
+    if (styleEl) {
+        styleEl.innerHTML = styleContent;
+    } else {
+        var newStyleEl = document.createElement("style");
+        newStyleEl.innerHTML = styleContent;
+        document.head.appendChild(newStyleEl);
+    }
+
+    // FUA add more formatting html code here
+
+    return [backupTitle, backup];
+
+}
+
+function restoreContent(backupTitle, backup) {
+    document.title = backupTitle || "",
+    document.body.innerHTML = backup || "";
+}
+
+simplifiedState = false;
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.toggle) {
-    // console.log("nice");
-    chrome.tabs.create({
-        url: `chrome-extension://${chrome.runtime.id}/simple.html`,
-        active: true
-    });
+    console.log("toggling");
+    if (simplifiedState) {
+        restoreContent(backupTitle, backup);
+        simplifiedState = false;
+    } else {
+        backupPair = simplifyContent(pageData);
+        backupTitle = backupPair[0];
+        backup = backupPair[1];
+        simplifiedState = true;
     }
+  }
 });
