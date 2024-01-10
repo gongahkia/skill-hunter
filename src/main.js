@@ -1,10 +1,11 @@
 // FUA 
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
+    // !! implement a check that replaces all instances once within a section instead of split and join, then checking the count and passing an iteration when count is one to prevent recursive definitions
+        // !! handle situations of recursive definitions, where one interpreted term is nested in another term, and resolve those instances accordingly
     // !! work out how to preserve tabs and newlines and existing formatting
     // !! add a div class called section that sections off each statute nicely
-    // !! handle situations for stricter checks of words beginning at the start, perhaps sort the array by length to avoid this issue?
-    // !! handle situations of recursive definitions, where one interpreted term is nested in another term, and resolve those instances accordingly
+    // !! handle situations s of words beginning at the start, perhaps sort the array by length to avoid this issue?
     // !! handle situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
     // !! work on front-end format of simplifyContent
     // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
