@@ -1,16 +1,15 @@
 // FUA 
-    // !! debug why the formatted div is having issues displaying itself in line 62
-    // !! work on front-end format of simplifyContent
+    // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
+        // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // !! work out how to preserve tabs and newlines and existing formatting
+    // !! add a div class called section that sections off each statute nicely
+    // !! handle situations for stricter checks of words beginning at the start, perhaps sort the array by length to avoid this issue?
+    // !! handle situations of recursive definitions, where one interpreted term is nested in another term, and resolve those instances accordingly
+    // !! handle situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
+    // !! work on front-end format of simplifyContent
     // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
     // !! make popup button look nicer
     // allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
-    // implement the following check
-        // !! def should be included, maybe add extra tag to pay attention to this => specify it is a definition section and can retroactively add the definitons within the "" by searching for the definiton in previous sections, effectively achieving what SSOparser on github did
-            // this should be nested within the existing general provTxtHdrRegex check
-        // !! section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
-        // implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
-            // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // further develop understanding of structure of SSO website, class names are quite specific
         // structure of SSO website
             // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
@@ -20,8 +19,6 @@
     // continue testing if the amendNote check I've implemented works
 
 // 2 implement
-    // when this project's parsing is done, add this to git
-    // make frontend layout like CCLAW L4 project with dynamic responsive tables
     // add a make file as required
     // allow toggling to reformat SSO site but include a gruvbox theme
     // work out how to port this over to manifest 3.0 for firefox and chrome later after implementing it in 2.0
@@ -59,7 +56,13 @@ function integrateDefinition(pageData) {
     pageData.statuteBody.forEach(section => {
         pageData.statuteDefinitions.forEach(definitionPair => {
             if (section.sectionBody.includes(definitionPair.term)) {
-                section.sectionBody = section.sectionBody.split(definitionPair.term).join(`<div class="statuteTerm-container">${definitionPair.term}<div class="statuteDefinition-content">${definitionPair.definition}</div></div>`);
+                const rip = `
+                    <div class="statuteTerm-container">
+                        ${definitionPair.term}
+                        <div class="statuteDefinition-content">${definitionPair.definition}</div>
+                    </div>
+                `;
+                section.sectionBody = section.sectionBody.split(definitionPair.term).join(rip);
             }
         });
     });
@@ -110,8 +113,8 @@ function extractDefinition(inputString) {
         definition:"",
     };
     if (match && match[1]) {
-        result.term = match[1];
-        result.definition = inputString;
+        result.term = match[1].trim();
+        result.definition = inputString.trim();
     }
     return result;
 }
@@ -120,7 +123,7 @@ var definitionElements = document.querySelectorAll(definitionClass);
 definitionElements.forEach(el => pageData.statuteDefinitions.push(extractDefinition(el.textContent)));
 pageData.statuteDefinitions.forEach(definitionPair => {
     amendNote.forEach(am => {
-        definitionPair.definition = definitionPair.definition.split(am).join("");
+        definitionPair.definition = definitionPair.definition.split(am).join("").trim();
     });
 });
 
@@ -141,12 +144,12 @@ function simplifyContent(pageData) {
     const backup = document.body.innerHTML;
 
     var styleContent = `
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f8f8f8;
-        color: #333;
-        margin: 0;
-        padding: 0;
+    .body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
     }
 
     .statuteTerm-container {
@@ -165,7 +168,10 @@ function simplifyContent(pageData) {
         padding: 10px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        max-width: 300px; /* Adjust as needed */
+        max-width: 400px; /* Adjust the max-width as needed */
+        min-width: 200px; /* Adjust the min-width as needed */
+        max-height: 300px; /* Adjust the max-height as needed */
+        overflow-y: auto; /* Add scroll if content exceeds max-height */
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s, visibility 0.3s;
@@ -180,7 +186,7 @@ function simplifyContent(pageData) {
 
     .statuteTerm-container:hover {
         color: lightgreen; /* Change the color when hovered over */
-    } 
+    }
 
     .github-credit {
         position: fixed;
@@ -209,15 +215,19 @@ function simplifyContent(pageData) {
         document.head.appendChild(newStyleEl);
     }
 
-    // FUA add more formatting html code here
+    // FUA add more formatting html code here for sectionTitle and sectionBody
 
     console.log(pageData);
 
     var sectionBody = document.getElementById("sectionBody");
-    sectionBody.innerHTML = JSON.stringify(pageData.statuteBody);
+    pageData.statuteBody.forEach(sectionPair => {
+        sectionBody.innerHTML += "<h2>" + sectionPair.sectionTitle + "</h2><br>";
+        sectionBody.innerHTML += sectionPair.sectionBody + "<br>";
+    });
+
+    // sectionBody.innerHTML = JSON.stringify(pageData.statuteBody);
 
     return [backupTitle, backup];
-
 }
 
 function restoreContent(backupTitle, backup) {
