@@ -1,16 +1,11 @@
 // FUA 
-    // !! rework size of the hovering text boxes to have no limits, maybe this will enable the definition to look better
+    // !! REMOVE ALL INSTANCES OF RECURSIVE DEFINITION by appending DOM elements directly in integrateDefiniton
+        // !! further debug by including a check for existing child nodes and if present, not integrating a definition
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // !! implement preserving tabs and newlines and existing formatting
     // !! add a div class called section that styles each section nicely and seperate from the others
-    // !! rework line 58 function to prevent recursive definitions, try solution 2
-        // 2. Mid Accuracy but hard to implement --> PERHAPS JUST ADD CODE TO SANITISE THE FINAL CREATED HTML CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
-        // 3. Less Accurate --> Chunk the section text by the length of the longest term in statuteDefinitions, then check for words and replace by chunk
-        // 4. Most strenous --> OTHERWISE MIGHT NEED TO REWORK ENTIRE SYSTEM OF INTEGRATING DEFINITIONS INTO THE TEXT, perhaps including a count to check if a term has already been defined using further regex
-        // 1. Most Accurate but dogshit time complexity --> Create a temporary dictionary that stores the wuindex of each individual word in a section, then upon checking it against the terms in StatuteDefinitions, adds the index as a key and the term as a value should the term be defined, after carying this out for the whole section's text, then generate definitions by going to the specified indexes and replacing them only. this prevents recursive definitions by giving granular control to the replace function.
-        // peripheral issues
-            // !! situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
+    // !! debug why the hovering text box doesn't even fit on screen now, might need to alter CSS injected
     // !! make popup button look nicer
     // !! allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
     // structure of SSO website
@@ -53,6 +48,7 @@ var amendNote = [];
 
 // HELPER FUNCTIONS
 
+/*
 function integrateDefinition(pageData) {
     pageData.statuteBody.forEach(section => {
         pageData.statuteDefinitions.forEach(definitionPair => {
@@ -68,23 +64,7 @@ function integrateDefinition(pageData) {
         });
     });
 }
-
-function checkKeyOverlap(obj1, obj2) {
-  for (let key in obj1) {
-    if (obj2.hasOwnProperty(key)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function mergeObjects(target, source) {
-  for (let key in source) {
-    if (source.hasOwnProperty(key)) {
-      target[key] = source[key];
-    }
-  }
-}
+*/
 
 // proof 
     /*
@@ -119,8 +99,51 @@ function integrateDefinition(pageData) {
     });
     return perm; // delete this later
 }
+
+function checkKeyOverlap(obj1, obj2) {
+  for (let key in obj1) {
+    if (obj2.hasOwnProperty(key)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function mergeObjects(target, source) {
+  for (let key in source) {
+    if (source.hasOwnProperty(key)) {
+      target[key] = source[key];
+    }
+  }
+}
+
 */
 
+function integrateDefinition(pageData) {
+    pageData.statuteBody.forEach(section => {
+        pageData.statuteDefinitions.forEach(definitionPair => {
+            if (section.sectionBody.includes(definitionPair.term)) {
+
+                const container = document.createElement('div');
+                container.classList.add('statuteTerm-container');
+
+                const term = document.createTextNode(definitionPair.term);
+                const definitionContent = document.createElement('div');
+                definitionContent.classList.add('statuteDefinition-content');
+                definitionContent.textContent = definitionPair.definition;
+
+                container.appendChild(term);
+                container.appendChild(definitionContent);
+
+                const termIndex = section.sectionBody.indexOf(definitionPair.term);
+                const termLength = definitionPair.term.length;
+
+                section.sectionBody = section.sectionBody.substring(0, termIndex) + section.sectionBody.substring(termIndex + termLength);
+                section.sectionBody = section.sectionBody.substring(0, termIndex) + container.outerHTML + section.sectionBody.substring(termIndex);
+            }
+        });
+    });
+}
 
 // ACTUAL LOGIC
 
@@ -199,12 +222,12 @@ function simplifyContent(pageData) {
     const backup = document.body.innerHTML;
 
     var styleContent = `
-    .body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-    margin: 0;
-    padding: 0;
+        .body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f8f8;
+        color: #333;
+        margin: 0;
+        padding: 0;
     }
 
     .statuteTerm-container {
@@ -223,21 +246,21 @@ function simplifyContent(pageData) {
         padding: 10px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        max-width: 400px; /* Adjust the max-width as needed */
-        min-width: 200px; /* Adjust the min-width as needed */
-        max-height: 300px; /* Adjust the max-height as needed */
-        overflow-y: auto; /* Add scroll if content exceeds max-height */
-        opacity: 1;
+        max-width: 600px;
+        min-width: 500px; 
+        max-height: 400px; 
+        overflow-y: auto;
+        opacity: 0; /* Set initial opacity to 0 */
         visibility: hidden;
         transition: opacity 0.3s, visibility 0.3s;
         white-space: pre-wrap; /* Preserve line breaks */
         width: auto; /* Allow dynamic sizing based on content */
+        z-index: 2; /* Ensure the text box appears above other elements */
     }
 
     .statuteTerm-container:hover .statuteDefinition-content {
         opacity: 1;
         visibility: visible;
-        z-index: 2;
     }
 
     .statuteTerm-container:hover {
