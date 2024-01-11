@@ -1,7 +1,7 @@
 {
   "manifest_version":2,
   "version":"1.0",
-  "name":"Easy SSO", 
+  "name":"Skill Hunter", 
   "description":"I make SSO easier to read. Report issues @gongahkia on Github",
   "icons": {
     "16": "asset/skill-hunter-16.png",
