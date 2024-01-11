@@ -1,28 +1,26 @@
 // FUA 
-    // !! rework line 58's function to split each section by line or a non character and space, then to run the check on that small test case to prevent recursive definitions
-        // !! PERHAPS JUST ADD CODE TO SANITISE THE EXISTING reucrsive html CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
-    // !! OTHERWISE MIGHT NEED TO REWORK ENTIRE SYSTEM OF INTEGRATING DEFINITIONS INTO THE TEXT, perhaps including a count to check if a term has already been defined using further regex
+    // !! rework line 58 function to prevent recursive definitions, try solution 1
+        // 1. Most Accurate and ok to implement --> Create a temporary dictionary that stores the index of each individual word in a section, then upon checking it against the terms in StatuteDefinitions, adds the index as a key and the term as a value should the term be defined, after carying this out for the whole section's text, then generate definitions by going to the specified indexes and replacing them only. this prevents recursive definitions by giving granular control to the replace function.
+        // 2. Mid Accuracy but hard to implement --> PERHAPS JUST ADD CODE TO SANITISE THE FINAL CREATED HTML CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
+        // 3. Less Accurate --> Chunk the section text by the length of the longest term in statuteDefinitions, then check for words and replace by chunk
+        // 4. Most strenous --> OTHERWISE MIGHT NEED TO REWORK ENTIRE SYSTEM OF INTEGRATING DEFINITIONS INTO THE TEXT, perhaps including a count to check if a term has already been defined using further regex
+        // peripheral issues
+            // !! situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // !! work out how to preserve tabs and newlines and existing formatting
-    // !! add a div class called section that sections off each statute nicely
-    // !! handle situations s of words beginning at the start, perhaps sort the array by length to avoid this issue?
-    // !! handle situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
-    // !! work on front-end format of simplifyContent
-    // !! should i remove the recursive definitions of the terms within the interpretation section terms within the interpretation section
+    // !! add a div class called section that styles each section nicely and seperate from the others
     // !! make popup button look nicer
-    // allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
-    // further develop understanding of structure of SSO website, class names are quite specific
-        // structure of SSO website
-            // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
-            // amendNote should be removed from the text to be printed
-            // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
-            // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
+    // !! allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
+    // structure of SSO website
+        // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
+        // amendNote should be removed from the text to be printed
+        // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
+        // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
     // continue testing if the amendNote check I've implemented works
 
 // 2 implement
     // add a make file as required
-    // allow toggling to reformat SSO site but include a gruvbox theme
     // work out how to port this over to manifest 3.0 for firefox and chrome later after implementing it in 2.0
     // upload this on firefox website
 
@@ -54,6 +52,7 @@ var amendNote = [];
 
 // HELPER FUNCTIONS
 
+// FUA REWORK THIS AS PER SOLUTION 1
 function integrateDefinition(pageData) {
     pageData.statuteBody.forEach(section => {
         pageData.statuteDefinitions.forEach(definitionPair => {
