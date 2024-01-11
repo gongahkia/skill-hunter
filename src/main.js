@@ -1,4 +1,5 @@
 // FUA 
+    // !! add check for sites that are of this specific SSO type and see if it works https://sso.agc.gov.sg/SL/GCA2022-S660-2022?DocDate=20220802&WholeDoc=1
     // !! rework line 58 function to prevent recursive definitions, try solution 1
         // 1. Most Accurate and ok to implement --> Create a temporary dictionary that stores the index of each individual word in a section, then upon checking it against the terms in StatuteDefinitions, adds the index as a key and the term as a value should the term be defined, after carying this out for the whole section's text, then generate definitions by going to the specified indexes and replacing them only. this prevents recursive definitions by giving granular control to the replace function.
         // 2. Mid Accuracy but hard to implement --> PERHAPS JUST ADD CODE TO SANITISE THE FINAL CREATED HTML CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
