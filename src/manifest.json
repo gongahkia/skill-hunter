@@ -30,7 +30,9 @@
   "content_scripts":[
     {
      "matches":[
-        "https://sso.agc.gov.sg/Act/*?WholeDoc=1"
+        "https://sso.agc.gov.sg/Act/*?WholeDoc=1",
+        "https://sso.agc.gov.sg/SL/*WholeDoc=1",
+        "https://sso.agc.gov.sg//Bills-Supp/*"
      ],
      "js":[
          "main.js"

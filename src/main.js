@@ -1,17 +1,15 @@
 // FUA 
-    // !! debug line 116
-    // !! rework line 58 function to prevent recursive definitions, try solution 1
-        // 1. Most Accurate and ok to implement --> Create a temporary dictionary that stores the wuindex of each individual word in a section, then upon checking it against the terms in StatuteDefinitions, adds the index as a key and the term as a value should the term be defined, after carying this out for the whole section's text, then generate definitions by going to the specified indexes and replacing them only. this prevents recursive definitions by giving granular control to the replace function.
+    // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
+        // frontend wise each provTxtX should then be under the provHdrX section with an indent
+    // !! implement preserving tabs and newlines and existing formatting
+    // !! add a div class called section that styles each section nicely and seperate from the others
+    // !! rework line 58 function to prevent recursive definitions, try solution 2
         // 2. Mid Accuracy but hard to implement --> PERHAPS JUST ADD CODE TO SANITISE THE FINAL CREATED HTML CODE TO ENSURE THERE ISNT RECURSIVE DEFINITIONS AFTER ITS OCCURENCE
         // 3. Less Accurate --> Chunk the section text by the length of the longest term in statuteDefinitions, then check for words and replace by chunk
         // 4. Most strenous --> OTHERWISE MIGHT NEED TO REWORK ENTIRE SYSTEM OF INTEGRATING DEFINITIONS INTO THE TEXT, perhaps including a count to check if a term has already been defined using further regex
+        // 1. Most Accurate but dogshit time complexity --> Create a temporary dictionary that stores the wuindex of each individual word in a section, then upon checking it against the terms in StatuteDefinitions, adds the index as a key and the term as a value should the term be defined, after carying this out for the whole section's text, then generate definitions by going to the specified indexes and replacing them only. this prevents recursive definitions by giving granular control to the replace function.
         // peripheral issues
             // !! situations of defintions not being the whole word but being part of one word, i can still define them but should resolve the space caused by split accordingly
-    // !! add check for sites that are of this specific SSO type and see if it works https://sso.agc.gov.sg/SL/GCA2022-S660-2022?DocDate=20220802&WholeDoc=1
-    // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
-        // frontend wise each provTxtX should then be under the provHdrX section with an indent
-    // !! work out how to preserve tabs and newlines and existing formatting
-    // !! add a div class called section that styles each section nicely and seperate from the others
     // !! make popup button look nicer
     // !! allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
     // structure of SSO website
@@ -54,9 +52,6 @@ var amendNote = [];
 
 // HELPER FUNCTIONS
 
-// FUA REWORK THIS AS PER SOLUTION 1
-
-/*
 function integrateDefinition(pageData) {
     pageData.statuteBody.forEach(section => {
         pageData.statuteDefinitions.forEach(definitionPair => {
@@ -72,7 +67,6 @@ function integrateDefinition(pageData) {
         });
     });
 }
-*/
 
 function checkKeyOverlap(obj1, obj2) {
   for (let key in obj1) {
@@ -91,20 +85,18 @@ function mergeObjects(target, source) {
   }
 }
 
-// FUA an internal check check for overlaps in ranges
-// FUA add a check to see if this allows for multiple repeated definitions within one chec
+// proof 
+    /*
+    i am a shit head
+    0 1 2 3 4 
 
-    // proof 
-        /*
-        i am a shit head
-        0 1 2 3 4 
+    split by shit
 
-        split by shit
+    i am a, head
+    0 1 2 1
+    */
 
-        i am a, head
-        0 1 2 1
-        */
-
+/*
 function integrateDefinition(pageData) {
     pageData.statuteBody.forEach(section => {
         var perm = {};
@@ -113,7 +105,7 @@ function integrateDefinition(pageData) {
             if (section.sectionBody.includes(definitionPair.term)) {
                 var termStartIndex = section.sectionBody.split(definitionPair.term)[0].length;
                 var termLength = definitionPair.term.length;
-                for (var iter of range(termStartIndex,termStartIndex+termLength-1,1)) {
+                for (let iter = termStartIndex; termStartIndex + termLength-1; iter++) {
                     tem.iter = definitionPair.term;
                 }
                 if (!checkKeyOverlap(tem,perm)) {
@@ -126,6 +118,7 @@ function integrateDefinition(pageData) {
     });
     return perm; // delete this later
 }
+*/
 
 
 // ACTUAL LOGIC
@@ -193,7 +186,7 @@ console.log(pageData);
 // --------- REFORMATTING ----------
     // add tags for definitions here
 
-print(integrateDefinition(pageData));
+integrateDefinition(pageData);
 
 // console.log(pageData);
 
