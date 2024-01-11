@@ -1,13 +1,12 @@
 // FUA 
-    // !! REMOVE ALL INSTANCES OF RECURSIVE DEFINITION by appending DOM elements directly in integrateDefiniton
-        // !! further debug by including a check for existing child nodes and if present, not integrating a definition
+    // !! add a div class called section that styles each section nicely and seperate from the others
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // !! implement preserving tabs and newlines and existing formatting
-    // !! add a div class called section that styles each section nicely and seperate from the others
-    // !! debug why the hovering text box doesn't even fit on screen now, might need to alter CSS injected
-    // !! make popup button look nicer
     // !! allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
+    // !! further beautify existing CSS and publish asap
+    // !! REMOVE ALL INSTANCES OF RECURSIVE DEFINITION by appending DOM elements directly in integrateDefiniton
+        // !! further debug by including a check for existing child nodes and if present, not integrating a definition
     // structure of SSO website
         // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
         // amendNote should be removed from the text to be printed
@@ -222,7 +221,15 @@ function simplifyContent(pageData) {
     const backup = document.body.innerHTML;
 
     var styleContent = `
-        .body {
+
+    header {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 1em;
+    }
+
+    .body {
         font-family: 'Arial', sans-serif;
         background-color: #f8f8f8;
         color: #333;
@@ -246,9 +253,9 @@ function simplifyContent(pageData) {
         padding: 10px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        max-width: 600px;
+        max-width: 850px;
         min-width: 500px; 
-        max-height: 400px; 
+        max-height: 500px; 
         overflow-y: auto;
         opacity: 0; /* Set initial opacity to 0 */
         visibility: hidden;
@@ -274,10 +281,21 @@ function simplifyContent(pageData) {
         font-size: 12px;
         color: #555;
     }
+
+    main {
+        max-width: 800px;
+        margin: 2em auto;
+        padding: 1em;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
     `;
 
     document.body.innerHTML = `
-    <div id="sectionBody"></div>
+    <header><h1>${backupTitle}</h1></header>
+    <main>
+        <div id="sectionBody"></div>
+    </main>
     <div class="github-credit">
         Designed and built by <a href="https://gongahkia.github.io/">Gabriel Ong</a> | <a href="https://github.com/gongahkia/skill-hunter">Source</a>
     </div>
