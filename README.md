@@ -23,7 +23,9 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Screenshots
 
-![](sample/skill-hunter-screenshot.jpg)
+![](sample/skill-hunter-screenshot-1.png)
+
+![](sample/skill-hunter-screenshot-2.png)
 
 ## Installation
 
@@ -39,11 +41,11 @@ $ make
 
 1. Click *Code*.
 
-![](sample/skill-hunter-installation-1.jpg)
+![](sample/skill-hunter-installation-1.png)
 
 2. Click *Download ZIP*.
 
-![](sample/skill-hunter-installation-2.jpg)
+![](sample/skill-hunter-installation-2.png)
 
 3. Unzip the ZIP file.
 

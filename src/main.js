@@ -1,27 +1,6 @@
-// FUA 
-    // !! add a div class called section that styles each section nicely and seperate from the others
-    // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
-        // frontend wise each provTxtX should then be under the provHdrX section with an indent
-    // !! implement preserving tabs and newlines and existing formatting
-    // !! allow reformatting to include a gruvbox light and dark theme, matcha, everforest and rosepine theme
-    // !! further beautify existing CSS and publish asap
-    // !! REMOVE ALL INSTANCES OF RECURSIVE DEFINITION by appending DOM elements directly in integrateDefiniton
-        // !! further debug by including a check for existing child nodes and if present, not integrating a definition
-    // structure of SSO website
-        // each section title and its text are nested within a div classes are provXHdr and provTxtX where X is a number that increases
-        // amendNote should be removed from the text to be printed
-        // def should be included, maybe add extra tag to pay attention to this => specify it is a definition section
-        // section limbs will be under the class p1No and pTxt, with p1No being the letter and pTxt being the internal text provided
-    // continue testing if the amendNote check I've implemented works
-
-// 2 implement
-    // add a make file as required
-    // work out how to port this over to manifest 3.0 for firefox and chrome later after implementing it in 2.0
-    // upload this on firefox website
-
 // ---------- CODE STARTS HERE ----------
 
-alert("walahi");
+// alert("walahi");
 
 // ---------- PARSING ----------
 
