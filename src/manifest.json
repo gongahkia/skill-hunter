@@ -32,7 +32,7 @@
      "matches":[
         "https://sso.agc.gov.sg/Act/*?WholeDoc=1",
         "https://sso.agc.gov.sg/SL/*WholeDoc=1",
-        "https://sso.agc.gov.sg//Bills-Supp/*"
+        "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
      ],
      "js":[
          "main.js"

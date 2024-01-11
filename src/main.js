@@ -1,4 +1,5 @@
 // FUA 
+    // !! rework size of the hovering text boxes to have no limits, maybe this will enable the definition to look better
     // !! implement a check for each provTxtX should check whether it starts with a number, if it does and not a bracket, then indent the portion otherwise dont indent
         // frontend wise each provTxtX should then be under the provHdrX section with an indent
     // !! implement preserving tabs and newlines and existing formatting
