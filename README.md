@@ -4,8 +4,6 @@
 
 Browser extension that formats legislation to be more readable.
 
-![](https://i.redd.it/531lsuu5cj081.jpg)
-
 ## Motivation
 
 [SSO](https://sso.agc.gov.sg/) is the most-referenced source for lawyers when keeping up to date with Singapore Legislation.
@@ -69,3 +67,9 @@ $ make
 6. Click the toggle button.
 
 Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V2 persists. Open an issue for further support.
+
+## References
+
+The name `Skill Hunter` is in reference to the Nen ability of [Chrollo Lucilfer](https://hunterxhunter.fandom.com/wiki/Chrollo_Lucilfer) (クロロ＝ルシルフル), the founder and leader of the Phantom Troupe in the ongoing manga series, [HunterXhunter](https://hunterxhunter.fandom.com/wiki/Hunterpedia).
+
+![](https://i.redd.it/531lsuu5cj081.jpg)
