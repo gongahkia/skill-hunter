@@ -4,8 +4,6 @@
 
 Browser extension that formats cases to be more readable.
 
-![](https://i0.wp.com/www.spielanime.com/wp-content/uploads/2023/11/Jujutsu-Kaisen-244-spoilers-Can-Judgeman-defeat-Sukuna-4.webp?resize=1007%2C527&ssl=1)
-
 ## Motivation
 
 [ELIT](https://www.elitigation.sg/_layouts/IELS/HomePage/Pages/Home.aspx) is one of the largest publicly available repositories for Singapore's law cases. However, the website is hard to navigate through and makes cases difficult to read. Important information is often lost in walls of text.
@@ -64,3 +62,9 @@ $ rm -r README.md sample
 6. Click the toggle button.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
+
+## References
+
+The name `Judgeman` is in reference to the cursed technique of [Hiromi Higuruma](https://jujutsu-kaisen.fandom.com/wiki/Hiromi_Higuruma) (日車寛見), a defense attorney who rose to prominence in the [culling game arc](https://jujutsu-kaisen.fandom.com/wiki/Culling_Game_Arc) of the manga series [Jujutsu Kaisen](https://jujutsu-kaisen.fandom.com/wiki/Jujutsu_Kaisen_Wiki).
+
+![](https://64.media.tumblr.com/2a449b56b7bf13ef94308fa4708b71fc/9f2fa11c67b698f5-4b/s1280x1920/83db52625d6df7b945b482183d12542a561407ab.png)
