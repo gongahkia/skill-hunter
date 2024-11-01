@@ -53,7 +53,7 @@ $ make
 1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
 2. Click *load temporary add-on*.
 3. Open the `skill-hunter` repo, select `manifest.json`.
-4. Open any **SSO** page, click *Whole Document*.
+4. Open any **SSO** page, then click *Whole Document*.
 5. Click the toggle button.
 
 ### Chrome
@@ -62,7 +62,7 @@ $ make
 2. Toggle *Developer mode* on.
 3. Click *load unpacked*.
 4. Open the `skill-hunter` repo, click *select*.
-5. Open any **SSO** page, click *Whole Document*.
+5. Open any **SSO** page, then click *Whole Document*.
 6. Click the toggle button.
 
 ## Browser support

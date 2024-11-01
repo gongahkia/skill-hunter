@@ -1,5 +1,7 @@
 /*
 FUA 
+    * consider centralising the pop-up button 
+    * also consider directly rendering the button as a component onto the screen that can then be clicked if need be, see createGenericButton() function
     * rewrite existing functionality from the groundup, of defining certain words within statutes inline 
     * add additional URL links so those words can be clicked to be brought to the definition section
     * edit manifest.json further later
@@ -11,6 +13,19 @@ FUA
         * allow statutes and their composite sections and subsections to fold accordingly
     * rewrite the frontend to be pretty and minimal with nice smooth animations 
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
+    * add a script or automated browser program (perhaps with playwright or selenium) that opens the user's local browser and handles AUTOMATIC INSTALLATION of skill_hunter for them, and ask GPT for help implementing this if idk how
+    * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
+        * add serialising and deserialising functions to read this config.json
+        * add documentation for what can be customised in the README.md
+    * add other colorschemes and font customisation such as
+        * dark mode
+        * light mode
+        * gruvbox
+        * everforest
+        * etc. (see more colorschemes from vsc)
+        * arial
+        * times new roman
+        * comic sans
     * draw my own logo for skill-hunter v2 on my ipad based on my purple and green character wearing chrollo lucifer's clothes and carrying an inspired book maybe? then place within the local_asset folder and add to the overall README.md
     * clean up the description, screenshots and installation instructions in the README.md
     * HARD DEADLINE 15 Nov to get skill_hunter up and running, email Jerrold Soh then to sell my app and harvest free classpart if possible
@@ -26,3 +41,36 @@ FUA
         * safari (come up with a browser-specific version for portability and runnability on macs if required)
 */
 
+// ~~~~~~~~~~ CODE STARTS HERE ~~~~~~~~~~
+
+// ~~~~~ HELPER FUNCTIONS ~~~~~
+
+
+function createGenericButton() {
+    /*
+    creates and appends a html button 
+    component that then prints an alert 
+    to the screen when clicked
+    */
+    const button = document.createElement("button");
+    button.innerText = "poke me 🫵";
+    button.style.position = "fixed"; 
+    button.style.top = "10px";
+    button.style.right = "10px";
+    button.style.zIndex = "1000"; 
+    button.style.padding = "10px"; 
+    button.style.backgroundColor = "#4CAF50"; 
+    button.style.color = "white"; 
+    button.style.border = "none"; 
+    button.style.borderRadius = "5px"; 
+    button.style.cursor = "pointer"; 
+    button.addEventListener("click", () => {
+        alert("Ouch! 🤕");
+    });
+    document.body.appendChild(button);
+    return None
+}
+
+// ~~~~~ EXECUTION CODE ~~~~~
+
+alert("skill hunter launching...")
