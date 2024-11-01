@@ -1,6 +1,10 @@
-[![](https://img.shields.io/badge/skill_hunter_1.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0)[![](https://img.shields.io/badge/skill_hunter_2.0-build-orange)]()
+[![](https://img.shields.io/badge/skill_hunter_1.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0) [![](https://img.shields.io/badge/skill_hunter_2.0-build-orange)]()
 
 # Skill Hunter
+
+<p align="center">
+<img src="./asset/logo_words.png" width=50% height=50%>
+</p>
 
 Browser extension that formats legislation to be more readable.
 
@@ -38,11 +42,11 @@ $ make
 
 1. Click *Code*.
 
-![](sample/skill-hunter-installation-1.png)
+![](./asset/skill-hunter-installation-1.png)
 
 2. Click *Download ZIP*.
 
-![](sample/skill-hunter-installation-2.png)
+![](./asset/skill-hunter-installation-2.png)
 
 3. Unzip the ZIP file.
 

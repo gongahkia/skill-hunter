@@ -26,7 +26,6 @@ FUA
         * arial
         * times new roman
         * comic sans
-    * draw my own logo for skill-hunter v2 on my ipad based on my purple and green character wearing chrollo lucifer's clothes and carrying an inspired book maybe? then place within the local_asset folder and add to the overall README.md
     * clean up the description, screenshots and installation instructions in the README.md
     * HARD DEADLINE 15 Nov to get skill_hunter up and running, email Jerrold Soh then to sell my app and harvest free classpart if possible
     * test to ensure the browser extension runs on all statutes including longer ones like the Penal Code
