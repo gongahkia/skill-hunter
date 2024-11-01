@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/skill_hunter_1.0-passing-green)
+[![](https://img.shields.io/badge/skill_hunter_1.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0)[![](https://img.shields.io/badge/skill_hunter_2.0-build-orange)]()
 
 # Skill Hunter
 
@@ -21,9 +21,8 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Screenshots
 
-![](sample/skill-hunter-screenshot-1.png)
-
-![](sample/skill-hunter-screenshot-2.png)
+![]()
+![]()
 
 ## Installation
 
