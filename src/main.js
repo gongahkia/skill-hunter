@@ -1,7 +1,5 @@
 /*
 FUA 
-    * consider centralising the pop-up button 
-    * also consider directly rendering the button as a component onto the screen that can then be clicked if need be, see createGenericButton() function
     * rewrite existing functionality from the groundup, of defining certain words within statutes inline 
     * add additional URL links so those words can be clicked to be brought to the definition section
     * edit manifest.json further later
@@ -12,6 +10,8 @@ FUA
         * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
         * allow statutes and their composite sections and subsections to fold accordingly
     * rewrite the frontend to be pretty and minimal with nice smooth animations 
+    * consider centralising the pop-up button 
+    * also consider directly rendering the button as a component onto the screen that can then be clicked if need be, see createGenericButton() function
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
     * add a script or automated browser program (perhaps with playwright or selenium) that opens the user's local browser and handles AUTOMATIC INSTALLATION of skill_hunter for them, and ask GPT for help implementing this if idk how
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
@@ -70,6 +70,28 @@ function createGenericButton() {
     document.body.appendChild(button);
     return None
 }
+
+// ~~~ internal reference ~~~
+
+// FUA continue working on this from here
+
+// ~ general things to scrape and reformat ~
+
+//     div#nav.affix-top div#topLeftPanel.top-left-panel 
+//         div.legis-title --> inner_text() to get full title of legislation
+//         span.fa.fa-file-pdf-o --> try href() to get the link to the pdf document, if there's anyway to click this element or extract the link from within it to get the link to the PDF document of each peice of legislation
+//         div.status-value --> inner_text() to get current version of the statute
+
+//     div#tocPanel.toc-panel
+//         nav#toc --> note a bunch of other classes are appended here but im ignoring them for the sake of simplicity
+//             a.nav-link --> query_selector_all() these instances to see individual elements of the contents pageA
+//                 b.active --> if inside, likely the header so extract inner_text()
+
+// ~ specific things to scrape and reformat ~
+
+// ~ other to dos ~
+
+// * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
 // ~~~~~ EXECUTION CODE ~~~~~
 
