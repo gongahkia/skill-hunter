@@ -65,7 +65,9 @@ $ make
 5. Open any **SSO** page, click *Whole Document*.
 6. Click the toggle button.
 
-Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V2 persists. Open an issue for further support.
+## Browser support
+
+Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V2 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
 
 ## References
 

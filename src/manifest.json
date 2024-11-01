@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "version": "2.0",
+  "name": "Skill Hunter",
+  "description": "I make SSO easier to read. Report issues @gongahkia on Github",
+  "icons": {
+    "16": "asset/skill-hunter-16.png",
+    "24": "asset/skill-hunter-24.png",
+    "32": "asset/skill-hunter-32.png",
+    "64": "asset/skill-hunter-64.png",
+    "128": "asset/skill-hunter-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "asset/skill-hunter-16.png",
+        "asset/skill-hunter-24.png",
+        "asset/skill-hunter-32.png",
+        "asset/skill-hunter-64.png",
+        "asset/skill-hunter-128.png"
+      ],
+      "matches": ["<all_urls>"]  
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "asset/skill-hunter-16.png",
+      "24": "asset/skill-hunter-24.png",
+      "32": "asset/skill-hunter-32.png",
+      "64": "asset/skill-hunter-64.png",
+      "128": "asset/skill-hunter-128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://sso.agc.gov.sg/Act/*?WholeDoc=1",
+        "https://sso.agc.gov.sg/SL/*WholeDoc=1",
+        "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
+      ],
+      "js": ["main.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "webNavigation"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "your@extension.id"
+    }
+  }
+}
