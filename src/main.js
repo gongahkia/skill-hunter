@@ -59,30 +59,7 @@ function deserialiseJSON(inp_json) {
     return JSON.stringify(inp_json, null, 4)
 }
 
-function createGenericButton() {
-    /*
-    creates and appends a html button 
-    component that then prints an alert 
-    to the screen when clicked
-    */
-    const button = document.createElement("button");
-    button.innerText = "poke me 🫵";
-    button.style.position = "fixed"; 
-    button.style.top = "10px";
-    button.style.right = "10px";
-    button.style.zIndex = "1000"; 
-    button.style.padding = "10px"; 
-    button.style.backgroundColor = "#4CAF50"; 
-    button.style.color = "white"; 
-    button.style.border = "none"; 
-    button.style.borderRadius = "5px"; 
-    button.style.cursor = "pointer"; 
-    button.addEventListener("click", () => {
-        alert("Ouch! 🤕");
-    });
-    document.body.appendChild(button);
-    return None
-}
+// ~~~~~ SCRAPE DATA ~~~~~
 
 function getPageMetadata() {
     /*
@@ -158,7 +135,7 @@ function getLegislationMetaData() {
     if (legisFront){
         legislationName = legisFront.querySelector("table tbody tr td.actHd")?.innerText.trim();
         legislationDescription = legisFront.querySelector("table tbody tr td.longTitle")?.innerText.trim();
-        legislationDate = legisFront.querySelector("table tbbody tr td.cDate")?.innerText.trim();
+        legislationDate = legisFront.querySelector("table tbody tr td.cDate")?.innerText.trim();
         revisedLegislationName = legisFront.querySelector("table tbody tr td.revdHdr")?.innerText.trim();
         revisedLegislationText = legisFront.querySelector("table tbody tr td.revdTxt")?.innerText.trim();
     } else {
@@ -177,6 +154,129 @@ function getLegislationMetaData() {
     }
 }
 
+function getLegislationDefinitions() {
+    /*
+    extracts definitions from within
+    legislation and places it within 
+    a json object for later retrieval
+    */
+    const definitions = []; 
+    const regex = /“([^”]+)”/g;
+    const provisionContainers = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov']");
+    provisionContainers.forEach(container => {
+        const rows = container.querySelectorAll("table tbody tr");
+        rows.forEach(row => {
+            const definitionCell = row.querySelector("td.def");
+            if (definitionCell) {
+                const sentence = definitionCell.innerText.trim();
+                let match;
+                if ((match = regex.exec(sentence)) !== null) {
+                    const term = match[1].trim(); 
+                    definitions.push({ [term]: sentence }); 
+                }
+            }
+        });
+    });
+    return definitions;
+}
+
+function getLegislationContent() {
+    const content = [] 
+    const provisionContainers = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov']");
+    provisionContainers.forEach(container => {
+
+        const rows = container.querySelectorAll("table tbody tr");
+
+        rows.forEach(row => {
+
+            const sectionHeader = row.querySelector("td[class^='prov'][class$='Hdr']")
+            if (sectionHeader) {
+                const sectionHeaderText = sectionHeader.innerText.trim()
+                const sectionHeaderID = sectionHeader.id.trim()
+                console.log(sectionHeaderID, sectionHeaderText)
+                content.append(
+                    {
+                        "type": "sectionHeader",
+                        "ID": sectionHeaderID,
+                        "content": sectionHeaderText
+                    }
+                )
+            } else {}
+
+            const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
+            if (sectionBody) {
+                const sectionBodyText = sectionBody.innerText.trim()
+                console.log(sectionBodyText)
+                content.append(
+                    {
+                        "type": "sectionBody",
+                        "ID": null,
+                        "content": sectionBodyText
+                    }
+                )
+            } else {}
+
+            const provisionHeader = row.querySelector("td.partHdr")
+            if (provisionHeader) {
+                const provisionHeaderID = provisionHeader.id
+                const provisionHeaderText = provisionHeader.innerText.trim()
+                console.log(provisionHeaderID, provisionHeaderText)
+                content.append(
+                    {
+                        "type": "provisionHeader",
+                        "ID": provisionHeaderID,
+                        "content": provisionHeaderText
+                    }
+                )
+            } else {}
+
+            const provisionNumber = row.querySelector("td[class^='prov'][class$='part']")
+            if (provisionNumber) {
+                const provisionNumberID = provisionNumber.id
+                const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
+                console.log(provisionNumberID, provisionNumberText)
+                content.append(
+                    {
+                        "type": "provisionNumber",
+                        "ID": provisionNumberID,
+                        "content": provisionNumberText
+                    }
+                )
+            } else {}
+
+        });
+    });
+    return cotent
+}
+
+// ~~~~~ CREATE ELEMENTS ~~~~~
+
+function createGenericButton() {
+    /*
+    creates and appends a html button 
+    component that then prints an alert 
+    to the screen when clicked
+    */
+    const button = document.createElement("button");
+    button.innerText = "poke me 🫵";
+    button.style.position = "fixed"; 
+    button.style.top = "10px";
+    button.style.right = "10px";
+    button.style.zIndex = "1000"; 
+    button.style.padding = "10px"; 
+    button.style.backgroundColor = "#4CAF50"; 
+    button.style.color = "white"; 
+    button.style.border = "none"; 
+    button.style.borderRadius = "5px"; 
+    button.style.cursor = "pointer"; 
+    button.addEventListener("click", () => {
+        alert("Ouch! 🤕");
+    });
+    document.body.appendChild(button);
+    return None
+}
+
+
 // ~~~ internal reference ~~~
 
 //     div#nav.affix-top div#topLeftPanel.top-left-panel 
@@ -188,9 +288,6 @@ function getLegislationMetaData() {
 //             a.nav-link --> query_selector_all() these instances to see individual elements of the contents pageA
 //                 b.active --> if inside, likely the header so extract inner_text(), extract the href()
 //                  otherwise --> extract the href() and inner_text() to get to the exact header within the code
-
-// !NOTE
-// can consider displaying the below content within a clickable drop-down field that only shows if specified
 // div#colLegis div#legisContent
     // div.front 
         // table tbody tr.actHd --> inner_text() is the act header, find this if present
@@ -218,3 +315,6 @@ function getLegislationMetaData() {
 
 alert("skill hunter launching...");
 console.log(deserialiseJSON(getPageBasicData()));
+console.log(deserialiseJSON(getLegislationMetaData()));
+console.log(deserialiseJSON(getLegislationDefinitions()));
+getLegislationContent()
