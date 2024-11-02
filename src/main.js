@@ -2,6 +2,7 @@
 FUA 
     * edit manifest.json further later
     * rewrite existing functionality from the groundup, of defining certain words within statutes inline 
+        * add further support to seperate and store part numbers and part headers in the created json
     * add additional URL links so those words can be clicked to be brought to the definition section
     * implement a stronger word check within a function to extract definitions from their speciifed words and attach words to their meanings
     * add rendering code so that when logical connecting words like "and", "or" etc. (ask GPT for others) are displayed in a defintion, they are bolded and italicised to show emphasis
@@ -181,72 +182,80 @@ function getLegislationDefinitions() {
 }
 
 function getLegislationContent() {
+    /*
+    extract main bulk of the content from the 
+    legislation document
+
+    FUA
+    continue debugging this function to be more universal
+    because right now things can't load properly
+    */
+
     const content = [] 
-    const provisionContainers = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov']");
-    provisionContainers.forEach(container => {
+    const rows = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov'] table tbody tr");
+    console.log(rows)
+    rows.forEach(row => {
 
-        const rows = container.querySelectorAll("table tbody tr");
+        // console.log(row.innerText.trim())
 
-        rows.forEach(row => {
+        const sectionHeader = row.querySelector("td[class^='prov'][class$='Hdr']")
+        if (sectionHeader) {
+            const sectionHeaderText = sectionHeader.innerText.trim()
+            const sectionHeaderID = sectionHeader.id.trim()
+            console.log(sectionHeaderID, sectionHeaderText)
+            content.push(
+                {
+                    "type": "sectionHeader",
+                    "ID": sectionHeaderID,
+                    "content": sectionHeaderText
+                }
+            )
+        } else {}
 
-            const sectionHeader = row.querySelector("td[class^='prov'][class$='Hdr']")
-            if (sectionHeader) {
-                const sectionHeaderText = sectionHeader.innerText.trim()
-                const sectionHeaderID = sectionHeader.id.trim()
-                console.log(sectionHeaderID, sectionHeaderText)
-                content.append(
-                    {
-                        "type": "sectionHeader",
-                        "ID": sectionHeaderID,
-                        "content": sectionHeaderText
-                    }
-                )
-            } else {}
+        const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
+        if (sectionBody) {
+            const sectionBodyText = sectionBody.innerText.trim()
+            console.log(sectionBodyText)
+            content.push(
+                {
+                    "type": "sectionBody",
+                    "ID": null,
+                    "content": sectionBodyText
+                }
+            )
+        } else {}
 
-            const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
-            if (sectionBody) {
-                const sectionBodyText = sectionBody.innerText.trim()
-                console.log(sectionBodyText)
-                content.append(
-                    {
-                        "type": "sectionBody",
-                        "ID": null,
-                        "content": sectionBodyText
-                    }
-                )
-            } else {}
+        const provisionHeader = row.querySelector("td.partHdr")
+        if (provisionHeader) {
+            const provisionHeaderID = provisionHeader.id
+            const provisionHeaderText = provisionHeader.innerText.trim()
+            console.log(provisionHeaderID, provisionHeaderText)
+            content.push(
+                {
+                    "type": "provisionHeader",
+                    "ID": provisionHeaderID,
+                    "content": provisionHeaderText
+                }
+            )
+        } else {}
 
-            const provisionHeader = row.querySelector("td.partHdr")
-            if (provisionHeader) {
-                const provisionHeaderID = provisionHeader.id
-                const provisionHeaderText = provisionHeader.innerText.trim()
-                console.log(provisionHeaderID, provisionHeaderText)
-                content.append(
-                    {
-                        "type": "provisionHeader",
-                        "ID": provisionHeaderID,
-                        "content": provisionHeaderText
-                    }
-                )
-            } else {}
+        const provisionNumber = row.querySelector("td.part")
+        if (provisionNumber) {
+            const provisionNumberID = provisionNumber.id
+            const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
+            console.log(provisionNumberID, provisionNumberText)
+            content.push(
+                {
+                    "type": "provisionNumber",
+                    "ID": provisionNumberID,
+                    "content": provisionNumberText
+                }
+            )
+        } else {}
 
-            const provisionNumber = row.querySelector("td[class^='prov'][class$='part']")
-            if (provisionNumber) {
-                const provisionNumberID = provisionNumber.id
-                const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
-                console.log(provisionNumberID, provisionNumberText)
-                content.append(
-                    {
-                        "type": "provisionNumber",
-                        "ID": provisionNumberID,
-                        "content": provisionNumberText
-                    }
-                )
-            } else {}
-
-        });
     });
-    return cotent
+
+    return content
 }
 
 // ~~~~~ CREATE ELEMENTS ~~~~~
@@ -317,4 +326,4 @@ alert("skill hunter launching...");
 console.log(deserialiseJSON(getPageBasicData()));
 console.log(deserialiseJSON(getLegislationMetaData()));
 console.log(deserialiseJSON(getLegislationDefinitions()));
-getLegislationContent()
+getLegislationContent();
