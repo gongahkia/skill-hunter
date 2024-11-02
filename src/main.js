@@ -1,8 +1,14 @@
 /*
 FUA 
+    * edit manifest.json further later
     * rewrite existing functionality from the groundup, of defining certain words within statutes inline 
     * add additional URL links so those words can be clicked to be brought to the definition section
-    * edit manifest.json further later
+    * implement a stronger word check within a function to extract definitions from their speciifed words and attach words to their meanings
+    * add rendering code so that when logical connecting words like "and", "or" etc. (ask GPT for others) are displayed in a defintion, they are bolded and italicised to show emphasis
+    * consider restricting how much the user is able to be shown at any given type
+        * instead of seeing a whole statute the script will show specific sections at any given time
+        * this also make it easier for the scraper to reformat and define things in line
+        * if adopting this approach, edit the regex content_matching urls in manifest.json
     * learn how background workers in manifest v3 work and consider integrating a background script as necessary
     * add an outline / minimap of each section and subsection at the side of the webpage that has clickable links so users can easily navigate statutes
     * integrate further functionality such as 
@@ -10,6 +16,7 @@ FUA
         * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
         * allow statutes and their composite sections and subsections to fold accordingly
     * rewrite the frontend to be pretty and minimal with nice smooth animations 
+    * consider keeping the display discrete and include a minimal and complex view that expands out to show all hidden details, minimal view should avoid distracting the user as far as possible
     * consider centralising the pop-up button 
     * also consider directly rendering the button as a component onto the screen that can then be clicked if need be, see createGenericButton() function
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
@@ -44,6 +51,13 @@ FUA
 
 // ~~~~~ HELPER FUNCTIONS ~~~~~
 
+function deserialiseJSON(inp_json) {
+    /*
+    deserialises a JSON string for easy 
+    debugging
+    */
+    return JSON.stringify(inp_json, null, 4)
+}
 
 function createGenericButton() {
     /*
@@ -70,6 +84,71 @@ function createGenericButton() {
     return None
 }
 
+function getPageMetadata() {
+    /*
+    returns basic metadata about the 
+    current webpage
+    */
+    const title = document.title;
+    const url = window.location.href;
+    const characterSet = document.characterSet; // note that document.charset is now deprecated
+    const descriptionMeta = document.querySelector('meta[name="description"]');
+    const description = descriptionMeta ? descriptionMeta.content : '';
+    // const htmlBody = document.body.innerHTML; // ignoring this right now because it makes the returned JSON way too long
+    const logoRef = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
+    const logoLink = logoRef ? logoRef.href : '';
+    return {
+        url,
+        title,
+        logoLink,
+        characterSet,
+        description
+        // htmlBody
+    };
+}
+
+function getPageBasicData() {
+    /*
+    returns metadata and other non-vital
+    information about the current webpage
+    */
+    pageMetadata = getPageMetadata()
+    const header = document.querySelector('div#nav.affix div#topLeftPanel');
+    linkedTableOfContents = []
+    if (header) {
+        legislationTitle = header.querySelector('div.legis-title')?.innerText.trim();
+        legislationPdfLink = header.querySelector('span.fa.fa-file-pdf-o').parentElement.href.trim();
+        legislationStatus = header.querySelector('div.status-value')?.innerText.trim();
+    } else {
+        legislationTitle = ""
+        legislationPdfLink = ""
+        legislationStatus = ""
+    }
+    const tableOfContents = document.querySelector('div#tocPanel.toc-panel div#tocNav nav#toc')
+    if (tableOfContents) {
+        elementArray = tableOfContents.querySelectorAll('a.nav-link')
+        if (elementArray) {
+            for (el of elementArray){
+                linkedTableOfContents.push(
+                    {
+                        "referenceText": el.innerText.trim(),
+                        "referenceUrl": el.href.trim()
+                    }
+                )
+            }
+        }
+    }
+    return {
+        "pageMetadata": pageMetadata,
+        "pageBasicData": {
+            "legislationTitle": legislationTitle,
+            "legislationPDFDownloadLink": legislationPdfLink,
+            "legislationStatus": legislationStatus,
+            "tableOfContents": linkedTableOfContents
+        }
+    }
+}
+
 // ~~~ internal reference ~~~
 
 // FUA continue working on this from here
@@ -84,7 +163,27 @@ function createGenericButton() {
 //     div#tocPanel.toc-panel
 //         nav#toc --> note a bunch of other classes are appended here but im ignoring them for the sake of simplicity
 //             a.nav-link --> query_selector_all() these instances to see individual elements of the contents pageA
-//                 b.active --> if inside, likely the header so extract inner_text()
+//                 b.active --> if inside, likely the header so extract inner_text(), extract the href()
+//                  otherwise --> extract the href() and inner_text() to get to the exact header within the code
+
+// !NOTE
+// can consider displaying the below content within a clickable drop-down field that only shows if specified
+// div#colLegis div#legisContent
+    // div.front 
+        // table tbody tr.actHd --> inner_text() is the act header, find this if present
+        // table tbody tr.revdHdr --> inner_text() is the revised act header, find this if present
+        // table tbody tr.revdTxt --> inner_text() is the revised text, find this if present
+        // table tbody tr.longTitle --> inner_text() is the long title that describes what the act is used for, find this if present
+        // table tbbody tr.cDate --> inner_text() is the origial date the statute was first introduced
+    // div.body
+        // div.prov* --> query_selector_all(), where the * is a wildcard operator
+            // table tbody tr --> query_selector_all(), then sort according to the below
+                // td.prov*Hdr --> where the * is a wildcard operator --> inner_text() is generally the section header, get_attribute('id') if present also to save as required
+                // td.prov*Txt --> where the * is a wilrdcard operator --> inner_text() is the section body which genearlly contains the longer explanation
+                // td.prov*part --> get_attribute('id') if present also to save as required
+                    // div.partNo --> inner_text() is generally the provision number
+                // td.partHdr --> get_attribute('id') if present also to save as required, inner_text() is generally the provision header
+                // td.def --> inner_text() is a specified definition and should be appended to a special array that will later be referenced
 
 // ~ specific things to scrape and reformat ~
 
@@ -94,4 +193,5 @@ function createGenericButton() {
 
 // ~~~~~ EXECUTION CODE ~~~~~
 
-alert("skill hunter launching...")
+alert("skill hunter launching...");
+console.log(deserialiseJSON(getPageBasicData()));
