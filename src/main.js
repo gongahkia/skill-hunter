@@ -196,6 +196,9 @@ function getLegislationContent() {
     code similarly stops extracting data at chapter 3, is this
     an intentional pattern? this is the same for the torts limitation 
     act as well
+
+    a possible fix is to put code in place to dynamically reload, rescrape 
+    redisplay the document when the user scrolls down past a certain point
     */
 
     const content = [] 
