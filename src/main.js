@@ -187,72 +187,86 @@ function getLegislationContent() {
     legislation document
 
     FUA
-    continue debugging this function to be more universal
-    because right now things can't load properly
+    !!! continue debugging this function to work for 
+    all sections and their defintions since this halts 
+    at part 3 currently and write further code to 
+    figure out why its not working
+
+    trying this code out on other statutes like the penal 
+    code similarly stops extracting data at chapter 3, is this
+    an intentional pattern? this is the same for the torts limitation 
+    act as well
     */
 
     const content = [] 
-    const rows = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov'] table tbody tr");
-    console.log(rows)
-    rows.forEach(row => {
+    const provisionContainers = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov']");
 
-        // console.log(row.innerText.trim())
+    console.log(provisionContainers)
 
-        const sectionHeader = row.querySelector("td[class^='prov'][class$='Hdr']")
-        if (sectionHeader) {
-            const sectionHeaderText = sectionHeader.innerText.trim()
-            const sectionHeaderID = sectionHeader.id.trim()
-            console.log(sectionHeaderID, sectionHeaderText)
-            content.push(
-                {
-                    "type": "sectionHeader",
-                    "ID": sectionHeaderID,
-                    "content": sectionHeaderText
-                }
-            )
-        } else {}
+    provisionContainers.forEach(container => {
 
-        const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
-        if (sectionBody) {
-            const sectionBodyText = sectionBody.innerText.trim()
-            console.log(sectionBodyText)
-            content.push(
-                {
-                    "type": "sectionBody",
-                    "ID": null,
-                    "content": sectionBodyText
-                }
-            )
-        } else {}
+        const rows = container.querySelectorAll("table tbody tr");
 
-        const provisionHeader = row.querySelector("td.partHdr")
-        if (provisionHeader) {
-            const provisionHeaderID = provisionHeader.id
-            const provisionHeaderText = provisionHeader.innerText.trim()
-            console.log(provisionHeaderID, provisionHeaderText)
-            content.push(
-                {
-                    "type": "provisionHeader",
-                    "ID": provisionHeaderID,
-                    "content": provisionHeaderText
-                }
-            )
-        } else {}
+        rows.forEach(row => {
 
-        const provisionNumber = row.querySelector("td.part")
-        if (provisionNumber) {
-            const provisionNumberID = provisionNumber.id
-            const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
-            console.log(provisionNumberID, provisionNumberText)
-            content.push(
-                {
-                    "type": "provisionNumber",
-                    "ID": provisionNumberID,
-                    "content": provisionNumberText
-                }
-            )
-        } else {}
+            // console.log(row.innerText.trim())
 
+            const sectionHeader = row.querySelector("td[class^='prov'][class$='Hdr']")
+            if (sectionHeader) {
+                const sectionHeaderText = sectionHeader.innerText.trim()
+                const sectionHeaderID = sectionHeader.id.trim()
+                console.log(sectionHeaderID, sectionHeaderText)
+                content.push(
+                    {
+                        "type": "sectionHeader",
+                        "ID": sectionHeaderID,
+                        "content": sectionHeaderText
+                    }
+                )
+            } else {}
+
+            const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
+            if (sectionBody) {
+                const sectionBodyText = sectionBody.innerText.trim()
+                console.log(sectionBodyText)
+                content.push(
+                    {
+                        "type": "sectionBody",
+                        "ID": null,
+                        "content": sectionBodyText
+                    }
+                )
+            } else {}
+
+            const provisionHeader = row.querySelector("td.partHdr")
+            if (provisionHeader) {
+                const provisionHeaderID = provisionHeader.id
+                const provisionHeaderText = provisionHeader.innerText.trim()
+                console.log(provisionHeaderID, provisionHeaderText)
+                content.push(
+                    {
+                        "type": "provisionHeader",
+                        "ID": provisionHeaderID,
+                        "content": provisionHeaderText
+                    }
+                )
+            } else {}
+
+            const provisionNumber = row.querySelector("td.part")
+            if (provisionNumber) {
+                const provisionNumberID = provisionNumber.id
+                const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
+                console.log(provisionNumberID, provisionNumberText)
+                content.push(
+                    {
+                        "type": "provisionNumber",
+                        "ID": provisionNumberID,
+                        "content": provisionNumberText
+                    }
+                )
+            } else {}
+
+        });
     });
 
     return content
@@ -323,7 +337,7 @@ function createGenericButton() {
 // ~~~~~ EXECUTION CODE ~~~~~
 
 alert("skill hunter launching...");
-console.log(deserialiseJSON(getPageBasicData()));
-console.log(deserialiseJSON(getLegislationMetaData()));
-console.log(deserialiseJSON(getLegislationDefinitions()));
-getLegislationContent();
+// console.log(deserialiseJSON(getPageBasicData()));
+// console.log(deserialiseJSON(getLegislationMetaData()));
+// console.log(deserialiseJSON(getLegislationDefinitions()));
+console.log(deserialiseJSON(getLegislationContent()));
