@@ -11,15 +11,15 @@
     "128": "local_asset/skill-hunter-128.png"
   },
   "web_accessible_resources": [
-    {
-      "resources": [
-        "local_asset/skill-hunter-16.png",
-        "local_asset/skill-hunter-24.png",
-        "local_asset/skill-hunter-32.png",
-        "local_asset/skill-hunter-64.png",
-        "local_asset/skill-hunter-128.png"
-      ],
-      "matches": ["<all_urls>"]  
+  {
+    "resources": [
+      "local_asset/skill-hunter-16.png",
+      "local_asset/skill-hunter-24.png",
+      "local_asset/skill-hunter-32.png",
+      "local_asset/skill-hunter-64.png",
+      "local_asset/skill-hunter-128.png"
+    ],
+      "matches": ["*://*/*"]
     }
   ],
   "action": {
@@ -45,7 +45,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "webNavigation"
+    "webNavigation",
+    "scripting"
   ],
   "browser_specific_settings": {
     "gecko": {

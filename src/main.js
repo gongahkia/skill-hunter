@@ -25,15 +25,6 @@ FUA
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
         * add serialising and deserialising functions to read this config.json
         * add documentation for what can be customised in the README.md
-    * add other colorschemes and font customisation such as
-        * dark mode
-        * light mode
-        * gruvbox
-        * everforest
-        * etc. (see more colorschemes from vsc)
-        * arial
-        * times new roman
-        * comic sans
     * clean up the description, screenshots and installation instructions in the README.md
     * HARD DEADLINE 15 Nov to get skill_hunter up and running, email Jerrold Soh then to sell my app and harvest free classpart if possible
     * test to ensure the browser extension runs on all statutes including longer ones like the Penal Code
@@ -46,6 +37,15 @@ FUA
         * opera
         * mozilla firefox 
         * safari (come up with a browser-specific version for portability and runnability on macs if required)
+    * add other colorschemes and font customisation such as
+        * dark mode
+        * light mode
+        * gruvbox
+        * everforest
+        * etc. (see more colorschemes from vsc)
+        * arial
+        * times new roman
+        * comic sans
 */
 
 // ~~~~~~~~~~ CODE STARTS HERE ~~~~~~~~~~
@@ -58,6 +58,81 @@ function deserialiseJSON(inp_json) {
     debugging
     */
     return JSON.stringify(inp_json, null, 4)
+}
+
+// ~~~~~ COSMETIC ~~~~~
+
+function applyColorScheme(scheme) {
+    /*
+    applies the specified colorscheme to 
+    the browser and returns the current 
+    browser colorscheme
+    */
+    const root = document.documentElement;
+    const schemes = {
+        'dark': {
+            '--bg-color': '#1e1e1e',
+            '--text-color': '#ffffff',
+        },
+        'light': {
+            '--bg-color': '#ffffff',
+            '--text-color': '#000000',
+        },
+        'gruvbox': {
+            '--bg-color': '#282828',
+            '--text-color': '#ebdbb2',
+        },
+        'everforest': {
+            '--bg-color': '#2b3339',
+            '--text-color': '#d3c6aa',
+        },
+        'solarized-dark': {
+            '--bg-color': '#002b36',
+            '--text-color': '#839496',
+        },
+        'solarized-light': {
+            '--bg-color': '#fdf6e3',
+            '--text-color': '#657b83',
+        },
+        'dracula': {
+            '--bg-color': '#282a36',
+            '--text-color': '#f8f8f2',
+        },
+        'monokai': {
+            '--bg-color': '#272822',
+            '--text-color': '#f8f8f2',
+        },
+        'nord': {
+            '--bg-color': '#2e3440',
+            '--text-color': '#d8dee9',
+        },
+        'tokyo-night': {
+            '--bg-color': '#1a1b26',
+            '--text-color': '#c0caf5',
+        }
+    };
+    const selectedScheme = schemes[scheme];
+    if (selectedScheme) {
+        root.style.setProperty('--bg-color', selectedScheme['--bg-color']);
+        root.style.setProperty('--text-color', selectedScheme['--text-color']);
+    } else {
+        console.warn(`Color scheme "${scheme}" not found`);
+    }
+}
+
+function applyFont(font) {
+    /*
+    applies the specified font to the 
+    browser and returns the current
+    browser font
+    */
+    const availableFonts = ['Arial', 'Times New Roman', 'Comic Sans MS', 'Courier New', 'Georgia', 'Verdana', 'Trebuchet MS', 'Palatino', 'Garamond', 'Helvetica'];
+    if (availableFonts.includes(font)) {
+        document.body.style.fontFamily = font;
+    } else {
+        console.warn(`Font "${font}" not supported`);
+    }
+    return None
 }
 
 // ~~~~~ SCRAPE DATA ~~~~~
@@ -343,4 +418,5 @@ alert("skill hunter launching...");
 // console.log(deserialiseJSON(getPageBasicData()));
 // console.log(deserialiseJSON(getLegislationMetaData()));
 // console.log(deserialiseJSON(getLegislationDefinitions()));
+applyColorScheme("gruvbox")
 console.log(deserialiseJSON(getLegislationContent()));
