@@ -149,17 +149,40 @@ function getPageBasicData() {
     }
 }
 
+function getLegislationMetaData() {
+    /*
+    extract meta data about the given 
+    legislation for subsequent display
+    */
+    const legisFront = document.querySelector("div#colLegis div#legisContent div.front")
+    if (legisFront){
+        legislationName = legisFront.querySelector("table tbody tr td.actHd")?.innerText.trim();
+        legislationDescription = legisFront.querySelector("table tbody tr td.longTitle")?.innerText.trim();
+        legislationDate = legisFront.querySelector("table tbbody tr td.cDate")?.innerText.trim();
+        revisedLegislationName = legisFront.querySelector("table tbody tr td.revdHdr")?.innerText.trim();
+        revisedLegislationText = legisFront.querySelector("table tbody tr td.revdTxt")?.innerText.trim();
+    } else {
+        legislationName = "";
+        legislationDescription = "";
+        legislationDate = "";
+        revisedLegislationName = "";
+        revisedLegislationText = "";
+    }
+    return {
+        "legislationName": legislationName,
+        "legislationDescription": legislationDescription,
+        "legislationDate": legislationDate,
+        "revisedLegislationName": revisedLegislationName,
+        "revisedLegislationText": revisedLegislationText
+    }
+}
+
 // ~~~ internal reference ~~~
-
-// FUA continue working on this from here
-
-// ~ general things to scrape and reformat ~
 
 //     div#nav.affix-top div#topLeftPanel.top-left-panel 
 //         div.legis-title --> inner_text() to get full title of legislation
 //         span.fa.fa-file-pdf-o --> try href() to get the link to the pdf document, if there's anyway to click this element or extract the link from within it to get the link to the PDF document of each peice of legislation
 //         div.status-value --> inner_text() to get current version of the statute
-
 //     div#tocPanel.toc-panel
 //         nav#toc --> note a bunch of other classes are appended here but im ignoring them for the sake of simplicity
 //             a.nav-link --> query_selector_all() these instances to see individual elements of the contents pageA
