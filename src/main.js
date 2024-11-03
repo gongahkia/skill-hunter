@@ -7,16 +7,15 @@ FUA
         * instead of seeing a whole statute the script will show specific sections at any given time
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
-    * learn how background workers in manifest v3 work and consider integrating a background script as necessary
-    * add an outline / minimap of each section and subsection at the side of the webpage that has clickable links so users can easily navigate statutes
+    * add an outline / minimap of each section and subsection at the side of the webpage that has clickable links so users can easily navigate statutes, ask GPT for help with generating a dynamic minimap
     * integrate further functionality such as 
         * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
         * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
         * allow statutes and their composite sections and subsections to fold accordingly
     * rewrite the frontend to be pretty and minimal with nice smooth animations 
+        * use a lot of emojis to keep the UI design nice and modern
+        * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
     * consider keeping the display discrete and include a minimal and complex view that expands out to show all hidden details, minimal view should avoid distracting the user as far as possible
-    * consider centralising the pop-up button 
-    * also consider directly rendering the button as a component onto the screen that can then be clicked if need be, see createGenericButton() function
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
     * add a script or automated browser program (perhaps with playwright or selenium) that opens the user's local browser and handles AUTOMATIC INSTALLATION of skill_hunter for them, and ask GPT for help implementing this if idk how
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
@@ -34,15 +33,8 @@ FUA
         * opera
         * mozilla firefox 
         * safari (come up with a browser-specific version for portability and runnability on macs if required)
-    * add other colorschemes and font customisation such as
-        * dark mode
-        * light mode
-        * gruvbox
-        * everforest
-        * etc. (see more colorschemes from vsc)
-        * arial
-        * times new roman
-        * comic sans
+    * learn how background workers in manifest v3 work and consider integrating a background script as necessary
+    * consider handling installation of skill_hunter using docker or some other tools, ask GPT what other tooling alternatives there are for this
 */
 
 // ~~~~~~~~~~ CODE STARTS HERE ~~~~~~~~~~
