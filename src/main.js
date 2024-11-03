@@ -17,15 +17,12 @@ FUA
         * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
     * consider keeping the display discrete and include a minimal and complex view that expands out to show all hidden details, minimal view should avoid distracting the user as far as possible
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
-    * add a script or automated browser program (perhaps with playwright or selenium) that opens the user's local browser and handles AUTOMATIC INSTALLATION of skill_hunter for them, and ask GPT for help implementing this if idk how
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
         * add serialising and deserialising functions to read this config.json
         * add documentation for what can be customised in the README.md
     * clean up the description, screenshots and installation instructions in the README.md
     * HARD DEADLINE 15 Nov to get skill_hunter up and running, email Jerrold Soh then to sell my app and harvest free classpart if possible
     * test to ensure the browser extension runs on all statutes including longer ones like the Penal Code
-    * integrate scraping using playwright if possible, otherwise look into continue using the HTML DOM API to access fields immediatly
-    * look into other JS libraries for parsing dom structure and making the UI look better 
     * test out functionality of browser extension on the following browsers, then specify which browsers the extension is functional for in the README.md under browser support
         * google chrome
         * microsoft edge
@@ -409,6 +406,20 @@ function createGenericButton() {
     return None
 }
 
+function createTableOfContents() {
+    /*
+    dynamically generates a clickable table 
+    of contents based on the tableOfContents 
+    scraped from the getPageBasicData() function
+
+    FUA 
+    edit and add implementation of this function here, 
+    html code for the table of contents can be taken from 
+    tableOfContents.html file in the same directory as this
+    one
+    */
+    return None
+}
 
 // ~~~ internal reference ~~~
 
