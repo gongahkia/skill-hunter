@@ -30,6 +30,7 @@
       "64": "local_asset/skill-hunter-64.png",
       "128": "local_asset/skill-hunter-128.png"
     },
+    "default_title": "Open popup",
     "default_popup": "popup.html"
   },
   "content_scripts": [

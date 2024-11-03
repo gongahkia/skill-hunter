@@ -1,24 +1,29 @@
-// document.getElementById('simplifyButton').addEventListener('click', function() {
-//     if (chrome.tabs) { // CHROME
-//         alert("chrome")
-//         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-//         chrome.tabs.sendMessage(tabs[0].id, { toggle: true });
-//         });
-//     } else if (browser.tabs) { // FIREFOX
-//         alert("firefox")
-//         browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
-//         browser.tabs.sendMessage(tabs[0].id, { toggle: true });
-//         });
-//     } else { // UNSUPPORTED BROWSER
-//         console.error("tabs API not supported in this environment");
+const modalOverlay = document.getElementById("modalOverlay");
+const cancelButton = document.getElementById("cancelButton");
+const simplifyButton = document.getElementById("simplifyButton");
+
+function hideModal() {
+    modalOverlay.style.visibility = "hidden";
+}
+
+cancelButton.addEventListener("click", () => {
+    hideModal(); 
+    console.log("Cancel button clicked!");
+});
+
+simplifyButton.addEventListener("click", () => {
+    hideModal(); 
+    console.log("Simplify button clicked!");
+    /*
+    FUA 
+    add additional code from main.js that 
+    triggers here later when the simplify button is pressed
+    */
+});
+
+// // hide the modal when clicking outside of the overlay 
+// modalOverlay.addEventListener("click", (event) => {
+//     if (event.target === modalOverlay) {
+//         hideModal(); 
 //     }
 // });
-
-document.getElementById('cancelButton').addEventListener('click', () => {
-    window.close(); // Closes the popup
-});
-
-document.getElementById('simplifyButton').addEventListener('click', () => {
-    // Implement your "simplify" functionality here
-    console.log("Simplify button clicked!");
-});

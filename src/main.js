@@ -1,11 +1,8 @@
 /*
 FUA 
     * edit manifest.json further later
-    * rewrite existing functionality from the groundup, of defining certain words within statutes inline 
-        * add further support to seperate and store part numbers and part headers in the created json
+    * add further support to seperate and store part numbers and part headers in the created json
     * add additional URL links so those words can be clicked to be brought to the definition section
-    * implement a stronger word check within a function to extract definitions from their speciifed words and attach words to their meanings
-    * add rendering code so that when logical connecting words like "and", "or" etc. (ask GPT for others) are displayed in a defintion, they are bolded and italicised to show emphasis
     * consider restricting how much the user is able to be shown at any given type
         * instead of seeing a whole statute the script will show specific sections at any given time
         * this also make it easier for the scraper to reformat and define things in line
@@ -58,6 +55,32 @@ function deserialiseJSON(inp_json) {
     debugging
     */
     return JSON.stringify(inp_json, null, 4)
+}
+
+function formatLogicalConnecters(input_sentence) {
+    /*
+    formats any logical connectors within a 
+    sentence by bolding and italicising them
+    */
+    const logicalConnectingWords = [
+    "and", "also", "as well as", "in addition", "furthermore", "moreover",
+    "but", "however", "on the other hand", "yet", "although", "nevertheless",
+    "because", "since", "therefore", "thus", "as a result", "consequently",
+    "similarly", "likewise", "in the same way", "first", "then", "next", 
+    "finally", "afterward", "if", "unless", "provided that",
+    "besides", "not only... but also", "along with", "as well",
+    "despite", "in contrast", "on the contrary", "even though", "rather",
+    "due to", "owing to", "for this reason", "accordingly",
+    "in comparison", "just as", "equally", "correspondingly",
+    "subsequently", "prior to", "simultaneously", "at the same time", "earlier",
+    "in case", "assuming that", "even if", "as long as",
+    "granted that", "admittedly", "regardless",
+    "in summary", "to sum up", "in conclusion", "all in all", "ultimately",
+    "for example", "for instance", "to illustrate", "in other words",
+    "or", "nor", "either", "alternatively", "otherwise"
+    ];
+    const regexPattern = new RegExp(`\\b(${logicalConnectingWords.join('|')})\\b`, 'gi');
+    return input_sentence.replace(regexPattern, (match) => `<b><i>${match}</i></b>`);
 }
 
 // ~~~~~ COSMETIC ~~~~~
@@ -262,18 +285,35 @@ function getLegislationContent() {
     legislation document
 
     FUA
-    !!! continue debugging this function to work for 
-    all sections and their defintions since this halts 
-    at part 3 currently and write further code to 
-    figure out why its not working
 
-    trying this code out on other statutes like the penal 
-    code similarly stops extracting data at chapter 3, is this
-    an intentional pattern? this is the same for the torts limitation 
-    act as well
+    !!!NOTE
+    a possible fix for the incomplete scrolling is as follows
 
-    a possible fix is to put code in place to dynamically reload, rescrape 
-    redisplay the document when the user scrolls down past a certain point
+        upon first scraping the site, the url is as such --> https://sso.agc.gov.sg/Act/LA1959
+        after getting the user to click whole document, the url is as such --> https://sso.agc.gov.sg/Act/LA1959?WholeDoc=1
+        then, either
+            1. find a way to access the last possible provision header within the tableOfContents array already scraped as part of pageBasicData, access the last element's URL
+            2. get the user to manually click the last section OR
+        after that, the url is as such --> https://sso.agc.gov.sg/Act/LA1959?WholeDoc=1#pr35-
+        then initiate the running of the already existing scraping script and all the statutes should be succesfully extracted
+
+    !!!ALSO
+
+    add the following to the below in this function to scan within provTxt td or outside of it 
+    where if there is 
+    a td.fs then it is either a Illustration/Explanation
+        if content of the td.fs is <em></em> tags with the innerText of "Illustrations" or "Illustration", then it is a illustrationHeader
+            {
+                "type": "illustrationHeader",
+                "ID": illustrationHeaderID,
+                "content": illustrationHeaderText
+            }
+        if content and the following chunk of text has no <em>Illustration</em> or <em>Illustrations</em>, then it is an illustrationBody
+            {
+                "type": "illustrationBody",
+                "ID": illustrationBodyID,
+                "content": illustrationBodyText
+            }
     */
 
     const content = [] 
@@ -415,8 +455,8 @@ function createGenericButton() {
 // ~~~~~ EXECUTION CODE ~~~~~
 
 alert("skill hunter launching...");
-// console.log(deserialiseJSON(getPageBasicData()));
+console.log(deserialiseJSON(getPageBasicData()));
 // console.log(deserialiseJSON(getLegislationMetaData()));
 // console.log(deserialiseJSON(getLegislationDefinitions()));
-applyColorScheme("gruvbox")
 console.log(deserialiseJSON(getLegislationContent()));
+applyColorScheme("gruvbox")
