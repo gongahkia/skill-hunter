@@ -8,6 +8,9 @@ FUA
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
  
+* add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
+when fedback and displayed
+
 * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
 * integrate further functionality such as 
@@ -286,7 +289,7 @@ function getLegislationContent() {
     const content = [] 
     const provisionContainers = document.querySelectorAll("#colLegis #legisContent div.body div[class^='prov']");
 
-    console.log(provisionContainers)
+    // console.log(provisionContainers)
 
     provisionContainers.forEach(container => {
 
@@ -300,7 +303,7 @@ function getLegislationContent() {
             if (sectionHeader) {
                 const sectionHeaderText = sectionHeader.innerText.trim()
                 const sectionHeaderID = sectionHeader.id.trim()
-                console.log(sectionHeaderID, sectionHeaderText)
+                // console.log(sectionHeaderID, sectionHeaderText)
                 content.push(
                     {
                         "type": "sectionHeader",
@@ -314,7 +317,7 @@ function getLegislationContent() {
             if (illustrationHeaderOrContent) {
                 if (illustrationHeaderOrContent.innerHTML.includes("<em>Illustration</em>") || illustrationHeaderOrContent.innerHTML.includes("<em>Illustrations</em>")) {
                     const illustrationHeaderText = illustrationHeaderOrContent.innerText.trim()
-                    console.log(illustrationHeaderText)
+                    // console.log(illustrationHeaderText)
                     content.push(
                         {
                             "type": "illustrationHeader",
@@ -324,7 +327,7 @@ function getLegislationContent() {
                     )
                 } else {
                     const illustrationBodyText = illustrationHeaderOrContent.innerText.trim()
-                    console.log(illustrationBodyText)
+                    // console.log(illustrationBodyText)
                     content.push(
                         {
                             "type": "illustrationBody",
@@ -338,7 +341,7 @@ function getLegislationContent() {
             const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
             if (sectionBody) {
                 const sectionBodyText = sectionBody.innerText.trim()
-                console.log(sectionBodyText)
+                // console.log(sectionBodyText)
                 content.push(
                     {
                         "type": "sectionBody",
@@ -352,7 +355,7 @@ function getLegislationContent() {
             if (provisionHeader) {
                 const provisionHeaderID = provisionHeader.id
                 const provisionHeaderText = provisionHeader.innerText.trim()
-                console.log(provisionHeaderID, provisionHeaderText)
+                // console.log(provisionHeaderID, provisionHeaderText)
                 content.push(
                     {
                         "type": "provisionHeader",
@@ -366,7 +369,7 @@ function getLegislationContent() {
             if (provisionNumber) {
                 const provisionNumberID = provisionNumber.id
                 const provisionNumberText = provisionNumber.querySelector("div.partNo").innerText.trim()
-                console.log(provisionNumberID, provisionNumberText)
+                // console.log(provisionNumberID, provisionNumberText)
                 content.push(
                     {
                         "type": "provisionNumber",
@@ -553,6 +556,44 @@ function createTableOfContents(pageBasicData) {
     return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
+function integrateDefinition(legislationContent, legislationDefinitions) {
+    /*
+    sort definitions by length, then embeds them 
+    within the statute whilst avoiding recursive 
+    definitions
+    */
+    legislationDefinitions.sort((a, b) => {
+        const termA = Object.keys(a)[0];
+        const termB = Object.keys(b)[0];
+        return termB.length - termA.length; 
+    });
+    legislationContent.forEach(token => {
+        if (token.type === "sectionBody") {
+            let sectionContent = token.content.split('\n');
+            sectionContent = sectionContent.map(line => {
+                let modifiedLine = line;
+                modifiedLine = modifiedLine.replace(/"/g, '&quot;');
+                for (const definitionPair of legislationDefinitions) {
+                    for (const [term, definition] of Object.entries(definitionPair)) {
+                        const escapedTerm = term.replace(/"/g, '\\"');
+                        const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'g'); 
+                        modifiedLine = modifiedLine.replace(regex, (match) => {
+                            const safeDefinition = definition.replace(/"/g, '&quot;');
+                            return `
+                                <span class='statuteTerm-container' title='${safeDefinition}'>
+                                    ${match}
+                                    <span class='statuteDefinition-content'>${safeDefinition}</span>
+                                </span>`;
+                        });
+                    }
+                }
+                return modifiedLine; 
+            });
+            token.content = sectionContent.join('<br>');
+        }
+    });
+}
+
 function createContentBody(legislationContent, legislationDefinitions) {
 
     /*
@@ -569,27 +610,43 @@ function createContentBody(legislationContent, legislationDefinitions) {
     `;
 
     const contentBodyStyle = `
+        <style>
+            .statuteTerm-container {
+                font-weight: bold; 
+                cursor: pointer; 
+            }
+            .statuteDefinition-content {
+                display: none; 
+                background: #f9f9f9; 
+                border: 1px solid #ccc; 
+                padding: 5px;
+                position: absolute; 
+                z-index: 1000; 
+            }
+        </style>
     </head>
     <body>
+    ` // FUA add further styling here later
 
-    ` // FUA add styling here
     const contentBodyFooter = `
     </body>
     </html>
-
     ` // FUA add content here later
-    const contentBodyMain = ""
 
-    for (contentToken in legislationContent) {
+    let contentBodyMain = ""
+
+    integrateDefinition(legislationContent, legislationDefinitions)
+
+    for (const contentToken of legislationContent) {
 
         switch (contentToken.type) {
 
             case "sectionHeader":
-                contentBodyMain += `<h2>${contentType.content}</h2>`
+                contentBodyMain += `<h2>${contentToken.content}</h2>`
                 break;
 
             case "sectionBody":
-                contentBodyMain += `${contentType.content}` // FUA add logic to split the words and embed the definitions
+                contentBodyMain += `${contentToken.content}` 
                 break;
 
             case "provisionHeader":
@@ -609,13 +666,13 @@ function createContentBody(legislationContent, legislationDefinitions) {
                 break;
 
             default:
-                console.log("Unknown edgecase hit")
+                console.log(`Unknown edgecase hit: ${contentToken}`)
                 break;
 
         }
     }
 
-    return `${contentBodyHeader}${contentBodyStyle}${contentBodyMain}${contentBodyFooter}`
+    return `${contentBodyHeader}${contentBodyStyle}${contentBodyMain}${contentBodyFooter}`;
 }
 
 // ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
@@ -640,11 +697,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const legislationContent = getLegislationContent();
         const legislationDefinitions = getLegislationDefinitions()
-        // console.log(deserialiseJSON(legislationDefinitions));
-        // console.log(deserialiseJSON(legislationContent));
+        console.log(deserialiseJSON(legislationDefinitions));
+        console.log(deserialiseJSON(legislationContent));
 
         const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
-        console.log(contentBodyHTMLString)
+        console.log(`html string --> ${contentBodyHTMLString}`)
 
         sendResponse({ status: "success" });
 
