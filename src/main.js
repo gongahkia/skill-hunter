@@ -3,6 +3,8 @@ FUA
     * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
     when fedback and displayed
 
+    * add credits made by gabriel ong and my github at the top right of the page
+
     * add code that will include the respective header of the desired section in the anchor tag of each sectionHeader to make it clickable
 
     * add a function that generates HTML based on the template finalPrototype.html in the same directory as this one
@@ -839,18 +841,26 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
 
             .statuteDefinition-content {
                 display: none; 
-                background: rgba(255, 255, 255, 0.9);
+                background-color: #333; /* Match the header background */
+                color: #fff; /* Text color for the definition content */
                 border: 1px solid #ff4b6e; 
                 padding: 10px;
                 position: absolute; 
                 z-index: 1000; 
                 transform: translateX(-50%);
-                color: #1a1b26; 
                 opacity: 0; 
                 visibility: hidden;
                 transition: opacity 0.3s, visibility 0.3s;
                 white-space: pre-wrap; 
                 width: auto; 
+                overflow-y: auto;
+                max-width: 850px;
+                min-width: 500px; 
+                max-height: 500px; 
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                top: 100%; /* Positioned below the term */
+                left: 50%; /* Centered horizontally */
             }
 
             .statuteTerm-container:hover {
@@ -859,6 +869,9 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
 
             .statuteTerm-container:hover .statuteDefinition-content {
                 background: rgba(255, 255, 255, 0.95); 
+                display: block; 
+                opacity: 1;
+                visibility: visible; 
             }
 
         </style>
