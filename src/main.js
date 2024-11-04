@@ -275,18 +275,7 @@ function getLegislationContent() {
 
     FUA
 
-    !!!NOTE
-    a possible fix for the incomplete scrolling is as follows
-
-        upon first scraping the site, the url is as such --> https://sso.agc.gov.sg/Act/LA1959
-        after getting the user to click whole document, the url is as such --> https://sso.agc.gov.sg/Act/LA1959?WholeDoc=1
-        then, either
-            1. find a way to access the last possible provision header within the tableOfContents array already scraped as part of pageBasicData, access the last element's URL
-            2. get the user to manually click the last section OR
-        after that, the url is as such --> https://sso.agc.gov.sg/Act/LA1959?WholeDoc=1#pr35-
-        then initiate the running of the already existing scraping script and all the statutes should be succesfully extracted
-
-    !!!ALSO
+    !!!ALSO ADD THE FOLLOWING
 
     add the following to the below in this function to scan within provTxt td or outside of it 
     where if there is 
@@ -550,18 +539,6 @@ function createTableOfContents(pageBasicData) {
     return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
-// ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
-
-// FUA
-    // debug this portion of the code and the code in popup.js that links the clicking of the cancel and simplify buttons to functions that are called and run here
-
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "simplifyPage") {
-        console.log("clicking...")
-        sendResponse({ status: "success" });
-    }
-});
-
 // ~~~ internal reference ~~~
 
 //     div#nav.affix-top div#topLeftPanel.top-left-panel 
@@ -590,21 +567,33 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 // td.partHdr --> get_attribute('id') if present also to save as required, inner_text() is generally the provision header
                 // td.def --> inner_text() is a specified definition and should be appended to a special array that will later be referenced
 
-// ~ specific things to scrape and reformat ~
-
 // ~ other to dos ~
 
 // * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
-// ~~~~~ EXECUTION CODE ~~~~~
 
-alert("skill hunter launching...");
+// ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
+
 const generalPageBasicData = getPageBasicData()
-// console.log(deserialiseJSON(generalPageBasicData));
 const pageBasicData = generalPageBasicData.pageBasicData
 const pageMetaData = generalPageBasicData.pageMetadata
 console.log(createTableOfContents(pageBasicData))
-// console.log(deserialiseJSON(getLegislationMetaData()));
-// console.log(deserialiseJSON(getLegislationDefinitions()));
-// console.log(deserialiseJSON(getLegislationContent()));
-// applyColorScheme("gruvbox")
+console.log(deserialiseJSON(getLegislationDefinitions()));
+window.location.href = pageBasicData.tableOfContents[pageBasicData.tableOfContents.length - 1].referenceUrl // resolves the issue of the page not loading
+
+// ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // alert("skill hunter launching...");
+    console.log("something clicked...")
+    if (request.action === "simplify") { 
+        console.log("simplify button clicked...");
+        console.log(deserialiseJSON(getLegislationContent()));
+        sendResponse({ status: "success" });
+    } else if (request.action === "cancel") { 
+        console.log("cancel button clicked...");
+        sendResponse({ status: "success" });
+    } else {
+        console.log("unknown edgecase hit");
+    } 
+});

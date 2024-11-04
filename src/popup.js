@@ -3,22 +3,34 @@ const cancelButton = document.getElementById("cancelButton");
 const simplifyButton = document.getElementById("simplifyButton");
 
 cancelButton.addEventListener("click", () => {
-    window.close()
     console.log("Cancel button clicked!");
+    if (chrome.tabs) { // CHROME
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "cancel" }); 
+        });
+    } else if (browser.tabs) { // FIREFOX
+        browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
+            browser.tabs.sendMessage(tabs[0].id, { action: "cancel" }); 
+        });
+    } else { // UNSUPPORTED BROWSER
+        console.error("Error hit: tabs API not supported in this environment");
+    }
+    window.close()
 });
 
 simplifyButton.addEventListener("click", () => {
-    /*
-    FUA 
-    add additional code from main.js that 
-    triggers here later when the simplify button is pressed
-    */
     console.log("Simplify button clicked!");
-    browser.runtime.sendMessage({ action: "simplifyPage" }, (response) => {
-        if (response.status === "success") {
-            console.log("Simplify page function executed in main.js!");
-        }
-    });
+    if (chrome.tabs) { // CHROME
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "simplify" });
+        });
+    } else if (browser.tabs) { // FIREFOX
+        browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
+            browser.tabs.sendMessage(tabs[0].id, { action: "simplify" });
+        });
+    } else { // UNSUPPORTED BROWSER
+        console.error("Error hit: tabs API not supported in this environment");
+    }
     window.close()
 });
 
