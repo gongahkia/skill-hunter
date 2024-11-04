@@ -550,6 +550,18 @@ function createTableOfContents(pageBasicData) {
     return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
+// ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
+
+// FUA
+    // debug this portion of the code and in popup.js that links the button clicking to functions run here
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "simplifyPage") {
+        console.log("clicking...")
+        sendResponse({ status: "success" });
+    }
+});
+
 // ~~~ internal reference ~~~
 
 //     div#nav.affix-top div#topLeftPanel.top-left-panel 
@@ -588,7 +600,7 @@ function createTableOfContents(pageBasicData) {
 
 alert("skill hunter launching...");
 const generalPageBasicData = getPageBasicData()
-console.log(deserialiseJSON(generalPageBasicData));
+// console.log(deserialiseJSON(generalPageBasicData));
 const pageBasicData = generalPageBasicData.pageBasicData
 const pageMetaData = generalPageBasicData.pageMetadata
 console.log(createTableOfContents(pageBasicData))
