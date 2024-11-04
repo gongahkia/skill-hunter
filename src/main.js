@@ -565,8 +565,8 @@ function createTableOfContents(pageBasicData) {
     tableOfContentsArray.forEach(element => {
         tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
     });
-
-    return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
+    return tableOfContentsString;
+    // return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
 function integrateDefinition(legislationContent, legislationDefinitions) {
@@ -625,7 +625,7 @@ function createContentBody(legislationContent, legislationDefinitions) {
     const contentBodyStyle = `
         <style>
             .tab-indent {
-                padding-left: 2em; /* Adjust this value as needed for indentation */
+                padding-left: 2em; 
             }
 
             .statuteTerm-container {
@@ -696,7 +696,190 @@ function createContentBody(legislationContent, legislationDefinitions) {
         }
     }
 
-    return `${contentBodyHeader}${contentBodyStyle}${contentBodyMain}${contentBodyFooter}`;
+    return contentBodyMain;
+    // return `${contentBodyHeader}${contentBodyStyle}${contentBodyMain}${contentBodyFooter}`;
+}
+
+function createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions) {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Skill Hunter: ${pageBasicData.legislationTitle}</title>
+        <style>
+            body {
+                display: flex;
+                margin: 0;
+                background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                min-height: 100vh;
+                transition: padding-left 0.3s ease; 
+            }
+
+            .toc-container {
+                width: 300px;
+                background: white;
+                border-radius: 24px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                transition: transform 0.3s ease;
+                position: relative;
+            }
+
+            .toc-header {
+                background: #1a1b26;
+                color: white;
+                padding: 20px 24px;
+                font-size: 18px;
+                font-weight: 500;
+                border-radius: 24px 24px 0 0;
+                position: relative;
+            }
+
+            .toc-header::after {
+                content: '';
+                position: absolute;
+                bottom: -24px;
+                left: 0;
+                right: 0;
+                height: 24px;
+                background: #1a1b26;
+                border-radius: 0 0 24px 24px;
+            }
+
+            .toc-content {
+                padding: 0 24px; 
+                height: calc(100vh - 80px); 
+                overflow-y: auto; 
+            }
+
+            .toc-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .toc-item {
+                display: flex;
+                align-items: center;
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                color: #1a1b26;
+                font-size: 14px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: background-color 0.2s, color 0.2s;
+            }
+
+            .toc-item::before {
+                content: '';
+                width: 8px;
+                height: 8px;
+                background: #ff4b6e;
+                border-radius: 50%;
+                margin-right: 12px;
+                flex-shrink: 0;
+            }
+
+            .toc-item.active {
+                background: #ff4b6e;
+                color: white;
+            }
+
+            .toc-item.active::before {
+                background: white;
+            }
+
+            .toc-item:hover {
+                background: #ff4b6e;
+                color: white;
+            }
+
+            .toc-item:hover::before {
+                background: white;
+            }
+
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                height: calc(100vh - 40px); 
+                overflow-y: auto; 
+                transition: margin-left 0.3s ease; 
+                margin-left: 0; 
+            }
+
+            .toggle-toc {
+                position: absolute;
+                top: 20px;
+                left: 320px; 
+                background: #ff4b6e;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 15px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                z-index: 1; 
+            }
+
+            .toggle-toc:hover {
+                background: #e43e5c;
+            }
+
+            .tab-indent {
+                padding-left: 2em; 
+            }
+
+            .statuteTerm-container {
+                font-weight: bold; 
+                cursor: pointer; 
+            }
+
+            .statuteDefinition-content {
+                display: none; 
+                background: #f9f9f9; 
+                border: 1px solid #ccc; 
+                padding: 5px;
+                position: absolute; 
+                z-index: 1000; 
+            }
+        </style>
+    </head> 
+    <body>
+    <button class="toggle-toc">Toggle TOC</button>
+    <div class="toc-container" id="toc">
+        <div class="toc-header">
+            ${pageBasicData.legislationTitle} 📜
+        </div>
+        <div class="toc-content">
+            <ul class="toc-list">
+                ${createTableOfContents(pageBasicData)}
+            </ul>
+        </div>
+    </div>
+    <div class="main-content" id="mainContent">
+        ${createContentBody(legislationContent, legislationDefinitions)}
+    </div>
+        <script>
+            const toggleButton = document.querySelector('.toggle-toc');
+            const tocContainer = document.getElementById('toc');
+            const mainContent = document.getElementById('mainContent');
+            toggleButton.addEventListener('click', () => {
+                if (tocContainer.style.transform === 'translateX(-100%)') {
+                    tocContainer.style.transform = 'translateX(0)';
+                    mainContent.style.marginLeft = '320px'; 
+                    toggleButton.style.left = '320px'; 
+                } else {
+                    tocContainer.style.transform = 'translateX(-100%)';
+                    mainContent.style.marginLeft = '0'; 
+                    toggleButton.style.left = '20px'; 
+                }
+            });
+        </script>
+    </body>
+    </html>
+    `
 }
 
 // ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
