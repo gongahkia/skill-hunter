@@ -3,6 +3,8 @@ FUA
     * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
     when fedback and displayed
 
+    * figure out if i can make the hovering definition prettier like the previosu definitions in the version 1 of this project
+
     * add credits made by gabriel ong and my github at the top right of the page
 
     * add code that will include the respective header of the desired section in the anchor tag of each sectionHeader to make it clickable
@@ -841,8 +843,8 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
 
             .statuteDefinition-content {
                 display: none; 
-                background-color: #333; /* Match the header background */
-                color: #fff; /* Text color for the definition content */
+                background-color: #333; 
+                color: #fff; 
                 border: 1px solid #ff4b6e; 
                 padding: 10px;
                 position: absolute; 
@@ -859,8 +861,8 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 max-height: 500px; 
                 border-radius: 5px;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-                top: 100%; /* Positioned below the term */
-                left: 50%; /* Centered horizontally */
+                top: 100%; 
+                left: 50%; 
             }
 
             .statuteTerm-container:hover {
