@@ -18,8 +18,12 @@ FUA
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
         * add serialising and deserialising functions to read this config.json
         * add documentation for what can be customised in the README.md
+
     * clean up the description, screenshots and installation instructions in the README.md
-    * HARD DEADLINE 15 Nov to get skill_hunter up and running, email Jerrold Soh then to sell my app and harvest free classpart if possible
+    * HARD DEADLINE 15 Nov to get skill_hunter up and running
+        * email Jerrold Soh then to sell my app and harvest free classpart if possible
+        * value proposition will be any statute viewed via SSO
+        * tort-law specific statutes include Tort Limitation Act, POHA, Penal Code (find others)
     * test to ensure the browser extension runs on all statutes including longer ones like the Penal Code
     * test out functionality of browser extension on the following browsers, then specify which browsers the extension is functional for in the README.md under browser support
         * google chrome
