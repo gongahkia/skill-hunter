@@ -1,13 +1,11 @@
 /*
 FUA 
-    * edit manifest.json further later
     * add further support to seperate and store part numbers and part headers in the created json
     * add additional URL links so those words can be clicked to be brought to the definition section
     * consider restricting how much the user is able to be shown at any given type
         * instead of seeing a whole statute the script will show specific sections at any given time
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
-    * add an outline / minimap of each section and subsection at the side of the webpage that has clickable links so users can easily navigate statutes, ask GPT for help with generating a dynamic minimap
     * integrate further functionality such as 
         * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
         * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
@@ -26,11 +24,10 @@ FUA
     * test out functionality of browser extension on the following browsers, then specify which browsers the extension is functional for in the README.md under browser support
         * google chrome
         * microsoft edge
+        * mozilla firefox 
         * brave
         * opera
-        * mozilla firefox 
         * safari (come up with a browser-specific version for portability and runnability on macs if required)
-    * learn how background workers in manifest v3 work and consider integrating a background script as necessary
     * consider handling installation of skill_hunter using docker or some other tools, ask GPT what other tooling alternatives there are for this
 */
 
@@ -517,7 +514,7 @@ function createTableOfContents(pageBasicData) {
     <body>
         <div class="toc-container">
             <div class="toc-header">
-                ${legislationTitle}
+                ${legislationTitle} 📜
             </div>
             <div class="toc-content">
                 <ul class="toc-list">
@@ -537,6 +534,19 @@ function createTableOfContents(pageBasicData) {
     });
 
     return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
+}
+
+function createContentBody(legislationContent) {
+
+    /*
+    FUA
+
+    include implementation for the following code below
+    that takes in the result returned by getLegislationContent()
+    and returns a html string element
+    */
+
+    return None
 }
 
 // ~~~ internal reference ~~~
