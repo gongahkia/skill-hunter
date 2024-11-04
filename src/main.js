@@ -843,6 +843,30 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 padding: 5px;
                 position: absolute; 
                 z-index: 1000; 
+                transform: translateX(-50%);
+                background-color: rgba(51, 51, 51, 1);
+                color: #fff;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                max-width: 850px;
+                min-width: 500px; 
+                max-height: 500px; 
+                overflow-y: auto;
+                opacity: 0; 
+                visibility: hidden;
+                transition: opacity 0.3s, visibility 0.3s;
+                white-space: pre-wrap; 
+                width: auto; 
+            }
+
+            .statuteTerm-container:hover .statuteDefinition-content {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .statuteTerm-container:hover {
+                color: lightgreen; 
             }
         </style>
     </head> 
