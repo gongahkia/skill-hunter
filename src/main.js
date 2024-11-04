@@ -834,25 +834,18 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
             .statuteTerm-container {
                 font-weight: bold; 
                 cursor: pointer; 
+                color: #ff4b6e; 
             }
 
             .statuteDefinition-content {
                 display: none; 
-                background: #f9f9f9; 
-                border: 1px solid #ccc; 
-                padding: 5px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid #ff4b6e; 
+                padding: 10px;
                 position: absolute; 
                 z-index: 1000; 
                 transform: translateX(-50%);
-                background-color: rgba(51, 51, 51, 1);
-                color: #fff;
-                padding: 10px;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-                max-width: 850px;
-                min-width: 500px; 
-                max-height: 500px; 
-                overflow-y: auto;
+                color: #1a1b26; 
                 opacity: 0; 
                 visibility: hidden;
                 transition: opacity 0.3s, visibility 0.3s;
@@ -860,14 +853,14 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 width: auto; 
             }
 
-            .statuteTerm-container:hover .statuteDefinition-content {
-                opacity: 1;
-                visibility: visible;
+            .statuteTerm-container:hover {
+                color: #e43e5c; 
             }
 
-            .statuteTerm-container:hover {
-                color: lightgreen; 
+            .statuteTerm-container:hover .statuteDefinition-content {
+                background: rgba(255, 255, 255, 0.95); 
             }
+
         </style>
     </head> 
     <body>
