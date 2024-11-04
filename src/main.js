@@ -87,6 +87,15 @@ function formatLogicalConnecters(input_sentence) {
     return input_sentence.replace(regexPattern, (match) => `<b><i>${match}</i></b>`);
 }
 
+function needsIndentation(line) {
+    /*
+    checks whether a given line fulfills the 
+    pattern for indentation
+    */
+    const pattern = /^\((?:[a-z]|[1-9][0-9]*)\)\s/;
+    return pattern.test(line);
+}
+
 // ~~~~~ COSMETIC ~~~~~
 
 function applyColorScheme(scheme) {
@@ -615,6 +624,10 @@ function createContentBody(legislationContent, legislationDefinitions) {
 
     const contentBodyStyle = `
         <style>
+            .tab-indent {
+                padding-left: 2em; /* Adjust this value as needed for indentation */
+            }
+
             .statuteTerm-container {
                 font-weight: bold; 
                 cursor: pointer; 
@@ -650,7 +663,14 @@ function createContentBody(legislationContent, legislationDefinitions) {
                 break;
 
             case "sectionBody":
-                contentBodyMain += `${contentToken.content}` 
+                for (line of contentToken.content.split("<br>")) {
+                    if (needsIndentation(line)) {
+                        contentBodyMain += `<span class="tab-indent">${line}<br></span>`;
+                    } else {
+                        contentBodyMain += `${line}<br>`
+                    }
+                }
+                // contentBodyMain += `${contentToken.content}` 
                 break;
 
             case "provisionHeader":
@@ -705,7 +725,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log(deserialiseJSON(legislationContent));
 
         const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
-        console.log(`html string --> ${contentBodyHTMLString}`)
+        console.log(contentBodyHTMLString)
 
         sendResponse({ status: "success" });
 
