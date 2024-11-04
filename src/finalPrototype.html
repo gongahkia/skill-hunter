@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Integrated Document</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            transition: padding-left 0.3s ease; /* Smooth transition for padding */
+        }
+
+        .toc-container {
+            width: 300px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .toc-header {
+            background: #1a1b26;
+            color: white;
+            padding: 20px 24px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+        }
+
+        .toc-header::after {
+            content: '';
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: #1a1b26;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .toc-content {
+            padding: 0 24px; /* Remove padding from top and bottom */
+            height: calc(100vh - 80px); /* Full height minus header height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            margin-bottom: 8px;
+            color: #1a1b26;
+            font-size: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .toc-item::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #ff4b6e;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .toc-item.active {
+            background: #ff4b6e;
+            color: white;
+        }
+
+        .toc-item.active::before {
+            background: white;
+        }
+
+        .toc-item:hover {
+            background: #ff4b6e;
+            color: white;
+        }
+
+        .toc-item:hover::before {
+            background: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            height: calc(100vh - 40px); /* Full height minus button height */
+            overflow-y: auto; /* Enable vertical scrolling */
+            transition: margin-left 0.3s ease; /* Smooth transition for margin */
+            margin-left: 0; /* Start with no margin */
+        }
+
+        .toggle-toc {
+            position: absolute;
+            top: 20px;
+            left: 320px; /* Adjust based on TOC width */
+            background: #ff4b6e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            z-index: 1; /* Ensure the button is on top */
+        }
+
+        .toggle-toc:hover {
+            background: #e43e5c;
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-toc">Toggle TOC</button>
+    
+    <div class="toc-container" id="toc">
+        <div class="toc-header">
+            Limitation Act 1959 
+        </div>
+        <div class="toc-content">
+            <ul class="toc-list">
+                <li class="toc-item">Short title</li>
+                <li class="toc-item">Interpretation</li>
+                <li class="toc-item">Saving for other limitation laws</li>
+                <li class="toc-item">Limitation not to operate as a bar unless specially pleaded</li>
+                <li class="toc-item">Part 2 to be subject to Part 3</li>
+                <li class="toc-item">Limitation of actions of contract and tort and certain other actions</li>
+                <li class="toc-item">Special time limit for claiming contribution</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <h1>Main Content Title</h1>
+        <p>This is where your generated HTML content will go. It will be displayed on the right side of the table of contents.</p>
+        <p>Continue adding your main content here...</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque lacinia felis eu felis vestibulum, ac varius magna tempor. Sed euismod, nulla in elementum lacinia, sapien metus dignissim lacus, vel egestas lorem sem a nunc. Duis sit amet nunc justo. Morbi vel lacinia libero.</p>
+        <p>Praesent fermentum libero ut neque varius, id faucibus purus euismod. Phasellus sit amet libero at metus fermentum fermentum. Cras vel tempor magna. Vivamus ac convallis justo. Sed nec odio vel purus malesuada dapibus.</p>
+        <p>Morbi feugiat ex id magna tempus, nec vehicula ex malesuada. Nam malesuada ipsum eget sem varius, nec dapibus augue tincidunt. Aenean et turpis erat. Quisque nec nunc nisl. Quisque tristique felis at augue dictum, a lacinia nunc bibendum.</p>
+        <p>Aliquam erat volutpat. Ut vulputate quam at urna tincidunt vehicula. Morbi scelerisque est id quam sagittis, a maximus erat feugiat. Etiam sit amet lorem et arcu maximus facilisis. Vestibulum volutpat nisi eget leo dictum facilisis. Nulla et neque ut magna egestas venenatis.</p>
+        <p>Continue adding your main content here...</p>
+        <p>This is where your generated HTML content will go. It will be displayed on the right side of the table of contents.</p>
+        <p>Continue adding your main content here...</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque lacinia felis eu felis vestibulum, ac varius magna tempor. Sed euismod, nulla in elementum lacinia, sapien metus dignissim lacus, vel egestas lorem sem a nunc. Duis sit amet nunc justo. Morbi vel lacinia libero.</p>
+        <p>Praesent fermentum libero ut neque varius, id faucibus purus euismod. Phasellus sit amet libero at metus fermentum fermentum. Cras vel tempor magna. Vivamus ac convallis justo. Sed nec odio vel purus malesuada dapibus.</p>
+        <p>Morbi feugiat ex id magna tempus, nec vehicula ex malesuada. Nam malesuada ipsum eget sem varius, nec dapibus augue tincidunt. Aenean et turpis erat. Quisque nec nunc nisl. Quisque tristique felis at augue dictum, a lacinia nunc bibendum.</p>
+        <p>Aliquam erat volutpat. Ut vulputate quam at urna tincidunt vehicula. Morbi scelerisque est id quam sagittis, a maximus erat feugiat. Etiam sit amet lorem et arcu maximus facilisis. Vestibulum volutpat nisi eget leo dictum facilisis. Nulla et neque ut magna egestas venenatis.</p>
+        <p>Continue adding your main content here...</p>
+    </div>
+
+    <script>
+        const toggleButton = document.querySelector('.toggle-toc');
+        const tocContainer = document.getElementById('toc');
+        const mainContent = document.getElementById('mainContent');
+
+        toggleButton.addEventListener('click', () => {
+            if (tocContainer.style.transform === 'translateX(-100%)') {
+                tocContainer.style.transform = 'translateX(0)';
+                mainContent.style.marginLeft = '320px'; // Adjust to maintain the space for the TOC
+                toggleButton.style.left = '320px'; // Adjust button position
+            } else {
+                tocContainer.style.transform = 'translateX(-100%)';
+                mainContent.style.marginLeft = '0'; // Reset margin when TOC is hidden
+                toggleButton.style.left = '20px'; // Move button to the left when TOC is hidden
+            }
+        });
+    </script>
+</body>
+</html>

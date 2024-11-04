@@ -1,5 +1,13 @@
 /*
 FUA 
+    * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
+    when fedback and displayed
+
+    * add code that will include the respective header of the desired section in the anchor tag of each sectionHeader to make it clickable
+
+    * add a function that generates HTML based on the template finalPrototype.html in the same directory as this one
+        * refine the generated HTML first here
+
     * add further support to seperate and store part numbers and part headers in the created json
     * add additional URL links so those words can be clicked to be brought to the definition section 
  
@@ -8,24 +16,20 @@ FUA
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
  
-* add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
-when fedback and displayed
+    * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
-* consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
-
-* integrate further functionality such as 
-    * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
-    * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
-    * allow statutes and their composite sections and subsections to fold accordingly
+    * integrate further functionality such as 
+        * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
+        * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
+        * allow statutes and their composite sections and subsections to fold accordingly
  
-* allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
-    * add serialising and deserialising functions to read this config.json
-    * add documentation for what can be customised in the README.md
+    * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
+        * add serialising and deserialising functions to read this config.json
+        * add documentation for what can be customised in the README.md
 
-    * rewrite the frontend to be pretty and minimal with nice smooth animations 
-        * use a lot of emojis to keep the UI design nice and modern
-        * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
-        * 
+        * rewrite the frontend to be pretty and minimal with nice smooth animations 
+            * use a lot of emojis to keep the UI design nice and modern
+            * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
 
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
 
