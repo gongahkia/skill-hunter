@@ -8,6 +8,8 @@ FUA
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
  
+* consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
+
 * integrate further functionality such as 
     * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
     * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
@@ -551,59 +553,80 @@ function createTableOfContents(pageBasicData) {
     return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
-function createContentBody(legislationContent) {
+function createContentBody(legislationContent, legislationDefinitions) {
 
     /*
-    FUA
-
-    include implementation for the following code below
-    that takes in the result returned by getLegislationContent()
-    and returns a html string element
+    dynamically generates HTML based on the extracted
+    legislation content, embedding definitions for words 
+    that have been defined in the same statute
     */
 
-    return None
+    const contentBodyHeader = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    `;
+
+    const contentBodyStyle = `
+    </head>
+    <body>
+
+    ` // FUA add styling here
+    const contentBodyFooter = `
+    </body>
+    </html>
+
+    ` // FUA add content here later
+    const contentBodyMain = ""
+
+    for (contentToken in legislationContent) {
+
+        switch (contentToken.type) {
+
+            case "sectionHeader":
+                contentBodyMain += `<h2>${contentType.content}</h2>`
+                break;
+
+            case "sectionBody":
+                contentBodyMain += `${contentType.content}` // FUA add logic to split the words and embed the definitions
+                break;
+
+            case "provisionHeader":
+                // FUA do nothing for now
+                break;
+
+            case "provisionNumber":
+                // FUA do nothing for now
+                break;
+
+            case "illustrationHeader":
+                // FUA do nothing for now
+                break;
+
+            case "illustrationBody":
+                // FUA do nothing for now
+                break;
+
+            default:
+                console.log("Unknown edgecase hit")
+                break;
+
+        }
+    }
+
+    return `${contentBodyHeader}${contentBodyStyle}${contentBodyMain}${contentBodyFooter}`
 }
-
-// ~~~ internal reference ~~~
-
-//     div#nav.affix-top div#topLeftPanel.top-left-panel 
-//         div.legis-title --> inner_text() to get full title of legislation
-//         span.fa.fa-file-pdf-o --> try href() to get the link to the pdf document, if there's anyway to click this element or extract the link from within it to get the link to the PDF document of each peice of legislation
-//         div.status-value --> inner_text() to get current version of the statute
-//     div#tocPanel.toc-panel
-//         nav#toc --> note a bunch of other classes are appended here but im ignoring them for the sake of simplicity
-//             a.nav-link --> query_selector_all() these instances to see individual elements of the contents page
-//                 b.active --> if inside, likely the header so extract inner_text(), extract the href()
-//                  otherwise --> extract the href() and inner_text() to get to the exact header within the code
-// div#colLegis div#legisContent
-// div.front 
-    // table tbody tr.actHd --> inner_text() is the act header, find this if present
-    // table tbody tr.revdHdr --> inner_text() is the revised act header, find this if present
-    // table tbody tr.revdTxt --> inner_text() is the revised text, find this if present
-    // table tbody tr.longTitle --> inner_text() is the long title that describes what the act is used for, find this if present
-    // table tbbody tr.cDate --> inner_text() is the origial date the statute was first introduced
-// div.body
-    // div.prov* --> query_selector_all(), where the * is a wildcard operator
-        // table tbody tr --> query_selector_all(), then sort according to the below
-            // td.prov*Hdr --> where the * is a wildcard operator --> inner_text() is generally the section header, get_attribute('id') if present also to save as required
-            // td.prov*Txt --> where the * is a wilrdcard operator --> inner_text() is the section body which genearlly contains the longer explanation
-            // td.prov*part --> get_attribute('id') if present also to save as required
-                // div.partNo --> inner_text() is generally the provision number
-            // td.partHdr --> get_attribute('id') if present also to save as required, inner_text() is generally the provision header
-            // td.def --> inner_text() is a specified definition and should be appended to a special array that will later be referenced
-
-// ~ other to dos ~
-
-// * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
-
 
 // ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
 
 const generalPageBasicData = getPageBasicData()
 const pageBasicData = generalPageBasicData.pageBasicData
 const pageMetaData = generalPageBasicData.pageMetadata
-console.log(createTableOfContents(pageBasicData))
-console.log(deserialiseJSON(getLegislationDefinitions()));
+
+const tableOfContentsHTMLString = createTableOfContents(pageBasicData)
+console.log(tableOfContentsHTMLString)
+
 window.location.href = pageBasicData.tableOfContents[pageBasicData.tableOfContents.length - 1].referenceUrl // resolves the issue of the page not loading
 
 // ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
@@ -612,9 +635,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // alert("skill hunter launching...");
     console.log("something clicked...")
     if (request.action === "simplify") { 
+
         console.log("simplify button clicked...");
-        console.log(deserialiseJSON(getLegislationContent()));
+
+        const legislationContent = getLegislationContent();
+        const legislationDefinitions = getLegislationDefinitions()
+        // console.log(deserialiseJSON(legislationDefinitions));
+        // console.log(deserialiseJSON(legislationContent));
+
+        const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
+        console.log(contentBodyHTMLString)
+
         sendResponse({ status: "success" });
+
     } else if (request.action === "cancel") { 
         console.log("cancel button clicked...");
         sendResponse({ status: "success" });
