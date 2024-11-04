@@ -1,26 +1,31 @@
 /*
 FUA 
     * add further support to seperate and store part numbers and part headers in the created json
-    * add additional URL links so those words can be clicked to be brought to the definition section
+    * add additional URL links so those words can be clicked to be brought to the definition section 
+ 
     * consider restricting how much the user is able to be shown at any given type
         * instead of seeing a whole statute the script will show specific sections at any given time
         * this also make it easier for the scraper to reformat and define things in line
         * if adopting this approach, edit the regex content_matching urls in manifest.json
-    * integrate further functionality such as 
-        * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
-        * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
-        * allow statutes and their composite sections and subsections to fold accordingly
+ 
+* integrate further functionality such as 
+    * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
+    * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
+    * allow statutes and their composite sections and subsections to fold accordingly
+ 
+* allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
+    * add serialising and deserialising functions to read this config.json
+    * add documentation for what can be customised in the README.md
+
     * rewrite the frontend to be pretty and minimal with nice smooth animations 
         * use a lot of emojis to keep the UI design nice and modern
         * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
-    * consider keeping the display discrete and include a minimal and complex view that expands out to show all hidden details, minimal view should avoid distracting the user as far as possible
-    * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
-    * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
-        * add serialising and deserialising functions to read this config.json
-        * add documentation for what can be customised in the README.md
+        * 
 
-    * clean up the description, screenshots and installation instructions in the README.md
-    * HARD DEADLINE 15 Nov to get skill_hunter up and running
+    * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
+
+    * clean up the description, screenshots and installation and USAGE instructions in the README.md
+    * HARD DEADLINE 7 Nov to get skill_hunter up and running
         * email Jerrold Soh then to sell my app and harvest free classpart if possible
         * value proposition will be any statute viewed via SSO
         * tort-law specific statutes include Tort Limitation Act, POHA, Penal Code (find others)
@@ -571,21 +576,21 @@ function createContentBody(legislationContent) {
 //                 b.active --> if inside, likely the header so extract inner_text(), extract the href()
 //                  otherwise --> extract the href() and inner_text() to get to the exact header within the code
 // div#colLegis div#legisContent
-    // div.front 
-        // table tbody tr.actHd --> inner_text() is the act header, find this if present
-        // table tbody tr.revdHdr --> inner_text() is the revised act header, find this if present
-        // table tbody tr.revdTxt --> inner_text() is the revised text, find this if present
-        // table tbody tr.longTitle --> inner_text() is the long title that describes what the act is used for, find this if present
-        // table tbbody tr.cDate --> inner_text() is the origial date the statute was first introduced
-    // div.body
-        // div.prov* --> query_selector_all(), where the * is a wildcard operator
-            // table tbody tr --> query_selector_all(), then sort according to the below
-                // td.prov*Hdr --> where the * is a wildcard operator --> inner_text() is generally the section header, get_attribute('id') if present also to save as required
-                // td.prov*Txt --> where the * is a wilrdcard operator --> inner_text() is the section body which genearlly contains the longer explanation
-                // td.prov*part --> get_attribute('id') if present also to save as required
-                    // div.partNo --> inner_text() is generally the provision number
-                // td.partHdr --> get_attribute('id') if present also to save as required, inner_text() is generally the provision header
-                // td.def --> inner_text() is a specified definition and should be appended to a special array that will later be referenced
+// div.front 
+    // table tbody tr.actHd --> inner_text() is the act header, find this if present
+    // table tbody tr.revdHdr --> inner_text() is the revised act header, find this if present
+    // table tbody tr.revdTxt --> inner_text() is the revised text, find this if present
+    // table tbody tr.longTitle --> inner_text() is the long title that describes what the act is used for, find this if present
+    // table tbbody tr.cDate --> inner_text() is the origial date the statute was first introduced
+// div.body
+    // div.prov* --> query_selector_all(), where the * is a wildcard operator
+        // table tbody tr --> query_selector_all(), then sort according to the below
+            // td.prov*Hdr --> where the * is a wildcard operator --> inner_text() is generally the section header, get_attribute('id') if present also to save as required
+            // td.prov*Txt --> where the * is a wilrdcard operator --> inner_text() is the section body which genearlly contains the longer explanation
+            // td.prov*part --> get_attribute('id') if present also to save as required
+                // div.partNo --> inner_text() is generally the provision number
+            // td.partHdr --> get_attribute('id') if present also to save as required, inner_text() is generally the provision header
+            // td.def --> inner_text() is a specified definition and should be appended to a special array that will later be referenced
 
 // ~ other to dos ~
 
