@@ -760,16 +760,16 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 margin: 0;
             }
 
-            .toc-item {
-                display: flex;
-                align-items: center;
+            .toc-item a {
+                display: flex; 
+                align-items: center; 
                 padding: 8px 16px;
-                margin-bottom: 8px;
                 color: #1a1b26;
                 font-size: 14px;
                 border-radius: 12px;
-                cursor: pointer;
+                cursor: pointer; 
                 transition: background-color 0.2s, color 0.2s;
+                text-decoration: none; 
             }
 
             .toc-item::before {
@@ -782,21 +782,21 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 flex-shrink: 0;
             }
 
-            .toc-item.active {
+            .toc-item a.active {
                 background: #ff4b6e;
                 color: white;
             }
 
-            .toc-item.active::before {
+            .toc-item a.active::before {
                 background: white;
             }
 
-            .toc-item:hover {
+            .toc-item a:hover {
                 background: #ff4b6e;
                 color: white;
             }
 
-            .toc-item:hover::before {
+            .toc-item a:hover::before {
                 background: white;
             }
 
@@ -904,11 +904,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const legislationContent = getLegislationContent();
         const legislationDefinitions = getLegislationDefinitions()
-        console.log(deserialiseJSON(legislationDefinitions));
-        console.log(deserialiseJSON(legislationContent));
+        // console.log(deserialiseJSON(legislationDefinitions));
+        // console.log(deserialiseJSON(legislationContent));
 
-        const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
-        console.log(contentBodyHTMLString)
+        // const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
+        // console.log(contentBodyHTMLString)
+
+        const overallHTMLContent = createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions)
+        console.log(overallHTMLContent)
 
         sendResponse({ status: "success" });
 
