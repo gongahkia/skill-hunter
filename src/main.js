@@ -178,7 +178,7 @@ function getPageBasicData() {
     information about the current webpage
     */
     pageMetadata = getPageMetadata()
-    const header = document.querySelector('div#nav.affix div#topLeftPanel');
+    const header = document.querySelector('div#topLeftPanel');
     linkedTableOfContents = []
     if (header) {
         legislationTitle = header.querySelector('div.legis-title')?.innerText.trim();
@@ -407,6 +407,7 @@ function createGenericButton() {
 }
 
 function createTableOfContents(pageBasicData) {
+
     /*
     dynamically generates a clickable table 
     of contents based on the tableOfContents 
@@ -418,8 +419,11 @@ function createTableOfContents(pageBasicData) {
     tableOfContents.html file in the same directory as this
     one
     */
-    tableOfContentsString = ""
-    tableOfContentsStyle = ```
+    const legislationTitle = pageBasicData.legislationTitle;
+    console.log(legislationTitle)
+    const tableOfContentsArray = pageBasicData.tableOfContents;
+    var tableOfContentsString = "";
+    const tableOfContentsStyle = `
     <style>
         .toc-container {
             width: 300px;
@@ -510,49 +514,40 @@ function createTableOfContents(pageBasicData) {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
     </style>
-    ```
+    `;
 
-tableOfContentsHeader = 
-```
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-```
+    const tableOfContentsHeader = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    `;
 
-tableOfContentsBody = 
-```
-</head>
-<body>
-    <div class="toc-container">
-        <div class="toc-header">
-            ${legislationTitle}
+    const tableOfContentsBody = `
+    </head>
+    <body>
+        <div class="toc-container">
+            <div class="toc-header">
+                ${legislationTitle}
+            </div>
+            <div class="toc-content">
+                <ul class="toc-list">
+    `;
+
+    const tableOfContentsFooter = `
+                </ul>
+            </div>
         </div>
-        <div class="toc-content">
-            <ul class="toc-list">
-```
+    </body>
+    </html>
+    `;
 
-tableOfContentsFooter = 
-```
-            </ul>
-        </div>
-    </div>
-</body>
-</html>
-```
-    const legislationTitle = pageBasicData.legislationTitle
-    const tableOfContentsArray = pageBasicData.tableOfContents
-    console.log(tableofContentsArray)
+    console.log(tableOfContentsArray);
     tableOfContentsArray.forEach(element => {
-        tableOfContentsString += "<li a='${element.referenceUrl}' class='toc-item'>${element.referenceText}</li>\n"
+        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
     });
-    return ```
-${tableOfContentsHeader}
-${tableOfContentsStyle}
-${tableOfContentsBody}
-${tableOfContentsString}
-${tableOfContentsFooter}
-    ```
+
+    return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
 
 // ~~~ internal reference ~~~
@@ -563,7 +558,7 @@ ${tableOfContentsFooter}
 //         div.status-value --> inner_text() to get current version of the statute
 //     div#tocPanel.toc-panel
 //         nav#toc --> note a bunch of other classes are appended here but im ignoring them for the sake of simplicity
-//             a.nav-link --> query_selector_all() these instances to see individual elements of the contents pageA
+//             a.nav-link --> query_selector_all() these instances to see individual elements of the contents page
 //                 b.active --> if inside, likely the header so extract inner_text(), extract the href()
 //                  otherwise --> extract the href() and inner_text() to get to the exact header within the code
 // div#colLegis div#legisContent
@@ -592,8 +587,10 @@ ${tableOfContentsFooter}
 // ~~~~~ EXECUTION CODE ~~~~~
 
 alert("skill hunter launching...");
-const pageBasicData = getPageBasicData()
-console.log(deserialiseJSON(pageBasicData));
+const generalPageBasicData = getPageBasicData()
+console.log(deserialiseJSON(generalPageBasicData));
+const pageBasicData = generalPageBasicData.pageBasicData
+const pageMetaData = generalPageBasicData.pageMetadata
 console.log(createTableOfContents(pageBasicData))
 // console.log(deserialiseJSON(getLegislationMetaData()));
 // console.log(deserialiseJSON(getLegislationDefinitions()));
