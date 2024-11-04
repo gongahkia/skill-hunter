@@ -406,7 +406,7 @@ function createGenericButton() {
     return None
 }
 
-function createTableOfContents() {
+function createTableOfContents(pageBasicData) {
     /*
     dynamically generates a clickable table 
     of contents based on the tableOfContents 
@@ -418,7 +418,141 @@ function createTableOfContents() {
     tableOfContents.html file in the same directory as this
     one
     */
-    return None
+    tableOfContentsString = ""
+    tableOfContentsStyle = ```
+    <style>
+        .toc-container {
+            width: 300px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .toc-header {
+            background: #1a1b26;
+            color: white;
+            padding: 20px 24px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+        }
+
+        .toc-header::after {
+            content: '';
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: #1a1b26;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .toc-content {
+            padding: 40px 24px 24px;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            margin-bottom: 8px;
+            color: #1a1b26;
+            font-size: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .toc-item::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #ff4b6e;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .toc-item.active {
+            background: #ff4b6e;
+            color: white;
+        }
+
+        .toc-item.active::before {
+            background: white;
+        }
+
+        .toc-item:hover {
+            background: #ff4b6e;
+            color: white;
+        }
+
+        .toc-item:hover::before {
+            background: white;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+    </style>
+    ```
+
+tableOfContentsHeader = 
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+```
+
+tableOfContentsBody = 
+```
+</head>
+<body>
+    <div class="toc-container">
+        <div class="toc-header">
+            ${legislationTitle}
+        </div>
+        <div class="toc-content">
+            <ul class="toc-list">
+```
+
+tableOfContentsFooter = 
+```
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+```
+    const legislationTitle = pageBasicData.legislationTitle
+    const tableOfContentsArray = pageBasicData.tableOfContents
+    console.log(tableofContentsArray)
+    tableOfContentsArray.forEach(element => {
+        tableOfContentsString += "<li a='${element.referenceUrl}' class='toc-item'>${element.referenceText}</li>\n"
+    });
+    return ```
+${tableOfContentsHeader}
+${tableOfContentsStyle}
+${tableOfContentsBody}
+${tableOfContentsString}
+${tableOfContentsFooter}
+    ```
 }
 
 // ~~~ internal reference ~~~
@@ -458,8 +592,10 @@ function createTableOfContents() {
 // ~~~~~ EXECUTION CODE ~~~~~
 
 alert("skill hunter launching...");
-console.log(deserialiseJSON(getPageBasicData()));
+const pageBasicData = getPageBasicData()
+console.log(deserialiseJSON(pageBasicData));
+console.log(createTableOfContents(pageBasicData))
 // console.log(deserialiseJSON(getLegislationMetaData()));
 // console.log(deserialiseJSON(getLegislationDefinitions()));
-console.log(deserialiseJSON(getLegislationContent()));
-applyColorScheme("gruvbox")
+// console.log(deserialiseJSON(getLegislationContent()));
+// applyColorScheme("gruvbox")
