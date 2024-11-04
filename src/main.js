@@ -412,15 +412,9 @@ function createTableOfContents(pageBasicData) {
     dynamically generates a clickable table 
     of contents based on the tableOfContents 
     scraped from the getPageBasicData() function
-
-    FUA 
-    edit and add implementation of this function here, 
-    html code for the table of contents can be taken from 
-    tableOfContents.html file in the same directory as this
-    one
     */
+
     const legislationTitle = pageBasicData.legislationTitle;
-    console.log(legislationTitle)
     const tableOfContentsArray = pageBasicData.tableOfContents;
     var tableOfContentsString = "";
     const tableOfContentsStyle = `
@@ -467,13 +461,19 @@ function createTableOfContents(pageBasicData) {
         .toc-item {
             display: flex;
             align-items: center;
-            padding: 8px 16px;
             margin-bottom: 8px;
+        }
+
+        .toc-item a {
+            display: flex; 
+            align-items: center; 
+            padding: 8px 16px;
             color: #1a1b26;
             font-size: 14px;
             border-radius: 12px;
-            cursor: pointer;
+            cursor: pointer; 
             transition: background-color 0.2s, color 0.2s;
+            text-decoration: none; 
         }
 
         .toc-item::before {
@@ -486,21 +486,21 @@ function createTableOfContents(pageBasicData) {
             flex-shrink: 0;
         }
 
-        .toc-item.active {
+        .toc-item a.active {
             background: #ff4b6e;
             color: white;
         }
 
-        .toc-item.active::before {
+        .toc-item a.active::before {
             background: white;
         }
 
-        .toc-item:hover {
+        .toc-item a:hover {
             background: #ff4b6e;
             color: white;
         }
 
-        .toc-item:hover::before {
+        .toc-item a:hover::before {
             background: white;
         }
 
@@ -542,7 +542,7 @@ function createTableOfContents(pageBasicData) {
     </html>
     `;
 
-    console.log(tableOfContentsArray);
+    // console.log(tableOfContentsArray);
     tableOfContentsArray.forEach(element => {
         tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
     });
@@ -553,7 +553,7 @@ function createTableOfContents(pageBasicData) {
 // ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
 
 // FUA
-    // debug this portion of the code and in popup.js that links the button clicking to functions run here
+    // debug this portion of the code and the code in popup.js that links the clicking of the cancel and simplify buttons to functions that are called and run here
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "simplifyPage") {
