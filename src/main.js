@@ -266,29 +266,10 @@ function getLegislationDefinitions() {
 }
 
 function getLegislationContent() {
+
     /*
     extract main bulk of the content from the 
     legislation document
-
-    FUA
-
-    !!!ALSO ADD THE FOLLOWING
-
-    add the following to the below in this function to scan within provTxt td or outside of it 
-    where if there is 
-    a td.fs then it is either a Illustration/Explanation
-        if content of the td.fs is <em></em> tags with the innerText of "Illustrations" or "Illustration", then it is a illustrationHeader
-            {
-                "type": "illustrationHeader",
-                "ID": illustrationHeaderID,
-                "content": illustrationHeaderText
-            }
-        if content and the following chunk of text has no <em>Illustration</em> or <em>Illustrations</em>, then it is an illustrationBody
-            {
-                "type": "illustrationBody",
-                "ID": illustrationBodyID,
-                "content": illustrationBodyText
-            }
     */
 
     const content = [] 
@@ -316,6 +297,31 @@ function getLegislationContent() {
                         "content": sectionHeaderText
                     }
                 )
+            } else {}
+
+            const illustrationHeaderOrContent = row.querySelector("td.fs")
+            if (illustrationHeaderOrContent) {
+                if (illustrationHeaderOrContent.innerHTML.includes("<em>Illustration</em>") || illustrationHeaderOrContent.innerHTML.includes("<em>Illustrations</em>")) {
+                    const illustrationHeaderText = illustrationHeaderOrContent.innerText.trim()
+                    console.log(illustrationHeaderText)
+                    content.push(
+                        {
+                            "type": "illustrationHeader",
+                            "ID": null,
+                            "content": illustrationHeaderText
+                        }
+                    )
+                } else {
+                    const illustrationBodyText = illustrationHeaderOrContent.innerText.trim()
+                    console.log(illustrationBodyText)
+                    content.push(
+                        {
+                            "type": "illustrationBody",
+                            "ID": null,
+                            "content": illustrationBodyText
+                        }
+                    )
+                }
             } else {}
 
             const sectionBody = row.querySelector("td[class^='prov'][class$='Txt']")
