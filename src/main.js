@@ -142,7 +142,7 @@ function randomEmoji() {
         "🧼", "🧽", "🪣", "🧴", "🛒", "🚬", "⚰️", "⚱️", "🗿", "🪆", "🪐", "🛰️", "🛸", 
         "🛎️", "🚪", "🛌", "🛀", "🚿", "🛋️"
     ];
-    return randomEmoji = emojiArray[Math.floor(Math.random() * emojiArray.length)];
+    return emojiArray[Math.floor(Math.random() * emojiArray.length)];
 }
 
 // ~~~~~ COSMETIC ~~~~~
@@ -612,8 +612,12 @@ function createTableOfContents(pageBasicData) {
 
     // console.log(tableOfContentsArray);
     tableOfContentsArray.forEach(element => {
-        tableOfContentsString += `<li class='toc-item'>${randomEmoji()}<a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
+        const text = element.referenceText.innerText.trim();
+        const match = text.match(/^(\d+)/); 
+        const formattedReferenceText = match ? `<b>${match[0]}</b>${text.slice(match[0].length)}` : text;
+        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${formattedReferenceText}${randomEmoji()}</a></li>\n`;
     });
+
     return tableOfContentsString;
     // return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
 }
