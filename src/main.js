@@ -618,7 +618,7 @@ function createTableOfContents(pageBasicData) {
         const text = element.referenceText
         const match = text.match(/^(\d+)/); 
         const formattedReferenceText = match ? `<span class='toc-sectionNo'>${match[0]}.</span> ${text.slice(match[0].length)}` : text;
-        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${formattedReferenceText} ${randomEmoji()}</a></li>\n`;
+        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}' target='_blank'>${formattedReferenceText} ${randomEmoji()}</a></li>\n`;
     });
 
     return tableOfContentsString;
@@ -759,13 +759,9 @@ function createContentBody(legislationContent, legislationDefinitions) {
 }
 
 function createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions) {
-    return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Skill Hunter: ${pageBasicData.legislationTitle}</title>
-        <style>
+    return {
+        "title": `Skill Hunter: ${pageBasicData.legislationTitle}</title>`,
+        "style": `
             body {
                 display: flex;
                 margin: 0;
@@ -935,10 +931,8 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 opacity: 1;
                 visibility: visible; 
             }
-
-        </style>
-    </head> 
-    <body>
+        `,
+        "content": `
     <button class="toggle-toc">Toggle TOC</button>
     <div class="toc-container" id="toc">
         <div class="toc-header">
@@ -972,36 +966,62 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 }
             });
         </script>
-    </body>
-    </html>
-    `
+        `
+    };
 }
 
-function revertPage(backupTitle, backupContent) {
+function revertPage(backupTitle, backupStyle, backupContent) {
     /*
     revert the content of the webpage based on
     specified data
     */
     document.title = backupTitle || "",
+    document.querySelector("style").innerHTML = backupStyle;
     document.body.innerHTML = backupContent || "";
 }
 
-function simplifyContent(pageData, overallHTMLContent) {
+function simplifyPage(overallHTMLContent) {
     /*
     simplifies the content of the webpage based on
     specified data
     */
+
+    // ~ saving old values ~
+
     const backupTitle = document.title;
     const backupContent = document.body.innerHTML;
-    document.innerHTML = overallHTMLContent;
+    let backupStyle = null;
+
+    // ~ replacing new values ~
+
+    const newTitle = overallHTMLContent.title
+    const newStyle = overallHTMLContent.style
+    const newContent = overallHTMLContent.content
+
+    document.title = newTitle
+
+    const styleEl = document.querySelector("style");
+    if (styleEl) {
+        backupStyle = styleEl.innerHTML;
+        styleEl.innerHTML = newStyle;
+    } else {
+        var newStyleEl = document.createElement("style");
+        newStyleEl.innerHTML = newStyle;
+        document.head.appendChild(newStyleEl);
+    }
+
+    document.body.innerHTML = newContent;
+
     return {
         "title": backupTitle,
-        "content": backupContent
+        "style": backupStyle,
+        "content": backupContent,
     }
 }
 
 // ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
 
+let simplifedState = false;
 const generalPageBasicData = getPageBasicData()
 const pageBasicData = generalPageBasicData.pageBasicData
 const pageMetaData = generalPageBasicData.pageMetadata
@@ -1024,26 +1044,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("simplify button clicked...");
 
         const legislationContent = getLegislationContent();
-        const legislationDefinitions = getLegislationDefinitions()
+        const legislationDefinitions = getLegislationDefinitions();
         // console.log(deserialiseJSON(legislationDefinitions));
         // console.log(deserialiseJSON(legislationContent));
 
         // const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
         // console.log(contentBodyHTMLString)
 
-        const overallHTMLContent = createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions)
-        console.log(overallHTMLContent)
+        const overallHTMLContent = createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions);
+        console.log(deserialiseJSON(overallHTMLContent));
 
         if (request.toggle) {
             console.log("toggling page...");
             if (simplifedState) {
                 console.log("reverting page...");
-                revertPage(backupTitle, backupContent);
+                revertPage(backupTitle, backupStyle, backupContent);
                 simplifedState = false;
             } else {
                 console.log("simplifying page...")
                 backupHTMLContentMap = simplifyPage(overallHTMLContent);
                 backupTitle = backupHTMLContentMap.title;
+                backupStyle = backupHTMLContentMap.style;
                 backupContent = backupHTMLContentMap.content;
                 simplifedState = true;
             }
