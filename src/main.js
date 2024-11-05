@@ -1,11 +1,9 @@
 /*
 FUA 
-    * implement actual toggling of the site code first with reference to the archived repo main.js code
+    * work out why the span tags aren't rendering properly with reference to the actual code from ./archive
 
     * add credits made by gabriel ong and my github at the top right of the page
     * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
-
-    * ignore the script tag issue for now
 
     * figure out if i can make the hovering definition prettier like the previous definitions in the version 1 of this project
         * add additional URL links so those words can be clicked to be brought to the definition section 
@@ -770,7 +768,6 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 min-height: 100vh;
-                transition: padding-left 0.3s ease; 
             }
 
             .toc-container {
@@ -778,9 +775,9 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 background: white;
                 border-radius: 24px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-                transition: transform 0.3s ease;
-                position: relative;
+                overflow-y: auto;
+                position: fixed;
+                height: 100vh; 
             }
 
             .toc-header {
@@ -790,7 +787,6 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 font-size: 18px;
                 font-weight: 500;
                 border-radius: 24px 24px 0 0;
-                position: relative;
             }
 
             .toc-header::after {
@@ -806,7 +802,6 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
 
             .toc-content {
                 padding: 0 24px; 
-                height: calc(100vh - 80px); 
                 overflow-y: auto; 
             }
 
@@ -867,26 +862,7 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 padding: 20px;
                 height: calc(100vh - 40px); 
                 overflow-y: auto; 
-                transition: margin-left 0.3s ease; 
-                margin-left: 0; 
-            }
-
-            .toggle-toc {
-                position: absolute;
-                top: 20px;
-                left: 320px; 
-                background: #ff4b6e;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 10px 15px;
-                cursor: pointer;
-                transition: background-color 0.2s;
-                z-index: 1; 
-            }
-
-            .toggle-toc:hover {
-                background: #e43e5c;
+                margin-left: 300px; 
             }
 
             .tab-indent {
@@ -897,20 +873,19 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 font-weight: bold; 
                 cursor: pointer; 
                 color: #ff4b6e; 
+                position: relative; 
             }
 
             .statuteDefinition-content {
-                display: none; 
-                background-color: #333; 
+                display: none; /* Initially hidden */
+                background-color: rgba(51, 51, 51, 1); 
                 color: #fff; 
                 border: 1px solid #ff4b6e; 
                 padding: 10px;
-                position: absolute; 
-                z-index: 1000; 
-                transform: translateX(-50%);
+                z-index: 2; 
                 opacity: 0; 
-                visibility: hidden;
-                transition: opacity 0.3s, visibility 0.3s;
+                visibility: hidden; 
+                transition: opacity 0.3s, visibility 0.3s; 
                 white-space: pre-wrap; 
                 width: auto; 
                 overflow-y: auto;
@@ -919,8 +894,10 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 max-height: 500px; 
                 border-radius: 5px;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                position: absolute; 
                 top: 100%; 
                 left: 50%; 
+                transform: translateX(-50%); 
             }
 
             .statuteTerm-container:hover {
@@ -933,9 +910,14 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 opacity: 1;
                 visibility: visible; 
             }
+
+            .statuteTerm-container:focus-within .statuteDefinition-content {
+                display: block; 
+                opacity: 1;
+                visibility: visible; 
+            }
         `,
         "content": `
-    <button class="toggle-toc">Toggle TOC</button>
     <div class="toc-container" id="toc">
         <div class="toc-header">
             ${pageBasicData.legislationTitle} 📜
@@ -953,22 +935,22 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
         ${createContentBody(legislationContent, legislationDefinitions)}
     </div>
         `,
-        "script": `
-            const toggleButton = document.querySelector('.toggle-toc');
-            const tocContainer = document.getElementById('toc');
-            const mainContent = document.getElementById('mainContent');
-            toggleButton.addEventListener('click', () => {
-                if (tocContainer.style.transform === 'translateX(-100%)') {
-                    tocContainer.style.transform = 'translateX(0)';
-                    mainContent.style.marginLeft = '320px'; 
-                    toggleButton.style.left = '320px'; 
-                } else {
-                    tocContainer.style.transform = 'translateX(-100%)';
-                    mainContent.style.marginLeft = '0'; 
-                    toggleButton.style.left = '20px'; 
-                }
-            });
-        `
+        // "script": `
+        //     const toggleButton = document.querySelector('.toggle-toc');
+        //     const tocContainer = document.getElementById('toc');
+        //     const mainContent = document.getElementById('mainContent');
+        //     toggleButton.addEventListener('click', () => {
+        //         if (tocContainer.style.transform === 'translateX(-100%)') {
+        //             tocContainer.style.transform = 'translateX(0)';
+        //             mainContent.style.marginLeft = '320px'; 
+        //             toggleButton.style.left = '320px'; 
+        //         } else {
+        //             tocContainer.style.transform = 'translateX(-100%)';
+        //             mainContent.style.marginLeft = '0'; 
+        //             toggleButton.style.left = '20px'; 
+        //         }
+        //     });
+        // `
     };
 }
 
