@@ -651,9 +651,7 @@ function integrateDefinition(legislationContent, legislationDefinitions) {
                             return `
                                 <span class='statuteTerm-container' title='${safeDefinition}'>
                                     ${match}
-                                    <span class='statuteDefinition-content'>
-                                        ${safeDefinition}
-                                    </span>
+                                    <span class='statuteDefinition-content'>${safeDefinition}</span>
                                 </span>`;
                         });
                     }
@@ -887,9 +885,8 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                 padding: 10px;             
                 border-radius: 5px;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-                max-width: 850px;
-                min-width: 500px; 
-                max-height: 500px;
+                min-width: 200px; 
+                max-width: 600px;
                 overflow-y: auto;
                 opacity: 0; 
                 visibility: hidden;     
@@ -1036,7 +1033,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const legislationContent = getLegislationContent();
         const legislationDefinitions = getLegislationDefinitions();
-        // console.log(deserialiseJSON(legislationDefinitions));
+        console.log(deserialiseJSON(legislationDefinitions));
         // console.log(deserialiseJSON(legislationContent));
 
         // const contentBodyHTMLString = createContentBody(legislationContent, legislationDefinitions)
