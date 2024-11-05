@@ -1,0 +1,24 @@
+# `NAPKIN.md`
+
+- Consider adding a general link to FAQs [here](https://sso.agc.gov.sg/Help/FAQ).
+- Figure out if I can make the hovering definition prettier, like the previous definitions in version 1 of this project.
+    - Add additional URL links so those words can be clicked to be brought to the definition section.
+- Add code that handles the conversion of newline characters and other non-HTML specific characters to HTML so that the text is rendered cleanly when fed back and displayed.
+- Add further support to separate and store part numbers and part headers in the created JSON.
+- Integrate further functionality such as:
+    - Statutes referenced within other statutes can be linked, and their respective URLs will be clickable.
+    - Mentions of a given limb or section dependent on other sections will also be clickable and can bring users to that dependent section immediately.
+    - Allow statutes and their composite sections and subsections to fold accordingly.
+        - Implement with the collapsible class using code from [W3Schools](https://www.w3schools.com/howto/howto_js_collapsible.asp).
+- Allow user customization via specification of additional configurations within a local `.json` file users can place in the same directory as the `manifest.json`.
+    - Add a UI button on the pop-up page to tweak settings.
+        - Add functionality and link to:
+            - Change font.
+            - Change color scheme.
+            - Functions I've implemented above.
+        - Add serializing and deserializing functions to read this `config.json`.
+        - Add documentation for what can be customized in the `README.md`.
+        - Rewrite the frontend to be pretty and minimal with nice smooth animations.
+            - Reference idea: ![Reference](https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png)
+- Consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users.
+- Consider handling the installation of **skill_hunter** using Docker or some other tools; ask GPT what other tooling alternatives there are for this.

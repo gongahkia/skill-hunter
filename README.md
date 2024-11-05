@@ -1,9 +1,9 @@
-[![](https://img.shields.io/badge/skill_hunter_1.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0) [![](https://img.shields.io/badge/skill_hunter_2.0-build-orange)]()
+[![](https://img.shields.io/badge/skill_hunter_1.0-deprecated-red)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0) [![](https://img.shields.io/badge/skill_hunter_2.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/2.0)
 
 # Skill Hunter
 
 <p align="center">
-<img src="./asset/logo_words.png" width=50% height=50%>
+<img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
 Browser extension that formats legislation to be more readable.
@@ -23,10 +23,9 @@ Time is often spent poring over definitions and navigating between interpretatio
 * Browser extension with tiny source code binary
 * Supported on Firefox and Chrome
 
-## Screenshots
+## Screenshot
 
-![]()
-![]()
+![](./asset/screenshots/skill-hunter-screenshot-2.png)
 
 ## Installation
 
@@ -42,23 +41,15 @@ $ make
 
 1. Click *Code*.
 
-![](./asset/skill-hunter-installation-1.png)
+![](./asset/screenshots/skill-hunter-installation-1.png)
 
 2. Click *Download ZIP*.
 
-![](./asset/skill-hunter-installation-2.png)
+![](./asset/screenshots/skill-hunter-installation-2.png)
 
 3. Unzip the ZIP file.
 
 ## Usage
-
-### Firefox
-
-1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
-2. Click *load temporary add-on*.
-3. Open the `skill-hunter` repo, select `manifest.json`.
-4. Open any **SSO** page, then click *Whole Document*.
-5. Click the toggle button.
 
 ### Chrome
 
@@ -67,11 +58,25 @@ $ make
 3. Click *load unpacked*.
 4. Open the `skill-hunter` repo, click *select*.
 5. Open any **SSO** page, then click *Whole Document*.
-6. Click the toggle button.
+
+![](./asset/screenshots/skill-hunter-screenshot-3.png)
+
+6. Click the simplify button.
+
+### Firefox
+
+1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
+2. Click *load temporary add-on*.
+3. Open the `skill-hunter` repo, select `manifest.json`.
+4. Open any **SSO** page, then click *Whole Document*.
+
+![](./asset/screenshots/skill-hunter-screenshot-3.png)
+
+5. Click the simplify button.
 
 ## Browser support
 
-Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V2 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
+Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
 
 ## References
 
