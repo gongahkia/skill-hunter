@@ -1062,9 +1062,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         sendResponse({ status: "success" });
 
-    } else if (request.action === "settings") { 
-        console.log("settings button clicked...");
-        sendResponse({ status: "success" });
+    // } else if (request.action === "settings") { 
+    //     console.log("settings button clicked...");
+    //     sendResponse({ status: "success" });
 
     } else if (request.action === "cancel") { 
         console.log("cancel button clicked...");
