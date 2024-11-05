@@ -1,6 +1,7 @@
 const modalOverlay = document.getElementById("modalOverlay");
 const cancelButton = document.getElementById("cancelButton");
 const simplifyButton = document.getElementById("simplifyButton");
+const settingsButton = document.getElementById("settingsButton");
 
 cancelButton.addEventListener("click", () => {
     console.log("Cancel button clicked!");
@@ -11,6 +12,22 @@ cancelButton.addEventListener("click", () => {
     } else if (browser.tabs) { // FIREFOX
         browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
             browser.tabs.sendMessage(tabs[0].id, { action: "cancel" }); 
+        });
+    } else { // UNSUPPORTED BROWSER
+        console.error("Error hit: tabs API not supported in this environment");
+    }
+    window.close()
+});
+
+settingsButton.addEventListener("click", () => {
+    console.log("Settings button clicked!");
+    if (chrome.tabs) { // CHROME
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "settings" }); 
+        });
+    } else if (browser.tabs) { // FIREFOX
+        browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
+            browser.tabs.sendMessage(tabs[0].id, { action: "settings" }); 
         });
     } else { // UNSUPPORTED BROWSER
         console.error("Error hit: tabs API not supported in this environment");

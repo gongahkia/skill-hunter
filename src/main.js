@@ -1,5 +1,7 @@
 /*
 FUA 
+    * implement actual toggling of the site code first with reference to the archived repo main.js code
+
     * add credits made by gabriel ong and my github at the top right of the page
     * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
@@ -8,7 +10,6 @@ FUA
 
     * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
     when fedback and displayed
-
 
     * add further support to seperate and store part numbers and part headers in the created json
 
@@ -1012,9 +1013,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         sendResponse({ status: "success" });
 
+    } else if (request.action === "settings") { 
+        console.log("settings button clicked...");
+        sendResponse({ status: "success" });
+
     } else if (request.action === "cancel") { 
         console.log("cancel button clicked...");
         sendResponse({ status: "success" });
+
     } else {
         console.log("unknown edgecase hit");
     } 
