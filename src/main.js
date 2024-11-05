@@ -923,7 +923,10 @@ const pageMetaData = generalPageBasicData.pageMetadata
 const tableOfContentsHTMLString = createTableOfContents(pageBasicData)
 console.log(tableOfContentsHTMLString)
 
-window.location.href = pageBasicData.tableOfContents[pageBasicData.tableOfContents.length - 1].referenceUrl // resolves the issue of the page not loading
+if (window.location.href.endsWith("?WholeDoc=1")) {
+    console.log("navigating to bottom of page...")
+    window.location.href = pageBasicData.tableOfContents[pageBasicData.tableOfContents.length - 1].referenceUrl // resolves the issue of the page not loading
+} else {}
 
 // ~~~~~ BROWSER RUNTIME LISTENERS ~~~~~
 
