@@ -580,6 +580,7 @@ function createTableOfContents(pageBasicData) {
             margin: 0;
             background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 16px;
         }
     </style>
     `;
@@ -612,10 +613,10 @@ function createTableOfContents(pageBasicData) {
 
     // console.log(tableOfContentsArray);
     tableOfContentsArray.forEach(element => {
-        const text = element.referenceText.innerText.trim();
+        const text = element.referenceText
         const match = text.match(/^(\d+)/); 
-        const formattedReferenceText = match ? `<b>${match[0]}</b>${text.slice(match[0].length)}` : text;
-        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${formattedReferenceText}${randomEmoji()}</a></li>\n`;
+        const formattedReferenceText = match ? `<span class='toc-sectionNo'>${match[0]}.</span> ${text.slice(match[0].length)}` : text;
+        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${formattedReferenceText} ${randomEmoji()}</a></li>\n`;
     });
 
     return tableOfContentsString;
@@ -648,7 +649,9 @@ function integrateDefinition(legislationContent, legislationDefinitions) {
                             return `
                                 <span class='statuteTerm-container' title='${safeDefinition}'>
                                     ${match}
-                                    <span class='statuteDefinition-content'>${safeDefinition}</span>
+                                    <span class='statuteDefinition-content'>
+                                        ${safeDefinition}
+                                    </span>
                                 </span>`;
                         });
                     }
@@ -851,6 +854,12 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
 
             .toc-item a:hover::before {
                 background: white;
+            }
+
+            .toc-sectionNo {
+                font-size: 16px;
+                font-weight: bold;
+                margin-right: 8px;
             }
 
             .main-content {
