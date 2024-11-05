@@ -1,0 +1,145 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #c0caf5; /* Tokyo Night foreground */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background: #1a1b26; /* Tokyo Night dark background */
+}
+
+.toc-container {
+    width: 300px;
+    background: #1f2335; /* Tokyo Night sidebar background */
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    position: fixed;
+    height: 100vh;
+}
+
+.toc-header {
+    background: #292e42; /* Tokyo Night header background */
+    color: #c0caf5; /* Tokyo Night light text */
+    padding: 20px 24px;
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 24px 24px 0 0;
+}
+
+.toc-header::after {
+    content: '';
+    position: absolute;
+    bottom: -24px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: #292e42; /* Tokyo Night header background */
+    border-radius: 0 0 24px 24px;
+}
+
+.toc-content {
+    padding: 0 24px;
+    overflow-y: auto;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item a {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    color: #a9b1d6; /* Tokyo Night muted text */
+    font-size: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none;
+}
+
+.toc-item::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #7aa2f7; /* Tokyo Night blue accent */
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.toc-item a.active {
+    background: #7aa2f7; /* Tokyo Night active item background */
+    color: #1a1b26; /* Tokyo Night background */
+}
+
+.toc-item a.active::before {
+    background: #1a1b26; /* Tokyo Night background */
+}
+
+.toc-item a:hover {
+    background: #7aa2f7; /* Tokyo Night hover background */
+    color: #1a1b26; /* Tokyo Night background */
+}
+
+.toc-item a:hover::before {
+    background: #1a1b26; /* Tokyo Night background */
+}
+
+.toc-sectionNo {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    height: calc(100vh - 40px);
+    overflow-y: auto;
+    margin-left: 300px;
+    background: #1a1b26; /* Tokyo Night dark background */
+}
+
+.tab-indent {
+    padding-left: 2em;
+}
+
+.statuteTerm-container {
+    position: relative;
+    font-weight: bold;
+    display: inline-block;
+    color: #7dcfff; /* Tokyo Night blue accent */
+}
+
+.statuteDefinition-content {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #414868; /* Tokyo Night tooltip background */
+    color: #c0caf5; /* Tokyo Night tooltip text */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    min-width: 200px;
+    max-width: 600px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    white-space: pre-wrap;
+    width: auto;
+    z-index: 2;
+}
+
+.statuteTerm-container:hover .statuteDefinition-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.statuteTerm-container:hover {
+    color: #bb9af7; /* Tokyo Night purple accent for hover */
+}

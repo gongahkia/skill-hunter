@@ -1,4 +1,4 @@
-# Internal reference
+# `REFERENCE.md`
 
 Generated while creating `Skill Hunter`.
 
