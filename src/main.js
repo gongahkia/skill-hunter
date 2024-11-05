@@ -3,9 +3,10 @@ FUA
     * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
     when fedback and displayed
 
-    * figure out if i can make the hovering definition prettier like the previosu definitions in the version 1 of this project
+    * figure out if i can make the hovering definition prettier like the previous definitions in the version 1 of this project
 
     * add credits made by gabriel ong and my github at the top right of the page
+    * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
     * add code that will include the respective header of the desired section in the anchor tag of each sectionHeader to make it clickable
 
@@ -14,13 +15,6 @@ FUA
 
     * add further support to seperate and store part numbers and part headers in the created json
     * add additional URL links so those words can be clicked to be brought to the definition section 
- 
-    * consider restricting how much the user is able to be shown at any given type
-        * instead of seeing a whole statute the script will show specific sections at any given time
-        * this also make it easier for the scraper to reformat and define things in line
-        * if adopting this approach, edit the regex content_matching urls in manifest.json
- 
-    * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
     * integrate further functionality such as 
         * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
@@ -98,6 +92,57 @@ function needsIndentation(line) {
     */
     const pattern = /^\((?:[a-z]|[1-9][0-9]*)\)\s/;
     return pattern.test(line);
+}
+
+function randomEmoji() {
+    /*
+    returns a random emoji from a predefined list
+    */
+    const emojiArray = [
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", 
+        "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "🥲", "🤗", "🤩", "🤔", "🤨", "😐", 
+        "😑", "😶", "😏", "😒", "🙄", "😬", "😮‍💨", "🤥", "😌", "😔", "😪", "🤤", "😴", 
+        "😷", "🤒", "🤕", "🤢", "🤮", "🤧", "🥵", "🥶", "😶‍🌫️", "🥴", "😵", "😵‍💫", "🤯", 
+        "🤠", "😎", "🥳", "😕", "😟", "🙁", "☹️", "😮", "😯", "😲", "😳", "🥺", "😦", 
+        "😧", "😨", "😰", "😥", "😢", "😭", "😱", "😖", "😣", "😞", "😓", "😩", "😫", 
+        "🥱", "😤", "😡", "😠", "🤬", "😈", "👿", "💀", "☠️", "💩", "🤡", "👹", "👺", 
+        "👻", "👽", "👾", "🤖", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾",
+        "👋", "🤚", "🖐", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🫰", "🤟", "🤘", 
+        "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", 
+        "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦵", "🦿", 
+        "🦶", "🖖", "👂", "🦻", "👃", "👀", "👁️", "👅", "👄", "🫦", "🧠", "🫀", "🫁",
+        "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🦝", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", 
+        "🐷", "🐽", "🐸", "🐵", "🦍", "🦧", "🦮", "🐕", "🐩", "🐈", "🐈‍⬛", "🐅", "🐆", 
+        "🦓", "🦄", "🦌", "🐂", "🐄", "🐖", "🦏", "🦛", "🐪", "🐫", "🦙", "🦒", "🐘", 
+        "🦏", "🦣", "🐁", "🐀", "🦫", "🦔", "🐇", "🦨", "🦡", "🦇", "🐓", "🦉", "🦅", 
+        "🦆", "🦢", "🦜", "🦩", "🐥", "🐣", "🐤", "🦋", "🐌", "🐛", "🐜", "🦗", "🐞", 
+        "🦂", "🦟", "🦠", "🌻", "🌼", "🌸", "💐", "🏵️", "🌹", "🥀", "🪷", "🪹", "🌲", 
+        "🌳", "🌴", "🌱", "🌿", "☘️", "🍀", "🌵", "🌾", "🌱", "🪴", "🍁", "🍂", "🍃", 
+        "🪺", "🌍", "🌎", "🌏", "🌐", "🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🥭", 
+        "🍎", "🍏", "🍒", "🍓", "🫐", "🥝", "🍅", "🫒", "🥥", "🥑", "🍆", "🥔", "🥕", 
+        "🌽", "🌶️", "🫑", "🥒", "🥬", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞", "🥐", "🥖", 
+        "🫓", "🥨", "🥯", "🥞", "🧇", "🧀", "🍖", "🍗", "🥩", "🥓", "🍔", "🍟", "🍕", 
+        "🌭", "🥪", "🌮", "🌯", "🫔", "🥙", "🧆", "🥚", "🍳", "🥘", "🍲", "🫕", "🥣", 
+        "🥗", "🍿", "🧈", "🍱", "🍘", "🍙", "🍚", "🍛", "🍜", "🍝", "🍠", "🍢", "🍣", 
+        "🍤", "🍥", "🦪", "🍡", "🧁", "🍰", "🎂", "🍨", "🍧", "🍦", "🍩", "🍪", "🍫", 
+        "🍬", "🍭", "🍮", "🍯", "🍼", "🥛", "☕", "🍵", "🍶", "🍾", "🍷", "🍸", "🍹", 
+        "🍺", "🍻", "🥂", "🥃", "🥤", "🧋", "🧃", "🧉", "🧊", "🌍", "🌎", "🌏", "🌐", 
+        "🗺️", "🗾", "🧭", "🏔️", "⛰️", "🏕️", "🏖️", "🏜️", "🏝️", "🏞️", "🏟️", "🏛️", "🏗️", 
+        "🏘️", "🏙️", "🏚️", "🏠", "🏡", "🏢", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "🏪", 
+        "🏫", "🏬", "🏭", "🏯", "🏰", "🗼", "🗽", "⛪", "🕌", "🛕", "🕍", "⛩️", "🕋", 
+        "⛲", "⛺", "🏠", "🌅", "🌄", "🌇", "🌆", "🌉", "🌌", "🌠", "🎆", "🎇", "🧨", 
+        "✨", "✴️", "🏙️", "🏞️", "🌋", "🌁", "🛤️", "🛣️", "🛫", "🛬", "🚂", "🛤️", "🚄", 
+        "🚅", "🚆", "🚇", "🚈", "🚉", "🚊", "🚝", "🚞", "🚋", "🚌", "🚍", "🚎", "🚐", 
+        "🚑", "🚒", "🚓", "🚔", "🚕", "🚖", "🚗", "🚘", "🚙", "🛻", "🚚", "🚛", "🚜", 
+        "🏎️", "🏍️", "🛵", "🦽", "🦼", "🛺", "🚲", "🛴", "🛹", "🛼", "⌚", "📱", "📲", 
+        "💻", "🖥️", "🖨️", "🖱️", "🖲️", "🕹️", "🗜️", "🧮", "💾", "💿", "📀", "🧲", "📡", 
+        "🔋", "🔌", "💡", "🔦", "🕯️", "💰", "💳", "💎", "⚖️", "🔧", "🔨", "⚒️", "🛠️", 
+        "⛏️", "🔩", "⚙️", "🗜️", "🔫", "💣", "🧨", "🪓", "🧱", "🛡️", "🦯", "🧲", "🪚", 
+        "🪛", "🪒", "🔑", "🗝️", "🚪", "🪑", "🛏️", "🛋️", "🚿", "🛁", "🚽", "🪠", "🧻", 
+        "🧼", "🧽", "🪣", "🧴", "🛒", "🚬", "⚰️", "⚱️", "🗿", "🪆", "🪐", "🛰️", "🛸", 
+        "🛎️", "🚪", "🛌", "🛀", "🚿", "🛋️"
+    ];
+    return randomEmoji = emojiArray[Math.floor(Math.random() * emojiArray.length)];
 }
 
 // ~~~~~ COSMETIC ~~~~~
@@ -567,7 +612,7 @@ function createTableOfContents(pageBasicData) {
 
     // console.log(tableOfContentsArray);
     tableOfContentsArray.forEach(element => {
-        tableOfContentsString += `<li class='toc-item'><a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
+        tableOfContentsString += `<li class='toc-item'>${randomEmoji()}<a href='${element.referenceUrl}'>${element.referenceText}</a></li>\n`
     });
     return tableOfContentsString;
     // return `${tableOfContentsHeader}${tableOfContentsStyle}${tableOfContentsBody}${tableOfContentsString}${tableOfContentsFooter}`
@@ -891,6 +936,9 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
         </div>
     </div>
     <div class="main-content" id="mainContent">
+        <h1>
+            ${pageBasicData.legislationTitle} 📜
+        </h1>
         ${createContentBody(legislationContent, legislationDefinitions)}
     </div>
         <script>
