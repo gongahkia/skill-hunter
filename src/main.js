@@ -977,6 +977,29 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
     `
 }
 
+function revertPage(backupTitle, backupContent) {
+    /*
+    revert the content of the webpage based on
+    specified data
+    */
+    document.title = backupTitle || "",
+    document.body.innerHTML = backupContent || "";
+}
+
+function simplifyContent(pageData, overallHTMLContent) {
+    /*
+    simplifies the content of the webpage based on
+    specified data
+    */
+    const backupTitle = document.title;
+    const backupContent = document.body.innerHTML;
+    document.innerHTML = overallHTMLContent;
+    return {
+        "title": backupTitle,
+        "content": backupContent
+    }
+}
+
 // ~~~~~ UNIVERSAL EXECUTED CODE ~~~~~
 
 const generalPageBasicData = getPageBasicData()
@@ -1010,6 +1033,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const overallHTMLContent = createOverallHTMLContent(pageBasicData, legislationContent, legislationDefinitions)
         console.log(overallHTMLContent)
+
+        if (request.toggle) {
+            console.log("toggling page...");
+            if (simplifedState) {
+                console.log("reverting page...");
+                revertPage(backupTitle, backupContent);
+                simplifedState = false;
+            } else {
+                console.log("simplifying page...")
+                backupHTMLContentMap = simplifyPage(overallHTMLContent);
+                backupTitle = backupHTMLContentMap.title;
+                backupContent = backupHTMLContentMap.content;
+                simplifedState = true;
+            }
+        } else {}
 
         sendResponse({ status: "success" });
 
