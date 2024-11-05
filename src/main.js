@@ -1,32 +1,33 @@
 /*
 FUA 
-    * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
-    when fedback and displayed
-
-    * figure out if i can make the hovering definition prettier like the previous definitions in the version 1 of this project
-
     * add credits made by gabriel ong and my github at the top right of the page
     * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
-    * add code that will include the respective header of the desired section in the anchor tag of each sectionHeader to make it clickable
+    * figure out if i can make the hovering definition prettier like the previous definitions in the version 1 of this project
+        * add additional URL links so those words can be clicked to be brought to the definition section 
 
-    * add a function that generates HTML based on the template finalPrototype.html in the same directory as this one
-        * refine the generated HTML first here
+    * add code that handles conversion of newline characters and other non-html specific characters to html so that the text is rendered cleanly
+    when fedback and displayed
+
 
     * add further support to seperate and store part numbers and part headers in the created json
-    * add additional URL links so those words can be clicked to be brought to the definition section 
 
     * integrate further functionality such as 
         * statutes referenced within other statutes can be linked and their respective URLs will be clickable as well
         * mention of a given limb or section dependent on other sections will also be clickable, can be brought to that dependent section immediately
         * allow statutes and their composite sections and subsections to fold accordingly
+            * implement with the collapsible class with code from https://www.w3schools.com/howto/howto_js_collapsible.asp
  
     * allow user customisation via specification of additional configurations within a local .json file users can place in the same directory as the manifest.json
+        * add a ui button on the pop-up page to tweak settings
+            * add functionality and link to the
+                * change font
+                * change colorscheme
+                * functions i've implemented above
         * add serialising and deserialising functions to read this config.json
         * add documentation for what can be customised in the README.md
 
         * rewrite the frontend to be pretty and minimal with nice smooth animations 
-            * use a lot of emojis to keep the UI design nice and modern
             * reference idea --> https://cdn.prod.website-files.com/62dabe5dc266a398da4d2629/62fcf2e4a604ce2bd71b7011_all-activities.png   
 
     * consider adding a local notepad that users can use to save specific statutes or an AI integration that explains what a given statute means to users
