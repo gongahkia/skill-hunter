@@ -763,11 +763,12 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
         "title": `Skill Hunter: ${pageBasicData.legislationTitle}</title>`,
         "style": `
             body {
-                display: flex;
-                margin: 0;
-                background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                min-height: 100vh;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                background: linear-gradient(135deg, #e9e4ff 0%, #f3e7ff 100%);
             }
 
             .toc-container {
@@ -870,51 +871,41 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
             }
 
             .statuteTerm-container {
+                position: relative;                 
                 font-weight: bold; 
-                cursor: pointer; 
-                color: #ff4b6e; 
-                position: relative; 
+                display: inline-block;
+                color: #ff4b6e;        
             }
 
             .statuteDefinition-content {
-                display: none; /* Initially hidden */
-                background-color: rgba(51, 51, 51, 1); 
-                color: #fff; 
-                border: 1px solid #ff4b6e; 
-                padding: 10px;
-                z-index: 2; 
+                position: absolute; 
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #333333;
+                color: #fff;
+                padding: 10px;             
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                max-width: 850px;
+                min-width: 500px; 
+                max-height: 500px;
+                overflow-y: auto;
                 opacity: 0; 
-                visibility: hidden; 
+                visibility: hidden;     
                 transition: opacity 0.3s, visibility 0.3s; 
                 white-space: pre-wrap; 
                 width: auto; 
-                overflow-y: auto;
-                max-width: 850px;
-                min-width: 500px; 
-                max-height: 500px; 
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-                position: absolute; 
-                top: 100%; 
-                left: 50%; 
-                transform: translateX(-50%); 
+                z-index: 2; 
+            }
+
+            .statuteTerm-container:hover .statuteDefinition-content {
+                opacity: 1;
+                visibility: visible; 
             }
 
             .statuteTerm-container:hover {
                 color: #e43e5c; 
-            }
-
-            .statuteTerm-container:hover .statuteDefinition-content {
-                background: rgba(255, 255, 255, 0.95); 
-                display: block; 
-                opacity: 1;
-                visibility: visible; 
-            }
-
-            .statuteTerm-container:focus-within .statuteDefinition-content {
-                display: block; 
-                opacity: 1;
-                visibility: visible; 
             }
         `,
         "content": `
