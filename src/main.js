@@ -5,6 +5,8 @@ FUA
     * add credits made by gabriel ong and my github at the top right of the page
     * consider adding a general link to FAQs per here --> https://sso.agc.gov.sg/Help/FAQ
 
+    * ignore the script tag issue for now
+
     * figure out if i can make the hovering definition prettier like the previous definitions in the version 1 of this project
         * add additional URL links so those words can be clicked to be brought to the definition section 
 
@@ -950,7 +952,8 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
         </h1>
         ${createContentBody(legislationContent, legislationDefinitions)}
     </div>
-        <script>
+        `,
+        "script": `
             const toggleButton = document.querySelector('.toggle-toc');
             const tocContainer = document.getElementById('toc');
             const mainContent = document.getElementById('mainContent');
@@ -965,12 +968,12 @@ function createOverallHTMLContent(pageBasicData, legislationContent, legislation
                     toggleButton.style.left = '20px'; 
                 }
             });
-        </script>
         `
     };
 }
 
 function revertPage(backupTitle, backupStyle, backupContent) {
+// function revertPage(backupTitle, backupStyle, backupContent, backupScriptArray) {
     /*
     revert the content of the webpage based on
     specified data
@@ -978,6 +981,13 @@ function revertPage(backupTitle, backupStyle, backupContent) {
     document.title = backupTitle || "",
     document.querySelector("style").innerHTML = backupStyle;
     document.body.innerHTML = backupContent || "";
+    // document.querySelectorAll("script").forEach(script => script.remove()); 
+    // backupScriptArray.forEach(scriptContent => {
+    //     const newScriptEl = document.createElement("script");
+    //     newScriptEl.innerHTML = scriptContent; 
+    //     document.body.appendChild(newScriptEl); 
+    // });
+    return null
 }
 
 function simplifyPage(overallHTMLContent) {
@@ -990,6 +1000,7 @@ function simplifyPage(overallHTMLContent) {
 
     const backupTitle = document.title;
     const backupContent = document.body.innerHTML;
+    // const backupScriptArray = Array.from(document.querySelectorAll("script")).map(script => script.innerHTML);
     let backupStyle = null;
 
     // ~ replacing new values ~
@@ -997,6 +1008,7 @@ function simplifyPage(overallHTMLContent) {
     const newTitle = overallHTMLContent.title
     const newStyle = overallHTMLContent.style
     const newContent = overallHTMLContent.content
+    // const newScript = overallHTMLContent.script
 
     document.title = newTitle
 
@@ -1012,10 +1024,16 @@ function simplifyPage(overallHTMLContent) {
 
     document.body.innerHTML = newContent;
 
+    // document.querySelectorAll("script").forEach(script => script.remove());
+    // const newScriptEl = document.createElement("script");
+    // newScriptEl.innerHTML = newScript; 
+    // document.body.appendChild(newScriptEl); 
+
     return {
         "title": backupTitle,
         "style": backupStyle,
         "content": backupContent,
+        // "script": backupScriptArray
     }
 }
 
@@ -1059,6 +1077,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (simplifedState) {
                 console.log("reverting page...");
                 revertPage(backupTitle, backupStyle, backupContent);
+                // revertPage(backupTitle, backupStyle, backupContent, backupScript);
                 simplifedState = false;
             } else {
                 console.log("simplifying page...")
@@ -1066,6 +1085,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 backupTitle = backupHTMLContentMap.title;
                 backupStyle = backupHTMLContentMap.style;
                 backupContent = backupHTMLContentMap.content;
+                // backupScript = backupHTMLContentMap.script;
                 simplifedState = true;
             }
         } else {}
