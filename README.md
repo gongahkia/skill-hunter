@@ -1,4 +1,8 @@
-![Static Badge](https://img.shields.io/badge/judgeman_1.0-passing-green)
+[![](https://img.shields.io/badge/judgeman_1.0-deprecated-red)](https://github.com/gongahkia/judgeman/releases/tag/1.0) [![](https://img.shields.io/badge/judgeman_2.0-passing-green)](https://github.com/gongahkia/judgeman/releases/tag/2.0)
+
+> ![IMPORTANT]  
+> This project is being reworked from scratch right now.  
+> \~ Gabriel  
 
 # Judgeman
 
