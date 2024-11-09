@@ -8,6 +8,7 @@ compile:
 
 config:.pre-commit-config.yaml
 	@echo "installing precommit hooks..."
+	sudo apt install maven
 	pip install pre-commit
 	pre-commit install
 	pre-commit autoupdate
