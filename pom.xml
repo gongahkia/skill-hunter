@@ -7,6 +7,12 @@
     <artifactId>casescraper</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <!-- Set Java version to 14 or higher to support switch expressions -->
+        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.target>14</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
@@ -22,8 +28,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>11</source> 
-                    <target>11</target> 
+                    <source>14</source> 
+                    <target>14</target> 
                 </configuration>
             </plugin>
             <plugin>
@@ -31,7 +37,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>CaseScraper</mainClass> 
+                    <mainClass>com.example.CaseScraper</mainClass>
                 </configuration>
             </plugin>
         </plugins>

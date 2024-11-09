@@ -1,3 +1,5 @@
+package com.example;
+
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.WaitUntilState;
 import java.util.*;
@@ -25,14 +27,12 @@ public class CaseScraper {
             CaseDetails caseDetails = new CaseDetails();
             
             // ----- EXTRACTING CASE TITLE -----
-
             Locator caseTitleEl = page.locator(".caseTitle");
             if (caseTitleEl.count() > 0) {
                 caseDetails.caseTitle = caseTitleEl.textContent().trim();
             }
 
             // ----- EXTRACTING CASE SUMMARY DATA -----
-
             Locator infoTable = page.locator("#info-table");
             for (int i = 0; i < infoTable.locator("tr").count(); i++) {
                 Locator rowCells = infoTable.locator("tr").nth(i).locator("td");
@@ -50,7 +50,6 @@ public class CaseScraper {
             }
 
             // ----- EXTRACTING CASE LEGAL ISSUES -----
-
             Locator legalIssues = page.locator("div.txt-body");
             if (legalIssues.count() > 0) {
                 for (Locator issue : legalIssues.locator("*").all()) {
@@ -61,21 +60,21 @@ public class CaseScraper {
             }
 
             // ----- EXTRACTING CASE BODY CONTENT ------
-
             Locator paragraphs = page.locator("p");
             String sectionName = "";
             List<String> buffer = new ArrayList<>();
 
             for (Locator paragraph : paragraphs.all()) {
                 String paragraphText = paragraph.textContent().trim();
-                
-                if (paragraph.hasClass("Judg-Heading-1")) {
+                String className = paragraph.evaluate("element => element.className");
+
+                if (className.contains("Judg-Heading-1")) {
                     if (!sectionName.isEmpty()) {
                         caseDetails.caseBody.put(sectionName, new ArrayList<>(buffer));
                         buffer.clear();
                     }
                     sectionName = paragraphText;
-                } else if (paragraph.hasClass("Judg-1") && paragraphText.matches("^\\d.*")) {
+                } else if (className.contains("Judg-1") && paragraphText.matches("^\\d.*")) {
                     buffer.add(paragraphText);
                 }
             }
@@ -84,7 +83,6 @@ public class CaseScraper {
             }
 
             // ----- FOR DEBUGGING -----
-
             System.out.println("Case Title: " + caseDetails.caseTitle);
             System.out.println("Case Number: " + caseDetails.caseNumber);
             System.out.println("Case Date: " + caseDetails.caseDate);

@@ -1,5 +1,9 @@
 all:compile
 
+run:
+	@echo "executing compiled file..."
+	java src.CaseScraper
+
 compile: 
 	@echo "compiling java project..."
 	mvn dependency:resolve
