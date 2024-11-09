@@ -27,6 +27,8 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ![](./asset/screenshots/skill-hunter-screenshot-2.png)
 
+## [Presentation](./asset/presentation/class_part.pdf)
+
 ## Installation
 
 ### CLI
