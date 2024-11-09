@@ -6,12 +6,13 @@ run:
 
 compile: 
 	@echo "compiling java project..."
-	gradle build
+	mvn clean
+	mvn install
 
 config:.pre-commit-config.yaml
 	@echo "installing precommit hooks..."
-	sudo apt install gradle
-	gradle -v
+	sudo apt install maven
+	maven -v
 	pip install pre-commit
 	pre-commit install
 	pre-commit autoupdate

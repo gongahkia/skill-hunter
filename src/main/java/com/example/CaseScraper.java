@@ -66,7 +66,7 @@ public class CaseScraper {
 
             for (Locator paragraph : paragraphs.all()) {
                 String paragraphText = paragraph.textContent().trim();
-                String className = paragraph.evaluate("element => element.className");
+                String className = (String) paragraph.evaluate("element => element.className");
 
                 if (className.contains("Judg-Heading-1")) {
                     if (!sectionName.isEmpty()) {
