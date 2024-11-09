@@ -1,4 +1,10 @@
-all:config
+all:compile
+
+compile: 
+	@echo "compiling java project..."
+	mvn dependency:resolve
+	mvn clean compile
+	mvn exec:java -Dexec.mainClass="CaseScraper"
 
 config:.pre-commit-config.yaml
 	@echo "installing precommit hooks..."

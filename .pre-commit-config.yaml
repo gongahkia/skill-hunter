@@ -10,4 +10,4 @@ repos:
     hooks:
       - id: prettier
         args: ["--write", "."]
-        types: [javascript, json, html, css]
+        types: [javascript, java, json, html, css]
