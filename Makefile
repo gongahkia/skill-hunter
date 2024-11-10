@@ -11,9 +11,11 @@ compile:
 
 config:.pre-commit-config.yaml
 	@echo "installing precommit hooks..."
-	sudo apt install maven
-	maven -v
 	pip install pre-commit
 	pre-commit install
 	pre-commit autoupdate
 	pre-commit run --all-files
+	@echo "installing maven and playwright project..."
+	sudo apt install maven
+	mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install"
+	maven -v
