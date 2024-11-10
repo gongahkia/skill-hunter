@@ -1,0 +1,16 @@
+[package]
+name = "Judgeman"
+version = "0.1.0"
+edition = "2021"
+
+authors = ["Gabriel Ong", "angryapplegravy@gmail.com"]
+description = "Rust webscraper and app"
+license = "MIT"
+
+[dependencies]
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+scraper = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+openssl = { version = "0.10", features = ["vendored"] }
