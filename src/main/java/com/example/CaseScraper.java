@@ -22,7 +22,7 @@ public class CaseScraper {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             BrowserContext context = browser.newContext();
             Page page = context.newPage();
-            String target_url = "https://www.elitigation.sg/gd/s/2021_SGHC_101";
+            String target_url = "https://www.elitigation.sg/gd/s/2009_SGCA_3";
             page.navigate(target_url, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
 
             CaseDetails caseDetails = new CaseDetails();
