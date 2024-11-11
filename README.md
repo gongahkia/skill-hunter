@@ -40,6 +40,8 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 
 ## Installation
 
+Build `Skill Hunter` locally.
+
 ### CLI
 
 ```console
