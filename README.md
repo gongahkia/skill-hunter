@@ -20,8 +20,17 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 * BLUF, offence sections and their limbs are laid bare
 * Important terms are defined in place
-* Browser extension with tiny source code binary
-* Supported on Firefox and Chrome
+* Browser extension with tiny source code binary runnable on most machines
+
+## Supported browsers
+
+Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+
+| Browser | Status | Link |
+| :--- | :--- | :--- | 
+| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
 
 ## Screenshot
 
