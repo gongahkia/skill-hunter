@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <h2>Tagged Cells</h2>
+  <div id="tagContainer"></div>
+
+  <script>
+
+    function displayTags(data) {
+      const container = document.getElementById('tagContainer');
+      container.innerHTML = '';
+
+      const tags = data.tags;
+      const colors = data.colors;
+      console.log(tags);
+
+      for (const [prefix, cells] of Object.entries(tags)) {
+        if (cells.length > 0) {
+          const tagInfo = document.createElement('div');
+          tagInfo.innerHTML = `<strong style="color:${colors[prefix]}">${prefix}</strong>: ${cells.join(', ')}`;
+          container.appendChild(tagInfo);
+        }
+      }
+
+      if (container.innerHTML === '') {
+        container.innerHTML = '<p>No tagged cells found.</p>';
+      }
+    }
+
+    google.script.run.withSuccessHandler(displayTags).getTaggedCells();
+  </script>
+</body>
+</html>
