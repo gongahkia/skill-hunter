@@ -14,3 +14,4 @@
 (B) Basically if there's any area of automation that will make Owl more useful specifically for law students and lawyers @idea @future
 
 (C) See if there's anyway to make Owl's source code editor agnostic, so it can automatically detect whether the current editor is Sheets or Docs or others and then specify the given source code for scraping that would be relevant for the given editor instance @idea @future
+(C) Optimise Owl's scraping methods and see if any multithreading or more effecient chunking is possible instead of the extremly slow scraping present in each version of the extension presently @idea @future
