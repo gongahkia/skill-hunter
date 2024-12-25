@@ -4,6 +4,10 @@
 
 Watches your google editors.
 
+## Rationale
+
+> TODO add more details here later
+
 ## Usage
 
 See [instructions](./INSTRUCTIONS.md).

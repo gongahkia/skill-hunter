@@ -1,6 +1,6 @@
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('Tobimune')
+  ui.createMenu('Owl')
     .addItem('Show Tags', 'showTagsSidebar')
     .addToUi();
 }
