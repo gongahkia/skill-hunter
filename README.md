@@ -1,11 +1,15 @@
-[![](https://img.shields.io/badge/tobimune_1.0-build-orange)](https://github.com/gongahkia/tobimune/releases/tag/1.0)
+[![](https://img.shields.io/badge/owl_1.0-build-orange)](https://github.com/gongahkia/owl/releases/tag/1.0)
 
-# `Tobimune`
+# `Owl` 🦉
 
-Protect your Linkedin.
+Watches your google editors.
+
+## Usage
+
+See [instructions](./INSTRUCTIONS.md).
 
 ## References
 
-The name `Tobimune` is in reference to the fifth [enchanted blade](https://kagurabachi.fandom.com/wiki/Enchanted_Blade) forged by [Kunishige Rokuhira](https://kagurabachi.fandom.com/wiki/Kunishige_Rokuhira) (六平国重) and contracted to the sword bearer [Seiichi Samura](https://kagurabachi.fandom.com/wiki/Seiichi_Samura) (座村清市) during the [Seitei War](https://kagurabachi.fandom.com/wiki/Seitei_War). It then reappeared during the [Sword Bearer Assassination arc](https://kagurabachi.fandom.com/wiki/Sword_Bearer_Assassination_Arc) of the manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
+The name `Owl` is in reference to the [second technique](https://kagurabachi.fandom.com/wiki/Seiichi_Samura#Techniques) of [Tobimune](https://kagurabachi.fandom.com/wiki/Enchanted_Blade#Tobimune) (飛宗), the [enchanted blade](https://kagurabachi.fandom.com/wiki/Enchanted_Blade) wielded by the contracted sword bearer [Seiichi Samura](https://kagurabachi.fandom.com/wiki/Seiichi_Samura) (座村清市) during the [Seitei War](https://kagurabachi.fandom.com/wiki/Seitei_War). [Owl](https://kagurabachi.fandom.com/wiki/Seiichi_Samura#Techniques) first appears during the [Sword Bearer Assassination arc](https://kagurabachi.fandom.com/wiki/Sword_Bearer_Assassination_Arc) of the manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
 
-![](https://preview.redd.it/what-do-you-think-tobimunes-powers-are-based-on-the-little-v0-v1yw0y56bxyd1.jpeg?width=640&crop=smart&auto=webp&s=5862b9adfe84385e4eaccb19be1822f1dab011b9)
+![](./asset/logo/owl.png)
