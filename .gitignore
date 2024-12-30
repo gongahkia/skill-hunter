@@ -1,6 +1,1 @@
-myenv
-__pycache__
-node_modules
-dist
-*.zip
-*.xpi
+todo.txt
