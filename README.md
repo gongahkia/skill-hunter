@@ -5,6 +5,8 @@
 
 Watches your google editors.
 
+A highly customisable, extensible extension that monitors, organises and collates tags on your google editors.
+
 ## Rationale
 
 > TODO add more details here later and an edited image perhaps
@@ -13,24 +15,18 @@ Watches your google editors.
 
 ### Docs Owl
 
-![]()
-![]()
-
-> todo add more details here
+![](./asset/screenshot/docsFilled.png)
+![](./asset/screenshot/docsEmpty.png)
 
 ### Sheets Owl
 
-![]()
-![]()
-
-> TODO add more details here
+![](./asset/screenshot/sheetsFilled.png)
+![](./asset/screenshot/sheetsEmpty.png)
 
 ### Slides Owl
 
-![]()
-![]()
-
-> TODO add more details here
+![](./asset/screenshot/slidesFilled.png)
+![](./asset/screenshot/slidesEmpty.png)
 
 ## Colorschemes
 
@@ -63,17 +59,15 @@ Watches your google editors.
 
 ## Tags
 
-> TODO add images to this table
-
 The below tags are currently supported.
 
 | Tag | Purpose | Example |
 | :--- | :--- | :--- |
-| `TODO` | Task to be completed in the future | ![]() |
-| `FIXME` | Signposts areas that require explicit urgent attention  | ![]() |
-| `REV` | Signposts areas that require less urgent revision | ![]() |
-| `TEMP` | Denotes temporary placeholder text | ![]() |
-| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![]() |
+| `TODO` | Task to be completed in the future | ![](./asset/screenshot/todo.png) |
+| `FIXME` | Signposts areas that require explicit urgent attention  | ![](./asset/screenshot/fixme.png) |
+| `REV` | Signposts areas that require less urgent revision | ![](./asset/screenshot/rev.png) |
+| `TEMP` | Denotes temporary placeholder text | ![](./asset/screenshot/temp.png) |
+| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![](./asset/screenshot/ref.png) |
 
 > [!TIP]  
 > More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
@@ -84,11 +78,11 @@ For detailed installation instructions, see [`INSTRUCTIONS.md`](./INSTRUCTIONS.m
 
 ## Deployment 
 
-| Platform | Status | Link | 
+| Editor platform | Status | Link | 
 | :--- | :--- | :--- |  
-| Google Docs | ![](https://img.shields.io/badge/Status-%20Up-green) | [docs.google](https://docs.google.com) |
-| Google Sheets | ![](https://img.shields.io/badge/Status-%20Up-green) | [sheets.google](https://sheets.google.com) |
-| Google Slides | ![](https://img.shields.io/badge/Status-%20Up-green) | [slides.google](https://slides.google.com) |
+| [Google Docs](./src/docs/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [docs.google](https://docs.google.com) |
+| [Google Sheets](./src/sheets/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [sheets.google](https://sheets.google.com) |
+| [Google Slides](./src/slides/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [slides.google](https://slides.google.com) |
 | Google Workspace Marketplace | ![](https://img.shields.io/badge/Status-Pending%20Approval-yellow) | [workspace.google.com/marketplace](https://workspace.google.com/marketplace/search/) |
 
 ## Disclaimer
