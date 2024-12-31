@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/owl_1.0.0-passing-green)](https://github.com/gongahkia/owl/releases/tag/1.0)
+[![](https://img.shields.io/badge/owl_1.0.0-passing-green)](https://github.com/gongahkia/owl/releases/tag/1.0.0)
 [![](https://img.shields.io/badge/owl_2.0.0-build-orange)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
 
 > [!IMPORTANT]  
