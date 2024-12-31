@@ -12,17 +12,21 @@
     function displayTags(data) {
       const container = document.getElementById('tagContainer');
       const tags = data.tags;
+      const prefixes = data.prefixes;
+      const colors = data.colorschemeGruvbox;
       container.innerHTML = "";
+      container.style.backgroundColor = colors["BACKGROUND"];
       for (const [prefix, lines] of Object.entries(tags)) {
         if (lines.length > 0) {
           const tagInfo = document.createElement('div');
-          const prefixList = lines.map(line => `<li>${line}</li>`).join('');
-          tagInfo.innerHTML = `<strong>${prefix}:</strong><ul>${prefixList}</ul>`;
+          const prefixList = lines.map(line => `<li style="color:${colors[prefix]}">${line}</li>`).join('');
+          tagInfo.innerHTML = `<strong style="color:${colors[prefix]}">${prefix}:</strong><ul>${prefixList}</ul>`;
           container.appendChild(tagInfo);
         }
       }
       if (container.innerHTML === '') {
-        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>. 😭</br></br>Specified tags are <code>${data.prefixes.join(", ")}</code>.</p>`;
+        container.style.backgroundColor = "";
+        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>. 😭</br></br>Specified tags are <code>${prefixes.join(", ")}</code>.</p>`;
       }
     }
     google.script.run.withSuccessHandler(displayTags).getTaggedLines();

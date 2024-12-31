@@ -26,7 +26,7 @@ function getTaggedLines() {
   const text = body.getText();
   const lines = text.split('\n');
   const prefixes = ['TODO', 'FIXME', 'TEMP', 'REF', 'REV'];
-    colorschemeGruvbox = {
+  colorschemeGruvbox = {
     "BACKGROUND": "#282828",
     "TODO": "#FABD2F",
     "FIXME": "#FB4934",
