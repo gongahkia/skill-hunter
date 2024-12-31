@@ -7,7 +7,7 @@ Watches your google editors.
 
 ## Rationale
 
-> TODO add more details here later
+> TODO add more details here later and an edited image perhaps
 
 ## Screenshot
 
@@ -63,26 +63,24 @@ Watches your google editors.
 
 ## Tags
 
+> TODO add images to this table
+
 The below tags are currently supported.
 
 | Tag | Purpose | Example |
 | :--- | :--- | :--- |
-| TODO | Task to be completed in the future | ![]() |
-| FIXME | Signposts areas that require explicit urgent attention  | ![]() |
-| REV | Signposts areas that require less urgent revision | ![]() |
-| TEMP | Denotes temporary placeholder text | ![]() |
-| REF | Points to a reference, generally to more detailed documentation, resources or bibliography | ![]() |
-
-> TODO add images here
+| `TODO` | Task to be completed in the future | ![]() |
+| `FIXME` | Signposts areas that require explicit urgent attention  | ![]() |
+| `REV` | Signposts areas that require less urgent revision | ![]() |
+| `TEMP` | Denotes temporary placeholder text | ![]() |
+| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![]() |
 
 > [!TIP]  
 > More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
 
 ## Usage
 
-See [instructions](./INSTRUCTIONS.md).
-
-> TODO add more details here
+For detailed installation instructions, see [`INSTRUCTIONS.md`](./INSTRUCTIONS.md).
 
 ## Deployment 
 
