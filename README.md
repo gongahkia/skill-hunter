@@ -36,6 +36,19 @@ Watches your google editors.
 
 > TODO add more details here
 
+| Colorscheme | Example |
+| :--- | :---: |
+| Gruvbox | ![](./asset/screenshot/gruvbox.png) |
+| Everforest | ![](./asset/screenshot/everforest.png) |
+| Tokyo Night | ![](./asset/screenshot/tokyoNight.png) |
+| Atom Dark | ![](./asset/screenshot/atomDark.png) |
+| Monokai | ![](./asset/screenshot/monokai.png) |
+| Github | ![](./asset/screenshot/github.png) |
+| Ayu | ![](./asset/screenshot/ayu.png) |
+| Dracula | ![](./asset/screenshot/dracula.png) |
+| Rose Pine | ![](./asset/screenshot/rosePine.png) |
+| Spacemacs | ![](./asset/screenshot/spacemacs.png) |
+
 ## Configurations
 
 > TODO add more details here
