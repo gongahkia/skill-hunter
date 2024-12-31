@@ -63,7 +63,20 @@ Watches your google editors.
 
 ## Tags
 
-> TODO add here
+The below tags are currently supported.
+
+| Tag | Purpose | Example |
+| :--- | :--- | :--- |
+| TODO | Task to be completed in the future | ![]() |
+| FIXME | Signposts areas that require explicit urgent attention  | ![]() |
+| REV | Signposts areas that require less urgent revision | ![]() |
+| TEMP | Denotes temporary placeholder text | ![]() |
+| REF | Points to a reference, generally to more detailed documentation, resources or bibliography | ![]() |
+
+> TODO add images here
+
+> [!TIP]  
+> More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
 
 ## Usage
 
