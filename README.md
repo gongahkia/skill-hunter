@@ -5,28 +5,13 @@
 
 Watches your google editors.
 
-[Owl](https://github.com/gongahkia/owl) is a highly customisable, extensible extension that monitors, collates and organises tags on your google editors.
+[Owl](https://github.com/gongahkia/owl) is a highly [customisable](#colorschemes), [extensible](#configurations) extension that monitors, collates and organises [your tags](#tags) on your google editors.
 
 It works for Google [docs](#docs-owl), [sheets](#sheets-owl) and [slides](#slides-owl).
 
 ## Rationale
 
 > TODO add more details here later and an edited meme image with a mroe serious reationale perhaps
-
-## Tags
-
-The below tags are currently supported.
-
-| Tag | Purpose | Example |
-| :--- | :--- | :--- |
-| `TODO` | Task to be completed in the future | ![](./asset/screenshot/todo.png) |
-| `FIXME` | Signposts areas that require explicit urgent attention  | ![](./asset/screenshot/fixme.png) |
-| `REV` | Signposts areas that require less urgent revision | ![](./asset/screenshot/rev.png) |
-| `TEMP` | Denotes temporary placeholder text | ![](./asset/screenshot/temp.png) |
-| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![](./asset/screenshot/ref.png) |
-
-> [!TIP]  
-> More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
 
 ## Screenshot
 
@@ -44,6 +29,21 @@ The below tags are currently supported.
 
 ![](./asset/screenshot/slidesFilled.png)
 ![](./asset/screenshot/slidesEmpty.png)
+
+## Tags
+
+The below tags are currently supported.
+
+| Tag | Purpose | Example |
+| :--- | :--- | :--- |
+| `TODO` | Task to be completed in the future | ![](./asset/screenshot/todo.png) |
+| `FIXME` | Signposts areas that require explicit urgent attention  | ![](./asset/screenshot/fixme.png) |
+| `REV` | Signposts areas that require less urgent revision | ![](./asset/screenshot/rev.png) |
+| `TEMP` | Denotes temporary placeholder text | ![](./asset/screenshot/temp.png) |
+| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![](./asset/screenshot/ref.png) |
+
+> [!TIP]  
+> More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
 
 ## Colorschemes
 
