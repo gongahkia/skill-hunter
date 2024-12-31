@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <h1><code>📍 Tags</code></h1>
+  <div id="tagContainer">
+    <p><b><i>Owl is searching for your tags</i></b> 🔍...</p>
+  </div>
+  <script>
+    function displayTags(data) {
+      const container = document.getElementById('tagContainer');
+      const tags = data.tags;
+      container.innerHTML = "";
+      for (const [prefix, lines] of Object.entries(tags)) {
+        if (lines.length > 0) {
+          const tagInfo = document.createElement('div');
+          const prefixList = lines.map(line => `<li>${line}</li>`).join('');
+          tagInfo.innerHTML = `<strong>${prefix}:</strong><ul>${prefixList}</ul>`;
+          container.appendChild(tagInfo);
+        }
+      }
+      if (container.innerHTML === '') {
+        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>. 😭</br></br>Specified tags are <code>${data.prefixes.join(", ")}</code>.</p>`;
+      }
+    }
+    google.script.run.withSuccessHandler(displayTags).getTaggedLines();
+  </script>
+</body>
+</html>

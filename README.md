@@ -8,18 +8,36 @@ Watches your google editors.
 
 > TODO add more details here later
 
+## Screenshot
+
+> TODO add more details here
+
+## Colorschemes
+
+> TODO add more details here
+
+## Configurations
+
+> TODO add more details here
+
 ## Usage
 
 See [instructions](./INSTRUCTIONS.md).
+
+> TODO add more details here
 
 ## Deployment 
 
 | Platform | Status | Link | 
 | :--- | :--- | :--- |  
-| Google Docs | ![](https://img.shields.io/badge/Status-%20Build-orange) | [docs.google](https://docs.google.com) |
-| Google Sheets | ![](https://img.shields.io/badge/Status-%20Build-orange) | [sheets.google](https://sheets.google.com) |
-| Google Slides | ![](https://img.shields.io/badge/Status-%20Build-orange) | [slides.google](https://slides.google.com) |
+| Google Docs | ![](https://img.shields.io/badge/Status-%20Up-green) | [docs.google](https://docs.google.com) |
+| Google Sheets | ![](https://img.shields.io/badge/Status-%20Up-green) | [sheets.google](https://sheets.google.com) |
+| Google Slides | ![](https://img.shields.io/badge/Status-%20Up-green) | [slides.google](https://slides.google.com) |
 | Google Workspace Marketplace | ![](https://img.shields.io/badge/Status-Pending%20Approval-yellow) | [workspace.google.com/marketplace](https://workspace.google.com/marketplace/search/) |
+
+## Disclaimer
+
+> TODO add here
 
 ## References
 
