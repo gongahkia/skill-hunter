@@ -1,5 +1,12 @@
 # Instructions
 
+[Owl](https://github.com/gongahkia/owl) reference manual.
+
+1. [Installation instructions](#installation)
+2. [Colorscheme configuration instructions](#colorscheme-configuration)
+
+## Installation
+
 [Owl](https://github.com/gongahkia/owl) extensions all begin installation the same way.
 
 1. Open [google editor suite](https://workspace.google.com/) application.
@@ -34,3 +41,30 @@
 12. Select `Allow`.
 
 ![](./asset/reference/reference-6.png)
+
+## Colorscheme configuration
+
+Personalise [Owl](https://github.com/gongahkia/owl).
+
+1. 
+
+![](./asset/reference/changeColorscheme-1.png)
+
+2. 
+
+![](./asset/reference/changeColorscheme-2.png)
+
+3. 
+
+![](./asset/reference/changeColorscheme-3.png)
+
+4. 
+5. 
+
+```js
+
+```
+
+```html
+
+```

@@ -47,6 +47,8 @@ The below tags are currently supported.
 
 ## Colorschemes
 
+Find instructions to change your colorscheme [here](#configurations).
+
 | Colorscheme | Example |
 | :--- | :---: |
 | Gruvbox | ![](./asset/screenshot/gruvbox.png) |
@@ -62,19 +64,18 @@ The below tags are currently supported.
 
 ## Configurations
 
-> TODO add more details here
+> [!NOTE]
+> Instructions have been moved.
 
-```js
-
-```
-
-```html
-
-```
+For detailed installation and configuration instructions, see [`INSTRUCTIONS.md`](./INSTRUCTIONS.md).
 
 ## Usage
 
-For detailed installation instructions, see [`INSTRUCTIONS.md`](./INSTRUCTIONS.md).
+> TODO add here
+
+```console
+
+```
 
 ## Deployment 
 
