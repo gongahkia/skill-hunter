@@ -1,4 +1,4 @@
-# ---------- SORTING FUNCTION ---------
+// ---------- SORTING FUNCTION ---------
 
 function detectCurrentEditor() {
   try {
@@ -29,11 +29,25 @@ function detectCurrentEditor() {
 
 // ----- GENERIC -----
 
-function showCredits() {
+function sheetsShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
       .setHeight(150);
   SpreadsheetApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+}
+
+function slidesShowCredits() {
+  const html = HtmlService.createHtmlOutputFromFile('Credits')
+      .setWidth(200)
+      .setHeight(150);
+  SlidesApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+}
+
+function docsShowCredits() {
+  const html = HtmlService.createHtmlOutputFromFile('Credits')
+      .setWidth(200)
+      .setHeight(150);
+  DocumentApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
 }
 
 // ----- SHEETS -----
@@ -42,7 +56,7 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('Owl')
     .addItem('Get Tags', 'sheetsShowTagsSidebar')
-    .addItem('Credits', 'showCredits')
+    .addItem('Credits', 'sheetsShowCredits')
     .addToUi();
 }
 
@@ -171,7 +185,7 @@ function onOpen() {
   const ui = DocumentApp.getUi();
   ui.createMenu('Owl')
     .addItem('Get Tags', 'docsShowTagsSidebar')
-    .addItem('Credits', 'showCredits')
+    .addItem('Credits', 'docsShowCredits')
     .addToUi();
 }
 
@@ -295,7 +309,7 @@ function onOpen() {
   const ui = SlidesApp.getUi();
   ui.createMenu('Owl')
     .addItem('Get Tags', 'slidesShowTagsSidebar')
-    .addItem('Credits', 'showCredits')
+    .addItem('Credits', 'slidesShowCredits')
     .addToUi();
 }
 
