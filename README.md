@@ -14,7 +14,17 @@ It works for Google [docs](#docs-owl), [sheets](#sheets-owl) and [slides](#slide
 
 ## Rationale
 
-> TODO add more details here later and an edited meme image with a mroe serious reationale perhaps
+Since I started taking law modules in August 2023, I've found it necessary to flag specific cases, rulings and analysis for later review, rework, or revision.
+
+Resultingly, I have more than once found myself wishing for native support for [code annotations](https://docs.github.com/en/contributing/writing-for-github-docs/annotating-code-examples) *(especially [those](https://medium.com/@wcpines/using-comment-annotations-cd06415ef71a) in the TODO, FIXME, NOTE, TBD family)* within the Google editor suite. Another close analogue would be Vim [marks](https://vim.fandom.com/wiki/Using_marks), addressed by the [ThePrimeagen](https://www.youtube.com/c/theprimeagen)'s fantastic marks manager, [Harpoon](https://github.com/ThePrimeagen/harpoon).
+
+However, the closest I could ever get to replicating that experience in Google Editors was finding with `Ctrl + F`, or commenting with `Ctrl + Alt + M`.
+
+Importantly, I needed a frictionless solution that complemented my existing notetaking workflow and did not slow me down by requiring learning a new keybind.
+
+With these considerations in mind, I created [Owl](https://github.com/gongahkia/owl).
+
+![](./asset/screenshot/rationale.png)
 
 ## Screenshot
 
