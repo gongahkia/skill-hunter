@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <h1><code>📍 Tags</code></h1>
+  <div id="tagContainer">
+    <p><b><i>Owl is searching for your tags</i></b> 🔍...</p>
+  </div>
+  <script>
+    function displayTags(data) {
+      const container = document.getElementById('tagContainer');
+      const tags = data.tags;
+      const colors = data.colorschemeGruvbox;
+      const allPrefixes = data.prefixes;
+      container.innerHTML = "";
+      container.style.backgroundColor = colors["BACKGROUND"];
+      for (const [prefix, cells] of Object.entries(tags)) {
+        if (cells.length > 0) {
+          const tagInfo = document.createElement('div');
+          const prefixList = cells.map(cell => `<li style="color:${colors[prefix]}">${cell}</li>`).join('');
+          tagInfo.innerHTML = `<strong style="color:${colors[prefix]}">${prefix}:</strong><ul>${prefixList}</ul>`;
+          container.appendChild(tagInfo);
+        }
+      }
+      if (container.innerHTML === '') {
+        container.style.backgroundColor = "";
+        container.innerHTML = `<p><b><i>Owl found no tagged cells</i></b>. 😭</br></br>Specified tags are <code>${allPrefixes.join(", ")}</code>.</p>`;
+      }
+    }
+    google.script.run.withSuccessHandler(displayTags).sheetsGetTaggedCells();
+  </script>
+</body>
+</html>

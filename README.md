@@ -10,6 +10,25 @@ Watches your google editors.
 
 ## Screenshot
 
+### Docs Owl
+
+![]()
+![]()
+
+> todo add more details here
+
+### Sheets Owl
+
+![]()
+![]()
+
+> TODO add more details here
+
+### Slides Owl
+
+![]()
+![]()
+
 > TODO add more details here
 
 ## Colorschemes
@@ -19,6 +38,18 @@ Watches your google editors.
 ## Configurations
 
 > TODO add more details here
+
+```js
+
+```
+
+```html
+
+```
+
+## Tags
+
+> TODO add here
 
 ## Usage
 

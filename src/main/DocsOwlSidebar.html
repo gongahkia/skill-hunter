@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <h1><code>📍 Tags</code></h1>
+  <div id="tagContainer">
+    <p><b><i>Owl is searching for your tags</i></b> 🔍...</p>
+  </div>
+  <script>
+    function displayTags(data) {
+      const container = document.getElementById('tagContainer');
+      const tags = data.tags;
+      const prefixes = data.prefixes;
+      const colors = data.colorschemeGruvbox;
+      container.innerHTML = "";
+      container.style.backgroundColor = colors["BACKGROUND"];
+      for (const [prefix, lines] of Object.entries(tags)) {
+        if (lines.length > 0) {
+          const tagInfo = document.createElement('div');
+          const prefixList = lines.map(line => `<li style="color:${colors[prefix]}">${line}</li>`).join('');
+          tagInfo.innerHTML = `<strong style="color:${colors[prefix]}">${prefix}:</strong><ul>${prefixList}</ul>`;
+          container.appendChild(tagInfo);
+        }
+      }
+      if (container.innerHTML === '') {
+        container.style.backgroundColor = "";
+        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>. 😭</br></br>Specified tags are <code>${prefixes.join(", ")}</code>.</p>`;
+      }
+    }
+    google.script.run.withSuccessHandler(displayTags).docsGetTaggedLines();
+  </script>
+</body>
+</html>

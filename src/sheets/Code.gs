@@ -17,7 +17,7 @@ function showTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('OwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  SpreadsheetApp.getUi().showSidebar(html.setTitle('Owl 🦉'));
+  SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl 🦉'));
 }
 
 function getTaggedCells() {

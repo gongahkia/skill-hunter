@@ -17,7 +17,7 @@ function showTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('OwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  DocumentApp.getUi().showSidebar(html.setTitle('Owl 🦉'));
+  DocumentApp.getUi().showSidebar(html.setTitle('Docs Owl 🦉'));
 }
 
 function getTaggedLines() {
