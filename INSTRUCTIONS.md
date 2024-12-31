@@ -22,23 +22,30 @@
 
 ![](./asset/reference/reference-9.png)
 
-5. `Ctrl + s` to save the project.
-6. Navigate to your google editor. 
-7. `Ctrl + r` to reload your google editor.
-8. Select `Owl` from the extensions topbar.
-9. Select `OK` to give permissions.
+5. Create a file called `Credits.html` and add the code.
+
+![](./asset/reference/reference-10.png)
+
+6. `Ctrl + s` to save the project.
+7. Navigate to your google editor. 
+8. `Ctrl + r` to reload your google editor.
+9. Select `Owl > Get Tags` from the extensions topbar.
+
+![](./asset/reference/buttons.png)
+
+10. Select `OK` to give permissions.
 
 ![](./asset/reference/reference-3.png)
 
-10. Choose a Google Account to associate with the script.
+11. Choose a Google Account to associate with the script.
 
 ![](./asset/reference/reference-4.png)
 
-11. Select `Show Advanced > Go to project_name (unsafe)`.
+12. Select `Show Advanced > Go to Untitled project (unsafe)`.
 
 ![](./asset/reference/reference-5.png)
 
-12. Select `Allow`.
+13. Select `Allow`.
 
 ![](./asset/reference/reference-6.png)
 
@@ -46,25 +53,29 @@
 
 Personalise [Owl](https://github.com/gongahkia/owl).
 
-1. 
+1. Refer to [`README.md`](./README.md#colorschemes) for supported colorschemes.
+2. Open [google editor suite](https://workspace.google.com/) application.
+3. Select `Extensions > Apps Script`.
 
 ![](./asset/reference/changeColorscheme-1.png)
 
-2. 
+4. Scroll to the bottom of `Code.gs` and replace the colorscheme identifier in the below line with your desired colorscheme.
+
+```js
+return { prefixes, tags, colorscheme<COLORSCHEME_NAME> };
+```
 
 ![](./asset/reference/changeColorscheme-2.png)
 
-3. 
+5. `Ctrl + s` to save the edited code.
+6. Replace the colorscheme identifier in the below line in `OwlSidebar.html` with your desired colorscheme.
+
+```js
+const colors = data.colorscheme<COLORSCHEME_NAME>;
+```
 
 ![](./asset/reference/changeColorscheme-3.png)
 
-4. 
-5. 
-
-```js
-
-```
-
-```html
-
-```
+7. `Ctrl + s` to save the edited code.
+8. Navigate to your google editor. 
+9. `Ctrl + r` to reload your google editor.
