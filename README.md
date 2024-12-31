@@ -1,6 +1,9 @@
 [![](https://img.shields.io/badge/owl_1.0.0-passing-green)](https://github.com/gongahkia/owl/releases/tag/1.0)
 [![](https://img.shields.io/badge/owl_2.0.0-build-orange)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
 
+> [!IMPORTANT]  
+> Please read through [this disclaimer](#disclaimer) before using [Owl](https://github.com/gongahkia/owl).  
+
 # `Owl` 🦉
 
 Watches your google editors.
@@ -64,18 +67,7 @@ Find instructions to change your colorscheme [here](#configurations).
 
 ## Configurations
 
-> [!NOTE]
-> Instructions have been moved.
-
 For detailed installation and configuration instructions, see [`INSTRUCTIONS.md`](./INSTRUCTIONS.md).
-
-## Usage
-
-> TODO add here
-
-```console
-
-```
 
 ## Deployment 
 
@@ -88,7 +80,28 @@ For detailed installation and configuration instructions, see [`INSTRUCTIONS.md`
 
 ## Disclaimer
 
-> TODO add here
+The `Owl` extension is provided "as is" and without any warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement.
+
+By using this extension, you acknowledge and agree to the following:
+
+1. **No Liability for Malfunction**: The developer of the `Owl` extension shall not be liable for any direct, indirect, incidental, special, consequential damages, or any damages whatsoever arising out of or in connection with the use of this extension. This includes but is not limited to:
+
+    * Data loss
+    * Corruption of files
+    * Interruption of service
+    * Any other issues that may arise as a result of using this extension
+
+2. **User Responsibility**: You are solely responsible for ensuring that you have adequate backups of your data and that you understand the risks associated with using this extension. 
+
+3. **Compliance with Laws**: You are responsible for ensuring compliance with all applicable laws and regulations regarding the use of this extension and any data it may process.
+
+4. **Modification and Updates**: The developer reserves the right to modify or discontinue the extension at any time without notice. The functionality may change over time, and while efforts will be made to keep it stable, no guarantees are made regarding its performance.
+
+5. **Third-Party Services**: The `Owl` extension interacts with third-party services (such as Google Docs, Sheets, and Slides). The developer is not responsible for any issues arising from these interactions or from changes in third-party services.
+
+6. **Indemnification**: You agree to indemnify and hold harmless the developer from any claims, losses, liabilities, damages, costs, or expenses (including reasonable attorney fees) arising out of your use of this extension.
+
+7. **Disclaimer changes**: This disclaimer is subject to change without notice. Please review it periodically for updates.
 
 ## References
 
