@@ -10,3 +10,9 @@ Instructions below are for those using [Vim](https://www.vim.org/) on UNIX syste
 
 1. Place [`owl.vim`](./owl.vim) at the filepath `~/.vim/pack/plugins/start/vim-owl/plugin/owl.vim`.
 2. Type `:OwlScan` to run
+
+## Screenshot
+
+![](./../../asset/screenshot/OwlVim.png)
+![](./../../asset/screenshot/OwlVimFound.png)
+![](./../../asset/screenshot/OwlVimEmpty.png)
