@@ -25,6 +25,7 @@ function! DisplayTags(tags)
     call append(0, '📍 Tags')
     if empty(a:tags)
         call append(2, 'Owl found no tagged lines. 😭')
+        nnoremap <buffer> <silent> :q<CR> :b 1<CR>
         return
     endif
     for [l:prefix, l:lines] in items(a:tags)
