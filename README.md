@@ -7,7 +7,7 @@
 
 # `Owl` 🦉
 
-Watches your google editors.
+Watches all google editors, designed for the nocturnal writer.
 
 [Owl](https://github.com/gongahkia/owl) is a highly [customisable](#colorschemes), [extensible](#configurations) extension that monitors, collates and organises [your tags](#tags) on your google editors.
 
