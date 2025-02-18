@@ -12,9 +12,25 @@
       align-items: center;
     }
     body {
-      width: 300px;
+      width: 500px; /* Increased width to accommodate the duck */
       padding: 10px;
       box-sizing: border-box;
+    }
+    .content-wrapper {
+      display: flex;
+      align-items: stretch;
+    }
+    .duck-container {
+      display: flex;
+      align-items: center;
+    }
+    .main-content {
+      width: 300px;
+    }
+    .duck-image {
+      margin-left: 50px;
+      width: 375px; 
+      height: auto;
     }
     textarea { width: 100%; margin: 10px 0; }
     #result { margin-top: 10px; font-weight: bold; }
@@ -50,28 +66,33 @@
   </style>
 </head>
 <body>
-  <div>
-    <h1>Dorso</h1>
-    <p>Fighting programmer brainrot since Feb 2025.</p>
-    <p>Made by <a href="https://github.com/gongahkia">@gongahkia</a></p>
-    <h2>
-      <span class="tooltip">Solve
-        <span class="tooltiptext">
-          <div class="flexbox-container">
-            <p>
-            The <b>dorsolateral prefrontal cortex</b> (DLPFC) is crucial for programmers as it 
-            enables logical problem-solving, working memory, cognitive flexibility, response inhibition, 
-            and emotional regulation, all essential for writing, debugging, and optimizing code.
-            </p>
-            <img src="https://www.newfrontierspsychiatry.com/wp-content/uploads/2019/09/5.jpg" width="50%" height="50%">
-          </div>
-        </span>
-      </span> this coding question to continue:
-    </h2>
-    <div id="question"></div>
-    <textarea id="solution" rows="10"></textarea>
-    <button id="submit">Submit</button>
-    <div id="result"></div>
+  <div class="content-wrapper">
+    <div class="main-content">
+      <h1>Dorso</h1>
+      <p>Fighting programmer brainrot since Feb 2025.</p>
+      <p>Made by <a href="https://github.com/gongahkia">@gongahkia</a></p>
+      <h2>
+        <span class="tooltip">Solve
+          <span class="tooltiptext">
+            <div class="flexbox-container">
+              <p>
+              The <b>dorsolateral prefrontal cortex</b> (DLPFC) is crucial for programmers as it 
+              enables logical problem-solving, working memory, cognitive flexibility, response inhibition, 
+              and emotional regulation, all essential for writing, debugging, and optimizing code.
+              </p>
+              <img src="https://www.newfrontierspsychiatry.com/wp-content/uploads/2019/09/5.jpg" width="50%" height="50%">
+            </div>
+          </span>
+        </span> this coding question to continue:
+      </h2>
+      <div id="question"></div>
+      <textarea id="solution" rows="10"></textarea>
+      <button id="submit">Submit</button>
+      <div id="result"></div>
+    </div>
+    <div align="duck-container">
+      <img src="duck.png" alt="Programmer's best friend" class="duck-image">
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
