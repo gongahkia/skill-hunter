@@ -2,7 +2,7 @@
 
 # `Dorso` 🧠
 
-Captcha but to catch braindead programmers instead of bots.
+CAPTCHA but to catch braindead programmers instead of bots.
 
 *(Credits to [Keith Tang](https://www.linkedin.com/in/keibtang/) for the above description.)*
 
