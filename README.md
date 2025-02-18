@@ -10,6 +10,12 @@
 
 > TODO add here
 
+![](./asset/reference/dorso-1.png)
+![](./asset/reference/dorso-2.png)
+![](./asset/reference/dorso-3.png)
+![](./asset/reference/dorso-4.png)
+![](./asset/reference/dorso-5.png)
+
 ## Usage
 
 ### Firefox
@@ -49,4 +55,4 @@ $ make
 
 The name `Dorso` is in reference to the [dorsolateral prefrontal cortex](https://en.wikipedia.org/wiki/Dorsolateral_prefrontal_cortex), the portion of the brain primarily responsible for solving programming problems.
 
-![](./asset/logo/think.png)
+![](./asset/logo/think.jpg)
