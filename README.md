@@ -56,6 +56,16 @@ $ make chrome
 
 ## Details
 
+### Supported browsers
+
+| Browser | Status | 
+| :--- | :--- |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
+| Google Chrome | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | 
+
+### Blacklist
+
 `Dorso` checks for web-based AI chatbot access off the following blacklist.
 
 * https://chatgpt.com/
