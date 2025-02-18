@@ -1,7 +1,7 @@
 // ----- CONST DEFINITIONS -----
 
 const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
-const resetTime = 15 * 60 * 1000;
+const RESETTIME = 15 * 60 * 1000;
 const QUESTIONS = {
   1: {
     "What data structure is LIFO (Last In First Out) and starts with an S? Capitalize your answer.": "Stack",
@@ -302,6 +302,156 @@ const QUESTIONS = {
   },
   100: {
     "What is the term for a program that manages other programs? Give the acronym. (Hint: It's 2 letters)": "OS"
+  },
+  101: {
+    "What data structure uses a hash function to compute an index?": "Hash table"
+  },
+  102: {
+    "What is the worst-case time complexity of quicksort?": "O(n^2)"
+  },
+  103: {
+    "What deployment strategy updates all instances simultaneously?": "All-at-once"
+  },
+  104: {
+    "What data structure represents hierarchical relationships?": "Tree"
+  },
+  105: {
+    "What algorithm finds the shortest path in a weighted graph? Remove the 's from the name.": "Dijkstra"
+  },
+  106: {
+    "What is the process of gradually shifting traffic to a new version?": "Canary deployment"
+  },
+  107: {
+    "Are Python lists mutable or immutable? Capitalize your answer.": "Mutable"
+  },
+  108: {
+    "What sorting algorithm has O(n log n) time complexity in all cases?": "Mergesort"
+  },
+  109: {
+    "What is the practice of frequent, automated software releases?": "Continuous deployment"
+  },
+  110: {
+    "What data structure allows fast insertion and deletion at both ends? Use the shorthand name.": "Deque"
+  },
+  111: {
+    "What algorithm is used for finding strongly connected components in a graph? Remove the 's from the name.": "Kosaraju"
+  },
+  112: {
+    "What deployment strategy keeps both old and new versions running?": "Blue-green deployment"
+  },
+  113: {
+    "What data structure is used to implement a priority queue?": "Heap"
+  },
+  114: {
+    "What is the time complexity of binary search?": "O(log n)"
+  },
+  115: {
+    "What is the practice of running multiple copies of an application?": "Horizontal scaling"
+  },
+  116: {
+    "What data structure represents a collection of disjoint sets?": "Union-find"
+  },
+  117: {
+    "What algorithm is used for topological sorting of a graph? Remove the 's from the name.": "Kahn"
+  },
+  118: {
+    "What is the process of rolling back to a previous version called?": "Rollback"
+  },
+  119: {
+    "What data structure is used to implement a trie?": "Tree"
+  },
+  120: {
+    "What is the best-case time complexity of bubble sort?": "O(n)"
+  },
+  121: {
+    "What is the practice of deploying to a subset of users first?": "Staged rollout"
+  },
+  122: {
+    "What data structure uses FIFO principle?": "Queue"
+  },
+  123: {
+    "What algorithm is used for finding the minimum spanning tree of a graph? Remove the 's from the name.": "Kruskal"
+  },
+  124: {
+    "What is the practice of deploying during low-traffic periods?": "Off-peak deployment"
+  },
+  125: {
+    "What data structure is used to implement an LRU cache?": "Hash table"
+  },
+  126: {
+    "What is the time complexity of counting sort?": "O(n+k)"
+  },
+  127: {
+    "What is the practice of deploying small, frequent updates?": "Continuous delivery"
+  },
+  128: {
+    "What data structure is used to implement a graph?": "Adjacency list"
+  },
+  129: {
+    "What algorithm is used for string pattern matching?": "KMP"
+  },
+  130: {
+    "What is the practice of deploying to multiple regions simultaneously?": "Multi-region deployment"
+  },
+  131: {
+    "What data structure is used to implement a cache with O(1) operations?": "LRU cache"
+  },
+  132: {
+    "What is the space complexity of merge sort?": "O(n)"
+  },
+  133: {
+    "What is the practice of deploying in containers?": "Containerization"
+  },
+  134: {
+    "What data structure is used to implement a suffix tree?": "Tree"
+  },
+  135: {
+    "What algorithm is used for finding the longest common subsequence?": "Dynamic programming"
+  },
+  136: {
+    "What is the practice of deploying to a copy of the production environment?": "Staging"
+  },
+  137: {
+    "What data structure is used to implement a bloom filter?": "Bit array"
+  },
+  138: {
+    "What is the time complexity of heapify operation?": "O(log n)"
+  },
+  139: {
+    "What is the practice of deploying different versions to different users?": "A/B testing"
+  },
+  140: {
+    "What data structure is used to implement a skip list?": "Linked list"
+  },
+  141: {
+    "What algorithm is used for finding the convex hull of a set of points?": "Graham scan"
+  },
+  142: {
+    "What is the practice of deploying updates without downtime?": "Zero-downtime deployment"
+  },
+  143: {
+    "What data structure is used to implement a segment tree?": "Tree"
+  },
+  144: {
+    "What is the average-case time complexity of quicksort?": "O(n log n)"
+  },
+  145: {
+    "What is the practice of deploying to a subset of servers first?": "Rolling deployment"
+  },
+  146: {
+    "What data structure is used to implement a disjoint set?": "Tree"
+  },
+  147: {
+    "What algorithm is used for finding the shortest path in a DAG?": "Topological sort"
+  },
+  148: {
+    "What is the practice of deploying in isolated environments?": "Sandboxing"
+  },
+  149: {
+    "What data structure is used to implement a B-tree?": "Tree"
+  },
+  150: {
+    "What is the time complexity of radix sort?": "O(d(n+k))"
   }
 };
 
@@ -312,7 +462,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     if (LLM_REGEX.test(details.url)) {
       chrome.storage.local.get(['lastSolvedTime'], function(result) {
         const now = Date.now();
-        if (!result.lastSolvedTime || now - result.lastSolvedTime > resetTime) {
+        if (!result.lastSolvedTime || now - result.lastSolvedTime > RESETTIME) {
           chrome.storage.local.set({originalUrl: details.url}, function() {
             chrome.tabs.update(details.tabId, {url: chrome.runtime.getURL("popup.html")});
           });
