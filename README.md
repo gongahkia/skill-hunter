@@ -16,13 +16,10 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 
 ## Screenshot
 
-> TODO add here
-
-![](./asset/reference/dorso-1.png)
-![](./asset/reference/dorso-2.png)
-![](./asset/reference/dorso-3.png)
-![](./asset/reference/dorso-4.png)
-![](./asset/reference/dorso-5.png)
+![](./asset/reference/1.png)
+![](./asset/reference/2.png)
+![](./asset/reference/3.png)
+![](./asset/reference/4.png)
 
 ## Usage
 
