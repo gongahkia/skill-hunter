@@ -1,6 +1,13 @@
-let currentQuestion, currentQuestionId;
+let currentQuestion, currentQuestionId, originalUrl;
+
+const successMessage = "Correct! You can now access the LLM for the next 15 minutes. Redirecting you now.";
+const failureMessage = "Incorrect. Please try again. Reload the page to get a different question.";
 
 document.addEventListener('DOMContentLoaded', function() {
+  chrome.storage.local.get(['originalUrl'], function(result) {
+    originalUrl = result.originalUrl;
+  });
+
   chrome.runtime.sendMessage({action: "getRandomQuestion"}, function(response) {
     currentQuestion = response.question;
     currentQuestionId = response.id;
@@ -16,12 +23,16 @@ document.addEventListener('DOMContentLoaded', function() {
       id: currentQuestionId
     }, function(response) {
       if (response.isCorrect) {
-        document.getElementById('result').textContent = "Correct! You can now access the LLM.";
+        document.getElementById('result').textContent = successMessage;
         chrome.storage.local.set({lastSolvedTime: Date.now()}, function() {
-          setTimeout(() => window.close(), 2000);
+          setTimeout(() => {
+            chrome.tabs.update({url: originalUrl}, function() {
+              window.close();
+            });
+          }, 2000);
         });
       } else {
-        document.getElementById('result').textContent = "Incorrect. Please try again.";
+        document.getElementById('result').textContent = failureMessage;
       }
     });
   });

@@ -1,5 +1,7 @@
-const LLM_REGEX = /chat\.openai\.com|bard\.google\.com/; // Add more LLM URLs as needed
+// ----- CONST DEFINTIONS -----
 
+const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
+const resetTime = 15 * 60 * 1000;
 const QUESTIONS = {
   1: {
     "Write a function to reverse a string": "function reverseString(str) { return str.split('').reverse().join(''); }"
@@ -9,23 +11,28 @@ const QUESTIONS = {
   },
   3: {
     "Write a function to find the maximum element in an array": "function findMax(arr) { return Math.max(...arr); }"
+  },
+  4: {
+    "Test question": "4"
   }
-  // Add more questions as needed
 };
 
-chrome.webRequest.onBeforeRequest.addListener(
+// ----- EVENT LISTENER FUNCTIONS -----
+
+chrome.webNavigation.onBeforeNavigate.addListener(
   function(details) {
     if (LLM_REGEX.test(details.url)) {
       chrome.storage.local.get(['lastSolvedTime'], function(result) {
         const now = Date.now();
-        if (!result.lastSolvedTime || now - result.lastSolvedTime > 24 * 60 * 60 * 1000) {
-          return {redirectUrl: chrome.runtime.getURL("popup.html")};
+        if (!result.lastSolvedTime || now - result.lastSolvedTime > resetTime) {
+          chrome.storage.local.set({originalUrl: details.url}, function() {
+            chrome.tabs.update(details.tabId, {url: chrome.runtime.getURL("popup.html")});
+          });
         }
       });
     }
   },
-  {urls: ["<all_urls>"]},
-  ["blocking"]
+  {url: [{urlMatches: LLM_REGEX.source}]}
 );
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {

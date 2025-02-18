@@ -28,7 +28,7 @@ $ cd dorso
 $ make
 ```
   
-2. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
+2. Copy and paste this link in the search bar *`about:debugging#/runtime/this-firefox`*.
 3. Click *load temporary add-on*.
 4. Open the `dorso` repo, select `manifest.json`.
 5. Open any LLM. 
@@ -44,7 +44,7 @@ $ cd dorso
 $ make
 ```
 
-2. Copy and paste this link in the search bar *chrome://extensions/*.
+2. Copy and paste this link in the search bar *`chrome://extensions/`*.
 3. Toggle *Developer mode* on.
 4. Click *load unpacked*.
 5. Open the `dorso` repo, click *select*.
