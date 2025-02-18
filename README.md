@@ -2,6 +2,10 @@
 
 # `Dorso` 🧠
 
+Captcha but to catch braindead programmers instead of bots.
+
+*(Credits to [Keith Tang](https://www.linkedin.com/in/keibtang/) for the above description.)*
+
 ## Rationale
 
 The software development experience in 2025 involves reaching for the closest AI chatbot available, then battling the urge to [punt your laptop across the room](https://media1.tenor.com/m/nJW6x9jzp1AAAAAC/mob-psycho100-mob-psycho.gif) when the chatbot can't understand your poorly worded prompt.
