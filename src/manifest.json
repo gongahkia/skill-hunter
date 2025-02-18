@@ -15,5 +15,9 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
-  ]
+  ],
+  "web_accessible_resources": [{
+    "resources": ["*.png"],
+    "matches": ["<all_urls>"]
+  }]
 }
