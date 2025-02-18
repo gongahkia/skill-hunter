@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Dorso",
+  "version": "1.0",
+  "permissions": ["webNavigation", "storage", "tabs", "activeTab", "<all_urls>"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    "*.png"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dorso@example.com"
+    }
+  }
+}
