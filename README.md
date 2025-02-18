@@ -4,7 +4,11 @@
 
 ## Rationale
 
-> TODO add here
+The software development experience in 2025 involves reaching for the closest AI chatbot available, then battling the urge to [punt your laptop across the room](https://media1.tenor.com/m/nJW6x9jzp1AAAAAC/mob-psycho100-mob-psycho.gif) when the chatbot can't understand your poorly worded prompt.
+
+Worried that the convenience and availability of web-based AI chatbots were [making programmers dumber](https://andrewzuo.com/is-ai-making-programmers-stupid-115e9d6e7460), I created `Dorso`.
+
+`Dorso` is a client-sided browser extension that monitors web activity and forces users to correctly answer a random programming question before allowing them access to their [AI chatbot](#details) of choice for the next 15 minutes.
 
 ## Screenshot
 
@@ -50,6 +54,22 @@ $ make
 5. Open the `dorso` repo, click *select*.
 6. Open any LLM.
 7. Solve the LeetCode question.
+
+## Details
+
+`Dorso` checks for web-based AI chatbot access off the following blacklist.
+
+* https://chatgpt.com/
+* https://www.perplexity.ai/
+* https://gemini.google.com/app
+* https://claude.ai/
+* https://www.deepseek.com/
+* https://copilot.microsoft.com/
+* https://socrat.ai/
+* https://huggingface.co/chat/
+* https://writesonic.com/chat
+* https://you.com/
+* https://www.jasper.ai/
 
 ## References
 
