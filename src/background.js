@@ -182,6 +182,126 @@ const QUESTIONS = {
   },
   60: {
     "What is the time complexity of inserting into a balanced binary search tree?": "O(log n)"
+  },
+  61: {
+    "What is the process of finding and fixing bugs called?": "Debugging"
+  },
+  62: {
+    "What is the name for a program that translates assembly language to machine code?": "Assembler"
+  },
+  63: {
+    "What data structure is used to implement undo functionality?": "Stack"
+  },
+  64: {
+    "What is the term for a variable that can be accessed from any function?": "Global"
+  },
+  65: {
+    "What is the most common HTTP method for retrieving data?": "GET"
+  },
+  66: {
+    "What is the process of converting high-level language to machine code called?": "Compilation"
+  },
+  67: {
+    "What is the name for a function with no side effects?": "Pure"
+  },
+  68: {
+    "What is the default access modifier in Java?": "Package-private"
+  },
+  69: {
+    "What is the term for a program that can modify or replicate itself?": "Virus"
+  },
+  70: {
+    "What is the name for a type of loop that always executes at least once?": "Do-while"
+  },
+  71: {
+    "What is the process of combining software components called?": "Integration"
+  },
+  72: {
+    "What is the term for a piece of code that runs independently within a program?": "Thread"
+  },
+  73: {
+    "What is the name for a program that appears legitimate but contains malware?": "Trojan"
+  },
+  74: {
+    "What is the term for a function that takes another function as an argument?": "Higher-order"
+  },
+  75: {
+    "What is the process of converting object instances to byte streams called?": "Serialization"
+  },
+  76: {
+    "What is the name for a type of programming language that uses tags?": "Markup"
+  },
+  77: {
+    "What is the term for a variable whose value cannot be changed after initialization?": "Constant"
+  },
+  78: {
+    "What is the name for a type of attack that injects malicious scripts into websites?": "XSS"
+  },
+  79: {
+    "What is the term for a function that is defined inside another function?": "Closure"
+  },
+  80: {
+    "What is the process of breaking a program into modules called?": "Modularization"
+  },
+  81: {
+    "What is the name for a type of error that occurs during program execution?": "Runtime"
+  },
+  82: {
+    "What is the term for a program that replicates itself across a network?": "Worm"
+  },
+  83: {
+    "What is the name for a type of database that uses tables and rows?": "Relational"
+  },
+  84: {
+    "What is the term for a function that doesn't return a value?": "Void"
+  },
+  85: {
+    "What is the name for a type of attack that overwhelms a system with traffic?": "DDoS"
+  },
+  86: {
+    "What is the term for a variable that is accessible only within a specific function?": "Local"
+  },
+  87: {
+    "What is the name for a type of loop that repeats a specific number of times?": "For"
+  },
+  88: {
+    "What is the term for a program that automatically gathers information from websites?": "Scraper"
+  },
+  89: {
+    "What is the name for a type of sort that repeatedly steps through a list?": "Bubble sort"
+  },
+  90: {
+    "What is the term for a function that calls itself?": "Recursive"
+  },
+  91: {
+    "What is the name for a type of database that doesn't use tables?": "NoSQL"
+  },
+  92: {
+    "What is the term for a program that translates high-level language to machine code?": "Compiler"
+  },
+  93: {
+    "What is the name for a type of error that violates syntax rules?": "Syntax"
+  },
+  94: {
+    "What is the term for a variable that can hold multiple values of the same type?": "Array"
+  },
+  95: {
+    "What is the name for a type of attack that exploits incorrect assumptions about user input?": "Injection"
+  },
+  96: {
+    "What is the term for a program that emulates a computer system?": "Virtual machine"
+  },
+  97: {
+    "What is the name for a type of programming that uses mathematical functions?": "Functional"
+  },
+  98: {
+    "What is the term for a program that automatically builds and tests code?": "CI/CD"
+  },
+  99: {
+    "What is the name for a type of error that produces incorrect output?": "Logic"
+  },
+  100: {
+    "What is the term for a program that manages other programs? Give the acronym. (Hint: It's 2 letters)": "OS"
   }
 };
 
