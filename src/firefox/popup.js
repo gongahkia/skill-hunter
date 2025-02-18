@@ -1,6 +1,6 @@
 let currentQuestion, currentQuestionId, originalUrl;
 
-const successMessage = "Correct! You can now access the LLM for the next 15 minutes. Redirecting you now.";
+const successMessage = "Correct! You can now access the AI Chatbot for the next 15 minutes. Redirecting you now.";
 const failureMessage = "Incorrect. Please try again. Reload the page to get a different question.";
 
 document.addEventListener('DOMContentLoaded', async function() {

@@ -33,14 +33,13 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 ```console
 $ git clone https://github.com/gongahkia/dorso
 $ cd dorso
-$ make
+$ make firefox
 ```
   
 2. Copy and paste this link in the search bar *`about:debugging#/runtime/this-firefox`*.
 3. Click *load temporary add-on*.
-4. Open the `dorso` repo, select `manifest.json`.
-5. Open any LLM. 
-6. Solve the LeetCode question.
+4. Open the `dorso` folder, select `manifest.json`.
+5. Open any Web-based AI Chatbot. 
 
 ### Chrome
 
@@ -49,15 +48,14 @@ $ make
 ```console
 $ git clone https://github.com/gongahkia/dorso
 $ cd dorso
-$ make
+$ make chrome
 ```
 
 2. Copy and paste this link in the search bar *`chrome://extensions/`*.
 3. Toggle *Developer mode* on.
 4. Click *load unpacked*.
-5. Open the `dorso` repo, click *select*.
-6. Open any LLM.
-7. Solve the LeetCode question.
+5. Open the `dorso` folder, click *select*.
+6. Open any Web-based AI Chatbot.
 
 ## Details
 

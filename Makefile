@@ -1,33 +1,18 @@
-.PHONY: icons build build-chrome build-firefox package-firefox lint-firefox build-safari safari-project test verify clean
+.PHONY: chrome firefox clean
 
-icons:
-	python3 scripts/generate-icons.py
+chrome:
+	@echo "Preparing Chrome extension..."
+	@rm -rf .git .gitignore README.md asset src/firefox
+	@mv src/chrome/* .
+	@rm -rf src
 
-build: icons
-	npm run build
-
-build-chrome: icons
-	npm run build:chrome
-
-build-firefox: icons
-	npm run build:firefox
-
-package-firefox: icons
-	npm run package:firefox
-
-lint-firefox: package-firefox
-	npm run lint:firefox
-
-build-safari: icons
-	npm run build:safari
-
-safari-project: build-safari
-	npm run safari:project
-
-test:
-	npm test
-
-verify: build test
+firefox:
+	@echo "Preparing Firefox extension..."
+	@rm -rf .git .gitignore README.md asset src/chrome
+	@mv src/firefox/* .
+	@rm -rf src
 
 clean:
-	rm -rf dist safari
+	@echo "Cleaning up..."
+	@git reset --hard HEAD
+	@git clean -fd
