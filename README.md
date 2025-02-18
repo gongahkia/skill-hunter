@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/dorso_1.0-passing-green)
 
-# `Dorso`
+# `Dorso` 🧠
 
 ## Rationale
 

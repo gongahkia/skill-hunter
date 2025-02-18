@@ -1,4 +1,4 @@
-// ----- CONST DEFINTIONS -----
+// ----- CONST DEFINITIONS -----
 
 const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
 const resetTime = 15 * 60 * 1000;
@@ -47,6 +47,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     const correctAnswer = QUESTIONS[request.id][request.question];
     const isCorrect = request.userAnswer.trim() === correctAnswer.trim();
     sendResponse({isCorrect: isCorrect});
+  } else if (request.action === "redirectToOriginal") {
+    chrome.storage.local.get(['originalUrl'], function(result) {
+      if (result.originalUrl) {
+        chrome.tabs.create({ url: result.originalUrl }, (tab) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
+          }
+        });
+      }
+    });
   }
   return true;
 });

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('result').textContent = successMessage;
         chrome.storage.local.set({lastSolvedTime: Date.now()}, function() {
           setTimeout(() => {
-            chrome.tabs.update({url: originalUrl}, function() {
+            chrome.runtime.sendMessage({action: "redirectToOriginal"}, function() {
               window.close();
             });
           }, 2000);
