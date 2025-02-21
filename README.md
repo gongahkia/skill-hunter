@@ -21,7 +21,43 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 ![](./asset/reference/3.png)
 ![](./asset/reference/4.png)
 
+## Details
+
+### Supported browsers
+
+Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+
+| Browser | Status | Link |
+| :--- | :--- | :--- | 
+| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
+
+### Blacklist
+
+`Dorso` checks for web-based AI chatbot access off the following blacklist.
+
+* https://chatgpt.com/
+* https://www.perplexity.ai/
+* https://gemini.google.com/app
+* https://claude.ai/
+* https://www.deepseek.com/
+* https://copilot.microsoft.com/
+* https://socrat.ai/
+* https://huggingface.co/chat/
+* https://writesonic.com/chat
+* https://you.com/
+* https://www.jasper.ai/
+
 ## Usage
+
+The below instructions are for locally running `Dorso`.
+
+| Browser | Status | 
+| :--- | :--- |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
+| Google Chrome | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | 
 
 ### Firefox
 
@@ -53,32 +89,6 @@ $ make chrome
 4. Click *load unpacked*.
 5. Open the `dorso` folder, click *select*.
 6. Open any Web-based AI Chatbot.
-
-## Details
-
-### Supported browsers
-
-| Browser | Status | 
-| :--- | :--- |
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
-| Google Chrome | ![](https://img.shields.io/badge/Status-Up-brightgreen) | 
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | 
-
-### Blacklist
-
-`Dorso` checks for web-based AI chatbot access off the following blacklist.
-
-* https://chatgpt.com/
-* https://www.perplexity.ai/
-* https://gemini.google.com/app
-* https://claude.ai/
-* https://www.deepseek.com/
-* https://copilot.microsoft.com/
-* https://socrat.ai/
-* https://huggingface.co/chat/
-* https://writesonic.com/chat
-* https://you.com/
-* https://www.jasper.ai/
 
 ## References
 
