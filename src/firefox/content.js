@@ -1,1 +1,0 @@
-console.log("Sanity check (1/1): Dorso is active");

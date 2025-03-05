@@ -1,43 +1,31 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import subprocess
-import json
+import ast
 
 app = FastAPI()
 
 class Submission(BaseModel):
     solution: str
-    question_id: str
+    function_name: str
+    test_cases: list
 
-# Mock LeetCode API (Replace with actual LeetCode API interaction)
-leetcode_questions = {
-    "1": {
-        "question_title": "Two Sum",
-        "question": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-        "test_cases": [
-            {"input": "[2, 7, 11, 15], 9", "output": "[0, 1]"},
-        ],
-        "correct_solution": "def twoSum(nums, target):\n    nums_map = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in nums_map:\n            return [nums_map[complement], i]\n        nums_map[num] = i\n    return []"
-    }
-}
-
-@app.get("/leetcode/problem")
-async def get_leetcode_problem():
-    """Returns a LeetCode problem (mocked for now)."""
-    question_id = "1"
-    problem = leetcode_questions[question_id]
-    return {"question": problem["question"], "question_title": problem["question_title"], "question_id": question_id}
+def run_code_safely(code, function_name, test_case):
+    try:
+        ast.parse(code)
+        restricted_globals = {"__builtins__": {}}
+        exec(code, restricted_globals)
+        user_function = restricted_globals.get(function_name)
+        if not user_function:
+            raise ValueError(f"Function '{function_name}' not found in the submitted code")
+        return user_function(*test_case)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/leetcode/submit")
 async def submit_leetcode_solution(submission: Submission):
-    """Submits a solution to be checked."""
-    question_id = submission.question_id
-    if question_id not in leetcode_questions:
-        raise HTTPException(status_code=404, detail="Question not found")
-    problem = leetcode_questions[question_id]
-    correct_solution = problem["correct_solution"]
-    test_cases = problem["test_cases"]
-    if submission.solution.strip() == correct_solution.strip():
-        return {"success": True, "message": "Solution is correct!"}
-    else:
-        return {"success": False, "error": "Solution is incorrect."}
+    for i, test_case in enumerate(submission.test_cases):
+        result = run_code_safely(submission.solution, submission.function_name, test_case["input"])
+        if result != test_case["output"]:
+            return {"success": False, "message": f"Failed on test case {i + 1}. Expected {test_case['output']}, but got {result}"}
+    
+    return {"success": True, "message": "All test cases passed!"}

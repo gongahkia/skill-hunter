@@ -1,6 +1,5 @@
 // ----- CONST DEFINITIONS -----
 
-const fs = require('fs').promises;
 const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
 const RESETTIME = 15 * 60 * 1000;
 const LEETCODE_GRAPHQL_ENDPOINT = 'https://leetcode.com/graphql';
@@ -9,6 +8,7 @@ query questionData($titleSlug: String!) {
   question(titleSlug: $titleSlug) {
     questionId
     title
+    titleSlug
     content
     difficulty
     exampleTestcases
@@ -27,7 +27,7 @@ async function fetchLeetCodeQuestion(titleSlug) {
         },
         body: JSON.stringify({
             query: QUESTION_QUERY,
-            variables: { titleSlug: titleSlug }, // Example: "two-sum"
+            variables: { titleSlug: titleSlug },
         }),
     });
 
@@ -39,16 +39,9 @@ async function fetchLeetCodeQuestion(titleSlug) {
     return data.data.question;
 }
 
+// FUA to update this later
 async function getRandomLeetCodeProblemTitleSlug() {
-    try {
-        const data = await fs.readFile('questions.txt', 'utf8');
-        const questions = data.split('\n').filter(line => line.trim() !== '');
-        const randomIndex = Math.floor(Math.random() * questions.length);
-        return questions[randomIndex].trim();
-    } catch (error) {
-        console.error('Error reading questions.txt:', error);
-        return "two-sum";
-    }
+    return "two-sum";
 }
 
 // ----- EVENT LISTENER FUNCTIONS -----
@@ -78,23 +71,18 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const titleSlug = await getRandomLeetCodeProblemTitleSlug();
                 const questionData = await fetchLeetCodeQuestion(titleSlug);
                 console.log("LeetCode Question Data:", questionData);
-                const question = questionData.content; 
-                const questionId = questionData.questionId;
-                const questionTitle = questionData.title;
-                sendResponse({ question: question, id: questionId, title: questionTitle }); 
+                sendResponse({ 
+                    question: questionData.content, 
+                    id: questionData.questionId, 
+                    title: questionData.title,
+                    slug: questionData.titleSlug
+                });
             } catch (error) {
                 console.error("Error fetching question:", error);
-                sendResponse({ question: "Failed to fetch question.", id: null });
+                sendResponse({ question: "Failed to fetch question.", id: null, title: null, slug: null });
             }
         })();
         return true; 
-    }
-    else if (request.action === "checkAnswer") {
-        // Implement a more robust checking mechanism.  For example, you can use a combination of string matching and regular expressions.
-        const correctAnswer = "Stack"; // Replace with your actual answer checking logic
-        const isCorrect = request.userAnswer.trim() === correctAnswer.trim();
-        return Promise.resolve({isCorrect: isCorrect});
-
     }
     else if (request.action === "redirectToOriginal") {
         return browser.storage.local.get(['originalUrl']).then((result) => {
@@ -102,5 +90,19 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 return browser.tabs.create({ url: result.originalUrl });
             }
         });
+    }
+});
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("Received message in background script:", message);
+    if (message.action === "submissionSuccess" || (message.action === "submissionResult" && message.success)) {
+        console.log("Successful submission detected");
+        browser.runtime.sendMessage({ action: "updatePopup", content: "Congratulations! You've solved the problem." });
+        browser.tabs.remove(sender.tab.id);
+        browser.storage.local.set({lastSolvedTime: Date.now()}).then(() => {
+            console.log("Last solved time updated");
+        });
+    } else if (message.action === "submissionResult" && !message.success) {
+        console.log("Submission failed");
     }
 });
