@@ -31,13 +31,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const resultDiv = document.getElementById("result");
         resultDiv.textContent = message.content;
         resultDiv.style.backgroundColor = "#e7f4e7"; 
+        const header = document.getElementById("declaration_of_war");
         const question = document.getElementById("question");
         const questionContent = document.getElementById("question_content");
+        const questionSection = document.getElementByClass("question-section");
         const submitButton = document.getElementById("submit");
-        if (question && questionContent && submitButton) {
+        if (header && question && questionContent && questionSection && submitButton) {
             console.log("Removing elements");
+            header.remove();
             question.remove();
             questionContent.remove();
+            questionSection.remove();
             submitButton.remove();
         } else {
             console.error("Elements not found");

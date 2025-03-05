@@ -590,6 +590,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         })();
         return true; 
     }
+    else if (request.action === "openLeetCodeQuestion") {
+        const leetCodeUrl = `https://leetcode.com/problems/${request.slug}/description`;
+        chrome.tabs.create({ url: leetCodeUrl });
+        return true;
+    }
     else if (request.action === "redirectToOriginal") {
         chrome.storage.local.get(['originalUrl'], function(result) {
             if (result.originalUrl) {
