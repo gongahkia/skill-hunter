@@ -20,3 +20,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.close();
     });
 });
+
+browser.runtime.onMessage.addListener((message) => {
+    if (message.action === "updatePopup") {
+        const resultDiv = document.getElementById("result");
+        resultDiv.textContent = message.content;
+        resultDiv.style.backgroundColor = "#e7f4e7"; 
+        const question = document.getElementById("question");
+        const questionContent = document.getElementById("question_content");
+        const submitButton = document.getElementById("submit");
+        if (question && questionContent && submitButton) {
+            console.log("Removing elements");
+            question.remove();
+            questionContent.remove();
+            submitButton.remove();
+        } else {
+            console.error("Elements not found");
+        }
+    }
+});

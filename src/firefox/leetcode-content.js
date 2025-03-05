@@ -6,7 +6,6 @@ function checkSubmissionResult() {
                 console.log("Submission result found:", span.textContent);
                 observer.disconnect();
                 if (span.textContent.includes('Accepted')) {
-                    alert('Success! You can now access the AI Chatbot for the next 15 minutes.');
                     console.log('Success');
                     browser.runtime.sendMessage({ action: "submissionResult", success: true });
                     resolve('success');
