@@ -1,8 +1,8 @@
 // ----- CONST DEFINITIONS -----
 
+const fs = require('fs').promises;
 const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
 const RESETTIME = 15 * 60 * 1000;
-
 const LEETCODE_GRAPHQL_ENDPOINT = 'https://leetcode.com/graphql';
 const QUESTION_QUERY = `
 query questionData($titleSlug: String!) {
@@ -39,12 +39,16 @@ async function fetchLeetCodeQuestion(titleSlug) {
     return data.data.question;
 }
 
-// Function to fetch a random LeetCode problem titleSlug (You need to implement this)
 async function getRandomLeetCodeProblemTitleSlug() {
-    // TODO: Implement logic to fetch a random problem titleSlug from LeetCode
-    // This could involve scraping a list of problems or using a third-party API
-    // For now, return a hardcoded value for testing
-    return "two-sum"; // Replace this with your logic.  "two-sum", "reverse-linked-list", "valid-parentheses"
+    try {
+        const data = await fs.readFile('questions.txt', 'utf8');
+        const questions = data.split('\n').filter(line => line.trim() !== '');
+        const randomIndex = Math.floor(Math.random() * questions.length);
+        return questions[randomIndex].trim();
+    } catch (error) {
+        console.error('Error reading questions.txt:', error);
+        return "two-sum";
+    }
 }
 
 // ----- EVENT LISTENER FUNCTIONS -----
@@ -74,19 +78,16 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const titleSlug = await getRandomLeetCodeProblemTitleSlug();
                 const questionData = await fetchLeetCodeQuestion(titleSlug);
                 console.log("LeetCode Question Data:", questionData);
-
-                const question = questionData.content; // The HTML content of the question
+                const question = questionData.content; 
                 const questionId = questionData.questionId;
                 const questionTitle = questionData.title;
-
-                sendResponse({ question: question, id: questionId, title: questionTitle }); // Send the LeetCode data
-
+                sendResponse({ question: question, id: questionId, title: questionTitle }); 
             } catch (error) {
                 console.error("Error fetching question:", error);
                 sendResponse({ question: "Failed to fetch question.", id: null });
             }
         })();
-        return true; // Indicate asynchronous response
+        return true; 
     }
     else if (request.action === "checkAnswer") {
         // Implement a more robust checking mechanism.  For example, you can use a combination of string matching and regular expressions.
