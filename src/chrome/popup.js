@@ -1,39 +1,46 @@
-let currentQuestion, currentQuestionId, originalUrl;
+let currentQuestion, currentQuestionId, originalUrl, currentQuestionTitle, currentQuestionSlug;
 
-const successMessage = "Correct! You can now access the AI Chatbot for the next 15 minutes. Redirecting you now.";
-const failureMessage = "Incorrect. Please try again. Reload the page to get a different question.";
-
-document.addEventListener('DOMContentLoaded', function() {
-  chrome.storage.local.get(['originalUrl'], function(result) {
-    originalUrl = result.originalUrl;
-  });
-
-  chrome.runtime.sendMessage({action: "getRandomQuestion"}, function(response) {
-    currentQuestion = response.question;
-    currentQuestionId = response.id;
-    document.getElementById('question').textContent = currentQuestion;
-  });
-
-  document.getElementById('submit').addEventListener('click', function() {
-    const solution = document.getElementById('solution').value;
-    chrome.runtime.sendMessage({
-      action: "checkAnswer", 
-      userAnswer: solution, 
-      question: currentQuestion,
-      id: currentQuestionId
-    }, function(response) {
-      if (response.isCorrect) {
-        document.getElementById('result').textContent = successMessage;
-        chrome.storage.local.set({lastSolvedTime: Date.now()}, function() {
-          setTimeout(() => {
-            chrome.runtime.sendMessage({action: "redirectToOriginal"}, function() {
-              window.close();
-            });
-          }, 2000);
-        });
-      } else {
-        document.getElementById('result').textContent = failureMessage;
-      }
+document.addEventListener('DOMContentLoaded', async function() {
+    chrome.storage.local.get(['originalUrl'], function(result) {
+        originalUrl = result.originalUrl;
     });
-  });
+
+    chrome.runtime.sendMessage({action: "getRandomQuestion"}, function(response) {
+        currentQuestion = response.question;
+        currentQuestionId = response.id;
+        currentQuestionTitle = response.title;
+        currentQuestionSlug = response.slug; 
+        document.getElementById('question').textContent = currentQuestionTitle; 
+        document.getElementById('question_content').innerHTML = currentQuestion; 
+    });
+
+    document.getElementById('submit').addEventListener('click', function() {
+        chrome.storage.local.set({ 
+            lastSubmittedSolution: "",
+            lastQuestionSlug: currentQuestionSlug
+        }, function() {
+            const leetCodeUrl = `https://leetcode.com/problems/${currentQuestionSlug}/description`;
+            chrome.tabs.create({ url: leetCodeUrl });
+            window.close();
+        });
+    });
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "updatePopup") {
+        const resultDiv = document.getElementById("result");
+        resultDiv.textContent = message.content;
+        resultDiv.style.backgroundColor = "#e7f4e7"; 
+        const question = document.getElementById("question");
+        const questionContent = document.getElementById("question_content");
+        const submitButton = document.getElementById("submit");
+        if (question && questionContent && submitButton) {
+            console.log("Removing elements");
+            question.remove();
+            questionContent.remove();
+            submitButton.remove();
+        } else {
+            console.error("Elements not found");
+        }
+    }
 });

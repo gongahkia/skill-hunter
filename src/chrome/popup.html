@@ -1,99 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dorso</title>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    body {
-      width: 500px; 
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    .content-wrapper {
-      display: flex;
-      align-items: stretch;
-    }
-    .duck-container {
-      display: flex;
-      align-items: center;
-    }
-    .main-content {
-      width: 300px;
-    }
-    .duck-image {
-      margin-left: 50px;
-      width: 375px; 
-      height: auto;
-    }
-    textarea { width: 100%; margin: 10px 0; }
-    #result { margin-top: 10px; font-weight: bold; }
-    .flexbox-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      border-bottom: 1px dotted black;
-    }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 500px;
-      background-color: #555;
-      color: #fff;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -150px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-  </style>
+    <title>Dorso</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-style: italic;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .question-section {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .action-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #submit {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #submit:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
-  <div class="content-wrapper">
-    <div class="main-content">
-      <h1>Dorso</h1>
-      <p>Fighting programmer brainrot since Feb 2025.</p>
-      <p>Made by <a href="https://github.com/gongahkia">@gongahkia</a></p>
-      <h2>
-        <span class="tooltip">Solve
-          <span class="tooltiptext">
-            <div class="flexbox-container">
-              <p>
-              The <b>dorsolateral prefrontal cortex</b> (DLPFC) is crucial for programmers as it 
-              enables logical problem-solving, working memory, cognitive flexibility, response inhibition, 
-              and emotional regulation, all essential for writing, debugging, and optimizing code.
-              </p>
-              <img src="https://www.newfrontierspsychiatry.com/wp-content/uploads/2019/09/5.jpg" width="50%" height="50%">
-            </div>
-          </span>
-        </span> this coding question to continue:
-      </h2>
-      <div id="question"></div>
-      <textarea id="solution" rows="10"></textarea>
-      <button id="submit">Submit</button>
-      <div id="result"></div>
+    <div class="header">
+        <h1>Dorso</h1>
+        <p class="subtitle">Fighting programmer brainrot since Feb 2025. Made by @gongahkia</p>
+        <h2>Solve this coding question to continue:</h2>
     </div>
-    <div align="duck-container">
-      <img src="duck.png" alt="Programmer's best friend" class="duck-image">
+    <div class="content">
+        <div class="question-section">
+            <div id="question"></div>
+            <div id="question_content"></div>
+        </div>
+        <div class="action-section">
+            <button id="submit">TRY QUESTION</button>
+            <div id="result"></div>
+        </div>
     </div>
-  </div>
-  <script src="popup.js"></script>
+    <script src="popup.js"></script>
 </body>
 </html>

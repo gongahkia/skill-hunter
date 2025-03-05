@@ -2,499 +2,614 @@
 
 const LLM_REGEX = /chatgpt\.com|perplexity\.ai|gemini\.google\.com|claude\.ai|deepseek\.com|you\.com|jasper\.ai|copilot\.microsoft\.com|writesonic\.com\/chat|socrat\.ai|huggingface\.co\/chat/;
 const RESETTIME = 15 * 60 * 1000;
-const QUESTIONS = {
-  1: {
-    "What data structure is LIFO (Last In First Out) and starts with an S? Capitalize your answer.": "Stack",
-  },
-  2: {
-    "What data structure is FIFO (First In First Out) and starts with a Q? Capitalize your answer.": "Queue",
-  },
-  3: {
-    "What data structure starts with a H? Capitalize your answer.": "Heap",
-  },
-  4 : {
-    "In a perfect binary tree of depth 10, what is the maximum number of nodes?": "1023",
-  },
-  5: {
-    "How many loops are there in a naive implementation of binary search?": "1"
-  },
-  6: {
-    "What is the worst-case time complexity of quicksort?": "O(n^2)"
-  },
-  7: {
-    "What is the average-case time complexity of merge sort?": "O(n log n)"
-  },
-  8: {
-    "What data structure is typically used to implement a breadth-first search?": "Queue"
-  },
-  9: {
-    "What is the space complexity of an in-place sorting algorithm?": "O(1)"
-  },
-  10: {
-    "What is the time complexity of accessing an element in an array by its index?": "O(1)"
-  },
-  11: {
-    "What is the primary advantage of a hash table over an array?": "Constant-time average case for insertion and lookup"
-  },
-  12: {
-    "What is the maximum number of nodes in a binary tree of height h?": "2^(h+1) - 1"
-  },
-  13: {
-    "What is the time complexity of the best algorithm for finding the nth Fibonacci number?": "O(log n)"
-  },
-  14: {
-    "How many loops are typically used in a bubble sort algorithm?": "1"
-  },
-  15: {
-    "How many bits are in a byte?": "8"
-  },
-  16: {
-    "What is the result of 0.1 + 0.2 === 0.3 in JavaScript?": "false"
-  },
-  17: {
-    "What is the time complexity of inserting an element at the beginning of an array?": "O(n)"
-  },
-  18: {
-    "What data structure does JavaScript use to implement objects?": "hash table"
-  },
-  19: {
-    "What is the output of console.log(1 + '2' + '2')?": "122"
-  },
-  20: {
-    "What is the worst-case time complexity of quicksort?": "O(n^2)"
-  },
-  21: {
-    "What is the name of the algorithm commonly used for balancing binary search trees?": "AVL"
-  },
-  22: {
-    "What is the maximum number of children a node can have in a binary tree?": "2"
-  },
-  23: {
-    "What is the result of typeof NaN in JavaScript?": "number"
-  },
-  24: {
-    "What is the time complexity of accessing an element in a hash table?": "O(1)"
-  },
-  25: {
-    "What is the name of the problem where two processes are waiting for each other to finish?": "deadlock"
-  },
-  26: {
-    "What is the default prototype of all objects in JavaScript?": "Object.prototype"
-  },
-  27: {
-    "What is the result of [] == [] in JavaScript?": "false"
-  },
-  28: {
-  "What is the time complexity of the best sorting algorithms?": "O(n log n)"
-  },
-  29: {
-    "What is the name of the algorithm used by most browsers for JavaScript's Array.prototype.sort()?": "Timsort"
-  },
-  30: {
-    "What is the output of console.log(2 ** 3 ** 2)?": "512"
-  },
-  31: {
-    "What is the time complexity of bogo sort? (Bogo sort is a sorting algorithm that randomly generates permutations of a list until it finds a sorted order.)": "O(n!)"
-  },
-  32: {
-    "What is the time complexity of binary search?": "O(log n)"
-  },
-  33: {
-    "What does the 'typeof null' return in JavaScript?": "object"
-  },
-  34: {
-    "What is the default return value of a function in JavaScript if no return statement is specified?": "undefined"
-  },
-  35: {
-    "What data structure uses LIFO (Last In, First Out) principle?": "Stack"
-  },
-  36: {
-    "In Python, what keyword is used to define a function?": "def"
-  },
-  37: {
-    "What is the time complexity of binary search?": "O(log n)"
-  },
-  38: {
-    "What protocol is commonly used for secure shell connections?": "SSH"
-  },
-  39: {
-    "In Java, what keyword is used to inherit from a class?": "extends"
-  },
-  40: {
-    "What is the process of converting source code to machine code called?": "Compilation"
-  },
-  41: {
-    "What data structure is typically used to implement a priority queue?": "Heap"
-  },
-  42: {
-    "In Ruby, what symbol is used to define a class method?": "self"
-  },
-  43: {
-    "What sorting algorithm has an average time complexity of O(n log n)?": "Quicksort"
-  },
-  44: {
-    "What is the most common port number for HTTPS?": "443"
-  },
-  45: {
-    "In JavaScript, what method is used to add elements to the end of an array?": "push"
-  },
-  46: {
-    "What is the term for a function that calls itself?": "Recursion"
-  },
-  47: {
-    "What data structure uses FIFO (First In, First Out) principle?": "Queue"
-  },
-  48: {
-    "In Python, what is used to catch exceptions?": "try-except"
-  },
-  49: {
-    "What algorithm is commonly used for finding the shortest path in a graph?": "Dijkstra's"
-  },
-  50: {
-    "What is the process of hiding implementation details in OOP called?": "Encapsulation"
-  },
-  51: {
-    "In Java, what keyword is used to implement an interface?": "implements"
-  },
-  52: {
-    "What is the time complexity of accessing an element in an array by index?": "O(1)"
-  },
-  53: {
-    "What protocol is used to send emails?": "SMTP"
-  },
-  54: {
-    "In Ruby, what symbol is used to define a constant?": "Uppercase"
-  },
-  55: {
-    "What is the name for a type of attack that exploits buffer overflows?": "Buffer overflow"
-  },
-  56: {
-    "In JavaScript, what is used to declare a variable with block scope?": "let"
-  },
-  57: {
-    "What is the process of converting machine code to assembly language called?": "Disassembly"
-  },
-  58: {
-    "What data structure is typically used to implement a trie? (A trie is a data structure that stores and organizes strings, often used to store dictionaries alongside handling spell-check and autocomplete. )": "Tree"
-  },
-  59: {
-    "In Python, what is used to define a class method?": "@classmethod"
-  },
-  60: {
-    "What is the time complexity of inserting into a balanced binary search tree?": "O(log n)"
-  },
-  61: {
-    "What is the process of finding and fixing bugs called?": "Debugging"
-  },
-  62: {
-    "What is the name for a program that translates assembly language to machine code?": "Assembler"
-  },
-  63: {
-    "What data structure is used to implement undo functionality?": "Stack"
-  },
-  64: {
-    "What is the term for a variable that can be accessed from any function?": "Global"
-  },
-  65: {
-    "What is the most common HTTP method for retrieving data?": "GET"
-  },
-  66: {
-    "What is the process of converting high-level language to machine code called?": "Compilation"
-  },
-  67: {
-    "What is the name for a function with no side effects?": "Pure"
-  },
-  68: {
-    "What is the default access modifier in Java?": "Package-private"
-  },
-  69: {
-    "What is the term for a program that can modify or replicate itself?": "Virus"
-  },
-  70: {
-    "What is the name for a type of loop that always executes at least once?": "Do-while"
-  },
-  71: {
-    "What is the process of combining software components called?": "Integration"
-  },
-  72: {
-    "What is the term for a piece of code that runs independently within a program?": "Thread"
-  },
-  73: {
-    "What is the name for a program that appears legitimate but contains malware?": "Trojan"
-  },
-  74: {
-    "What is the term for a function that takes another function as an argument?": "Higher-order"
-  },
-  75: {
-    "What is the process of converting object instances to byte streams called?": "Serialization"
-  },
-  76: {
-    "What is the name for a type of programming language that uses tags?": "Markup"
-  },
-  77: {
-    "What is the term for a variable whose value cannot be changed after initialization?": "Constant"
-  },
-  78: {
-    "What is the name for a type of attack that injects malicious scripts into websites?": "XSS"
-  },
-  79: {
-    "What is the term for a function that is defined inside another function?": "Closure"
-  },
-  80: {
-    "What is the process of breaking a program into modules called?": "Modularization"
-  },
-  81: {
-    "What is the name for a type of error that occurs during program execution?": "Runtime"
-  },
-  82: {
-    "What is the term for a program that replicates itself across a network?": "Worm"
-  },
-  83: {
-    "What is the name for a type of database that uses tables and rows?": "Relational"
-  },
-  84: {
-    "What is the term for a function that doesn't return a value?": "Void"
-  },
-  85: {
-    "What is the name for a type of attack that overwhelms a system with traffic?": "DDoS"
-  },
-  86: {
-    "What is the term for a variable that is accessible only within a specific function?": "Local"
-  },
-  87: {
-    "What is the name for a type of loop that repeats a specific number of times?": "For"
-  },
-  88: {
-    "What is the term for a program that automatically gathers information from websites?": "Scraper"
-  },
-  89: {
-    "What is the name for a type of sort that repeatedly steps through a list?": "Bubble sort"
-  },
-  90: {
-    "What is the term for a function that calls itself?": "Recursive"
-  },
-  91: {
-    "What is the name for a type of database that doesn't use tables?": "NoSQL"
-  },
-  92: {
-    "What is the term for a program that translates high-level language to machine code?": "Compiler"
-  },
-  93: {
-    "What is the name for a type of error that violates syntax rules?": "Syntax"
-  },
-  94: {
-    "What is the term for a variable that can hold multiple values of the same type?": "Array"
-  },
-  95: {
-    "What is the name for a type of attack that exploits incorrect assumptions about user input?": "Injection"
-  },
-  96: {
-    "What is the term for a program that emulates a computer system?": "Virtual machine"
-  },
-  97: {
-    "What is the name for a type of programming that uses mathematical functions?": "Functional"
-  },
-  98: {
-    "What is the term for a program that automatically builds and tests code?": "CI/CD"
-  },
-  99: {
-    "What is the name for a type of error that produces incorrect output?": "Logic"
-  },
-  100: {
-    "What is the term for a program that manages other programs? Give the acronym. (Hint: It's 2 letters)": "OS"
-  },
-  101: {
-    "What data structure uses a hash function to compute an index?": "Hash table"
-  },
-  102: {
-    "What is the worst-case time complexity of quicksort?": "O(n^2)"
-  },
-  103: {
-    "What deployment strategy updates all instances simultaneously?": "All-at-once"
-  },
-  104: {
-    "What data structure represents hierarchical relationships?": "Tree"
-  },
-  105: {
-    "What algorithm finds the shortest path in a weighted graph? Remove the 's from the name.": "Dijkstra"
-  },
-  106: {
-    "What is the process of gradually shifting traffic to a new version?": "Canary deployment"
-  },
-  107: {
-    "Are Python lists mutable or immutable? Capitalize your answer.": "Mutable"
-  },
-  108: {
-    "What sorting algorithm has O(n log n) time complexity in all cases?": "Mergesort"
-  },
-  109: {
-    "What is the practice of frequent, automated software releases?": "Continuous deployment"
-  },
-  110: {
-    "What data structure allows fast insertion and deletion at both ends? Use the shorthand name.": "Deque"
-  },
-  111: {
-    "What algorithm is used for finding strongly connected components in a graph? Remove the 's from the name.": "Kosaraju"
-  },
-  112: {
-    "What deployment strategy keeps both old and new versions running?": "Blue-green deployment"
-  },
-  113: {
-    "What data structure is used to implement a priority queue?": "Heap"
-  },
-  114: {
-    "What is the time complexity of binary search?": "O(log n)"
-  },
-  115: {
-    "What is the practice of running multiple copies of an application?": "Horizontal scaling"
-  },
-  116: {
-    "What data structure represents a collection of disjoint sets?": "Union-find"
-  },
-  117: {
-    "What algorithm is used for topological sorting of a graph? Remove the 's from the name.": "Kahn"
-  },
-  118: {
-    "What is the process of rolling back to a previous version called?": "Rollback"
-  },
-  119: {
-    "What data structure is used to implement a trie?": "Tree"
-  },
-  120: {
-    "What is the best-case time complexity of bubble sort?": "O(n)"
-  },
-  121: {
-    "What is the practice of deploying to a subset of users first?": "Staged rollout"
-  },
-  122: {
-    "What data structure uses FIFO principle?": "Queue"
-  },
-  123: {
-    "What algorithm is used for finding the minimum spanning tree of a graph? Remove the 's from the name.": "Kruskal"
-  },
-  124: {
-    "What is the practice of deploying during low-traffic periods?": "Off-peak deployment"
-  },
-  125: {
-    "What data structure is used to implement an LRU cache?": "Hash table"
-  },
-  126: {
-    "What is the time complexity of counting sort?": "O(n+k)"
-  },
-  127: {
-    "What is the practice of deploying small, frequent updates?": "Continuous delivery"
-  },
-  128: {
-    "What data structure is used to implement a graph?": "Adjacency list"
-  },
-  129: {
-    "What algorithm is used for string pattern matching?": "KMP"
-  },
-  130: {
-    "What is the practice of deploying to multiple regions simultaneously?": "Multi-region deployment"
-  },
-  131: {
-    "What data structure is used to implement a cache with O(1) operations?": "LRU cache"
-  },
-  132: {
-    "What is the space complexity of merge sort?": "O(n)"
-  },
-  133: {
-    "What is the practice of deploying in containers?": "Containerization"
-  },
-  134: {
-    "What data structure is used to implement a suffix tree?": "Tree"
-  },
-  135: {
-    "What algorithm is used for finding the longest common subsequence?": "Dynamic programming"
-  },
-  136: {
-    "What is the practice of deploying to a copy of the production environment?": "Staging"
-  },
-  137: {
-    "What data structure is used to implement a bloom filter?": "Bit array"
-  },
-  138: {
-    "What is the time complexity of heapify operation?": "O(log n)"
-  },
-  139: {
-    "What is the practice of deploying different versions to different users?": "A/B testing"
-  },
-  140: {
-    "What data structure is used to implement a skip list?": "Linked list"
-  },
-  141: {
-    "What algorithm is used for finding the convex hull of a set of points?": "Graham scan"
-  },
-  142: {
-    "What is the practice of deploying updates without downtime?": "Zero-downtime deployment"
-  },
-  143: {
-    "What data structure is used to implement a segment tree?": "Tree"
-  },
-  144: {
-    "What is the average-case time complexity of quicksort?": "O(n log n)"
-  },
-  145: {
-    "What is the practice of deploying to a subset of servers first?": "Rolling deployment"
-  },
-  146: {
-    "What data structure is used to implement a disjoint set?": "Tree"
-  },
-  147: {
-    "What algorithm is used for finding the shortest path in a DAG?": "Topological sort"
-  },
-  148: {
-    "What is the practice of deploying in isolated environments?": "Sandboxing"
-  },
-  149: {
-    "What data structure is used to implement a B-tree?": "Tree"
-  },
-  150: {
-    "What is the time complexity of radix sort?": "O(d(n+k))"
+const LEETCODE_GRAPHQL_ENDPOINT = 'https://leetcode.com/graphql';
+const QUESTION_QUERY = `
+query questionData($titleSlug: String!) {
+  question(titleSlug: $titleSlug) {
+    questionId
+    title
+    titleSlug
+    content
+    difficulty
+    exampleTestcases
   }
-};
+}
+`;
+
+// ----- HELPER FUNCTION -----
+
+async function fetchLeetCodeQuestion(titleSlug) {
+    const response = await fetch(LEETCODE_GRAPHQL_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            query: QUESTION_QUERY,
+            variables: { titleSlug: titleSlug },
+        }),
+    });
+    const data = await response.json();
+    if (data.errors) {
+        console.error("GraphQL Error:", data.errors);
+        throw new Error("Failed to fetch LeetCode question");
+    }
+    return data.data.question;
+}
+
+async function getRandomLeetCodeProblemTitleSlug() {
+    try {
+        const questions = [
+            "count-total-number-of-colored-cells",
+            "two-sum",
+            "add-two-numbers",
+            "longest-substring-without-repeating-characters",
+            "median-of-two-sorted-arrays",
+            "longest-palindromic-substring",
+            "zigzag-conversion",
+            "reverse-integer",
+            "string-to-integer-(atoi)",
+            "palindrome-number",
+            "regular-expression-matching",
+            "container-with-most-water",
+            "integer-to-roman",
+            "roman-to-integer",
+            "longest-common-prefix",
+            "3sum",
+            "3sum-closest",
+            "letter-combinations-of-a-phone-number",
+            "4sum",
+            "remove-nth-node-from-end-of-list",
+            "valid-parentheses",
+            "merge-two-sorted-lists",
+            "generate-parentheses",
+            "merge-k-sorted-lists",
+            "swap-nodes-in-pairs",
+            "reverse-nodes-in-k-group",
+            "remove-duplicates-from-sorted-array",
+            "remove-element",
+            "find-the-index-of-the-first-occurrence-in-a-string",
+            "divide-two-integers",
+            "substring-with-concatenation-of-all-words",
+            "next-permutation",
+            "longest-valid-parentheses",
+            "search-in-rotated-sorted-array",
+            "find-first-and-last-position-of-element-in-sorted-array",
+            "search-insert-position",
+            "valid-sudoku",
+            "sudoku-solver",
+            "count-and-say",
+            "combination-sum",
+            "combination-sum-ii",
+            "first-missing-positive",
+            "trapping-rain-water",
+            "multiply-strings",
+            "wildcard-matching",
+            "jump-game-ii",
+            "permutations",
+            "permutations-ii",
+            "rotate-image",
+            "group-anagrams",
+            "pow(x,-n)",
+            "n-queens",
+            "n-queens-ii",
+            "maximum-subarray",
+            "spiral-matrix",
+            "jump-game",
+            "merge-intervals",
+            "insert-interval",
+            "length-of-last-word",
+            "spiral-matrix-ii",
+            "permutation-sequence",
+            "rotate-list",
+            "unique-paths",
+            "unique-paths-ii",
+            "minimum-path-sum",
+            "valid-number",
+            "plus-one",
+            "add-binary",
+            "text-justification",
+            "sqrt(x)",
+            "climbing-stairs",
+            "simplify-path",
+            "edit-distance",
+            "set-matrix-zeroes",
+            "search-a-2d-matrix",
+            "sort-colors",
+            "minimum-window-substring",
+            "combinations",
+            "subsets",
+            "word-search",
+            "remove-duplicates-from-sorted-array-ii",
+            "search-in-rotated-sorted-array-ii",
+            "remove-duplicates-from-sorted-list-ii",
+            "remove-duplicates-from-sorted-list",
+            "largest-rectangle-in-histogram",
+            "maximal-rectangle",
+            "partition-list",
+            "scramble-string",
+            "merge-sorted-array",
+            "gray-code",
+            "subsets-ii",
+            "decode-ways",
+            "reverse-linked-list-ii",
+            "restore-ip-addresses",
+            "binary-tree-inorder-traversal",
+            "unique-binary-search-trees-ii",
+            "unique-binary-search-trees",
+            "interleaving-string",
+            "validate-binary-search-tree",
+            "recover-binary-search-tree",
+            "same-tree",
+            "symmetric-tree",
+            "binary-tree-level-order-traversal",
+            "binary-tree-zigzag-level-order-traversal",
+            "maximum-depth-of-binary-tree",
+            "construct-binary-tree-from-preorder-and-inorder-traversal",
+            "construct-binary-tree-from-inorder-and-postorder-traversal",
+            "binary-tree-level-order-traversal-ii",
+            "convert-sorted-array-to-binary-search-tree",
+            "convert-sorted-list-to-binary-search-tree",
+            "balanced-binary-tree",
+            "minimum-depth-of-binary-tree",
+            "path-sum",
+            "path-sum-ii",
+            "flatten-binary-tree-to-linked-list",
+            "distinct-subsequences",
+            "populating-next-right-pointers-in-each-node",
+            "populating-next-right-pointers-in-each-node-ii",
+            "pascal's-triangle",
+            "pascal's-triangle-ii",
+            "triangle",
+            "best-time-to-buy-and-sell-stock",
+            "best-time-to-buy-and-sell-stock-ii",
+            "best-time-to-buy-and-sell-stock-iii",
+            "binary-tree-maximum-path-sum",
+            "valid-palindrome",
+            "word-ladder-ii",
+            "word-ladder",
+            "longest-consecutive-sequence",
+            "sum-root-to-leaf-numbers",
+            "surrounded-regions",
+            "palindrome-partitioning",
+            "palindrome-partitioning-ii",
+            "clone-graph",
+            "gas-station",
+            "candy",
+            "single-number",
+            "single-number-ii",
+            "copy-list-with-random-pointer",
+            "word-break",
+            "word-break-ii",
+            "linked-list-cycle",
+            "linked-list-cycle-ii",
+            "reorder-list",
+            "binary-tree-preorder-traversal",
+            "binary-tree-postorder-traversal",
+            "lru-cache",
+            "insertion-sort-list",
+            "sort-list",
+            "max-points-on-a-line",
+            "evaluate-reverse-polish-notation",
+            "reverse-words-in-a-string",
+            "maximum-product-subarray",
+            "find-minimum-in-rotated-sorted-array",
+            "find-minimum-in-rotated-sorted-array-ii",
+            "min-stack",
+            "binary-tree-upside-down",
+            "read-n-characters-given-read4",
+            "read-n-characters-given-read4-ii---call-multiple-times",
+            "longest-substring-with-at-most-two-distinct-characters",
+            "intersection-of-two-linked-lists",
+            "one-edit-distance",
+            "find-peak-element",
+            "missing-ranges",
+            "maximum-gap",
+            "compare-version-numbers",
+            "fraction-to-recurring-decimal",
+            "two-sum-ii---input-array-is-sorted",
+            "excel-sheet-column-title",
+            "majority-element",
+            "two-sum-iii---data-structure-design",
+            "excel-sheet-column-number",
+            "factorial-trailing-zeroes",
+            "binary-search-tree-iterator",
+            "dungeon-game",
+            "combine-two-tables",
+            "second-highest-salary",
+            "nth-highest-salary",
+            "rank-scores",
+            "largest-number",
+            "consecutive-numbers",
+            "employees-earning-more-than-their-managers",
+            "duplicate-emails",
+            "customers-who-never-order",
+            "department-highest-salary",
+            "department-top-three-salaries",
+            "reverse-words-in-a-string-ii",
+            "repeated-dna-sequences",
+            "best-time-to-buy-and-sell-stock-iv",
+            "rotate-array",
+            "reverse-bits",
+            "number-of-1-bits",
+            "word-frequency",
+            "valid-phone-numbers",
+            "transpose-file",
+            "tenth-line",
+            "delete-duplicate-emails",
+            "rising-temperature",
+            "house-robber",
+            "binary-tree-right-side-view",
+            "number-of-islands",
+            "bitwise-and-of-numbers-range",
+            "happy-number",
+            "remove-linked-list-elements",
+            "count-primes",
+            "isomorphic-strings",
+            "reverse-linked-list",
+            "course-schedule",
+            "implement-trie-(prefix-tree)",
+            "minimum-size-subarray-sum",
+            "course-schedule-ii",
+            "design-add-and-search-words-data-structure",
+            "word-search-ii",
+            "house-robber-ii",
+            "shortest-palindrome",
+            "kth-largest-element-in-an-array",
+            "combination-sum-iii",
+            "contains-duplicate",
+            "the-skyline-problem",
+            "contains-duplicate-ii",
+            "contains-duplicate-iii",
+            "maximal-square",
+            "count-complete-tree-nodes",
+            "rectangle-area",
+            "basic-calculator",
+            "implement-stack-using-queues",
+            "invert-binary-tree",
+            "basic-calculator-ii",
+            "summary-ranges",
+            "majority-element-ii",
+            "kth-smallest-element-in-a-bst",
+            "power-of-two",
+            "implement-queue-using-stacks",
+            "number-of-digit-one",
+            "palindrome-linked-list",
+            "lowest-common-ancestor-of-a-binary-search-tree",
+            "lowest-common-ancestor-of-a-binary-tree",
+            "delete-node-in-a-linked-list",
+            "product-of-array-except-self",
+            "sliding-window-maximum",
+            "search-a-2d-matrix-ii",
+            "different-ways-to-add-parentheses",
+            "valid-anagram",
+            "shortest-word-distance",
+            "shortest-word-distance-ii",
+            "shortest-word-distance-iii",
+            "strobogrammatic-number",
+            "strobogrammatic-number-ii",
+            "strobogrammatic-number-iii",
+            "group-shifted-strings",
+            "count-univalue-subtrees",
+            "flatten-2d-vector",
+            "meeting-rooms",
+            "meeting-rooms-ii",
+            "factor-combinations",
+            "verify-preorder-sequence-in-binary-search-tree",
+            "paint-house",
+            "binary-tree-paths",
+            "add-digits",
+            "3sum-smaller",
+            "single-number-iii",
+            "graph-valid-tree",
+            "trips-and-users",
+            "ugly-number",
+            "ugly-number-ii",
+            "paint-house-ii",
+            "palindrome-permutation",
+            "palindrome-permutation-ii",
+            "missing-number",
+            "alien-dictionary",
+            "closest-binary-search-tree-value",
+            "encode-and-decode-strings",
+            "closest-binary-search-tree-value-ii",
+            "integer-to-english-words",
+            "h-index",
+            "h-index-ii",
+            "paint-fence",
+            "find-the-celebrity",
+            "first-bad-version",
+            "perfect-squares",
+            "wiggle-sort",
+            "zigzag-iterator",
+            "expression-add-operators",
+            "move-zeroes",
+            "peeking-iterator",
+            "inorder-successor-in-bst",
+            "walls-and-gates",
+            "find-the-duplicate-number",
+            "unique-word-abbreviation",
+            "game-of-life",
+            "word-pattern",
+            "word-pattern-ii",
+            "nim-game",
+            "flip-game",
+            "flip-game-ii",
+            "find-median-from-data-stream",
+            "best-meeting-point",
+            "serialize-and-deserialize-binary-tree",
+            "binary-tree-longest-consecutive-sequence",
+            "bulls-and-cows",
+            "longest-increasing-subsequence",
+            "remove-invalid-parentheses",
+            "smallest-rectangle-enclosing-black-pixels",
+            "range-sum-query---immutable",
+            "range-sum-query-2d---immutable",
+            "number-of-islands-ii",
+            "additive-number",
+            "range-sum-query---mutable",
+            "range-sum-query-2d---mutable",
+            "best-time-to-buy-and-sell-stock-with-cooldown",
+            "minimum-height-trees",
+            "sparse-matrix-multiplication",
+            "burst-balloons",
+            "super-ugly-number",
+            "binary-tree-vertical-order-traversal",
+            "count-of-smaller-numbers-after-self",
+            "remove-duplicate-letters",
+            "shortest-distance-from-all-buildings",
+            "maximum-product-of-word-lengths",
+            "bulb-switcher",
+            "generalized-abbreviation",
+            "create-maximum-number",
+            "coin-change",
+            "number-of-connected-components-in-an-undirected-graph",
+            "wiggle-sort-ii",
+            "maximum-size-subarray-sum-equals-k",
+            "power-of-three",
+            "count-of-range-sum",
+            "odd-even-linked-list",
+            "longest-increasing-path-in-a-matrix",
+            "patching-array",
+            "verify-preorder-serialization-of-a-binary-tree",
+            "reconstruct-itinerary",
+            "largest-bst-subtree",
+            "increasing-triplet-subsequence",
+            "self-crossing",
+            "palindrome-pairs",
+            "house-robber-iii",
+            "counting-bits",
+            "nested-list-weight-sum",
+            "longest-substring-with-at-most-k-distinct-characters",
+            "flatten-nested-list-iterator",
+            "power-of-four",
+            "integer-break",
+            "reverse-string",
+            "reverse-vowels-of-a-string",
+            "moving-average-from-data-stream",
+            "top-k-frequent-elements",
+            "design-tic-tac-toe",
+            "intersection-of-two-arrays",
+            "intersection-of-two-arrays-ii",
+            "android-unlock-patterns",
+            "data-stream-as-disjoint-intervals",
+            "design-snake-game",
+            "russian-doll-envelopes",
+            "design-twitter",
+            "line-reflection",
+            "count-numbers-with-unique-digits",
+            "rearrange-string-k-distance-apart",
+            "logger-rate-limiter",
+            "sort-transformed-array",
+            "bomb-enemy",
+            "design-hit-counter",
+            "max-sum-of-rectangle-no-larger-than-k",
+            "nested-list-weight-sum-ii",
+            "water-and-jug-problem",
+            "find-leaves-of-binary-tree",
+            "valid-perfect-square",
+            "largest-divisible-subset",
+            "plus-one-linked-list",
+            "range-addition",
+            "sum-of-two-integers",
+            "super-pow",
+            "find-k-pairs-with-smallest-sums",
+            "guess-number-higher-or-lower",
+            "guess-number-higher-or-lower-ii",
+            "wiggle-subsequence",
+            "combination-sum-iv",
+            "kth-smallest-element-in-a-sorted-matrix",
+            "design-phone-directory",
+            "insert-delete-getrandom-o(1)",
+            "insert-delete-getrandom-o(1)---duplicates-allowed",
+            "linked-list-random-node",
+            "ransom-note",
+            "shuffle-an-array",
+            "mini-parser",
+            "lexicographical-numbers",
+            "first-unique-character-in-a-string",
+            "longest-absolute-file-path",
+            "find-the-difference",
+            "elimination-game",
+            "perfect-rectangle",
+            "is-subsequence",
+            "utf-8-validation",
+            "decode-string",
+            "longest-substring-with-at-least-k-repeating-characters",
+            "rotate-function",
+            "integer-replacement",
+            "random-pick-index",
+            "evaluate-division",
+            "nth-digit",
+            "binary-watch",
+            "remove-k-digits",
+            "frog-jump",
+            "sum-of-left-leaves",
+            "convert-a-number-to-hexadecimal",
+            "queue-reconstruction-by-height",
+            "trapping-rain-water-ii",
+            "valid-word-abbreviation",
+            "longest-palindrome",
+            "split-array-largest-sum",
+            "minimum-unique-word-abbreviation",
+            "fizz-buzz",
+            "arithmetic-slices",
+            "third-maximum-number",
+            "add-strings",
+            "partition-equal-subset-sum",
+            "pacific-atlantic-water-flow",
+            "sentence-screen-fitting",
+            "battleships-in-a-board",
+            "strong-password-checker",
+            "maximum-xor-of-two-numbers-in-an-array",
+            "valid-word-square",
+            "reconstruct-original-digits-from-english",
+            "longest-repeating-character-replacement",
+            "word-squares",
+            "convert-binary-search-tree-to-sorted-doubly-linked-list",
+            "construct-quad-tree",
+            "serialize-and-deserialize-n-ary-tree",
+            "n-ary-tree-level-order-traversal",
+            "flatten-a-multilevel-doubly-linked-list",
+            "encode-n-ary-tree-to-binary-tree",
+            "all-o`one-data-structure",
+            "minimum-genetic-mutation",
+            "number-of-segments-in-a-string",
+            "non-overlapping-intervals",
+            "find-right-interval",
+            "path-sum-iii",
+            "find-all-anagrams-in-a-string",
+            "ternary-expression-parser",
+            "k-th-smallest-in-lexicographical-order",
+            "arranging-coins",
+            "find-all-duplicates-in-an-array",
+            "string-compression",
+            "sequence-reconstruction",
+            "add-two-numbers-ii",
+            "arithmetic-slices-ii---subsequence",
+            "number-of-boomerangs",
+            "find-all-numbers-disappeared-in-an-array",
+            "serialize-and-deserialize-bst",
+            "delete-node-in-a-bst",
+            "sort-characters-by-frequency",
+            "minimum-number-of-arrows-to-burst-balloons",
+            "minimum-moves-to-equal-array-elements",
+            "4sum-ii",
+            "assign-cookies",
+            "132-pattern",
+            "circular-array-loop",
+            "poor-pigs",
+            "repeated-substring-pattern",
+            "lfu-cache",
+            "hamming-distance",
+            "minimum-moves-to-equal-array-elements-ii",
+            "island-perimeter",
+            "can-i-win",
+            "optimal-account-balancing",
+            "count-the-repetitions",
+            "unique-substrings-in-wraparound-string",
+            "validate-ip-address",
+            "convex-polygon",
+            "implement-rand10()-using-rand7()",
+            "encode-string-with-shortest-length",
+            "concatenated-words",
+            "matchsticks-to-square",
+            "ones-and-zeroes",
+            "heaters",
+            "number-complement",
+            "total-hamming-distance",
+            "generate-random-point-in-a-circle",
+            "largest-palindrome-product",
+            "sliding-window-median",
+            "magical-string",
+            "license-key-formatting",
+            "smallest-good-base",
+            "find-permutation",
+            "max-consecutive-ones",
+            "predict-the-winner",
+            "max-consecutive-ones-ii",
+            "zuma-game",
+            "robot-room-cleaner",
+            "the-maze",
+            "non-decreasing-subsequences",
+            "construct-the-rectangle",
+            "reverse-pairs",
+            "target-sum",
+            "teemo-attacking",
+            "next-greater-element-i",
+            "random-point-in-non-overlapping-rectangles",
+            "diagonal-traverse",
+            "the-maze-iii"
+        ];
+        const randomIndex = Math.floor(Math.random() * questions.length);
+        return questions[randomIndex];
+    } catch (error) {
+        console.error('Error selecting random question:', error);
+        return "two-sum";
+    }
+}
 
 // ----- EVENT LISTENER FUNCTIONS -----
 
 chrome.webNavigation.onBeforeNavigate.addListener(
-  function(details) {
-    if (LLM_REGEX.test(details.url)) {
-      chrome.storage.local.get(['lastSolvedTime'], function(result) {
-        const now = Date.now();
-        if (!result.lastSolvedTime || now - result.lastSolvedTime > RESETTIME) {
-          chrome.storage.local.set({originalUrl: details.url}, function() {
-            chrome.tabs.update(details.tabId, {url: chrome.runtime.getURL("popup.html")});
-          });
+    function(details) {
+        if (LLM_REGEX.test(details.url)) {
+            chrome.storage.local.get(['lastSolvedTime'], function(result) {
+                const now = Date.now();
+                if (!result.lastSolvedTime || now - result.lastSolvedTime > RESETTIME) {
+                    chrome.storage.local.set({originalUrl: details.url}, function() {
+                        chrome.tabs.update(details.tabId, {url: chrome.runtime.getURL("popup.html")});
+                    });
+                }
+            });
         }
-      });
+    },
+    {
+        url: [{urlMatches: LLM_REGEX.source}]
     }
-  },
-  {url: [{urlMatches: LLM_REGEX.source}]}
 );
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === "getRandomQuestion") {
-    const questionKeys = Object.keys(QUESTIONS);
-    const randomKey = questionKeys[Math.floor(Math.random() * questionKeys.length)];
-    const questionObj = QUESTIONS[randomKey];
-    const question = Object.keys(questionObj)[0];
-    const answer = questionObj[question];
-    sendResponse({question: question, answer: answer, id: randomKey});
-  } else if (request.action === "checkAnswer") {
-    const correctAnswer = QUESTIONS[request.id][request.question];
-    const isCorrect = request.userAnswer.trim() === correctAnswer.trim();
-    sendResponse({isCorrect: isCorrect});
-  } else if (request.action === "redirectToOriginal") {
-    chrome.storage.local.get(['originalUrl'], function(result) {
-      if (result.originalUrl) {
-        chrome.tabs.create({ url: result.originalUrl }, (tab) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-          }
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "getRandomQuestion") {
+        (async () => {
+            try {
+                const titleSlug = await getRandomLeetCodeProblemTitleSlug();
+                const questionData = await fetchLeetCodeQuestion(titleSlug);
+                console.log("LeetCode Question Data:", questionData);
+                sendResponse({ 
+                    question: questionData.content, 
+                    id: questionData.questionId, 
+                    title: questionData.title,
+                    slug: questionData.titleSlug
+                });
+            } catch (error) {
+                console.error("Error fetching question:", error);
+                sendResponse({ question: "Failed to fetch question.", id: null, title: null, slug: null });
+            }
+        })();
+        return true; 
+    }
+    else if (request.action === "redirectToOriginal") {
+        chrome.storage.local.get(['originalUrl'], function(result) {
+            if (result.originalUrl) {
+                chrome.tabs.create({ url: result.originalUrl });
+            }
         });
-      }
-    });
-  }
-  return true;
+        return true;
+    }
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("Received message in background script:", message);
+    if (message.action === "submissionSuccess" || (message.action === "submissionResult" && message.success)) {
+        console.log("Successful submission detected");
+        chrome.runtime.sendMessage({ action: "updatePopup", content: "Congratulations! You've solved the problem.\n\nYou can now access any AI Chatbot for the next 15 minutes." });
+        chrome.tabs.remove(sender.tab.id);
+        chrome.storage.local.set({lastSolvedTime: Date.now()}, function() {
+            console.log("Last solved time updated");
+        });
+    } else if (message.action === "submissionResult" && !message.success) {
+        console.log("Submission failed");
+    }
 });

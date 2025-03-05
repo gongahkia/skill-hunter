@@ -2,8 +2,15 @@
   "manifest_version": 3,
   "name": "Dorso",
   "version": "1.0",
-  "permissions": ["webNavigation", "storage", "tabs", "activeTab"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -12,8 +19,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["leetcode-content.js"]
     }
   ],
   "web_accessible_resources": [{
