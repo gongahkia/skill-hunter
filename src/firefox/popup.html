@@ -24,18 +24,16 @@
         }
         .content {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: stretch;
         }
         .question-section {
-            flex: 1;
-            margin-right: 20px;
+            margin-bottom: 20px;
         }
         .action-section {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
         #submit {
             background-color: #4CAF50;
@@ -56,19 +54,19 @@
         #result {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #fff;
+            background-color: #f0f0f0;;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Dorso</h1>
-        <p class="subtitle">Fighting programmer brainrot since Feb 2025. Made by @gongahkia</p>
+        <p class="subtitle">Fighting programmer brainrot since Feb 2025. Made by <a href="https://gabrielongzm.com/">Gabriel Ong</a>.</p>
         <h2 id="declaration_of_war">Solve this Leetcode question to continue</h2>
     </div>
     <div class="content">
-        <div class="question-section">
+        <div id="question_section" class="question-section">
             <div id="question"></div>
             <div id="question_content"></div>
         </div>

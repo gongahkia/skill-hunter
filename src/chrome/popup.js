@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const header = document.getElementById("declaration_of_war");
         const question = document.getElementById("question");
         const questionContent = document.getElementById("question_content");
-        const questionSection = document.getElementByClass("question-section");
+        const questionSection = document.getElementById("question_section");
         const submitButton = document.getElementById("submit");
         if (header && question && questionContent && questionSection && submitButton) {
             console.log("Removing elements");
