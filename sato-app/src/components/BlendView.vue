@@ -16,6 +16,14 @@
       <!-- Friend List -->
       <div v-if="friends.length">
         <div v-for="friend in friends" :key="friend.id" class="friend-card">
+          <label>
+            <input 
+              type="checkbox" 
+              v-model="selectedFriends"
+              :value="friend.id"
+            >
+            {{ friend.name }}
+          </label>
           <img :src="friend.image" v-if="friend.image" class="profile-img"/>
           <div>
             <h3>{{ friend.name }}</h3>
@@ -48,8 +56,11 @@
       return {
         profileUrls: '',
         friends: [],
+        selectedFriends: [], // Add this line
         weights: {},
-        blendUrl: null
+        selfWeight: 50,
+        blendUrl: null,
+        error: null
       }
     },
     methods: {
@@ -101,37 +112,69 @@
 
   async generateBlend() {
       try {
-        // Convert weights to decimal percentages
-        const weights = {}
+        // Validate selections
+        if (!this.selectedFriends.length) {
+          throw new Error("Please select at least one friend")
+        }
+
+        // Prepare payload
+        const payload = {
+          weights: {},
+          self_weight: this.selfWeight / 100
+        }
+
         this.selectedFriends.forEach(friendId => {
-          weights[friendId] = this.weights[friendId] / 100
+          const weight = this.weights[friendId]
+          if (isNaN(weight) || weight < 0 || weight > 100) {
+            throw new Error(`Invalid weight for ${friendId}`)
+          }
+          payload.weights[friendId] = weight / 100
         })
 
+        // API call
         const response = await fetch('http://127.0.0.1:5000/generate-blend', {
           method: 'POST',
           credentials: 'include',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            weights: weights,
-            self_weight: this.selfWeight / 100
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         })
 
+        // Handle HTTP errors
         if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Blend creation failed: ${response.status} ${errorText}`)
+          let errorData
+          try {
+            errorData = await response.json()
+          } catch {
+            errorData = { error: await response.text() }
+          }
+          throw new Error(
+            `Server error ${response.status}: ${errorData.error || 'Unknown error'}`
+          )
         }
 
+        // Process successful response
         const data = await response.json()
+        if (!data?.external_urls?.spotify) {
+          throw new Error("Invalid response format from server")
+        }
+
+        // Update UI state
         this.blendUrl = data.external_urls.spotify
         this.error = null
 
       } catch (err) {
-        console.error('Blend creation error:', err)
+        console.error('Blend creation failed:', err)
         this.error = err.message
         this.blendUrl = null
+        
+        // Optional: Scroll to error message
+        this.$nextTick(() => {
+          const errorEl = document.querySelector('.error-message')
+          if (errorEl) errorEl.scrollIntoView({ behavior: 'smooth' })
+        })
       }
     }
+
 }
 
   }
