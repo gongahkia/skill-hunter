@@ -34,6 +34,13 @@ SPOTIFY_REDIRECT_URI = "http://127.0.0.1:5000/callback"
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE = "https://api.spotify.com/v1"
+SPOTIFY_SCOPE = " ".join([
+    "user-read-private",
+    "user-read-email",
+    "user-top-read",
+    "playlist-modify-public",
+    "playlist-modify-private"
+])
 
 @app.route("/login")
 def login():
@@ -42,7 +49,7 @@ def login():
         "client_id": SPOTIFY_CLIENT_ID,
         "response_type": "code",
         "redirect_uri": SPOTIFY_REDIRECT_URI,
-        "scope": "user-read-private user-read-email",
+        "scope": SPOTIFY_SCOPE,
         "show_dialog": "true"
     }
     auth_url = f"{SPOTIFY_AUTH_URL}?{urlencode(params)}"

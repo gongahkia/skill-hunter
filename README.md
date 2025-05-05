@@ -22,6 +22,8 @@ A Web App that provides fine-grained control over Spotify Blends.
 
 ...
 
+## Other notes
+
 ## Reference
 
 The name `Sato` is in reference to [Satō](https://ajin.fandom.com/wiki/Sat%C5%8D) (佐藤), the chief antagonist who opposes [Kei Nagai](https://ajin.fandom.com/wiki/Kei_Nagai) in the completed manga series [Ajin](https://ajin.fandom.com/wiki/Ajin_Wiki).
