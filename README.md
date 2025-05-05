@@ -4,6 +4,20 @@
 
 A Web App that provides fine-grained control over Spotify Blends.
 
+## Screenshots
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="./asset/reference/1.png" width="32%">
+  <img src="./asset/reference/2.png" width="32%">
+  <img src="./asset/reference/3.png" width="32%">
+</div>
+
+<br>
+
+<div style="display: flex; justify-content: center;">
+  <img src="./asset/reference/4.png" width="85%">
+</div>
+
 ## Usage
 
 ...
