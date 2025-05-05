@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/sato_1.0.0-build-orange)](https://github.com/gongahkia/sato/releases/tag/1.0.0)
+[![](https://img.shields.io/badge/sato_1.0.0-passing-green)](https://github.com/gongahkia/sato/releases/tag/1.0.0)
 
 # `Sato`
 
