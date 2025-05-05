@@ -8,6 +8,7 @@ Web App that provides fine-grained, percentage-based control for making Spotify 
 
 * *Backend*: [Flask](https://flask.palletsprojects.com/en/stable/), [Redis](https://redis.io/), [Python](https://www.python.org/)
 * *Frontend*: [Vue.js](https://vuejs.org/)
+* *Auth*: [OAuth 2.0](https://oauth.net/2/)
 * *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
 * *Deploy*: [Netlify](https://www.netlify.com/), [Heroku](https://www.heroku.com/)
 
