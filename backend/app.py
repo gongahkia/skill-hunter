@@ -7,17 +7,23 @@ from urllib.parse import urlencode
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True, expose_headers=["Set-Cookie"])
+CORS(
+    app,
+    origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    supports_credentials=True,
+    expose_headers=["Set-Cookie"]
+)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersecret")
 app.config.update(
-    SESSION_COOKIE_SAMESITE="None",  # Required for cross-origin
-    SESSION_COOKIE_SECURE=False      # Set to True in production (HTTPS)
+    SESSION_COOKIE_DOMAIN="localhost",  # Add this line
+    SESSION_COOKIE_SAMESITE="None",
+    SESSION_COOKIE_SECURE=False
 )
 
 # Spotify credentials (now loaded from .env)
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")  # Use getenv() instead of os.environ[]
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-SPOTIFY_REDIRECT_URI = "http://127.0.0.1:5000/callback"
+SPOTIFY_REDIRECT_URI = "http://localhost:5000/callback"  # Changed from 127.0.0.1
 
 # Rest of your code remains unchanged...
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"

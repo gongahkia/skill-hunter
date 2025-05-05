@@ -20,13 +20,13 @@ export default {
   },
   methods: {
     loginWithSpotify() {
-      window.location.href = "http://127.0.0.1:5000/login";
+      window.location.href = "http://localhost:5000/login";  // Use localhost
     }
   },
   mounted() {
     // Check for ?login=success in the URL
     if (window.location.search.includes('login=success')) {
-      fetch("http://127.0.0.1:5000/me", { credentials: "include" })
+      fetch("http://localhost:5000/me", { credentials: "include" })  // Use localhost
         .then(res => res.json())
         .then(data => {
           if (data.error) {
