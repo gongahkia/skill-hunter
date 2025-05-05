@@ -3,8 +3,9 @@ load_dotenv()
 import os
 import requests
 from flask import Flask, redirect, request, session, jsonify
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from flask_cors import CORS
+import re
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersecret")
@@ -100,6 +101,108 @@ def logout():
     """Clear session data"""
     session.clear()
     return jsonify({"status": "logged out"})
+
+@app.route('/process-friends', methods=['POST'])
+def process_friends():
+    try:
+        profile_urls = request.json.get('urls', [])
+        if not profile_urls:
+            return jsonify({"error": "No URLs provided"}), 400
+
+        friends_data = []
+        
+        for url in profile_urls:
+            # Validate URL format
+            match = re.search(r'spotify\.com/user/([^/?]+)', url)
+            if not match:
+                continue
+                
+            user_id = match.group(1)
+            
+            # Get public profile
+            profile_response = requests.get(
+                f'https://api.spotify.com/v1/users/{user_id}',
+                headers={'Authorization': f'Bearer {session["access_token"]}'}
+            )
+            if profile_response.status_code != 200:
+                continue
+
+            profile = profile_response.json()
+            
+            # Get public playlists
+            playlists_response = requests.get(
+                f'https://api.spotify.com/v1/users/{user_id}/playlists',
+                headers={'Authorization': f'Bearer {session["access_token"]}'}
+            )
+            playlists = playlists_response.json().get('items', []) if playlists_response.status_code == 200 else []
+            
+            friends_data.append({
+                'id': user_id,
+                'name': profile.get('display_name'),
+                'image': profile.get('images', [{}])[0].get('url'),
+                'followers': profile.get('followers', {}).get('total', 0),
+                'playlist_count': len(playlists),
+                'playlists': [p['id'] for p in playlists]
+            })
+        return jsonify(friends_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/generate-blend', methods=['POST'])
+def generate_blend():
+    weights = request.json.get('weights', {})
+    blend_tracks = {}
+    
+    # Get current user's top tracks
+    current_user_tracks = get_user_top_tracks(session['access_token'])
+    
+    # Process each friend
+    for friend in session.get('friends_data', []):
+        friend_tracks = []
+        for playlist_id in friend['playlists']:
+            tracks = requests.get(
+                f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
+                headers={'Authorization': f'Bearer {session["access_token"]}'}
+            ).json().get('items', [])
+            friend_tracks.extend([t['track']['id'] for t in tracks])
+        
+        # Apply weights
+        weight = weights.get(friend['id'], 0) / 100
+        for track in set(friend_tracks):
+            blend_tracks[track] = blend_tracks.get(track, 0) + weight
+    
+    # Add current user's tracks with default weight
+    for track in current_user_tracks:
+        blend_tracks[track] = blend_tracks.get(track, 0) + 0.5
+    
+    # Sort and select top 50 tracks
+    sorted_tracks = sorted(blend_tracks.items(), key=lambda x: -x[1])[:50]
+    
+    # Create playlist
+    playlist = requests.post(
+        f'https://api.spotify.com/v1/users/{session["user_id"]}/playlists',
+        headers={'Authorization': f'Bearer {session["access_token"]}'},
+        json={
+            'name': 'Custom Blend',
+            'public': False,
+            'description': 'Automatically generated blend'
+        }
+    ).json()
+    
+    # Add tracks
+    requests.post(
+        f'https://api.spotify.com/v1/playlists/{playlist["id"]}/tracks',
+        headers={'Authorization': f'Bearer {session["access_token"]}'},
+        json={'uris': [f'spotify:track:{t[0]}' for t in sorted_tracks]}
+    )
+    
+    return jsonify(playlist)
+
+def get_user_top_tracks(token):
+    return requests.get(
+        'https://api.spotify.com/v1/me/top/tracks?limit=50',
+        headers={'Authorization': f'Bearer {token}'}
+    ).json().get('items', [])
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)

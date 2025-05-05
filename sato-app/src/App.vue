@@ -3,36 +3,44 @@
     <div v-if="!user">
       <button @click="login">Login with Spotify</button>
     </div>
+    
     <div v-if="user">
-      <div>
+      <!-- User Profile Section -->
+      <div class="profile-summary">
         <img 
           v-if="user.images && user.images.length"
           :src="user.images[0].url" 
           alt="Profile"
+          class="profile-image"
         />
         <div>
           <h2>{{ user.display_name }}</h2>
           <p>{{ user.email }}</p>
           <p>{{ user.country }} • {{ user.product }}</p>
+          <p>Followers: {{ user.followers.total }}</p>
         </div>
       </div>
-      <div>
-        <div>
-          <span>{{ user.followers.total }}</span>
-          <span> Followers</span>
-        </div>
-      </div>
-      <br>
-      <button @click="logout">Log Out</button>
+
+      <!-- Blend Creation Interface -->
+      <BlendView />
+
+      <!-- Logout Button -->
+      <button @click="logout" class="logout-btn">Log Out</button>
     </div>
-    <div v-if="error">
+
+    <div v-if="error" class="error">
       {{ error }}
     </div>
   </div>
 </template>
 
 <script>
+import BlendView from './components/BlendView.vue'
+
 export default {
+  components: {
+    BlendView
+  },
   data() {
     return {
       user: null,
@@ -77,3 +85,33 @@ export default {
   }
 }
 </script>
+
+<style>
+.profile-summary {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.logout-btn {
+  margin-top: 2rem;
+  padding: 0.5rem 1rem;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-top: 1rem;
+}
+</style>
