@@ -15,7 +15,8 @@ CORS(
     app,
     origins=["http://127.0.0.1:5173", "http://localhost:5173"],
     supports_credentials=True,
-    expose_headers=["Set-Cookie"]
+    expose_headers=["Set-Cookie"],
+    allow_methods=["POST", "GET"]  # <-- Add this
 )
 
 # Session Configuration
@@ -105,6 +106,9 @@ def logout():
 @app.route('/process-friends', methods=['POST'])
 def process_friends():
     try:
+        access_token = session.get("access_token")
+        if not access_token:
+            return jsonify({"error": "Not authenticated"}), 401
         profile_urls = request.json.get('urls', [])
         if not profile_urls:
             return jsonify({"error": "No URLs provided"}), 400

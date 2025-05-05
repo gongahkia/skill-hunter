@@ -61,8 +61,9 @@
     }
 
     try {
-      const response = await fetch('/process-friends', {
+      const response = await fetch('http://127.0.0.1:5000/process-friends', {
         method: 'POST',
+        credentials: 'include',  // Crucial for sending cookies
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ urls })
       })
@@ -96,7 +97,41 @@
       this.error = `Failed to load friends: ${err.message}`
       this.friends = []
     }
-  }
+  },
+
+  async generateBlend() {
+      try {
+        // Convert weights to decimal percentages
+        const weights = {}
+        this.selectedFriends.forEach(friendId => {
+          weights[friendId] = this.weights[friendId] / 100
+        })
+
+        const response = await fetch('http://127.0.0.1:5000/generate-blend', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            weights: weights,
+            self_weight: this.selfWeight / 100
+          })
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Blend creation failed: ${response.status} ${errorText}`)
+        }
+
+        const data = await response.json()
+        this.blendUrl = data.external_urls.spotify
+        this.error = null
+
+      } catch (err) {
+        console.error('Blend creation error:', err)
+        this.error = err.message
+        this.blendUrl = null
+      }
+    }
 }
 
   }
