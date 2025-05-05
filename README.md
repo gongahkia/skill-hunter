@@ -4,31 +4,37 @@
 
 A Web App that provides fine-grained control over Spotify Blends by wrangling with [their](https://developer.spotify.com/documentation/web-api/concepts/authorization) janky [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749).
 
+## Stack
+
+* *Backend*: [Flask](https://flask.palletsprojects.com/en/stable/), [Redis](https://redis.io/), [Python](https://www.python.org/)
+* *Frontend*: [Vue.js](https://vuejs.org/)
+* *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
+* *Deploy*: [Netlify](https://www.netlify.com/), [Heroku](https://www.heroku.com/)
+
 ## Screenshots
+
+### Login with Spotify
 
 <div style="display: flex; justify-content: space-between;">
   <img src="./asset/reference/1.png" width="49%">
   <img src="./asset/reference/2.png" width="49%">
 </div>
 
-<br>
+### Paste Spotify Profile URLs
 
 <div style="display: flex; justify-content: center;">
   <img src="./asset/reference/3.png" width="85%">
 </div>
 
-<br>
+### Create Custom Blends
 
 <div style="display: flex; justify-content: center;">
   <img src="./asset/reference/4.png" width="85%">
 </div>
 
-## Stack
+## Architecture
 
-* *Backend*: [Flask](https://flask.palletsprojects.com/en/stable/), [Python](https://www.python.org/)
-* *Frontend*: [Vue.js](https://vuejs.org/)
-* *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
-* *Deploy*: [Netlify](https://www.netlify.com/), [Heroku](https://www.heroku.com/)
+![](./asset/reference/sato_architecture.png)
 
 ## Usage
 
@@ -54,12 +60,6 @@ $ cd sato-app && npm install && npm run dev
 
 * See the frontend at [127.0.0.1:5000](http://127.0.0.1:5000/).  
 * See the backend at [localhost:5000](http://localhost:5000).
-
-## Architecture
-
-...
-
-## Other notes
 
 ## Reference
 
