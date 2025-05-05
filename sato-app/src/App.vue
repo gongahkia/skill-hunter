@@ -1,12 +1,33 @@
 <template>
   <div>
-    <button v-if="!user" @click="loginWithSpotify">Login with Spotify</button>
-    <div v-if="user">
-      <p>Welcome, {{ user.display_name }}</p>
-      <img v-if="user.images && user.images.length" :src="user.images[0].url" alt="Profile" style="width:100px; border-radius:50%;" />
-      <p>Email: {{ user.email }}</p>
+    <div v-if="!user">
+      <button @click="login">Login with Spotify</button>
     </div>
-    <div v-if="error" style="color:red;">{{ error }}</div>
+    <div v-if="user">
+      <div>
+        <img 
+          v-if="user.images && user.images.length"
+          :src="user.images[0].url" 
+          alt="Profile"
+        />
+        <div>
+          <h2>{{ user.display_name }}</h2>
+          <p>{{ user.email }}</p>
+          <p>{{ user.country }} • {{ user.product }}</p>
+        </div>
+      </div>
+      <div>
+        <div>
+          <span>{{ user.followers.total }}</span>
+          <span> Followers</span>
+        </div>
+      </div>
+      <br>
+      <button @click="logout">Log Out</button>
+    </div>
+    <div v-if="error">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -19,25 +40,39 @@ export default {
     }
   },
   methods: {
-    loginWithSpotify() {
-      window.location.href = "http://localhost:5000/login";  // Use localhost
+    login() {
+      window.location.href = "http://127.0.0.1:5000/login"
+    },
+    async logout() {
+      try {
+        await fetch("http://127.0.0.1:5000/logout", {
+          method: "POST",
+          credentials: "include"
+        })
+        this.user = null
+        window.location.search = ""
+      } catch (err) {
+        this.error = "Logout failed"
+      }
+    },
+    async fetchUserData() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/me", {
+          credentials: "include"
+        })
+        if (!response.ok) throw new Error("Failed to fetch user data")
+        const data = await response.json()
+        if (data.error) throw new Error(data.error)
+        this.user = data
+        window.history.replaceState({}, document.title, "/")
+      } catch (err) {
+        this.error = err.message
+      }
     }
   },
   mounted() {
-    // Check for ?login=success in the URL
-    if (window.location.search.includes('login=success')) {
-      fetch("http://localhost:5000/me", { credentials: "include" })  // Use localhost
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            this.error = data.error;
-          } else {
-            this.user = data;
-          }
-        })
-        .catch(() => {
-          this.error = "Failed to fetch user info from backend.";
-        });
+    if (window.location.search.includes("login=success")) {
+      this.fetchUserData()
     }
   }
 }
