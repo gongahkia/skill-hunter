@@ -1,11 +1,13 @@
 <template>
   <div>
+    <header>
+      <h1 style="margin:0; text-align:center;">Sato</h1>
+    </header>
+    <span><br></span>
     <div v-if="!user">
       <button @click="login">Login with Spotify</button>
     </div>
-    
     <div v-if="user">
-      <!-- User Profile Section -->
       <div class="profile-summary">
         <img 
           v-if="user.images && user.images.length"
@@ -20,23 +22,21 @@
           <p>Followers: {{ user.followers.total }}</p>
         </div>
       </div>
-
-      <!-- Blend Creation Interface -->
       <BlendView />
-
-      <!-- Logout Button -->
       <button @click="logout" class="logout-btn">Log Out</button>
     </div>
-
     <div v-if="error" class="error">
       {{ error }}
     </div>
+    <footer style="margin-top:2em; font-size:0.95em;">
+      Made with <span style="color:#e25555;">♥</span> by 
+      <a href="https://gabrielongzm.com" target="_blank" rel="noopener">Gabriel Ong</a>.
+      Source code <a href="https://github.com/gongahkia/sato" target="_blank" rel="noopener">here</a>.
+    </footer>
   </div>
 </template>
-
 <script>
 import BlendView from './components/BlendView.vue'
-
 export default {
   components: {
     BlendView
@@ -85,21 +85,17 @@ export default {
   }
 }
 </script>
-
 <style>
 .profile-summary {
-  display: flex;
   gap: 1rem;
-  align-items: center;
+  align-items: ce;
   margin-bottom: 2rem;
 }
-
 .profile-image {
   width: 100px;
   height: 100px;
   border-radius: 50%;
 }
-
 .logout-btn {
   margin-top: 2rem;
   padding: 0.5rem 1rem;
@@ -109,7 +105,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .error {
   color: red;
   margin-top: 1rem;
