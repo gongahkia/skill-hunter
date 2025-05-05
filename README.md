@@ -2,14 +2,19 @@
 
 # `Sato`
 
-A Web App that provides fine-grained control over Spotify Blends.
+A Web App that provides fine-grained control over Spotify Blends by wrangling with [their](https://developer.spotify.com/documentation/web-api/concepts/authorization) janky [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749).
 
 ## Screenshots
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/1.png" width="32%">
-  <img src="./asset/reference/2.png" width="32%">
-  <img src="./asset/reference/3.png" width="32%">
+  <img src="./asset/reference/1.png" width="49%">
+  <img src="./asset/reference/2.png" width="49%">
+</div>
+
+<br>
+
+<div style="display: flex; justify-content: center;">
+  <img src="./asset/reference/3.png" width="85%">
 </div>
 
 <br>
@@ -18,19 +23,37 @@ A Web App that provides fine-grained control over Spotify Blends.
   <img src="./asset/reference/4.png" width="85%">
 </div>
 
-## Usage
-
-...
-
-### Local host
-
-...
-
 ## Stack
 
 * *Backend*: [Flask](https://flask.palletsprojects.com/en/stable/), [Python](https://www.python.org/)
 * *Frontend*: [Vue.js](https://vuejs.org/)
+* *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
 * *Deploy*: [Netlify](https://www.netlify.com/), [Heroku](https://www.heroku.com/)
+
+## Usage
+
+First [register](https://developer.spotify.com/) as a Spotify Developer.
+
+Then *Create app* on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/callback** under *Redirect URIs*.
+
+Create an `.env` file with the *Client ID* and *Client secret*.
+
+```env
+SPOTIFY_CLIENT_ID=XXX
+SPOTIFY_CLIENT_SECRET=XXX
+```
+
+Then run the below.
+
+```console
+$ git clone https://github.com/gongahkia/sato
+$ cd backend && python3 -m venv myenv && source myenv/bin/activate
+$ cd backend && pip install -r requirements.txt && python3 app.py
+$ cd sato-app && npm install && npm run dev
+```
+
+* See the frontend at [127.0.0.1:5000](http://127.0.0.1:5000/).  
+* See the backend at [localhost:5000](http://localhost:5000).
 
 ## Architecture
 
