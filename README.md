@@ -2,7 +2,7 @@
 
 # `Sato`
 
-A Web App that provides fine-grained control over Spotify Blends by wrangling with [their](https://developer.spotify.com/documentation/web-api/concepts/authorization) janky [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749).
+Web App that provides fine-grained, percentage-based control for making Spotify Blends with your friends.
 
 ## Stack
 
@@ -60,6 +60,10 @@ $ cd sato-app && npm install && npm run dev
 
 * See the frontend at [127.0.0.1:5000](http://127.0.0.1:5000/).  
 * See the backend at [localhost:5000](http://localhost:5000).
+
+## Other notes
+
+I probably spent 75% of my time wrangling with [Spotify's](https://developer.spotify.com/documentation/web-api/concepts/authorization) janky [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) implementation and 25% of the time actually developing `Sato`.
 
 ## Reference
 
