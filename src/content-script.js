@@ -146,6 +146,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     try {
       const messages = ChatExporter.extractors[platform]();
+      console.log(messages);
       sendResponse({ data: messages, platform });
     } catch (error) {
       sendResponse({ error: error.message });

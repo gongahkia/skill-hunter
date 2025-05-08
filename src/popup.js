@@ -11,14 +11,15 @@ document.querySelectorAll('.format-grid button').forEach(btn => {
           alert("Could not extract chat. Are you on a supported chat page?");
           return;
         } else {
-          console.log(response);
+          console.log(response.data);
+          console.log(response.platform);
+          chrome.runtime.sendMessage({
+            action: "download",
+            content: response.data,
+            mime: response.mime,
+            extension: format
+          });
         }
-        chrome.runtime.sendMessage({
-          action: "download",
-          content: response.data,
-          mime: response.mime,
-          extension: format
-        });
       });
     });
   });
