@@ -68,9 +68,15 @@ Then follow the below instructions for your browser.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
 
-## Coverage
+## Chatbot Coverage
 
-... Add support coverage for chatbots
+| Chatbot | Status |
+| :--- | :--- |
+| [ChatGPT](https://chatgpt.com/) | |
+| [Gemini](https://gemini.google.com/) | |
+| [Claude](https://claude.ai/) | |
+| [Perplexity](https://www.perplexity.ai/) | |
+| [DeepSeek](https://chat.deepseek.com/) | |
 
 ## Reference
 
