@@ -16,6 +16,7 @@ class ChatExporter {
   };
 
   static extractChatGPTMessages() {
+    console.log('extracting chatgpt messages');
     let messageArray = [];
     const chatElement = document.querySelector('.flex.basis-auto.flex-col');
     if (chatElement != null) {
@@ -40,6 +41,7 @@ class ChatExporter {
   }
 
   static extractClaudeMessages() {
+    console.log('extracting claude messages');
     let messageArray = [];
     const chatElement = document.querySelector('.flex-1.flex.flex-col.gap-3.px-4.max-w-3xl.mx-auto.w-full.pt-1');
     if (chatElement != null) {
@@ -61,6 +63,7 @@ class ChatExporter {
   }
 
   static extractGeminiMessages() {
+    console.log('extracting gemini messages');
     let messageArray = [];
     const chatElement = document.querySelector('#chat-history');
     if (chatElement != null) {
@@ -79,6 +82,7 @@ class ChatExporter {
   }
 
   static extractPerplexityMessages() {
+    console.log('extracting perplexity messages');
     const messageArray = [];
     const chatElement = document.querySelector('.chat-container');
     if (chatElement != null) {
@@ -97,6 +101,7 @@ class ChatExporter {
   }
 
   static extractDeepSeekMessages() {
+    console.log('extracting deepseek messages');
     const messageArray = [];
     const chatElement = document.querySelector('.chat-container.divider');
     if (chatElement != null) {
