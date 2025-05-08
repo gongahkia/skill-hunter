@@ -137,20 +137,22 @@ class ChatExporter {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "extractChat") {
+    console.log('Extraction request received');
     const platform = ChatExporter.getCurrentPlatform();
     if (!platform) {
+      console.warn('No platform detected');
       sendResponse({ error: "No supported chat platform detected" });
       return true;
-    } else {
-      console.log(`Detected platform: ${platform}`);
     }
     try {
+      console.log(`Extracting from ${platform}`);
       const messages = ChatExporter.extractors[platform]();
-      console.log(messages);
+      console.log(`Extracted ${messages.length} messages`);
       sendResponse({ data: messages, platform });
     } catch (error) {
+      console.error('Extraction failed:', error);
       sendResponse({ error: error.message });
     }
+    return true; 
   }
-  return true; 
 });
