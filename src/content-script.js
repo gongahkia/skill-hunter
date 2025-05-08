@@ -51,7 +51,7 @@ class ChatExporter {
           id: ''
         };
         template.role = index % 2 === 0 ? 'user' : 'assistant';
-        template.content = innerText.trim();
+        template.content = el.innerText.trim();
         const url = window.location.href;
         template.id = url.replace('https://claude.ai/chat/', '');
         messageArray.push(template);
