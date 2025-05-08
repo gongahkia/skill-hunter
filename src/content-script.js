@@ -15,22 +15,6 @@ class ChatExporter {
     deepseek: () => this.extractDeepSeekMessages()
   };
 
-  static injectUI() {
-    const btn = document.createElement('button');
-    btn.id = 'rakuzaichi-export';
-    btn.textContent = 'Export Chat';
-    btn.addEventListener('click', this.showFormatSelector);
-    document.body.appendChild(btn);
-  }
-
-  static async showFormatSelector() {
-    const response = await fetch(chrome.runtime.getURL('formats.html'));
-    const html = await response.text();
-    const parser = new DOMParser();
-    const formatDoc = parser.parseFromString(html, 'text/html');
-    document.body.appendChild(formatDoc.querySelector('.format-selector'));
-  }
-
   static extractChatGPTMessages() {
     let messageArray = [];
     const chatElement = document.querySelector('.flex.basis-auto.flex-col');
@@ -130,11 +114,27 @@ class ChatExporter {
     return messageArray;
   }
 
+  static getCurrentPlatform() {
+    return Object.keys(this.detectors).find(platform => 
+      this.detectors[platform]()
+    );
+  }
+
 }
 
-Object.keys(ChatExporter.detectors).some(platform => {
-  if (ChatExporter.detectors[platform]()) {
-    ChatExporter.injectUI();
-    return true;
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "extractChat") {
+    const platform = ChatExporter.getCurrentPlatform();
+    if (!platform) {
+      sendResponse({ error: "No supported chat platform detected" });
+      return true;
+    }
+    try {
+      const messages = ChatExporter.extractors[platform]();
+      sendResponse({ data: messages, platform });
+    } catch (error) {
+      sendResponse({ error: error.message });
+    }
   }
+  return true; 
 });
