@@ -6,18 +6,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h3>Export Format</h3>
-  <div class="format-grid">
-    <button data-format="csv">CSV</button>
-    <button data-format="tsv">TSV</button>
-    <button data-format="json">JSON</button>
-    <button data-format="ndjson">NDJSON</button>
-    <button data-format="xml">XML</button>
-    <button data-format="yaml">YAML</button>
-    <button data-format="parquet">Parquet</button>
-    <button data-format="avro">Avro</button>
+  <div class="popup-container">
+    <header>
+      <img src="./icon/128.png" alt="Rakuzaichi Logo" class="logo">
+      <h2>Export Chat</h2>
+    </header>
+    <section>
+      <h3>Select Format</h3>
+      <div class="format-grid">
+        <button data-format="csv">CSV</button>
+        <button data-format="tsv">TSV</button>
+        <button data-format="json">JSON</button>
+        <button data-format="ndjson">NDJSON</button>
+        <button data-format="xml">XML</button>
+        <button data-format="yaml">YAML</button>
+        <button data-format="parquet">Parquet</button>
+        <button data-format="avro">Avro</button>
+      </div>
+    </section>
+    <footer>
+      <div class="made-by">Made by <span>Gabriel Ong</span>.</div>
+    </footer>
   </div>
-  <div class="made-by">Made by <span>Gabriel Ong</span>.</div>
   <script src="popup.js"></script>
 </body>
 </html>

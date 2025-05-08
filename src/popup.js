@@ -6,7 +6,7 @@ document.querySelectorAll('.format-grid button').forEach(btn => {
       target: { tabId: tab.id },
       files: ['content-script.js']
     }, () => {
-      chrome.tabs.sendMessage(tab.id, { action: "extract", format }, (response) => {
+      chrome.tabs.sendMessage(tab.id, { action: "extractChat", format }, (response) => {
         if (chrome.runtime.lastError) {
           alert("Could not extract chat. Are you on a supported chat page?");
           return;
