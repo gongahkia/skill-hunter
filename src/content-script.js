@@ -138,4 +138,3 @@ Object.keys(ChatExporter.detectors).some(platform => {
     return true;
   }
 });
-
