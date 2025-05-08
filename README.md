@@ -57,7 +57,6 @@ Then follow the below instructions for your browser.
 2. Click *load temporary add-on*.
 3. Open the `Rakuzaichi` repo, select `manifest.json`.
 4. Click the toggle button to open the `Rakuzaichi` browser extension.
-5. Input your Gemeni API Key and *Save*.
 
 ### Chrome
 
@@ -66,7 +65,6 @@ Then follow the below instructions for your browser.
 3. Click *load unpacked*.
 4. Open the `Rakuzaichi` repo, click *select*.
 5. Click the toggle button to open the `Rakuzaichi` browser extension.
-6. Input your Gemeni API Key and *Save*.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
 
@@ -78,3 +76,56 @@ The name `Rakuzaichi` is in reference to the [Rakuzaichi Auction House](https://
 
 ## Legal disclaimer
 
+The Rakuzaichi browser extension ("Rakuzaichi") is provided "AS IS" and "AS AVAILABLE," without warranty of any kind, express or implied. By using Rakuzaichi, you acknowledge that you have read, understood, and agree to be bound by this disclaimer's below terms and limitations.
+
+### No Responsibility Disclaimer
+
+The information and functionality provided by Rakuzaichi through its chat export services is for general informational purposes only. Rakuzaichi and its creators make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any data exported through the extension.
+
+### Use at Your Own Risk
+
+Your use of Rakuzaichi and its features is entirely at your own risk. Rakuzaichi's creators and contributors shall not be liable for any errors or omissions in the exported content, nor for any actions taken in reliance thereon.
+
+### Export Functionality Limitations
+
+Data exported by Rakuzaichi in JSON, YAML, Parquet, XML, CSV, or other formats may contain limitations, inconsistencies, or formatting issues. Users should:
+* Not rely solely on exported chat data for critical decisions
+* Verify all information against the original chat interfaces
+* Understand that format conversion may result in partial data loss or transformation
+* Be aware that exported data may not include all metadata from the original chat platform
+
+### No Technical Support Guarantee
+
+Rakuzaichi does not guarantee technical support or compatibility with all AI chatbot platforms. The extension's functionality may change based on updates to the underlying platforms it interacts with. Users should be aware that changes to third-party chat interfaces may temporarily or permanently affect Rakuzaichi's functionality.
+
+### Intellectual Property
+
+Users are responsible for ensuring they have the necessary rights to export and use chat conversations processed through Rakuzaichi. The extension does not claim ownership of user-accessed content, but users grant Rakuzaichi the right to process and convert such content for the purpose of providing export services.
+
+### Third-Party Services
+
+Rakuzaichi interacts with third-party services including but not limited to various AI chatbot platforms. The use of these services is subject to their respective terms and conditions. Rakuzaichi's creators are not responsible for the performance, availability, or policies of these third-party services.
+
+### Data Privacy
+
+Information processed through Rakuzaichi may be temporarily handled within the extension's operation. By using Rakuzaichi, you acknowledge that:
+* The extension processes conversation data that may contain personal information
+* You have the right to export the data you're accessing
+* Exported data becomes your responsibility to store and handle securely
+* Users should review the terms of service of the original chat platforms regarding data export permissions
+
+### Limitation of Liability
+
+Under no circumstances shall Rakuzaichi's creators or contributors be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the extension. Rakuzaichi is not liable for any decisions made or actions taken based on the exported data provided.
+
+### Compliance with Terms of Service
+
+Users are responsible for ensuring their use of Rakuzaichi complies with the terms of service of the AI chat platforms from which they export data. Rakuzaichi does not encourage or support circumventing any restrictions placed by these platforms.
+
+### Changes to Disclaimer
+
+This disclaimer may be updated from time to time without notice. It is your responsibility to review this disclaimer periodically for changes.
+
+### Termination of Service
+
+Rakuzaichi reserves the right to modify, suspend, or discontinue the extension or any part thereof at any time without prior notice or liability.
