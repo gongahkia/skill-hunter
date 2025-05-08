@@ -68,6 +68,10 @@ Then follow the below instructions for your browser.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
 
+## Coverage
+
+... Add support coverage for chatbots
+
 ## Reference
 
 The name `Rakuzaichi` is in reference to the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家 ), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of the ongoing manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).

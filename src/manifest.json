@@ -3,12 +3,12 @@
   "name": "Rakuzaichi",
   "version": "1.0",
   "permissions": ["activeTab", "scripting", "downloads"],
-  "host_permissions": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*"],
+  "host_permissions": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*", "*//chat.deepseek.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [{
-    "matches": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*"],
+    "matches": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*", "*//chat.deepseek.com/*"],
     "js": ["content-script.js"],
     "css": ["styles.css"]
   }],
