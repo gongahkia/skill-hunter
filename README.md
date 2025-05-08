@@ -8,6 +8,15 @@
 
 ...
 
+CSV
+TSV
+XML
+JSON
+NDJSON
+YAML
+Parquet
+Avro
+
 ## Stack
 
 * *Frontend*: HTML, CSS
