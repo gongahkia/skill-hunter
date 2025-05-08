@@ -70,7 +70,7 @@ class ChatExporter {
         let template = {
           role: i % 2 === 0 ? 'user' : 'assistant', 
           content: currentElement.innerText?.trim() || '',
-          id: currentElement.id || `msg-${Date.now()}-${i}`
+          id: '' | currentElement.id || `msg-${Date.now()}-${i}`
         };
         messageArray.push(template);
       }
@@ -128,6 +128,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!platform) {
       sendResponse({ error: "No supported chat platform detected" });
       return true;
+    } else {
+      console.log(`Detected platform: ${platform}`);
     }
     try {
       const messages = ChatExporter.extractors[platform]();

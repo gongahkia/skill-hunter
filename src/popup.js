@@ -10,6 +10,8 @@ document.querySelectorAll('.format-grid button').forEach(btn => {
         if (chrome.runtime.lastError) {
           alert("Could not extract chat. Are you on a supported chat page?");
           return;
+        } else {
+          console.log(response);
         }
         chrome.runtime.sendMessage({
           action: "download",
