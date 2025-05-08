@@ -2,9 +2,9 @@ class ChatExporter {
   static detectors = {
     chatgpt: () => document.querySelector('.flex.basis-auto.flex-col'),
     claude: () => document.querySelector('.flex-1.flex.flex-col.gap-3.px-4.max-w-3xl.mx-auto.w-full.pt-1'),
-    gemini: () => document.querySelector('.chat-container'),
+    gemini: () => document.querySelector('#chat-history'),
     perplexity: () => document.querySelector('.chat-container'),
-    deepseek: () => document.querySelector('.chat-container')
+    deepseek: () => document.querySelector('.chat-container.divider')
   };
 
   static extractors = {
@@ -66,8 +66,8 @@ class ChatExporter {
           content: '',
           id: ''
         };
-        template.role = index === 0 ? 'user' : 'assistant';
-        template.content = el.innerText.trim();
+        template.role = index % 2 === 0 ? 'user' : 'assistant';
+        template.content = innerText.trim();
         const url = window.location.href;
         template.id = url.replace('https://claude.ai/chat/', '');
         messageArray.push(template);
@@ -76,72 +76,58 @@ class ChatExporter {
     return messageArray;
   }
 
-  // Gemini Implementation
-  // FUA to fix this logic
   static extractGeminiMessages() {
-    const messages = [];
-    const chatRows = document.querySelectorAll('.chat-container > div');
-    
-    chatRows.forEach(row => {
-      const isUser = row.querySelector('div[data-role="user"]');
-      const contentElement = isUser 
-        ? row.querySelector('.user-message-content')
-        : row.querySelector('.bot-response-content');
-      
-      messages.push({
-        role: isUser ? 'user' : 'assistant',
-        content: contentElement?.innerText?.trim() || '',
-        timestamp: row.querySelector('time')?.dateTime || new Date().toISOString()
-      });
-    });
-    
-    return messages;
+    let messageArray = [];
+    const chatElement = document.querySelector('#chat-history');
+    if (chatElement != null) {
+      const messages = chatElement.querySelectorAll('.conversation-container.message-actions-hover-boundary.tts-removed.ng-star-inserted');
+      for (let i = 0; i < messages.length; i++) {
+        const currentElement = messages[i];
+        let template = {
+          role: i % 2 === 0 ? 'user' : 'assistant', 
+          content: currentElement.innerText?.trim() || '',
+          id: currentElement.id || `msg-${Date.now()}-${i}`
+        };
+        messageArray.push(template);
+      }
+    }
+    return messageArray;
   }
-
-  // Perplexity Implementation
-  // FUA to fix this logic
 
   static extractPerplexityMessages() {
-    const messages = [];
-    const chatRows = document.querySelectorAll('.chat-container > div');
-    
-    chatRows.forEach(row => {
-      const isUser = row.querySelector('div[data-role="user"]');
-      const contentElement = isUser 
-        ? row.querySelector('.user-message-content')
-        : row.querySelector('.bot-response-content');
-      
-      messages.push({
-        role: isUser ? 'user' : 'assistant',
-        content: contentElement?.innerText?.trim() || '',
-        timestamp: row.querySelector('time')?.dateTime || new Date().toISOString()
-      });
-    });
-    
-    return messages;
+    const messageArray = [];
+    const chatElement = document.querySelector('.chat-container');
+    if (chatElement != null) {
+      const messages = chatElement.querySelectorAll('.message');
+      for (let i = 0; i < messages.length; i++) {
+        const currentElement = messages[i];
+        let template = {
+          role: i % 2 === 0 ? 'user' : 'assistant', 
+          content: currentElement.innerText?.trim() || '',
+          id: currentElement.id || `msg-${Date.now()}-${i}`
+        };
+        messageArray.push(template);
+      }
+    }
+    return messageArray;
   }
 
-  // DeepSeek Implementation
-  // FUA to fix this logic
-
   static extractDeepSeekMessages() {
-    const messages = [];
-    const chatRows = document.querySelectorAll('.chat-container > div');
-    
-    chatRows.forEach(row => {
-      const isUser = row.querySelector('div[data-role="user"]');
-      const contentElement = isUser 
-        ? row.querySelector('.user-message-content')
-        : row.querySelector('.bot-response-content');
-      
-      messages.push({
-        role: isUser ? 'user' : 'assistant',
-        content: contentElement?.innerText?.trim() || '',
-        timestamp: row.querySelector('time')?.dateTime || new Date().toISOString()
-      });
-    });
-    
-    return messages;
+    const messageArray = [];
+    const chatElement = document.querySelector('.chat-container.divider');
+    if (chatElement != null) {
+      const messages = chatElement.querySelectorAll('.message');
+      for (let i = 0; i < messages.length; i++) {
+        const currentElement = messages[i];
+        let template = {
+          role: i % 2 === 0 ? 'user' : 'assistant', 
+          content: currentElement.innerText?.trim() || '',
+          id: currentElement.id || `msg-${Date.now()}-${i}`
+        };
+        messageArray.push(template);
+      }
+    }
+    return messageArray;
   }
 
 }
