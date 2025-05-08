@@ -6,16 +6,14 @@
 
 ## Rationale
 
-...
-
-CSV
-TSV
-XML
-JSON
-NDJSON
-YAML
-Parquet
-Avro
+* CSV
+* TSV
+* JSON
+* NDJSON
+* XML
+* YAML
+* Parquet
+* Avro
 
 ## Stack
 
