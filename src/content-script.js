@@ -1,7 +1,7 @@
 class ChatExporter {
   static detectors = {
-    chatgpt: () => document.querySelector('.group'),
-    claude: () => document.querySelector('.flex.flex-col.items-center'),
+    chatgpt: () => document.querySelector('.flex.basis-auto.flex-col'),
+    claude: () => document.querySelector('.flex-1.flex.flex-col.gap-3.px-4.max-w-3xl.mx-auto.w-full.pt-1'),
     gemini: () => document.querySelector('.chat-container'),
     perplexity: () => document.querySelector('.chat-container'),
     deepseek: () => document.querySelector('.chat-container')
