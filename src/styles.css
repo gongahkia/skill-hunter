@@ -1,0 +1,87 @@
+#rakuzaichi-export {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 24px;
+  background: #2d3748;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+#rakuzaichi-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.2);
+  background: #3c4a5f;
+}
+
+.format-selector {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  width: 240px;
+  z-index: 10000;
+}
+
+.format-selector h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: #1a202c;
+}
+
+.format-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.format-grid button {
+  padding: 8px 12px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.format-grid button:hover {
+  background: #edf2f7;
+  transform: translateY(-1px);
+}
+
+.made-by {
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 15px;
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.made-by span {
+  font-weight: 600;
+  text-decoration: underline;
+  color: #2d3748;
+}
+
+/* Backdrop overlay */
+.format-selector::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: -1;
+}

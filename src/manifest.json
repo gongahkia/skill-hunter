@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Rakuzaichi",
+  "version": "1.0",
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "host_permissions": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["*://chat.openai.com/*", "*://claude.ai/*", "*://gemini.google.com/*", "*://perplexity.ai/*"],
+    "js": ["content-script.js"],
+    "css": ["styles.css"]
+  }],
+  "web_accessible_resources": [{
+    "resources": ["formats.html"],
+    "matches": ["<all_urls>"]
+  }]
+}
