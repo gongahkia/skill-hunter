@@ -38,7 +38,6 @@ with Diagram("Rakuzaichi Architecture", show=False, direction="TB"):
                 
         storage = Storage("Local Storage\n(Settings/Cache)")
 
-    # Chatbot platforms
     with Cluster("Supported Chatbots"):
         chatgpt = Custom("", CHATGPT_ICON)
         claude = Custom("", CLAUDE_ICON)
@@ -46,7 +45,6 @@ with Diagram("Rakuzaichi Architecture", show=False, direction="TB"):
         perplexity = Custom("", PERPLEXITY_ICON)
         deepseek = Custom("", DEEPSEEK_ICON)
 
-    # Relationships
     user >> Edge(label="1. Chat interaction") >> gemini
     user >> Edge(label="2. Trigger export") >> browser
     

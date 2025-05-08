@@ -2,23 +2,37 @@
 
 # `Rakuzaichi`
 
-...
-
-## Rationale
-
-* CSV
-* TSV
-* JSON
-* NDJSON
-* XML
-* YAML
-* Parquet
-* Avro
+Browser extension that stores your chats with [LLMs](https://cloud.google.com/ai/llms) locally, for the future.
 
 ## Stack
 
 * *Frontend*: HTML, CSS
 * *Backend*: JavaScript
+
+## Rationale
+
+As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyday tool, being able to [store local copies](https://www.reddit.com/r/cybersecurity_help/comments/1ae6vzk/cloud_vs_local_storage/) of your past chat logs becomes increasingly important.
+
+Unfortunately, current chatbots only support exporting chat history as `.pdf`, `.md` or `.docx` *(if at all)*.
+
+`Rakuzaichi` puts you ***back in control*** of your data by [exporting your chat history](#screenshots) *(and other useful metadata)* at the click of a button in the following formats, with a focus on serialisation, transfer and storage.
+
+| Export Format | Purpose |
+| :--- | :--- |
+| [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | Wide support for tabular data and spreadsheet operations|
+| [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) | Tab-delimited CSV alternative for ease of parsing and storage|
+| [JSON](https://en.wikipedia.org/wiki/JSON) | Human-readable and universally supported storage format|
+| [NDJSON](https://en.wikipedia.org/wiki/JSON_streaming#Compatibility) | JSON optimised for streaming and large datasets |
+| [XML](https://en.wikipedia.org/wiki/XML) | Extensible and hierarchy-capable for legacy and enterprise |
+| [YAML](https://en.wikipedia.org/wiki/YAML) | Human-readable storage for configuration files |
+| [Parquet](https://parquet.apache.org/) *(Apache)* | Columnar storage for big data analytics |
+| [Avro](https://avro.apache.org/) *(Apache)* | Compact binary format with native serialization capabilities |
+
+See the supported chatbots [here](#chatbot-coverage).
+
+## Architecture
+
+![](./asset/reference/architecture.png)
 
 ## Screenshots
 
@@ -30,14 +44,12 @@
 
 <img src="./asset/reference/3.png" width="100%">
 
+<br>
+
 <div style="display: flex; justify-content: space-between;">
   <img src="./asset/reference/2.png" width="49%">
   <img src="./asset/reference/4.png" width="49%">
 </div>
-
-## Architecture
-
-![](./asset/reference/architecture.png)
 
 ## Usage
 
