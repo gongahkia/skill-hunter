@@ -150,7 +150,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log(`Extracting from ${platform}`);
       const messages = ChatExporter.extractors[platform]();
       console.log(`Extracted ${messages.length} messages`);
-      exportChat(messages);
+      exportChat(platform, messages);
       sendResponse({ data: messages, platform });
     } catch (error) {
       console.error('Extraction failed:', error);
@@ -161,6 +161,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function exportChat(platform, data) {
+  console.log(`exporting chat from ${platform}`);
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
