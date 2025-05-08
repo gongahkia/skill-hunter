@@ -19,6 +19,7 @@ document.querySelectorAll('.format-grid button').forEach(btn => {
             mime: response.mime,
             extension: format
           });
+          // continue debugging port forwarding from here
         }
       });
     });
