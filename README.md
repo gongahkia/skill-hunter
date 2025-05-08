@@ -24,23 +24,17 @@ Avro
 
 ## Screenshots
 
+### Browser Extension
+
+<img src="./asset/reference/1.png" width="49%">
+
+### Exporting a chat
+
+<img src="./asset/reference/3.png" width="100%">
+
 <div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/1.png" width="49%">
   <img src="./asset/reference/2.png" width="49%">
-</div>
-
-<br>
-
-<div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/3.png" width="49%">
   <img src="./asset/reference/4.png" width="49%">
-</div>
-
-<br>
-
-<div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/5.png" width="49%">
-  <img src="./asset/reference/6.png" width="49%">
 </div>
 
 ## Architecture
