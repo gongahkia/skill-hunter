@@ -77,9 +77,11 @@ class ChatExporter {
           content: currentElement.innerText?.trim() || '',
           id: '' | currentElement.id || `msg-${Date.now()}-${i}`
         };
+        console.log(template);
         messageArray.push(template);
       }
     }
+    console.log(messageArray);
     return messageArray;
   }
 
@@ -96,9 +98,11 @@ class ChatExporter {
           content: currentElement.innerText?.trim() || '',
           id: currentElement.id || `msg-${Date.now()}-${i}`
         };
+        console.log(template);
         messageArray.push(template);
       }
     }
+    console.log(messageArray);
     return messageArray;
   }
 
@@ -116,8 +120,10 @@ class ChatExporter {
           id: currentElement.id || `msg-${Date.now()}-${i}`
         };
         messageArray.push(template);
+        console.log(template);
       }
     }
+    console.log(messageArray);
     return messageArray;
   }
 
