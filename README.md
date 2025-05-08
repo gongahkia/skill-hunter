@@ -72,11 +72,13 @@ Support for other browsers like Opera, Vivaldi have not been extensively tested,
 
 | Chatbot | Status |
 | :--- | :--- |
-| [ChatGPT](https://chatgpt.com/) | |
-| [Gemini](https://gemini.google.com/) | |
-| [Claude](https://claude.ai/) | |
-| [Perplexity](https://www.perplexity.ai/) | |
-| [DeepSeek](https://chat.deepseek.com/) | |
+| [ChatGPT](https://chatgpt.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Gemini](https://gemini.google.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Claude](https://claude.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Perplexity](https://www.perplexity.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [DeepSeek](https://chat.deepseek.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Grok](https://grok.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
+| [Copilot](https://copilot.microsoft.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
 
 ## Reference
 
