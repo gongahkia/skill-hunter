@@ -56,9 +56,11 @@ class ChatExporter {
         template.content = el.innerText.trim();
         const url = window.location.href;
         template.id = url.replace('https://claude.ai/chat/', '');
+        console.log(template);
         messageArray.push(template);
       });
     }
+    console.log(messageArray);
     return messageArray;
   }
 
