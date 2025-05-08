@@ -55,25 +55,25 @@ class ChatExporter {
     return messageArray;
   }
 
-  // Claude Implementation
-  // FUA to fix this logic
   static extractClaudeMessages() {
-    const messages = [];
-    const messageContainers = document.querySelectorAll('.flex.flex-col.items-center > div:not(:first-child)');
-    
-    messageContainers.forEach(container => {
-      const isUser = !!container.querySelector('img[alt*="User"]');
-      const contentElement = container.querySelector('.whitespace-pre-wrap');
-      const timeElement = container.querySelector('time');
-      
-      messages.push({
-        role: isUser ? 'user' : 'assistant',
-        content: contentElement?.innerText?.trim() || '',
-        timestamp: timeElement?.dateTime || new Date().toISOString()
+    let messageArray = [];
+    const chatElement = document.querySelector('.flex-1.flex.flex-col.gap-3.px-4.max-w-3xl.mx-auto.w-full.pt-1');
+    if (chatElement != null) {
+      const elements = chatElement.querySelectorAll('[data-test-render-count="1"]');
+      elements.forEach((el, index) => {
+        let template = {
+          role: '',
+          content: '',
+          id: ''
+        };
+        template.role = index === 0 ? 'user' : 'assistant';
+        template.content = el.innerText.trim();
+        const url = window.location.href;
+        template.id = url.replace('https://claude.ai/chat/', '');
+        messageArray.push(template);
       });
-    });
-    
-    return messages;
+    }
+    return messageArray;
   }
 
   // Gemini Implementation
