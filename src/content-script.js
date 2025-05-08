@@ -31,19 +31,28 @@ class ChatExporter {
     document.body.appendChild(formatDoc.querySelector('.format-selector'));
   }
 
-  // ChatGPT Implementation
-  // FUA to fix this logic
   static extractChatGPTMessages() {
-    return Array.from(document.querySelectorAll('.group')).map(el => {
-      const isUser = !!el.querySelector('.dark\\:bg-gray-800');
-      const contentElement = el.querySelector('.whitespace-pre-wrap');
-      const timeElement = el.querySelector('time');
-      return {
-        role: isUser ? 'user' : 'assistant',
-        content: contentElement?.innerText?.trim() || '',
-        timestamp: timeElement?.dateTime || new Date().toISOString()
-      };
-    });
+    let messageArray = [];
+    const chatElement = document.querySelector('.flex.basis-auto.flex-col');
+    if (chatElement != null) {
+      const messagesArray = chatElement.querySelectorAll('.min-h-8.text-message.relative.flex.w-full.flex-col.items-end');
+      for (let i = 0; i < messagesArray.length; i++) {
+        const currentElement = messagesArray[i];
+        let template = {
+          role: '',
+          content: '',
+          id: ''
+        };
+        const roleAttribute = currentElement.getAttribute('data-message-author-role');
+        template.role = roleAttribute === 'assistant' ? 'assistant' 
+                      : roleAttribute === 'user' ? 'user' 
+                      : 'unknown';
+        template.content = currentElement.innerText.trim();
+        template.id = currentElement.getAttribute('data-message-id') || '';
+        messageArray.push(template);
+      }
+    }
+    return messageArray;
   }
 
   // Claude Implementation
