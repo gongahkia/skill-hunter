@@ -143,11 +143,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.warn('No platform detected');
       sendResponse({ error: "No supported chat platform detected" });
       return true;
+    } else {
+      console.log(`Detected platform: ${platform}`);
     }
     try {
       console.log(`Extracting from ${platform}`);
       const messages = ChatExporter.extractors[platform]();
       console.log(`Extracted ${messages.length} messages`);
+      exportChat(messages);
       sendResponse({ data: messages, platform });
     } catch (error) {
       console.error('Extraction failed:', error);
@@ -156,3 +159,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; 
   }
 });
+
+function exportChat(platform, data) {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${platform}_chat_export_${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

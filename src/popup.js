@@ -11,15 +11,18 @@ document.querySelectorAll('button[data-format]').forEach(button => {
       });
       if (!response) {
         throw new Error('No response from content script');
+      } else {
+        if (response.error) {
+          throw new Error(response.error);
+        } else {
+          console.log(response);
+          chrome.runtime.sendMessage({
+            action: "download",
+            format,
+            data: response.data
+          });
+        }
       }
-      if (response.error) {
-        throw new Error(response.error);
-      }
-      chrome.runtime.sendMessage({
-        action: "convertAndDownload",
-        format,
-        data: response.data
-      });
     } catch (error) {
       alert(`Export failed: ${error.message}`);
       console.error('Export error:', error);
