@@ -167,27 +167,27 @@ export function getLegislationDefinitions(): Definition[] {
   const definitionTerms = new Set<string>(); // Prevent duplicates
   const regex = /"([^"]+)"/g;
 
-  logger.debug('Starting definition extraction...');
+  logger.info('Starting definition extraction...');
   
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  logger.debug(`Found ${provisionContainers.length} provision containers`);
+  logger.info(`Found ${provisionContainers.length} provision containers`);
   
   // Also try a broader search to see what's available
   const allProvisionDivs = safeQuerySelectorAll(document, "div[class^='prov']");
-  logger.debug(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
+  logger.info(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
   
   // Check for definition cells with different selectors
   const defCells1 = safeQuerySelectorAll(document, 'td.def');
   const defCells2 = safeQuerySelectorAll(document, 'td[class*="def"]');
   const defCells3 = safeQuerySelectorAll(document, 'td[class*="Def"]');
   
-  logger.debug(`Found ${defCells1.length} cells with class 'def'`);
-  logger.debug(`Found ${defCells2.length} cells with class containing 'def'`);
-  logger.debug(`Found ${defCells3.length} cells with class containing 'Def'`);
+  logger.info(`Found ${defCells1.length} cells with class 'def'`);
+  logger.info(`Found ${defCells2.length} cells with class containing 'def'`);
+  logger.info(`Found ${defCells3.length} cells with class containing 'Def'`);
 
   provisionContainers.forEach((container, index) => {
     const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
