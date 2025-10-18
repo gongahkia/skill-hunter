@@ -165,7 +165,7 @@ export function getLegislationMetadata(): LegislationMetadata {
 export function getLegislationDefinitions(): Definition[] {
   const definitions: Definition[] = [];
   const definitionTerms = new Set<string>(); // Prevent duplicates
-  // Handle smart quotes used in the penal code - look for "term" pattern
+  // Handle smart quotes used in legislation - character codes 8220 and 8221
   const regex = /"([^"]+)"/g;
 
   logger.info('Starting definition extraction...');
@@ -200,6 +200,10 @@ export function getLegislationDefinitions(): Definition[] {
       
       if (!sentence) return;
 
+      // Debug: Log the first few characters to see what quote characters are used
+      const firstChars = sentence.substring(0, 20);
+      logger.info(`First 20 chars: "${firstChars}" (char codes: ${Array.from(firstChars).map(c => c.charCodeAt(0)).join(', ')})`);
+
       // Reset regex lastIndex for each iteration
       regex.lastIndex = 0;
       const match = regex.exec(sentence);
@@ -213,6 +217,8 @@ export function getLegislationDefinitions(): Definition[] {
           definitionTerms.add(term);
           definitions.push({ [term]: sentence });
         }
+      } else {
+        logger.info(`No match found for: "${sentence.substring(0, 50)}..."`);
       }
     });
   });
