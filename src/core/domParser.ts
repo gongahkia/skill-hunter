@@ -194,7 +194,7 @@ export function getLegislationDefinitions(): Definition[] {
     const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
     logger.info(`Container ${index}: found ${definitionCells.length} definition cells`);
 
-    definitionCells.forEach((cell, cellIndex) => {
+    definitionCells.forEach((cell) => {
       const sentence = cell.textContent?.trim() ?? '';
       
       if (!sentence) return;
