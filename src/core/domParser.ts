@@ -191,11 +191,11 @@ export function getLegislationDefinitions(): Definition[] {
 
   provisionContainers.forEach((container, index) => {
     const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
-    logger.debug(`Container ${index}: found ${definitionCells.length} definition cells`);
+    logger.info(`Container ${index}: found ${definitionCells.length} definition cells`);
 
     definitionCells.forEach((cell, cellIndex) => {
       const sentence = cell.textContent?.trim() ?? '';
-      logger.debug(`Cell ${cellIndex}: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`);
+      logger.info(`Cell ${cellIndex}: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`);
       
       if (!sentence) return;
 
@@ -205,7 +205,7 @@ export function getLegislationDefinitions(): Definition[] {
 
       if (match && match[1]) {
         const term = match[1].trim();
-        logger.debug(`Found definition term: "${term}"`);
+        logger.info(`Found definition term: "${term}"`);
         
         // Only add if we haven't seen this term before
         if (!definitionTerms.has(term)) {
@@ -216,7 +216,7 @@ export function getLegislationDefinitions(): Definition[] {
     });
   });
 
-  logger.debug(`Extracted ${definitions.length} definitions`);
+  logger.info(`Extracted ${definitions.length} definitions`);
   return definitions;
 }
 
@@ -226,27 +226,27 @@ export function getLegislationDefinitions(): Definition[] {
 export function getLegislationContent(): ContentToken[] {
   const content: ContentToken[] = [];
 
-  logger.debug('Starting content extraction...');
+  logger.info('Starting content extraction...');
   
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  logger.debug(`Found ${provisionContainers.length} provision containers for content extraction`);
+  logger.info(`Found ${provisionContainers.length} provision containers for content extraction`);
   
   // Also check what we can find with broader selectors
   const legisContent = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
   const legisBody = safeQuerySelector(document, SELECTORS.LEGIS_BODY);
-  logger.debug(`Legis content element: ${legisContent ? 'found' : 'not found'}`);
-  logger.debug(`Legis body element: ${legisBody ? 'found' : 'not found'}`);
+  logger.info(`Legis content element: ${legisContent ? 'found' : 'not found'}`);
+  logger.info(`Legis body element: ${legisBody ? 'found' : 'not found'}`);
 
   if (provisionContainers.length === 0) {
     logger.warn('No provision containers found, trying alternative selectors...');
     
     // Try alternative selectors
     const altContainers = safeQuerySelectorAll(document, "div[class^='prov']");
-    logger.debug(`Found ${altContainers.length} alternative provision containers`);
+    logger.info(`Found ${altContainers.length} alternative provision containers`);
     
     if (altContainers.length === 0) {
       throw new DOMParsingError('No provision containers found in document');
@@ -255,7 +255,7 @@ export function getLegislationContent(): ContentToken[] {
     // Use alternative containers
     altContainers.forEach((container) => {
       const rows = safeQuerySelectorAll(container, 'table tbody tr');
-      logger.debug(`Alternative container: found ${rows.length} rows`);
+      logger.info(`Alternative container: found ${rows.length} rows`);
       
       rows.forEach((row) => {
         // Section Header
@@ -288,7 +288,7 @@ export function getLegislationContent(): ContentToken[] {
       });
     });
     
-    logger.debug(`Extracted ${content.length} content tokens using alternative method`);
+    logger.info(`Extracted ${content.length} content tokens using alternative method`);
     return content;
   }
 
@@ -381,7 +381,7 @@ export function getLegislationContent(): ContentToken[] {
     });
   });
 
-  logger.debug(`Extracted ${content.length} content tokens`);
+  logger.info(`Extracted ${content.length} content tokens`);
   return content;
 }
 
