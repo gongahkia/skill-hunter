@@ -166,7 +166,7 @@ export function getLegislationDefinitions(): Definition[] {
   const definitions: Definition[] = [];
   const definitionTerms = new Set<string>(); // Prevent duplicates
   // Handle smart quotes used in legislation - character codes 8220 and 8221
-  const regex = /"([^"]+)"/g;
+  const regex = /\u201C([^\u201D]+)\u201D/g;
 
   logger.info('Starting definition extraction...');
   
