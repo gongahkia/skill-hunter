@@ -39,6 +39,7 @@
         "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
       ],
       "js": ["content.js"],
+      "css": ["styles/main.css"],
       "run_at": "document_idle"
     }
   ],

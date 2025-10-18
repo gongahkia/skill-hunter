@@ -17,9 +17,6 @@ import {
 import { logger } from '@/utils/logger';
 import { handleError } from '@/utils/errorHandler';
 
-// Import styles
-import '@/styles/main.css';
-
 // State management
 let isSimplified = false;
 let backupContent: BackupContent | null = null;

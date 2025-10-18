@@ -63,7 +63,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 /**
  * Monitor tab updates (optional - for future features)
  */
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
     // Check if the tab is on an SSO page
     const ssoPattern = /https:\/\/sso\.agc\.gov\.sg\/(Act|SL|Bills-Supp)\/.*\?WholeDoc=1/;

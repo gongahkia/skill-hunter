@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "types": ["chrome", "jest"]
+    "types": ["chrome", "jest", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "archive"]
