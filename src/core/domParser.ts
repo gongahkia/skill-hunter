@@ -1,0 +1,309 @@
+/**
+ * Optimized DOM parsing utilities for extracting legislation content
+ */
+
+import type {
+  PageMetadata,
+  PageBasicData,
+  TableOfContentsItem,
+  LegislationMetadata,
+  Definition,
+  ContentToken,
+} from '@/types';
+import { SELECTORS } from '@/utils/constants';
+import { DOMParsingError } from '@/utils/errorHandler';
+import { logger } from '@/utils/logger';
+
+/**
+ * Safely query a single element
+ */
+function safeQuerySelector<T extends Element = Element>(
+  parent: Document | Element,
+  selector: string
+): T | null {
+  try {
+    return parent.querySelector<T>(selector);
+  } catch (error) {
+    logger.warn(`Failed to query selector: ${selector}`, error);
+    return null;
+  }
+}
+
+/**
+ * Safely query multiple elements
+ */
+function safeQuerySelectorAll<T extends Element = Element>(
+  parent: Document | Element,
+  selector: string
+): NodeListOf<T> | [] {
+  try {
+    return parent.querySelectorAll<T>(selector);
+  } catch (error) {
+    logger.warn(`Failed to query selector all: ${selector}`, error);
+    return [] as unknown as NodeListOf<T>;
+  }
+}
+
+/**
+ * Extract basic page metadata
+ */
+export function getPageMetadata(): PageMetadata {
+  const descriptionMeta = safeQuerySelector<HTMLMetaElement>(
+    document,
+    'meta[name="description"]'
+  );
+  const logoRef = safeQuerySelector<HTMLLinkElement>(
+    document,
+    'link[rel="icon"], link[rel="shortcut icon"]'
+  );
+
+  return {
+    url: window.location.href,
+    title: document.title,
+    logoLink: logoRef?.href ?? '',
+    characterSet: document.characterSet,
+    description: descriptionMeta?.content ?? '',
+  };
+}
+
+/**
+ * Extract table of contents items
+ */
+function extractTableOfContents(): TableOfContentsItem[] {
+  const tocPanel = safeQuerySelector(document, SELECTORS.TOC_PANEL);
+  if (!tocPanel) {
+    logger.warn('Table of contents panel not found');
+    return [];
+  }
+
+  const links = safeQuerySelectorAll<HTMLAnchorElement>(tocPanel, SELECTORS.TOC_LINKS);
+  const items: TableOfContentsItem[] = [];
+
+  links.forEach((link) => {
+    const text = link.innerText.trim();
+    const url = link.href.trim();
+    if (text && url) {
+      items.push({
+        referenceText: text,
+        referenceUrl: url,
+      });
+    }
+  });
+
+  return items;
+}
+
+/**
+ * Extract page basic data including legislation title and status
+ */
+export function getPageBasicData(): { pageMetadata: PageMetadata; pageBasicData: PageBasicData } {
+  const pageMetadata = getPageMetadata();
+  const header = safeQuerySelector(document, SELECTORS.TOP_PANEL);
+
+  let legislationTitle = '';
+  let legislationPdfLink = '';
+  let legislationStatus = '';
+
+  if (header) {
+    const titleEl = safeQuerySelector(header, SELECTORS.LEGIS_TITLE);
+    const pdfEl = safeQuerySelector(header, SELECTORS.PDF_LINK);
+    const statusEl = safeQuerySelector(header, SELECTORS.STATUS_VALUE);
+
+    legislationTitle = titleEl?.textContent?.trim() ?? '';
+    legislationPdfLink = pdfEl?.parentElement?.getAttribute('href')?.trim() ?? '';
+    legislationStatus = statusEl?.textContent?.trim() ?? '';
+  }
+
+  const tableOfContents = extractTableOfContents();
+
+  return {
+    pageMetadata,
+    pageBasicData: {
+      legislationTitle,
+      legislationPDFDownloadLink: legislationPdfLink,
+      legislationStatus,
+      tableOfContents,
+    },
+  };
+}
+
+/**
+ * Extract legislation metadata from the front section
+ */
+export function getLegislationMetadata(): LegislationMetadata {
+  const legisFront = safeQuerySelector(document, SELECTORS.LEGIS_FRONT);
+
+  if (!legisFront) {
+    logger.warn('Legislation front section not found');
+    return {
+      legislationName: '',
+      legislationDescription: '',
+      legislationDate: '',
+      revisedLegislationName: '',
+      revisedLegislationText: '',
+    };
+  }
+
+  const actHeader = safeQuerySelector(legisFront, SELECTORS.ACT_HEADER);
+  const longTitle = safeQuerySelector(legisFront, SELECTORS.LONG_TITLE);
+  const cDate = safeQuerySelector(legisFront, SELECTORS.C_DATE);
+  const revisedHeader = safeQuerySelector(legisFront, SELECTORS.REVISED_HEADER);
+  const revisedText = safeQuerySelector(legisFront, SELECTORS.REVISED_TEXT);
+
+  return {
+    legislationName: actHeader?.textContent?.trim() ?? '',
+    legislationDescription: longTitle?.textContent?.trim() ?? '',
+    legislationDate: cDate?.textContent?.trim() ?? '',
+    revisedLegislationName: revisedHeader?.textContent?.trim() ?? '',
+    revisedLegislationText: revisedText?.textContent?.trim() ?? '',
+  };
+}
+
+/**
+ * Extract definitions from the legislation using an optimized approach
+ */
+export function getLegislationDefinitions(): Definition[] {
+  const definitions: Definition[] = [];
+  const definitionTerms = new Set<string>(); // Prevent duplicates
+  const regex = /"([^"]+)"/g;
+
+  const provisionContainers = safeQuerySelectorAll(
+    document,
+    `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
+  );
+
+  provisionContainers.forEach((container) => {
+    const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
+
+    definitionCells.forEach((cell) => {
+      const sentence = cell.textContent?.trim() ?? '';
+      if (!sentence) return;
+
+      // Reset regex lastIndex for each iteration
+      regex.lastIndex = 0;
+      const match = regex.exec(sentence);
+
+      if (match && match[1]) {
+        const term = match[1].trim();
+        
+        // Only add if we haven't seen this term before
+        if (!definitionTerms.has(term)) {
+          definitionTerms.add(term);
+          definitions.push({ [term]: sentence });
+        }
+      }
+    });
+  });
+
+  logger.debug(`Extracted ${definitions.length} definitions`);
+  return definitions;
+}
+
+/**
+ * Extract main legislation content with optimized parsing
+ */
+export function getLegislationContent(): ContentToken[] {
+  const content: ContentToken[] = [];
+
+  const provisionContainers = safeQuerySelectorAll(
+    document,
+    `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
+  );
+
+  if (provisionContainers.length === 0) {
+    throw new DOMParsingError('No provision containers found in document');
+  }
+
+  provisionContainers.forEach((container) => {
+    const rows = safeQuerySelectorAll(container, 'table tbody tr');
+
+    rows.forEach((row) => {
+      // Section Header
+      const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
+      if (sectionHeader) {
+        const headerText = sectionHeader.textContent?.trim() ?? '';
+        const headerId = sectionHeader.id?.trim() ?? null;
+
+        if (headerText) {
+          content.push({
+            type: 'sectionHeader',
+            ID: headerId,
+            content: headerText,
+          });
+        }
+      }
+
+      // Illustration Header or Content
+      const illustrationCell = safeQuerySelector(row, SELECTORS.ILLUSTRATION_CELL);
+      if (illustrationCell) {
+        const innerHTML = illustrationCell.innerHTML;
+        const text = illustrationCell.textContent?.trim() ?? '';
+
+        if (innerHTML.includes('<em>Illustration</em>') || innerHTML.includes('<em>Illustrations</em>')) {
+          content.push({
+            type: 'illustrationHeader',
+            ID: null,
+            content: text,
+          });
+        } else if (text) {
+          content.push({
+            type: 'illustrationBody',
+            ID: null,
+            content: text,
+          });
+        }
+      }
+
+      // Section Body
+      const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
+      if (sectionBody) {
+        const bodyText = sectionBody.textContent?.trim() ?? '';
+        if (bodyText) {
+          content.push({
+            type: 'sectionBody',
+            ID: null,
+            content: bodyText,
+          });
+        }
+      }
+
+      // Provision Header
+      const provisionHeader = safeQuerySelector(row, SELECTORS.PROVISION_HEADER);
+      if (provisionHeader) {
+        const provisionHeaderId = provisionHeader.id || null;
+        const provisionHeaderText = provisionHeader.textContent?.trim() ?? '';
+
+        if (provisionHeaderText) {
+          content.push({
+            type: 'provisionHeader',
+            ID: provisionHeaderId,
+            content: provisionHeaderText,
+          });
+        }
+      }
+
+      // Provision Number
+      const provisionNumber = safeQuerySelector(row, SELECTORS.PROVISION_NUMBER);
+      if (provisionNumber) {
+        const provisionNumberId = provisionNumber.id || null;
+        const provisionNumberDiv = safeQuerySelector(
+          provisionNumber,
+          SELECTORS.PROVISION_NUMBER_DIV
+        );
+        const provisionNumberText = provisionNumberDiv?.textContent?.trim() ?? '';
+
+        if (provisionNumberText) {
+          content.push({
+            type: 'provisionNumber',
+            ID: provisionNumberId,
+            content: provisionNumberText,
+          });
+        }
+      }
+    });
+  });
+
+  logger.debug(`Extracted ${content.length} content tokens`);
+  return content;
+}
+

@@ -1,0 +1,133 @@
+/**
+ * Popup styles - Minimalist Notion-inspired design
+ */
+
+:root {
+  --popup-bg: #ffffff;
+  --popup-text: #37352f;
+  --popup-text-secondary: #787774;
+  --popup-border: #e9e9e7;
+  --popup-hover: #f7f7f5;
+  --popup-accent: #2383e2;
+  --popup-accent-hover: #1a6cbd;
+  --popup-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --popup-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --popup-bg: #191919;
+    --popup-text: #e3e3e1;
+    --popup-text-secondary: #9b9b99;
+    --popup-border: #3a3a3a;
+    --popup-hover: #252525;
+    --popup-accent: #5fa3e8;
+    --popup-accent-hover: #7db4ed;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--popup-bg);
+  color: var(--popup-text);
+  width: 320px;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.popup-container {
+  padding: 20px;
+}
+
+.popup-header {
+  margin-bottom: 16px;
+}
+
+.popup-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--popup-text);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.popup-description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--popup-text-secondary);
+}
+
+.popup-description a {
+  color: var(--popup-accent);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.popup-description a:hover {
+  color: var(--popup-accent-hover);
+  text-decoration: underline;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--popup-text-secondary);
+  border: 1px solid var(--popup-border);
+}
+
+.btn-cancel:hover {
+  background: var(--popup-hover);
+  color: var(--popup-text);
+}
+
+.btn-cancel:active {
+  transform: scale(0.98);
+}
+
+.btn-simplify {
+  background: var(--popup-accent);
+  color: #ffffff;
+  border: 1px solid var(--popup-accent);
+}
+
+.btn-simplify:hover {
+  background: var(--popup-accent-hover);
+  border-color: var(--popup-accent-hover);
+}
+
+.btn-simplify:active {
+  transform: scale(0.98);
+}
+
+.popup-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--popup-border);
+  font-size: 11px;
+  color: var(--popup-text-secondary);
+  text-align: center;
+}
+

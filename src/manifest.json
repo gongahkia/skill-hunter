@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "version": "2.0",
+  "version": "2.0.0",
   "name": "Skill Hunter",
-  "description": "I make SSO easier to read. Report issues @gongahkia on Github",
+  "description": "Transform Singapore legislation into a clean, readable format",
+  "author": "Gabriel Ong",
+  "homepage_url": "https://github.com/gongahkia/skill-hunter",
+  
   "icons": {
     "16": "local_asset/skill-hunter-16.png",
     "24": "local_asset/skill-hunter-24.png",
@@ -10,18 +13,7 @@
     "64": "local_asset/skill-hunter-64.png",
     "128": "local_asset/skill-hunter-128.png"
   },
-  "web_accessible_resources": [
-  {
-    "resources": [
-      "local_asset/skill-hunter-16.png",
-      "local_asset/skill-hunter-24.png",
-      "local_asset/skill-hunter-32.png",
-      "local_asset/skill-hunter-64.png",
-      "local_asset/skill-hunter-128.png"
-    ],
-      "matches": ["*://*/*"]
-    }
-  ],
+  
   "action": {
     "default_icon": {
       "16": "local_asset/skill-hunter-16.png",
@@ -30,9 +22,15 @@
       "64": "local_asset/skill-hunter-64.png",
       "128": "local_asset/skill-hunter-128.png"
     },
-    "default_title": "Open popup",
+    "default_title": "Simplify legislation with Skill Hunter",
     "default_popup": "popup.html"
   },
+  
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  
   "content_scripts": [
     {
       "matches": [
@@ -40,18 +38,39 @@
         "https://sso.agc.gov.sg/SL/*WholeDoc=1",
         "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
       ],
-      "js": ["main.js"]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
+  
   "permissions": [
     "activeTab",
     "storage",
-    "webNavigation",
     "scripting"
   ],
+  
+  "host_permissions": [
+    "https://sso.agc.gov.sg/*"
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "local_asset/*.png",
+        "styles/*.css"
+      ],
+      "matches": ["https://sso.agc.gov.sg/*"]
+    }
+  ],
+  
   "browser_specific_settings": {
     "gecko": {
-      "id": "your@extension.id"
+      "id": "skill-hunter@gongahkia.dev",
+      "strict_min_version": "109.0"
     }
+  },
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

@@ -4,101 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Hunter</title>
-    <style>
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 300px;
-            height: 138px; 
-            margin: 8px 0;
-            padding: 8px 16px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: visible; 
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 8px;
-            padding: 24px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 8px;
-        }
-
-        .modal-description {
-            font-size: 14px;
-            color: #666;
-            margin: 0 0 20px;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .btn {
-            font-size: 14px;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-cancel {
-            background-color: transparent;
-            color: #333;
-        }
-
-        .btn-settings {
-            background-color: transparent;
-            color: #333;
-        }
-
-        .btn-simplify {
-            background-color: #007bff;
-            color: white;
-            transition: background-color 0.3s; 
-        }
-
-        .btn-simplify:hover {
-            background-color: #0056b3; 
-        }
-    </style>
 </head>
 <body>
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-title">Skill Hunter ⚖️</h2>
-            <p class="modal-description">
-                Made by <a href="https://www.linkedin.com/in/gabriel-zmong/">Gabriel Ong</a>.<br>
-                Report issues at <a href='https://github.com/gongahkia'>@gongahkia</a> on GitHub.
+    <div class="popup-container">
+        <div class="popup-header">
+            <h1 class="popup-title">Skill Hunter</h1>
+            <p class="popup-description">
+                Transform Singapore legislation into a clean, readable format.
             </p>
-            <div class="modal-footer">
-                <button id="cancelButton" class="btn btn-cancel">Cancel</button>
-                <button id="simplifyButton" class="btn btn-simplify">Simplify</button>
-                <!-- <button id="settingsButton" class="btn btn-settings">Settings</button> -->
-            </div>
+        </div>
+        
+        <div class="popup-actions">
+            <button id="cancelButton" class="btn btn-cancel">Cancel</button>
+            <button id="simplifyButton" class="btn btn-simplify">Simplify</button>
+        </div>
+        
+        <div class="popup-footer">
+            Made by <a href="https://www.linkedin.com/in/gabriel-zmong/" target="_blank">Gabriel Ong</a> · 
+            <a href="https://github.com/gongahkia/skill-hunter" target="_blank">GitHub</a>
         </div>
     </div>
     <script src="popup.js"></script>
