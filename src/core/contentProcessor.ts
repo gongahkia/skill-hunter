@@ -22,14 +22,6 @@ export function formatLogicalConnectors(sentence: string): string {
   return sentence.replace(regexPattern, (match) => `<b><i>${match}</i></b>`);
 }
 
-/**
- * Escape HTML special characters
- */
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
 
 /**
  * Sort definitions by term length (longest first) to avoid partial matches
@@ -85,8 +77,7 @@ export function integrateDefinitions(
 
         // Replace term with definition tooltip
         modifiedLine = modifiedLine.replace(regex, (match) => {
-          const safeDefinition = escapeHtml(definition);
-          return `<span class="statute-term" data-definition="${safeDefinition}">${match}</span>`;
+          return `<span class="statute-term">${match}<div class="statute-tooltip">${definition}</div></span>`;
         });
       });
 

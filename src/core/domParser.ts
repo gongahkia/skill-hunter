@@ -196,13 +196,8 @@ export function getLegislationDefinitions(): Definition[] {
 
     definitionCells.forEach((cell, cellIndex) => {
       const sentence = cell.textContent?.trim() ?? '';
-      logger.info(`Cell ${cellIndex}: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`);
       
       if (!sentence) return;
-
-      // Debug: Log the first few characters to see what quote characters are used
-      const firstChars = sentence.substring(0, 20);
-      logger.info(`First 20 chars: "${firstChars}" (char codes: ${Array.from(firstChars).map(c => c.charCodeAt(0)).join(', ')})`);
 
       // Reset regex lastIndex for each iteration
       regex.lastIndex = 0;
@@ -210,15 +205,12 @@ export function getLegislationDefinitions(): Definition[] {
 
       if (match && match[1]) {
         const term = match[1].trim();
-        logger.info(`Found definition term: "${term}"`);
         
         // Only add if we haven't seen this term before
         if (!definitionTerms.has(term)) {
           definitionTerms.add(term);
           definitions.push({ [term]: sentence });
         }
-      } else {
-        logger.info(`No match found for: "${sentence.substring(0, 50)}..."`);
       }
     });
   });

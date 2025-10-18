@@ -260,8 +260,8 @@ body {
   border-bottom-color: var(--accent-hover);
 }
 
-.statute-term::after {
-  content: attr(data-definition);
+/* Tooltip container */
+.statute-tooltip {
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -282,11 +282,38 @@ body {
   transition: opacity var(--transition-base), visibility var(--transition-base);
   pointer-events: none;
   z-index: 1000;
+  word-wrap: break-word;
 }
 
-.statute-term:hover::after {
+.statute-term:hover .statute-tooltip {
   opacity: 1;
   visibility: visible;
+}
+
+/* Tooltip positioning adjustments */
+.statute-tooltip.tooltip-left {
+  left: 0;
+  transform: translateY(-8px);
+}
+
+.statute-tooltip.tooltip-right {
+  left: auto;
+  right: 0;
+  transform: translateY(-8px);
+}
+
+.statute-tooltip.tooltip-bottom {
+  bottom: auto;
+  top: 100%;
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* Tooltip content styling */
+.statute-tooltip b i,
+.statute-tooltip i b {
+  color: var(--bg-primary);
+  font-weight: 600;
+  font-style: italic;
 }
 
 /* Illustrations */
