@@ -35,7 +35,53 @@ export function sortDefinitionsByLength(definitions: Definition[]): Definition[]
 }
 
 /**
- * Integrate definitions into content tokens with optimized algorithm
+ * Escape HTML to prevent XSS and HTML injection
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Split text into segments, preserving HTML tags
+ * Returns array of {text, isTag} objects
+ */
+function splitPreservingTags(html: string): Array<{ text: string; isTag: boolean }> {
+  const segments: Array<{ text: string; isTag: boolean }> = [];
+  const tagRegex = /<[^>]+>/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = tagRegex.exec(html)) !== null) {
+    // Add text before tag
+    if (match.index > lastIndex) {
+      segments.push({
+        text: html.substring(lastIndex, match.index),
+        isTag: false,
+      });
+    }
+    // Add tag
+    segments.push({
+      text: match[0],
+      isTag: true,
+    });
+    lastIndex = tagRegex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < html.length) {
+    segments.push({
+      text: html.substring(lastIndex),
+      isTag: false,
+    });
+  }
+
+  return segments;
+}
+
+/**
+ * Integrate definitions into content tokens with proper HTML handling
  * This modifies the content tokens in place for better performance
  */
 export function integrateDefinitions(
@@ -59,29 +105,61 @@ export function integrateDefinitions(
     const lines = token.content.split('\n');
 
     const processedLines = lines.map((line) => {
-      let modifiedLine = line;
+      // First, format logical connectors (this adds HTML tags)
+      let modifiedLine = formatLogicalConnectors(line);
 
-      // Process each definition
-      sortedDefinitions.forEach((definitionPair) => {
-        const term = Object.keys(definitionPair)[0];
-        if (!term) return;
+      // Then, split the line into segments (text and HTML tags)
+      const segments = splitPreservingTags(modifiedLine);
 
-        const definition = definitionPair[term];
-        if (!definition) return;
+      // Process only the text segments (not HTML tags)
+      const processedSegments = segments.map((segment) => {
+        if (segment.isTag) {
+          // Don't process HTML tags
+          return segment.text;
+        }
 
-        // Escape special regex characters in the term
-        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        let textSegment = segment.text;
 
-        // Create a regex that matches whole words only
-        const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'g');
+        // Process each definition, but only in plain text
+        sortedDefinitions.forEach((definitionPair) => {
+          const term = Object.keys(definitionPair)[0];
+          if (!term) return;
 
-        // Replace term with definition tooltip
-        modifiedLine = modifiedLine.replace(regex, (match) => {
-          return `<span class="statute-term">${match}<div class="statute-tooltip">${definition}</div></span>`;
+          const definition = definitionPair[term];
+          if (!definition) return;
+
+          // Escape special regex characters in the term
+          const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+          // Create a regex that matches whole words only, case-insensitive
+          const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'gi');
+
+          // Replace term with definition tooltip
+          // Use a placeholder to prevent recursive replacements
+          const placeholder = `___STATUTE_TERM_${Math.random().toString(36).substr(2, 9)}___`;
+          const replacementMap = new Map<string, string>();
+
+          textSegment = textSegment.replace(regex, (match) => {
+            const key = `${placeholder}${replacementMap.size}`;
+            // Escape the definition text to prevent HTML injection
+            const escapedDefinition = escapeHtml(definition);
+            replacementMap.set(
+              key,
+              `<span class="statute-term">${match}<div class="statute-tooltip">${escapedDefinition}</div></span>`
+            );
+            return key;
+          });
+
+          // Replace placeholders with actual HTML
+          replacementMap.forEach((value, key) => {
+            textSegment = textSegment.replace(key, value);
+          });
         });
+
+        return textSegment;
       });
 
-      return modifiedLine;
+      return processedSegments.join('');
     });
 
     // Update the token content
@@ -91,6 +169,7 @@ export function integrateDefinitions(
 
 /**
  * Process content lines with proper formatting
+ * Note: Logical connectors are already formatted in integrateDefinitions
  */
 export function processContentLines(content: string): string {
   const lines = content.split('<br>');
@@ -98,15 +177,14 @@ export function processContentLines(content: string): string {
   const processedLines = lines.map((line) => {
     if (!line.trim()) return '';
 
-    // Format logical connectors
-    const formattedLine = formatLogicalConnectors(line);
-
     // Apply indentation if needed
-    if (needsIndentation(formattedLine)) {
-      return `<div class="indented-line">${formattedLine}</div>`;
+    // Check the original line (without HTML) for indentation pattern
+    const textOnly = line.replace(/<[^>]+>/g, '');
+    if (needsIndentation(textOnly)) {
+      return `<div class="indented-line">${line}</div>`;
     }
 
-    return `<div class="content-line">${formattedLine}</div>`;
+    return `<div class="content-line">${line}</div>`;
   });
 
   return processedLines.join('');
