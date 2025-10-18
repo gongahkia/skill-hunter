@@ -22,6 +22,18 @@ Time is often spent poring over definitions and navigating between interpretatio
 * Important terms are defined in place
 * Browser extension with tiny source code binary runnable on most machines
 
+## Screenshot
+
+![](./asset/screenshots/skill-hunter-screenshot-4.png)
+
+## Stack
+
+* *Frontend*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS)
+* *Build*: [Webpack](https://webpack.js.org/), [TypeScript Compiler](https://www.typescriptlang.org/)
+* *Testing*: [Jest](https://jestjs.io/), [ts-jest](https://kulshekhar.github.io/ts-jest/)
+* *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
+* *Package Manager*: [npm](https://www.npmjs.com/)
+
 ## Supported browsers
 
 Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
@@ -31,10 +43,6 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 | Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
 | Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
 | Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
-
-## Screenshot
-
-![](./asset/screenshots/skill-hunter-screenshot-2.png)
 
 ## [Presentation](./asset/presentation/class_part.pdf)
 
