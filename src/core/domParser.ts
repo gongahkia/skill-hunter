@@ -167,16 +167,36 @@ export function getLegislationDefinitions(): Definition[] {
   const definitionTerms = new Set<string>(); // Prevent duplicates
   const regex = /"([^"]+)"/g;
 
+  logger.debug('Starting definition extraction...');
+  
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  provisionContainers.forEach((container) => {
-    const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
+  logger.debug(`Found ${provisionContainers.length} provision containers`);
+  
+  // Also try a broader search to see what's available
+  const allProvisionDivs = safeQuerySelectorAll(document, "div[class^='prov']");
+  logger.debug(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
+  
+  // Check for definition cells with different selectors
+  const defCells1 = safeQuerySelectorAll(document, 'td.def');
+  const defCells2 = safeQuerySelectorAll(document, 'td[class*="def"]');
+  const defCells3 = safeQuerySelectorAll(document, 'td[class*="Def"]');
+  
+  logger.debug(`Found ${defCells1.length} cells with class 'def'`);
+  logger.debug(`Found ${defCells2.length} cells with class containing 'def'`);
+  logger.debug(`Found ${defCells3.length} cells with class containing 'Def'`);
 
-    definitionCells.forEach((cell) => {
+  provisionContainers.forEach((container, index) => {
+    const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
+    logger.debug(`Container ${index}: found ${definitionCells.length} definition cells`);
+
+    definitionCells.forEach((cell, cellIndex) => {
       const sentence = cell.textContent?.trim() ?? '';
+      logger.debug(`Cell ${cellIndex}: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`);
+      
       if (!sentence) return;
 
       // Reset regex lastIndex for each iteration
@@ -185,6 +205,7 @@ export function getLegislationDefinitions(): Definition[] {
 
       if (match && match[1]) {
         const term = match[1].trim();
+        logger.debug(`Found definition term: "${term}"`);
         
         // Only add if we haven't seen this term before
         if (!definitionTerms.has(term)) {
@@ -205,13 +226,70 @@ export function getLegislationDefinitions(): Definition[] {
 export function getLegislationContent(): ContentToken[] {
   const content: ContentToken[] = [];
 
+  logger.debug('Starting content extraction...');
+  
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
+  logger.debug(`Found ${provisionContainers.length} provision containers for content extraction`);
+  
+  // Also check what we can find with broader selectors
+  const legisContent = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
+  const legisBody = safeQuerySelector(document, SELECTORS.LEGIS_BODY);
+  logger.debug(`Legis content element: ${legisContent ? 'found' : 'not found'}`);
+  logger.debug(`Legis body element: ${legisBody ? 'found' : 'not found'}`);
+
   if (provisionContainers.length === 0) {
-    throw new DOMParsingError('No provision containers found in document');
+    logger.warn('No provision containers found, trying alternative selectors...');
+    
+    // Try alternative selectors
+    const altContainers = safeQuerySelectorAll(document, "div[class^='prov']");
+    logger.debug(`Found ${altContainers.length} alternative provision containers`);
+    
+    if (altContainers.length === 0) {
+      throw new DOMParsingError('No provision containers found in document');
+    }
+    
+    // Use alternative containers
+    altContainers.forEach((container) => {
+      const rows = safeQuerySelectorAll(container, 'table tbody tr');
+      logger.debug(`Alternative container: found ${rows.length} rows`);
+      
+      rows.forEach((row) => {
+        // Section Header
+        const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
+        if (sectionHeader) {
+          const headerText = sectionHeader.textContent?.trim() ?? '';
+          const headerId = sectionHeader.id?.trim() ?? null;
+
+          if (headerText) {
+            content.push({
+              type: 'sectionHeader',
+              ID: headerId,
+              content: headerText,
+            });
+          }
+        }
+
+        // Section Body
+        const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
+        if (sectionBody) {
+          const bodyText = sectionBody.textContent?.trim() ?? '';
+          if (bodyText) {
+            content.push({
+              type: 'sectionBody',
+              ID: null,
+              content: bodyText,
+            });
+          }
+        }
+      });
+    });
+    
+    logger.debug(`Extracted ${content.length} content tokens using alternative method`);
+    return content;
   }
 
   provisionContainers.forEach((container) => {
