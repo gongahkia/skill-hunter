@@ -165,8 +165,8 @@ export function getLegislationMetadata(): LegislationMetadata {
 export function getLegislationDefinitions(): Definition[] {
   const definitions: Definition[] = [];
   const definitionTerms = new Set<string>(); // Prevent duplicates
-  // Handle both regular quotes and smart quotes
-  const regex = /[""]([^"""]+)[""]/g;
+  // Handle smart quotes used in the penal code - look for "term" pattern
+  const regex = /"([^"]+)"/g;
 
   logger.info('Starting definition extraction...');
   
