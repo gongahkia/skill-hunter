@@ -1,2 +1,8 @@
 myenv
 __pycache__
+
+# Environment variables - contain sensitive credentials
+.env
+.env.local
+*.env
+!.env.example
