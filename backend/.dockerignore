@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# Static files
+/staticfiles/
+/mediafiles/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Logs
+logs/
+*.log
+
+# Git
+.git/
+.gitignore
