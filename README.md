@@ -1,17 +1,15 @@
-[![](https://img.shields.io/badge/owl_1.0.0-passing-green)](https://github.com/gongahkia/owl/releases/tag/1.0.0)
-[![](https://img.shields.io/badge/owl_1.0.1-passing-green)](https://github.com/gongahkia/owl/releases/tag/1.0.1)
-[![](https://img.shields.io/badge/owl_2.0.0-build-orange)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
+[![](https://img.shields.io/badge/owl_1.0.0-passing-%23006400)](https://github.com/gongahkia/owl/releases/tag/1.0.0)
+[![](https://img.shields.io/badge/owl_1.0.1-passing-%23228B22)](https://github.com/gongahkia/owl/releases/tag/1.0.1)
+[![](https://img.shields.io/badge/owl_2.0.0-passing-%2390EE90)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
 
 > [!IMPORTANT]  
 > Please read through [this disclaimer](#disclaimer) before using [Owl](https://github.com/gongahkia/owl).  
 
 # `Owl` 🦉
 
-Watches all google editors, designed for the nocturnal writer.
+[`Owl`](https://github.com/gongahkia/owl) watches your editors.
 
-[Owl](https://github.com/gongahkia/owl) is a highly [customisable](#colorschemes), [extensible](#configurations) extension that monitors, collates and organises [your tags](#tags) on your google editors.
-
-It works for Google [docs](#docs-owl), [sheets](#sheets-owl) and [slides](#slides-owl).
+A highly [customisable](#colorschemes), [extensible](#configurations) extension that monitors, collates and organises [your tags](#tags) on your google editors *([docs](#docs-owl), [sheets](#sheets-owl) and [slides](#slides-owl))* and within [Vim](#deployment).
 
 ## Rationale
 
@@ -23,7 +21,7 @@ However, the closest I could ever get to replicating that experience in Google E
 
 Importantly, I needed a frictionless solution that complemented my existing notetaking workflow and did not slow me down by requiring learning a new keybind.
 
-With these considerations in mind, I created [Owl](https://github.com/gongahkia/owl).
+With these considerations in mind, I created [`Owl`](https://github.com/gongahkia/owl).
 
 ![](./asset/screenshot/rationale.png)
 
@@ -87,7 +85,7 @@ For detailed installation and configuration instructions, see [`INSTRUCTIONS.md`
 | [Google Docs](./src/docs/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [docs.google](https://docs.google.com) |
 | [Google Sheets](./src/sheets/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [sheets.google](https://sheets.google.com) |
 | [Google Slides](./src/slides/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [slides.google](https://slides.google.com) |
-| Google Workspace Marketplace | ![](https://img.shields.io/badge/Status-Pending%20Approval-yellow) | [workspace.google.com/marketplace](https://workspace.google.com/marketplace/search/) |
+| [Vim Plugin](./src/vim/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [vim.org](https://www.vim.org/) |
 
 ## Disclaimer
 
