@@ -163,7 +163,7 @@ function sheetsGetTaggedCells() {
             if (!tags[prefix]) {
               tags[prefix] = [];
             }
-            sanitisedCell = trimmedCell.slice(prefix.length)
+            const sanitisedCell = trimmedCell.slice(prefix.length);
             if (sanitisedCell.length == 0){
               continue
             } else {
