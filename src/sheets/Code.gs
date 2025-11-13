@@ -1,3 +1,11 @@
+const DEBUG_MODE = false;
+
+function debugLog(message) {
+  if (DEBUG_MODE) {
+    Logger.log(message);
+  }
+}
+
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('Owl')
@@ -108,7 +116,7 @@ function getTaggedCells() {
   const tags = {};
   for (let row of values) {
     for (let cell of row) {
-      Logger.log(`Checking cell: '${cell}'`);
+      debugLog(`Checking cell: '${cell}'`);
       if (typeof cell === 'string') {
         const trimmedCell = cell.trim();
         for (let prefix of prefixes) {
@@ -116,18 +124,18 @@ function getTaggedCells() {
             if (!tags[prefix]) {
               tags[prefix] = [];
             }
-            sanitisedCell = trimmedCell.slice(prefix.length)
+            const sanitisedCell = trimmedCell.slice(prefix.length);
             if (sanitisedCell.length == 0){
               continue
             } else {
               tags[prefix].push(sanitisedCell);
             }
-            Logger.log(`Found tag: ${prefix} in cell: '${trimmedCell}'`);
+            debugLog(`Found tag: ${prefix} in cell: '${trimmedCell}'`);
           }
         }
       }
     }
   }
-  Logger.log(tags);
+  debugLog(tags);
   return { prefixes, tags, colorschemeGruvbox };
 }
