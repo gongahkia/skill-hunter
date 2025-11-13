@@ -1,3 +1,11 @@
+const DEBUG_MODE = false;
+
+function debugLog(message) {
+  if (DEBUG_MODE) {
+    Logger.log(message);
+  }
+}
+
 function onOpen() {
   const ui = DocumentApp.getUi();
   ui.createMenu('Owl')
