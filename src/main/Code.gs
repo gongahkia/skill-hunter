@@ -1,28 +1,38 @@
+// ---------- DEBUGGING ----------
+
+const DEBUG_MODE = false;
+
+function debugLog(message) {
+  if (DEBUG_MODE) {
+    Logger.log(message);
+  }
+}
+
 // ---------- SORTING FUNCTION ---------
 
 function detectCurrentEditor() {
   try {
     var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    Logger.log("Success: Active document is Google Sheets: " + spreadsheet.getName());
+    debugLog("Success: Active document is Google Sheets: " + spreadsheet.getName());
     return;
   } catch (e) {
-    Logger.log("Error: Active document is not Google Sheets.");
+    debugLog("Error: Active document is not Google Sheets.");
   }
   try {
     var document = DocumentApp.getActiveDocument();
-    Logger.log("Success: Active document is Google Docs: " + document.getName());
+    debugLog("Success: Active document is Google Docs: " + document.getName());
     return;
   } catch (e) {
-    Logger.log("Error: Active document is not Google Docs.");
+    debugLog("Error: Active document is not Google Docs.");
   }
   try {
     var presentation = SlidesApp.getActivePresentation();
-    Logger.log("Success: Active document is Google Slides: " + presentation.getName());
+    debugLog("Success: Active document is Google Slides: " + presentation.getName());
     return;
   } catch (e) {
-    Logger.log("Error: Active document is not Google Slides.");
+    debugLog("Error: Active document is not Google Slides.");
   }
-  Logger.log("Error: No active Google editor found.");
+  debugLog("Error: No active Google editor found.");
 }
 
 // ---------- RENDERING FUNCTIONS ----------
@@ -155,7 +165,7 @@ function sheetsGetTaggedCells() {
   const tags = {};
   for (let row of values) {
     for (let cell of row) {
-      Logger.log(`Checking cell: '${cell}'`);
+      debugLog(`Checking cell: '${cell}'`);
       if (typeof cell === 'string') {
         const trimmedCell = cell.trim();
         for (let prefix of prefixes) {
@@ -169,13 +179,13 @@ function sheetsGetTaggedCells() {
             } else {
               tags[prefix].push(sanitisedCell);
             }
-            Logger.log(`Found tag: ${prefix} in cell: '${trimmedCell}'`);
+            debugLog(`Found tag: ${prefix} in cell: '${trimmedCell}'`);
           }
         }
       }
     }
   }
-  Logger.log(tags);
+  debugLog(tags);
   return { prefixes, tags, colorschemeGruvbox };
 }
 
@@ -284,7 +294,7 @@ function docsGetTaggedLines() {
   }
   const tags = {};
   for (let line of lines) {
-    Logger.log(`Checking line: '${line}'`);
+    debugLog(`Checking line: '${line}'`);
     const trimmedLine = line.trim();
     for (let prefix of prefixes) {
       if (trimmedLine.toUpperCase().startsWith(prefix)) {
@@ -295,11 +305,11 @@ function docsGetTaggedLines() {
         if (sanitisedLine.length > 0) {
           tags[prefix].push(sanitisedLine);
         }
-        Logger.log(`Found tag: ${prefix} in line: '${trimmedLine}'`);
+        debugLog(`Found tag: ${prefix} in line: '${trimmedLine}'`);
       }
     }
   }
-  Logger.log(tags);
+  debugLog(tags);
   return { prefixes, tags, colorschemeGruvbox };
 }
 
@@ -412,7 +422,7 @@ function slidesGetTaggedLines() {
         const textContent = shape.getText().asString();
         const lines = textContent.split('\n');
         for (let line of lines) {
-          Logger.log(`Checking line: '${line}'`);
+          debugLog(`Checking line: '${line}'`);
           const trimmedLine = line.trim();
           for (let prefix of prefixes) {
             if (trimmedLine.toUpperCase().startsWith(prefix)) {
@@ -423,13 +433,13 @@ function slidesGetTaggedLines() {
               if (sanitisedLine.length > 0) {
                 tags[prefix].push(sanitisedLine);
               }
-              Logger.log(`Found tag: ${prefix} in line: '${trimmedLine}'`);
+              debugLog(`Found tag: ${prefix} in line: '${trimmedLine}'`);
             }
           }
         }
       }
     }
   }
-  Logger.log(tags);
+  debugLog(tags);
   return { prefixes, tags, colorschemeGruvbox };
 }
