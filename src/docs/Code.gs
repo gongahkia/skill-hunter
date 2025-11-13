@@ -116,7 +116,7 @@ function getTaggedLines() {
   }
   const tags = {};
   for (let line of lines) {
-    Logger.log(`Checking line: '${line}'`);
+    debugLog(`Checking line: '${line}'`);
     const trimmedLine = line.trim();
     for (let prefix of prefixes) {
       if (trimmedLine.toUpperCase().startsWith(prefix)) {
@@ -127,10 +127,10 @@ function getTaggedLines() {
         if (sanitisedLine.length > 0) {
           tags[prefix].push(sanitisedLine);
         }
-        Logger.log(`Found tag: ${prefix} in line: '${trimmedLine}'`);
+        debugLog(`Found tag: ${prefix} in line: '${trimmedLine}'`);
       }
     }
   }
-  Logger.log(tags);
+  debugLog(tags);
   return { prefixes, tags, colorschemeGruvbox };
 }
