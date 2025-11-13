@@ -151,8 +151,8 @@ function getTaggedCells() {
               tags[prefix] = [];
             }
             const sanitisedCell = trimmedCell.slice(prefix.length);
-            if (sanitisedCell.length == 0){
-              continue
+            if (sanitisedCell.length === 0) {
+              continue;
             } else {
               tags[prefix].push(sanitisedCell);
             }
