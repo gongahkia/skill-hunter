@@ -30,9 +30,9 @@ endfunction
 function! DisplayTags(tags)
     enew
     setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
-    call append(0, '📍 Tags')
+    call append(0, 'Tags')
     if empty(a:tags)
-        call append(2, 'Owl found no tagged lines. 😭')
+        call append(2, 'Owl found no tagged lines.')
         nnoremap <buffer> <silent> :q<CR> :b 1<CR>
         return
     endif
