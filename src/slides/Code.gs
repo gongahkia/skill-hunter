@@ -1,11 +1,19 @@
 const DEBUG_MODE = false;
 
+/**
+ * Conditionally logs a message based on DEBUG_MODE setting.
+ * @param {string} message - The message to log
+ */
 function debugLog(message) {
   if (DEBUG_MODE) {
     Logger.log(message);
   }
 }
 
+/**
+ * Creates the Owl menu when the presentation is opened.
+ * Adds "Get Tags" and "Credits" menu items to the presentation UI.
+ */
 function onOpen() {
   const ui = SlidesApp.getUi();
   ui.createMenu('Owl')
@@ -14,6 +22,10 @@ function onOpen() {
     .addToUi();
 }
 
+/**
+ * Displays the credits modal dialog.
+ * Shows attribution information in a 200x150px modal.
+ */
 function showCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
@@ -21,6 +33,10 @@ function showCredits() {
   SlidesApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
 }
 
+/**
+ * Displays the Owl sidebar containing tagged lines.
+ * Creates a 300x400px sidebar that shows all detected tags in the presentation.
+ */
 function showTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('OwlSidebar')
     .setWidth(300)
@@ -28,6 +44,16 @@ function showTagsSidebar() {
   SlidesApp.getUi().showSidebar(html.setTitle('Slides Owl 🦉'));
 }
 
+/**
+ * Scans the active Google Slides presentation for tagged lines.
+ * Searches through all shapes in all slides for text starting with predefined
+ * tag prefixes (TODO, FIXME, TEMP, REF, REV) and organizes them by tag type.
+ *
+ * @returns {Object} Object containing:
+ *   - prefixes: Array of supported tag prefixes
+ *   - tags: Object mapping prefixes to arrays of tagged content
+ *   - colorschemeGruvbox: Active colorscheme configuration
+ */
 function getTaggedLines() {
   const presentation = SlidesApp.getActivePresentation();
   const slides = presentation.getSlides();
