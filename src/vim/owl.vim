@@ -1,5 +1,9 @@
+" Supported tag prefixes that Owl will search for in the buffer
 let g:tags = ['TODO', 'FIXME', 'TEMP', 'REF', 'REV']
 
+" Scans the current buffer for lines containing supported tag prefixes.
+" Extracts and organizes tagged content by tag type, then displays results.
+" Tags are matched case-insensitively using word boundaries.
 function! GetTaggedLines()
     let l:lines = getline(1, '$')
     let l:tags = {}
@@ -19,6 +23,10 @@ function! GetTaggedLines()
     call DisplayTags(l:tags)
 endfunction
 
+" Displays tagged lines in a new scratch buffer.
+" Creates a non-file buffer that shows all found tags organized by prefix.
+" If no tags are found, displays an informative message.
+" @param tags Dictionary mapping tag prefixes to arrays of tagged content
 function! DisplayTags(tags)
     enew
     setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
@@ -39,4 +47,5 @@ function! DisplayTags(tags)
     nnoremap <buffer> <silent> :q<CR> :b 1<CR>
 endfunction
 
+" User command to trigger tag scanning in the current buffer
 command! OwlScan call GetTaggedLines()
