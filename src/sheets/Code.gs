@@ -124,7 +124,7 @@ function showCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
       .setHeight(150);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+  SpreadsheetApp.getUi().showModalDialog(html, 'Credits');
 }
 
 /**
@@ -135,7 +135,7 @@ function showTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('OwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl 🦉'));
+  SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl'));
 }
 
 /**
