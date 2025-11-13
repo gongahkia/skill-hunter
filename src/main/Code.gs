@@ -21,27 +21,27 @@ function debugLog(message) {
  */
 function detectCurrentEditor() {
   try {
-    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    debugLog("Success: Active document is Google Sheets: " + spreadsheet.getName());
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    debugLog('Success: Active document is Google Sheets: ' + spreadsheet.getName());
     return;
   } catch (e) {
-    debugLog("Error: Active document is not Google Sheets.");
+    debugLog('Error: Active document is not Google Sheets.');
   }
   try {
-    var document = DocumentApp.getActiveDocument();
-    debugLog("Success: Active document is Google Docs: " + document.getName());
+    const document = DocumentApp.getActiveDocument();
+    debugLog('Success: Active document is Google Docs: ' + document.getName());
     return;
   } catch (e) {
-    debugLog("Error: Active document is not Google Docs.");
+    debugLog('Error: Active document is not Google Docs.');
   }
   try {
-    var presentation = SlidesApp.getActivePresentation();
-    debugLog("Success: Active document is Google Slides: " + presentation.getName());
+    const presentation = SlidesApp.getActivePresentation();
+    debugLog('Success: Active document is Google Slides: ' + presentation.getName());
     return;
   } catch (e) {
-    debugLog("Error: Active document is not Google Slides.");
+    debugLog('Error: Active document is not Google Slides.');
   }
-  debugLog("Error: No active Google editor found.");
+  debugLog('Error: No active Google editor found.');
 }
 
 // ---------- RENDERING FUNCTIONS ----------
