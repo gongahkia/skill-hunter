@@ -2,6 +2,10 @@
 
 const DEBUG_MODE = false;
 
+/**
+ * Conditionally logs a message based on DEBUG_MODE setting.
+ * @param {string} message - The message to log
+ */
 function debugLog(message) {
   if (DEBUG_MODE) {
     Logger.log(message);
@@ -10,6 +14,11 @@ function debugLog(message) {
 
 // ---------- SORTING FUNCTION ---------
 
+/**
+ * Detects which Google editor is currently active.
+ * Attempts to access Sheets, Docs, and Slides APIs in order.
+ * Logs the detected editor name or error if none found.
+ */
 function detectCurrentEditor() {
   try {
     var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -39,6 +48,10 @@ function detectCurrentEditor() {
 
 // ----- GENERIC -----
 
+/**
+ * Displays credits modal for Sheets.
+ * Shows attribution information in a 200x150px modal.
+ */
 function sheetsShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
@@ -46,6 +59,10 @@ function sheetsShowCredits() {
   SpreadsheetApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
 }
 
+/**
+ * Displays credits modal for Slides.
+ * Shows attribution information in a 200x150px modal.
+ */
 function slidesShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
@@ -53,6 +70,10 @@ function slidesShowCredits() {
   SlidesApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
 }
 
+/**
+ * Displays credits modal for Docs.
+ * Shows attribution information in a 200x150px modal.
+ */
 function docsShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
@@ -62,6 +83,11 @@ function docsShowCredits() {
 
 // ----- SHEETS -----
 
+/**
+ * Creates the Owl menu when a spreadsheet is opened.
+ * NOTE: This is the first of three onOpen() declarations - only the last one will execute.
+ * This is a known issue in the unified implementation.
+ */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('Owl')
@@ -70,6 +96,10 @@ function onOpen() {
     .addToUi();
 }
 
+/**
+ * Displays the Owl sidebar for Sheets containing tagged cells.
+ * Creates a 300x400px sidebar showing all detected tags.
+ */
 function sheetsShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('SheetsOwlSidebar')
     .setWidth(300)
@@ -77,6 +107,10 @@ function sheetsShowTagsSidebar() {
   SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl 🦉'));
 }
 
+/**
+ * Scans the active Google Sheet for tagged cells.
+ * @returns {Object} Object containing prefixes, tags, and colorscheme
+ */
 function sheetsGetTaggedCells() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const range = sheet.getDataRange();
@@ -191,6 +225,10 @@ function sheetsGetTaggedCells() {
 
 // ----- DOCS -----
 
+/**
+ * Creates the Owl menu when a document is opened.
+ * NOTE: This is the second of three onOpen() declarations - only the last one will execute.
+ */
 function onOpen() {
   const ui = DocumentApp.getUi();
   ui.createMenu('Owl')
@@ -199,6 +237,10 @@ function onOpen() {
     .addToUi();
 }
 
+/**
+ * Displays the Owl sidebar for Docs containing tagged lines.
+ * Creates a 300x400px sidebar showing all detected tags.
+ */
 function docsShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('DocsOwlSidebar')
     .setWidth(300)
@@ -206,6 +248,10 @@ function docsShowTagsSidebar() {
   DocumentApp.getUi().showSidebar(html.setTitle('Docs Owl 🦉'));
 }
 
+/**
+ * Scans the active Google Doc for tagged lines.
+ * @returns {Object} Object containing prefixes, tags, and colorscheme
+ */
 function docsGetTaggedLines() {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
@@ -315,6 +361,10 @@ function docsGetTaggedLines() {
 
 // ----- SLIDES -----
 
+/**
+ * Creates the Owl menu when a presentation is opened.
+ * NOTE: This is the third onOpen() declaration - this one will actually execute.
+ */
 function onOpen() {
   const ui = SlidesApp.getUi();
   ui.createMenu('Owl')
@@ -323,6 +373,10 @@ function onOpen() {
     .addToUi();
 }
 
+/**
+ * Displays the Owl sidebar for Slides containing tagged lines.
+ * Creates a 300x400px sidebar showing all detected tags.
+ */
 function slidesShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('SlidesOwlSidebar')
     .setWidth(300)
@@ -330,6 +384,11 @@ function slidesShowTagsSidebar() {
   SlidesApp.getUi().showSidebar(html.setTitle('Slides Owl 🦉'));
 }
 
+/**
+ * Scans the active Google Slides presentation for tagged lines.
+ * Searches through all shapes in all slides.
+ * @returns {Object} Object containing prefixes, tags, and colorscheme
+ */
 function slidesGetTaggedLines() {
   const presentation = SlidesApp.getActivePresentation();
   const slides = presentation.getSlides();
