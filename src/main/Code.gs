@@ -56,7 +56,7 @@ function sheetsShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
       .setHeight(150);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+  SpreadsheetApp.getUi().showModalDialog(html, 'Credits');
 }
 
 /**
@@ -67,7 +67,7 @@ function slidesShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
       .setHeight(150);
-  SlidesApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+  SlidesApp.getUi().showModalDialog(html, 'Credits');
 }
 
 /**
@@ -78,7 +78,7 @@ function docsShowCredits() {
   const html = HtmlService.createHtmlOutputFromFile('Credits')
       .setWidth(200)
       .setHeight(150);
-  DocumentApp.getUi().showModalDialog(html, 'Credits 🙇🏻');
+  DocumentApp.getUi().showModalDialog(html, 'Credits');
 }
 
 // ----- SHEETS -----
@@ -104,7 +104,7 @@ function sheetsShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('SheetsOwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl 🦉'));
+  SpreadsheetApp.getUi().showSidebar(html.setTitle('Sheets Owl'));
 }
 
 /**
@@ -245,7 +245,7 @@ function docsShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('DocsOwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  DocumentApp.getUi().showSidebar(html.setTitle('Docs Owl 🦉'));
+  DocumentApp.getUi().showSidebar(html.setTitle('Docs Owl'));
 }
 
 /**
@@ -381,7 +381,7 @@ function slidesShowTagsSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('SlidesOwlSidebar')
     .setWidth(300)
     .setHeight(400);
-  SlidesApp.getUi().showSidebar(html.setTitle('Slides Owl 🦉'));
+  SlidesApp.getUi().showSidebar(html.setTitle('Slides Owl'));
 }
 
 /**

@@ -4,9 +4,9 @@
   <base target="_top">
 </head>
 <body>
-  <h1><code>📍 Tags</code></h1>
+  <h1><code>Tags</code></h1>
   <div id="tagContainer">
-    <p><b><i>Owl is searching for your tags</i></b> 🔍...</p>
+    <p><b><i>Owl is searching for your tags</i></b>...</p>
   </div>
   <script>
     function displayTags(data) {
@@ -26,7 +26,7 @@
       }
       if (container.innerHTML === '') {
         container.style.backgroundColor = "";
-        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>. 😭</br></br>Specified tags are <code>${prefixes.join(", ")}</code>.</p>`;
+        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>.</br></br>Specified tags are <code>${prefixes.join(", ")}</code>.</p>`;
       }
     }
     google.script.run.withSuccessHandler(displayTags).slidesGetTaggedLines();
