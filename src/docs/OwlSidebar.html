@@ -13,7 +13,7 @@
       const container = document.getElementById('tagContainer');
       const tags = data.tags;
       const prefixes = data.prefixes;
-      const colors = data.colorschemeGruvbox;
+      const colors = data.colorscheme;
       container.innerHTML = "";
       container.style.backgroundColor = colors["BACKGROUND"];
       for (const [prefix, lines] of Object.entries(tags)) {
