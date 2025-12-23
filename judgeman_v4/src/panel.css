@@ -10,6 +10,10 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
 
+#judgeman-panel.jm-collapsed #jm-more {
+  display: none;
+}
+
 #judgeman-panel.jm-hidden {
   display: none;
 }
@@ -55,6 +59,25 @@
 #judgeman-panel .jm-actions {
   display: flex;
   gap: 8px;
+}
+
+#judgeman-panel .jm-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7edf6;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+#judgeman-panel .jm-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
 }
 
 #judgeman-panel .jm-btn {

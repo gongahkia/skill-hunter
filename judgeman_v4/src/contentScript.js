@@ -242,6 +242,7 @@
 
     const panel = document.createElement('div');
     panel.id = 'judgeman-panel';
+    panel.classList.add('jm-collapsed');
     panel.innerHTML = `
       <div class="jm-shell">
         <div class="jm-header">
@@ -250,7 +251,7 @@
             <div class="jm-subtitle" id="jm-case-title">Loading…</div>
           </div>
           <div class="jm-actions">
-            <button id="jm-hide" class="jm-btn jm-btn-quiet jm-min" type="button" title="Hide panel">Hide</button>
+            <button id="jm-expand" class="jm-icon-btn" type="button" aria-label="Expand" title="Expand">+</button>
           </div>
         </div>
 
@@ -263,50 +264,52 @@
             <div class="jm-status" id="jm-status">Ready.</div>
           </div>
 
-          <div class="jm-card">
-            <div class="jm-card-title">Case facts rundown (BYOK)</div>
-            <div class="jm-muted">Uses your API key saved below.</div>
-            <div class="jm-row">
-              <button id="jm-facts" class="jm-btn" type="button">Generate rundown</button>
-              <button id="jm-copy-facts" class="jm-btn jm-btn-quiet" type="button">Copy</button>
+          <div id="jm-more">
+            <div class="jm-card">
+              <div class="jm-card-title">Case facts rundown (BYOK)</div>
+              <div class="jm-muted">Uses your API key saved below.</div>
+              <div class="jm-row">
+                <button id="jm-facts" class="jm-btn" type="button">Generate rundown</button>
+                <button id="jm-copy-facts" class="jm-btn jm-btn-quiet" type="button">Copy</button>
+              </div>
+              <div class="jm-output" id="jm-facts-out" aria-label="Facts rundown"></div>
             </div>
-            <div class="jm-output" id="jm-facts-out" aria-label="Facts rundown"></div>
-          </div>
 
-          <div class="jm-card">
-            <div class="jm-card-title">Instant diagram</div>
-            <div class="jm-muted">Builds a quick relationship graph from the case.</div>
-            <div class="jm-row">
-              <button id="jm-diagram" class="jm-btn" type="button">Generate diagram</button>
-              <button id="jm-copy-diagram" class="jm-btn jm-btn-quiet" type="button">Copy JSON</button>
+            <div class="jm-card">
+              <div class="jm-card-title">Instant diagram</div>
+              <div class="jm-muted">Builds a quick relationship graph from the case.</div>
+              <div class="jm-row">
+                <button id="jm-diagram" class="jm-btn" type="button">Generate diagram</button>
+                <button id="jm-copy-diagram" class="jm-btn jm-btn-quiet" type="button">Copy JSON</button>
+              </div>
+              <div class="jm-diagram" id="jm-diagram-wrap" aria-label="Diagram"></div>
+              <div class="jm-output" id="jm-diagram-json" aria-label="Diagram JSON"></div>
             </div>
-            <div class="jm-diagram" id="jm-diagram-wrap" aria-label="Diagram"></div>
-            <div class="jm-output" id="jm-diagram-json" aria-label="Diagram JSON"></div>
-          </div>
 
-          <div class="jm-card">
-            <div class="jm-card-title">BYOK settings</div>
-            <label>Provider
-              <select id="jm-provider">
-                <option value="gemini">Gemini</option>
-              </select>
-            </label>
-            <label>Model
-              <input id="jm-model" type="text" placeholder="gemini-2.0-flash" />
-            </label>
-            <label>API key
-              <input id="jm-apiKey" type="password" placeholder="Paste API key" />
-            </label>
-            <div class="jm-row">
-              <button id="jm-save" class="jm-btn" type="button">Save</button>
-              <button id="jm-clear" class="jm-btn jm-btn-quiet" type="button">Clear</button>
+            <div class="jm-card">
+              <div class="jm-card-title">BYOK settings</div>
+              <label>Provider
+                <select id="jm-provider">
+                  <option value="gemini">Gemini</option>
+                </select>
+              </label>
+              <label>Model
+                <input id="jm-model" type="text" placeholder="gemini-2.0-flash" />
+              </label>
+              <label>API key
+                <input id="jm-apiKey" type="password" placeholder="Paste API key" />
+              </label>
+              <div class="jm-row">
+                <button id="jm-save" class="jm-btn" type="button">Save</button>
+                <button id="jm-clear" class="jm-btn jm-btn-quiet" type="button">Clear</button>
+              </div>
             </div>
-          </div>
 
-          <div class="jm-card">
-            <div class="jm-card-title">Export</div>
-            <div class="jm-row">
-              <button id="jm-copy-case" class="jm-btn jm-btn-quiet" type="button">Copy case JSON</button>
+            <div class="jm-card">
+              <div class="jm-card-title">Export</div>
+              <div class="jm-row">
+                <button id="jm-copy-case" class="jm-btn jm-btn-quiet" type="button">Copy case JSON</button>
+              </div>
             </div>
           </div>
         </div>
@@ -316,29 +319,28 @@
     // Mount outside body so it survives readable-view DOM replacement.
     document.documentElement.appendChild(panel);
 
-    const hideBtn = document.getElementById('jm-hide');
-    const showBtn = document.getElementById('jm-show');
-    hideBtn?.addEventListener('click', async () => {
-      panel.classList.add('jm-hidden');
-      // Provide a tiny floating restore button
-      const mini = document.createElement('button');
-      mini.id = 'jm-mini-show';
-      mini.textContent = 'Judgeman';
-      mini.style.position = 'fixed';
-      mini.style.top = '12px';
-      mini.style.left = '12px';
-      mini.style.zIndex = '2147483647';
-      mini.style.borderRadius = '999px';
-      mini.style.border = '1px solid rgba(255,255,255,0.14)';
-      mini.style.background = 'rgba(10,12,15,0.88)';
-      mini.style.color = '#e7edf6';
-      mini.style.padding = '8px 10px';
-      mini.style.cursor = 'pointer';
-      mini.addEventListener('click', () => {
-        panel.classList.remove('jm-hidden');
-        mini.remove();
-      });
-      document.documentElement.appendChild(mini);
+    const expandBtn = document.getElementById('jm-expand');
+    const setExpanded = (expanded) => {
+      if (expanded) {
+        panel.classList.remove('jm-collapsed');
+        if (expandBtn) {
+          expandBtn.textContent = '−';
+          expandBtn.setAttribute('aria-label', 'Collapse');
+          expandBtn.setAttribute('title', 'Collapse');
+        }
+      } else {
+        panel.classList.add('jm-collapsed');
+        if (expandBtn) {
+          expandBtn.textContent = '+';
+          expandBtn.setAttribute('aria-label', 'Expand');
+          expandBtn.setAttribute('title', 'Expand');
+        }
+      }
+    };
+    setExpanded(false);
+    expandBtn?.addEventListener('click', () => {
+      const isCollapsed = panel.classList.contains('jm-collapsed');
+      setExpanded(isCollapsed);
     });
 
     // Wire actions
