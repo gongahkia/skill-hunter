@@ -307,7 +307,6 @@
             <div class="jm-card-title">Export</div>
             <div class="jm-row">
               <button id="jm-copy-case" class="jm-btn jm-btn-quiet" type="button">Copy case JSON</button>
-              <button id="jm-show" class="jm-btn jm-btn-quiet jm-min" type="button" style="display:none">Show</button>
             </div>
           </div>
         </div>
