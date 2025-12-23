@@ -22,7 +22,9 @@ Browser extension that formats cases to be more readable.
 
 ## Screenshots
 
-![](./archive/judgeman_v1/asset/screenshot-1.png)
+![](./asset/1.png)  
+![](./asset/2.png)  
+![](./asset/3.png)  
 
 ## Installation
 
