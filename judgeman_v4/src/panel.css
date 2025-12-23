@@ -1,0 +1,182 @@
+/* Injected on-page panel styles (content script) */
+
+#judgeman-panel {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 360px;
+  max-height: calc(100vh - 24px);
+  z-index: 2147483647;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+#judgeman-panel.jm-hidden {
+  display: none;
+}
+
+#judgeman-panel .jm-shell {
+  background: rgba(10, 12, 15, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+#judgeman-panel .jm-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#judgeman-panel .jm-title {
+  font-weight: 750;
+  letter-spacing: 0.2px;
+  color: #e7edf6;
+}
+
+#judgeman-panel .jm-subtitle {
+  font-size: 12px;
+  color: rgba(231, 237, 246, 0.70);
+  margin-top: 2px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#judgeman-panel .jm-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+#judgeman-panel .jm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#judgeman-panel .jm-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e7edf6;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 13px;
+}
+
+#judgeman-panel .jm-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+#judgeman-panel .jm-btn-primary {
+  background: #4caf50;
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #0b0d10;
+}
+
+#judgeman-panel .jm-btn-primary:hover {
+  background: #316935;
+  color: #ffffff;
+}
+
+#judgeman-panel .jm-btn-quiet {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#judgeman-panel .jm-body {
+  padding: 10px 12px 12px;
+  overflow: auto;
+  max-height: calc(100vh - 70px);
+}
+
+#judgeman-panel .jm-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 10px;
+}
+
+#judgeman-panel .jm-card-title {
+  font-weight: 750;
+  color: #e7edf6;
+  margin-bottom: 4px;
+}
+
+#judgeman-panel .jm-muted {
+  color: rgba(231, 237, 246, 0.65);
+  font-size: 12px;
+}
+
+#judgeman-panel .jm-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#judgeman-panel .jm-output {
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #e7edf6;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow: auto;
+}
+
+#judgeman-panel .jm-diagram {
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #e7edf6;
+  overflow: auto;
+}
+
+#judgeman-panel label {
+  display: block;
+  font-size: 12px;
+  color: rgba(231, 237, 246, 0.70);
+  margin-top: 8px;
+}
+
+#judgeman-panel input,
+#judgeman-panel select {
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e7edf6;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+#judgeman-panel input::placeholder {
+  color: rgba(231, 237, 246, 0.45);
+}
+
+#judgeman-panel .jm-status {
+  margin-top: 8px;
+  color: rgba(231, 237, 246, 0.75);
+  font-size: 12px;
+}
+
+#judgeman-panel .jm-min {
+  width: auto;
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 10px;
+}

@@ -10,8 +10,7 @@
   "options_page": "options.html",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
-    "https://www.elitigation.sg/gd/*",
-    "https://www.elitigation.sg/gdviewer/*",
+    "https://www.elitigation.sg/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
@@ -21,10 +20,10 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.elitigation.sg/gd/*",
-        "https://www.elitigation.sg/gdviewer/*"
+        "https://www.elitigation.sg/*"
       ],
       "js": ["contentScript.js"],
+      "css": ["panel.css"],
       "run_at": "document_idle"
     }
   ]
