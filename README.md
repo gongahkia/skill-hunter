@@ -1,7 +1,7 @@
-[![judgeman_1.0.0](https://img.shields.io/badge/judgeman_1.0.0-passing-10B981)](https://github.com/gongahkia/judgeman/releases/tag/1.0.0)
-[![judgeman_2.0.0](https://img.shields.io/badge/judgeman_2.0.0-passing-059669)](https://github.com/gongahkia/judgeman/releases/tag/2.0.0)
-[![judgeman_3.0.0](https://img.shields.io/badge/judgeman_3.0.0-passing-047857)](https://github.com/gongahkia/judgeman/releases/tag/3.0.0)
-[![judgeman_4.0.0](https://img.shields.io/badge/judgeman_4.0.0-passing-065F46)](https://github.com/gongahkia/judgeman/releases/tag/4.0.0)
+[![judgeman_1.0.0](https://img.shields.io/badge/judgeman_1.0-passing-10B981)](https://github.com/gongahkia/judgeman/releases/tag/1.0)
+[![judgeman_2.0.0](https://img.shields.io/badge/judgeman_2.0-passing-059669)](https://github.com/gongahkia/judgeman/releases/tag/2.0)
+[![judgeman_3.0.0](https://img.shields.io/badge/judgeman_3.0-passing-047857)](https://github.com/gongahkia/judgeman/releases/tag/3.0)
+[![judgeman_4.0.0](https://img.shields.io/badge/judgeman_4.0-passing-065F46)](https://github.com/gongahkia/judgeman/releases/tag/4.0)
 
 # `Judgeman`
 
