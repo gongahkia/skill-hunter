@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Judgeman v4",
+  "version": "4.0.0",
+  "description": "Readable ELIT judgments + case facts rundown + diagram (BYOK).",
+  "action": {
+    "default_title": "Judgeman",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://www.elitigation.sg/gd/*",
+    "https://www.elitigation.sg/gdviewer/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.elitigation.sg/gd/*",
+        "https://www.elitigation.sg/gdviewer/*"
+      ],
+      "js": ["contentScript.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

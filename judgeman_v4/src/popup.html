@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Judgeman</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <div class="brand-title">Judgeman</div>
+        <div class="brand-subtitle" id="caseTitle">ELIT judgment helper</div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <div class="row">
+          <button id="toggleBtn" class="btn btn-primary">Toggle readable view</button>
+          <button id="refreshBtn" class="btn btn-quiet" title="Re-scan page">Refresh</button>
+        </div>
+        <div class="muted" id="status">Ready.</div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Case facts rundown (BYOK)</div>
+        <div class="muted">Uses your API key from Options.</div>
+        <div class="row">
+          <button id="factsBtn" class="btn btn-secondary">Generate rundown</button>
+          <button id="copyFactsBtn" class="btn btn-quiet">Copy</button>
+        </div>
+        <pre id="factsOut" class="output" aria-label="Facts rundown"></pre>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Instant diagram</div>
+        <div class="muted">Builds a quick relationship graph from the case.</div>
+        <div class="row">
+          <button id="diagramBtn" class="btn btn-secondary">Generate diagram</button>
+          <button id="copyDiagramBtn" class="btn btn-quiet">Copy JSON</button>
+        </div>
+        <div id="diagramWrap" class="diagram" aria-label="Diagram"></div>
+        <pre id="diagramJson" class="output" aria-label="Diagram JSON"></pre>
+      </section>
+
+      <section class="card">
+        <div class="card-title">Export</div>
+        <div class="row">
+          <button id="copyCaseBtn" class="btn btn-quiet">Copy case JSON</button>
+          <a class="link" href="options.html" target="_blank" rel="noreferrer">Open Options</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
