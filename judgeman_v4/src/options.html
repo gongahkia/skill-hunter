@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Judgeman Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Judgeman v4 – Options</h1>
+      <p class="muted">
+        BYOK: Your key is stored in <code>chrome.storage</code> for this extension.
+        Avoid using highly sensitive keys.
+      </p>
+
+      <section class="card">
+        <label class="label" for="provider">Provider</label>
+        <select id="provider" class="input">
+          <option value="gemini">Google Gemini (API key)</option>
+        </select>
+
+        <label class="label" for="apiKey">API key</label>
+        <input id="apiKey" class="input" type="password" placeholder="Paste your Gemini API key" />
+
+        <label class="label" for="model">Model</label>
+        <input id="model" class="input" type="text" placeholder="e.g. gemini-2.0-flash" />
+
+        <div class="row">
+          <button id="saveBtn" class="btn btn-primary">Save</button>
+          <button id="clearBtn" class="btn btn-quiet">Clear</button>
+          <span id="status" class="muted"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Notes</h2>
+        <ul>
+          <li>This extension calls Gemini REST: <code>.../v1beta/models/&lt;model&gt;:generateContent?key=...</code></li>
+          <li>If you leave the key blank, v4 still works as a readability toggle like v1.</li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
