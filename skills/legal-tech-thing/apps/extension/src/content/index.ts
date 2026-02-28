@@ -9,6 +9,7 @@ import {
 } from "./terms-link-extractor";
 import { installPreAcceptInterceptor } from "./acceptance-interceptor";
 import type { DomExtractionResult } from "./dom-extractor";
+import { extractGmailMessageBody } from "./gmail-extractor";
 import {
   APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE,
   CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE,
@@ -36,7 +37,9 @@ if (!document.documentElement.hasAttribute(CONTENT_SCRIPT_MARKER)) {
   const runScan = () => {
     const pageUrl = window.location.href;
     const detectionResult = detectContractLikePage(document, pageUrl);
-    const extractionResult = extractVisibleContractText(document, pageUrl);
+    const extractionResult =
+      extractGmailMessageBody(document, pageUrl, detectionResult.matchedPhrases) ??
+      extractVisibleContractText(document, pageUrl);
     const termsLinksResult = extractTermsLinksNearConsentControls(document, pageUrl);
     latestExtractionResult = extractionResult;
 

@@ -67,6 +67,11 @@ export interface DomExtractionResult {
   extractedAt: string;
 }
 
+export interface DomExtractionOptions {
+  includeWithin?: Element[];
+  titleOverride?: string;
+}
+
 interface TextBounds {
   start: number;
   end: number;
@@ -198,15 +203,35 @@ function isElementVisible(element: Element, visibilityCache: WeakMap<Element, bo
   return true;
 }
 
-export function extractVisibleContractText(doc: Document, pageUrl: string): DomExtractionResult {
+function isWithinIncludedRoots(element: Element, includeWithin: Element[] | null) {
+  if (!includeWithin || includeWithin.length === 0) {
+    return true;
+  }
+
+  for (const root of includeWithin) {
+    if (root === element || root.contains(element)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function extractVisibleContractText(
+  doc: Document,
+  pageUrl: string,
+  options: DomExtractionOptions = {}
+): DomExtractionResult {
   const root = doc.body ?? doc.documentElement;
   const spans: ExtractedTextSpan[] = [];
   const visibilityCache = new WeakMap<Element, boolean>();
+  const includeWithin =
+    options.includeWithin?.filter((element) => element.isConnected) ?? null;
 
   if (!root) {
     return {
       url: pageUrl,
-      title: doc.title ?? "",
+      title: options.titleOverride ?? doc.title ?? "",
       extractedText: "",
       spans,
       extractedCharacters: 0,
@@ -234,6 +259,10 @@ export function extractVisibleContractText(doc: Document, pageUrl: string): DomE
     }
 
     if (!isElementVisible(parentElement, visibilityCache)) {
+      continue;
+    }
+
+    if (!isWithinIncludedRoots(parentElement, includeWithin)) {
       continue;
     }
 
@@ -294,7 +323,7 @@ export function extractVisibleContractText(doc: Document, pageUrl: string): DomE
 
   return {
     url: pageUrl,
-    title: doc.title ?? "",
+    title: options.titleOverride ?? doc.title ?? "",
     extractedText: parts.join(""),
     spans,
     extractedCharacters: cursor,
