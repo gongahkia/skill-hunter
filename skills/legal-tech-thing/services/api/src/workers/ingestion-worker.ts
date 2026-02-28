@@ -4,6 +4,7 @@ import {
   CONTRACT_INGESTION_QUEUE,
   type ContractIngestionJobPayload
 } from "../modules/ingest/types";
+import { closeDeadLetterQueues, enqueueDeadLetterJob } from "../modules/queue/dead-letter";
 import {
   closeIngestionWorkerResources,
   failContractIngestionJob,
@@ -56,11 +57,31 @@ worker.on("failed", (job, error) => {
     contractId: job?.data?.contractId,
     error
   });
+
+  if (!job) {
+    return;
+  }
+
+  const maxAttempts = typeof job.opts.attempts === "number" ? job.opts.attempts : 1;
+  if (job.attemptsMade < maxAttempts) {
+    return;
+  }
+
+  void enqueueDeadLetterJob(CONTRACT_INGESTION_QUEUE, {
+    sourceQueue: CONTRACT_INGESTION_QUEUE,
+    sourceJobId: String(job.id ?? `unknown-${Date.now()}`),
+    requestId: job.data.requestId,
+    attemptsMade: job.attemptsMade,
+    failedAt: new Date().toISOString(),
+    errorMessage: error instanceof Error ? error.message : "UNKNOWN_INGESTION_ERROR",
+    payload: job.data
+  });
 });
 
 async function shutdown() {
   await worker.close();
   await closeIngestionWorkerResources();
+  await closeDeadLetterQueues();
   process.exit(0);
 }
 

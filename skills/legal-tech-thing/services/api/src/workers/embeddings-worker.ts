@@ -8,6 +8,7 @@ import {
   CLAUSE_EMBEDDINGS_QUEUE,
   type ClauseEmbeddingJobPayload
 } from "../modules/embeddings/types";
+import { closeDeadLetterQueues, enqueueDeadLetterJob } from "../modules/queue/dead-letter";
 
 function buildQueueConnection() {
   const redisUrl = new URL(process.env.REDIS_URL ?? "redis://127.0.0.1:6379");
@@ -57,11 +58,31 @@ worker.on("failed", (job, error) => {
     contractVersionId: job?.data?.contractVersionId,
     error
   });
+
+  if (!job) {
+    return;
+  }
+
+  const maxAttempts = typeof job.opts.attempts === "number" ? job.opts.attempts : 1;
+  if (job.attemptsMade < maxAttempts) {
+    return;
+  }
+
+  void enqueueDeadLetterJob(CLAUSE_EMBEDDINGS_QUEUE, {
+    sourceQueue: CLAUSE_EMBEDDINGS_QUEUE,
+    sourceJobId: String(job.id ?? `unknown-${Date.now()}`),
+    requestId: job.data.requestId,
+    attemptsMade: job.attemptsMade,
+    failedAt: new Date().toISOString(),
+    errorMessage: error instanceof Error ? error.message : "UNKNOWN_EMBEDDINGS_ERROR",
+    payload: job.data
+  });
 });
 
 async function shutdown() {
   await worker.close();
   await closeEmbeddingsGeneratorResources();
+  await closeDeadLetterQueues();
   process.exit(0);
 }
 

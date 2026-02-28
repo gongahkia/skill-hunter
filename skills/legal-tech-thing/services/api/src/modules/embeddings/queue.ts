@@ -4,6 +4,7 @@ import {
   CLAUSE_EMBEDDINGS_QUEUE,
   type ClauseEmbeddingJobPayload
 } from "./types";
+import { queueRetryPolicy, toDefaultJobOptions } from "../queue/retry-policy";
 
 let clauseEmbeddingsQueue: Queue<ClauseEmbeddingJobPayload> | null = null;
 
@@ -32,15 +33,7 @@ function getClauseEmbeddingsQueue() {
       {
         connection: buildQueueConnection(),
         prefix: getQueuePrefix(),
-        defaultJobOptions: {
-          attempts: 5,
-          backoff: {
-            type: "exponential",
-            delay: 2000
-          },
-          removeOnComplete: 500,
-          removeOnFail: 2000
-        }
+        defaultJobOptions: toDefaultJobOptions(queueRetryPolicy[CLAUSE_EMBEDDINGS_QUEUE])
       }
     );
   }

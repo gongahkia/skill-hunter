@@ -10,6 +10,7 @@ import {
   type ContractIngestionJobPayload
 } from "../modules/ingest/types";
 import { REVIEW_RUN_QUEUE, type ReviewRunJobPayload } from "../modules/reviews/types";
+import { queueRetryPolicy, toDefaultJobOptions } from "../modules/queue/retry-policy";
 
 type AppQueues = {
   contractIngestionQueue: Queue;
@@ -47,15 +48,7 @@ const queuesPlugin = fp(async (app) => {
     {
       connection: buildQueueConnection(),
       prefix: getQueuePrefix(),
-      defaultJobOptions: {
-        attempts: 5,
-        removeOnComplete: 1000,
-        removeOnFail: 5000,
-        backoff: {
-          type: "exponential",
-          delay: 1000
-        }
-      }
+      defaultJobOptions: toDefaultJobOptions(queueRetryPolicy[CONTRACT_INGESTION_QUEUE])
     }
   );
   const clauseEmbeddingsQueue = new Queue<ClauseEmbeddingJobPayload>(
@@ -63,29 +56,13 @@ const queuesPlugin = fp(async (app) => {
     {
       connection: buildQueueConnection(),
       prefix: getQueuePrefix(),
-      defaultJobOptions: {
-        attempts: 5,
-        removeOnComplete: 1000,
-        removeOnFail: 5000,
-        backoff: {
-          type: "exponential",
-          delay: 1000
-        }
-      }
+      defaultJobOptions: toDefaultJobOptions(queueRetryPolicy[CLAUSE_EMBEDDINGS_QUEUE])
     }
   );
   const reviewRunQueue = new Queue<ReviewRunJobPayload>(REVIEW_RUN_QUEUE, {
     connection: buildQueueConnection(),
     prefix: getQueuePrefix(),
-    defaultJobOptions: {
-      attempts: 3,
-      removeOnComplete: 1000,
-      removeOnFail: 5000,
-      backoff: {
-        type: "exponential",
-        delay: 1000
-      }
-    }
+    defaultJobOptions: toDefaultJobOptions(queueRetryPolicy[REVIEW_RUN_QUEUE])
   });
 
   app.decorate("queues", {
