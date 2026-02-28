@@ -1,4 +1,4 @@
-import { ClauseType, LlmProvider } from "@prisma/client";
+import { ClauseType, LlmProvider, Prisma } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 
@@ -42,6 +42,21 @@ const createPolicyRuleBodySchema = z
       });
     }
   });
+
+const policyRuleIdParamsSchema = z.object({
+  id: z.string().uuid()
+});
+
+const updatePolicyRuleBodySchema = z.object({
+  expectedVersion: z.number().int().positive(),
+  clauseRequirement: z.nativeEnum(ClauseType).nullable().optional(),
+  clauseSelector: z.string().min(1).optional(),
+  requiredPattern: z.string().min(1).nullable().optional(),
+  forbiddenPattern: z.string().min(1).nullable().optional(),
+  allowException: z.boolean().optional(),
+  active: z.boolean().optional(),
+  priority: z.number().int().positive().optional()
+});
 
 const defaultRiskThresholds = {
   criticalMinConfidence: 0.8,
@@ -197,6 +212,96 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
 
     return reply.status(201).send({
       rule: createdRule
+    });
+  });
+
+  app.patch("/rules/:id", async (request, reply) => {
+    const paramsResult = policyRuleIdParamsSchema.safeParse(request.params);
+    const bodyResult = updatePolicyRuleBodySchema.safeParse(request.body);
+
+    if (!paramsResult.success || !bodyResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: {
+          params: paramsResult.success ? null : paramsResult.error.flatten(),
+          body: bodyResult.success ? null : bodyResult.error.flatten()
+        }
+      });
+    }
+
+    const profile = await app.prisma.policyProfile.findFirst({
+      where: {
+        userId: request.auth.userId
+      },
+      orderBy: {
+        createdAt: "asc"
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!profile) {
+      return reply.status(404).send({
+        error: "POLICY_PROFILE_NOT_FOUND"
+      });
+    }
+
+    const existingRule = await app.prisma.policyRule.findFirst({
+      where: {
+        id: paramsResult.data.id,
+        profileId: profile.id
+      },
+      select: {
+        id: true,
+        version: true
+      }
+    });
+
+    if (!existingRule) {
+      return reply.status(404).send({
+        error: "POLICY_RULE_NOT_FOUND"
+      });
+    }
+
+    const updateResult = await app.prisma.policyRule.updateMany({
+      where: {
+        id: existingRule.id,
+        profileId: profile.id,
+        version: bodyResult.data.expectedVersion
+      },
+      data: {
+        clauseRequirement:
+          bodyResult.data.clauseRequirement === undefined
+            ? undefined
+            : bodyResult.data.clauseRequirement,
+        clauseSelector: bodyResult.data.clauseSelector,
+        requiredPattern: bodyResult.data.requiredPattern,
+        forbiddenPattern: bodyResult.data.forbiddenPattern,
+        allowException: bodyResult.data.allowException,
+        active: bodyResult.data.active,
+        priority: bodyResult.data.priority,
+        version: {
+          increment: 1
+        }
+      }
+    });
+
+    if (updateResult.count === 0) {
+      return reply.status(409).send({
+        error: "VERSION_CONFLICT",
+        currentVersion: existingRule.version
+      });
+    }
+
+    const updatedRule = await app.prisma.policyRule.findUnique({
+      where: {
+        id: existingRule.id
+      }
+    });
+
+    return reply.status(200).send({
+      rule: updatedRule
     });
   });
 };
