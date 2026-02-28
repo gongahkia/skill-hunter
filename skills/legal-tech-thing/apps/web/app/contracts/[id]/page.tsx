@@ -10,9 +10,11 @@ import {
   type ContractDetailResponse
 } from "../../../src/contracts/detail-api";
 import {
+  createFindingFeedback,
   fetchContractFindings,
   updateFindingStatus,
-  type ContractFinding
+  type ContractFinding,
+  type FeedbackSeverity
 } from "../../../src/findings/api";
 import {
   fetchMyPolicyProfile,
@@ -27,6 +29,13 @@ import {
 
 const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const;
 const providers: PolicyProvider[] = ["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"];
+const feedbackSeverityOptions: FeedbackSeverity[] = [
+  "critical",
+  "high",
+  "medium",
+  "low",
+  "info"
+];
 
 function toConfidencePercentage(confidence: string) {
   const value = Number(confidence);
@@ -58,6 +67,12 @@ export default function ContractDetailPage() {
   const [trackedReviewRunId, setTrackedReviewRunId] = useState("");
   const [liveProgress, setLiveProgress] = useState<ReviewRunProgress | null>(null);
   const [realtimeError, setRealtimeError] = useState<string | null>(null);
+  const [feedbackDrafts, setFeedbackDrafts] = useState<
+    Record<string, { rationale: string; correctedSeverity: FeedbackSeverity | "" }>
+  >({});
+  const [submittingFeedbackId, setSubmittingFeedbackId] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [feedbackStatus, setFeedbackStatus] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ContractFinding[]>();
@@ -227,6 +242,55 @@ export default function ContractDetailPage() {
     setTrackedReviewRunId(reviewRunId);
   }
 
+  async function handleSubmitFeedback(finding: ContractFinding) {
+    const draft = feedbackDrafts[finding.id] ?? {
+      rationale: "",
+      correctedSeverity: "" as const
+    };
+    const rationale = draft.rationale.trim();
+
+    if (!rationale) {
+      setFeedbackError("FEEDBACK_RATIONALE_REQUIRED");
+      return;
+    }
+
+    setFeedbackError(null);
+    setFeedbackStatus(null);
+    setSubmittingFeedbackId(finding.id);
+
+    const action =
+      finding.status === "ACCEPTED"
+        ? "accepted"
+        : finding.status === "DISMISSED"
+          ? "dismissed"
+          : "edited";
+
+    try {
+      const updatedFinding = await createFindingFeedback(finding.id, {
+        action,
+        rationale,
+        correctedSeverity: draft.correctedSeverity || undefined
+      });
+      setFindings((current) =>
+        current.map((item) => (item.id === updatedFinding.id ? updatedFinding : item))
+      );
+      setFeedbackDrafts((current) => ({
+        ...current,
+        [finding.id]: {
+          rationale: "",
+          correctedSeverity: ""
+        }
+      }));
+      setFeedbackStatus(`Feedback submitted for finding ${finding.id}.`);
+    } catch (submitError) {
+      setFeedbackError(
+        submitError instanceof Error ? submitError.message : "FINDING_FEEDBACK_FAILED"
+      );
+    } finally {
+      setSubmittingFeedbackId(null);
+    }
+  }
+
   return (
     <main>
       <p>
@@ -354,6 +418,8 @@ export default function ContractDetailPage() {
           <section>
             <h2>Findings by Severity</h2>
             {statusUpdateError ? <p>{statusUpdateError}</p> : null}
+            {feedbackError ? <p>{feedbackError}</p> : null}
+            {feedbackStatus ? <p>{feedbackStatus}</p> : null}
             {groupedFindings.length === 0 ? <p>No findings yet.</p> : null}
             {groupedFindings.map((group) => (
               <article key={group.severity}>
@@ -363,26 +429,93 @@ export default function ContractDetailPage() {
                 <ul>
                   {group.items.map((finding) => (
                     <li key={finding.id}>
-                      <strong>{finding.title}</strong> [{finding.status}] <br />
-                      <span>Confidence: {toConfidencePercentage(finding.confidence)}</span>
-                      <p>{finding.description}</p>
-                      <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
-                      <p>
-                        <button
-                          disabled={updatingFindingId === finding.id}
-                          onClick={() => void handleUpdateStatus(finding.id, "accepted")}
-                          type="button"
-                        >
-                          Accept
-                        </button>{" "}
-                        <button
-                          disabled={updatingFindingId === finding.id}
-                          onClick={() => void handleUpdateStatus(finding.id, "dismissed")}
-                          type="button"
-                        >
-                          Dismiss
-                        </button>
-                      </p>
+                      {(() => {
+                        const draft = feedbackDrafts[finding.id] ?? {
+                          rationale: "",
+                          correctedSeverity: "" as const
+                        };
+
+                        return (
+                          <>
+                            <strong>{finding.title}</strong> [{finding.status}] <br />
+                            <span>Confidence: {toConfidencePercentage(finding.confidence)}</span>
+                            <p>{finding.description}</p>
+                            <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
+                            <p>
+                              <button
+                                disabled={updatingFindingId === finding.id}
+                                onClick={() => void handleUpdateStatus(finding.id, "accepted")}
+                                type="button"
+                              >
+                                Accept
+                              </button>{" "}
+                              <button
+                                disabled={updatingFindingId === finding.id}
+                                onClick={() => void handleUpdateStatus(finding.id, "dismissed")}
+                                type="button"
+                              >
+                                Dismiss
+                              </button>
+                            </p>
+                            <p>
+                              <label>
+                                Feedback rationale
+                                <textarea
+                                  disabled={submittingFeedbackId === finding.id}
+                                  onChange={(event) =>
+                                    setFeedbackDrafts((current) => ({
+                                      ...current,
+                                      [finding.id]: {
+                                        ...draft,
+                                        rationale: event.target.value
+                                      }
+                                    }))
+                                  }
+                                  value={draft.rationale}
+                                />
+                              </label>
+                            </p>
+                            <p>
+                              <label>
+                                Corrected severity
+                                <select
+                                  disabled={submittingFeedbackId === finding.id}
+                                  onChange={(event) =>
+                                    setFeedbackDrafts((current) => ({
+                                      ...current,
+                                      [finding.id]: {
+                                        ...draft,
+                                        correctedSeverity: event.target.value as
+                                          | FeedbackSeverity
+                                          | ""
+                                      }
+                                    }))
+                                  }
+                                  value={draft.correctedSeverity}
+                                >
+                                  <option value="">No correction</option>
+                                  {feedbackSeverityOptions.map((severity) => (
+                                    <option key={severity} value={severity}>
+                                      {severity}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                            </p>
+                            <p>
+                              <button
+                                disabled={submittingFeedbackId === finding.id}
+                                onClick={() => void handleSubmitFeedback(finding)}
+                                type="button"
+                              >
+                                {submittingFeedbackId === finding.id
+                                  ? "Submitting feedback..."
+                                  : "Submit feedback"}
+                              </button>
+                            </p>
+                          </>
+                        );
+                      })()}
                     </li>
                   ))}
                 </ul>

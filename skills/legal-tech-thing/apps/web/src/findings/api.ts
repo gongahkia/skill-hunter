@@ -17,6 +17,8 @@ export type ContractFinding = {
 };
 
 export type FindingStatus = "open" | "accepted" | "dismissed" | "needs-edit";
+export type FeedbackAction = "accepted" | "dismissed" | "edited";
+export type FeedbackSeverity = "critical" | "high" | "medium" | "low" | "info";
 
 export async function fetchContractFindings(contractId: string) {
   const response = (await apiClient.request(
@@ -33,6 +35,32 @@ export async function updateFindingStatus(findingId: string, status: FindingStat
     method: "PATCH",
     body: {
       status
+    }
+  })) as {
+    finding: ContractFinding;
+  };
+
+  return response.finding;
+}
+
+type CreateFindingFeedbackInput = {
+  action?: FeedbackAction;
+  rationale: string;
+  correctedSeverity?: FeedbackSeverity;
+  correctedTitle?: string;
+};
+
+export async function createFindingFeedback(
+  findingId: string,
+  input: CreateFindingFeedbackInput
+) {
+  const response = (await apiClient.request(`/findings/${findingId}/feedback`, {
+    method: "POST",
+    body: {
+      action: input.action,
+      rationale: input.rationale,
+      correctedSeverity: input.correctedSeverity,
+      correctedTitle: input.correctedTitle
     }
   })) as {
     finding: ContractFinding;
