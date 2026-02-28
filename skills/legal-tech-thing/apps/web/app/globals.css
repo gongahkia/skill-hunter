@@ -1,0 +1,22 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+main {
+  min-height: 100vh;
+  display: grid;
+  gap: 0.75rem;
+  place-content: center;
+  padding: 2rem;
+}

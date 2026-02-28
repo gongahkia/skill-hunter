@@ -3,9 +3,20 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build": "echo web build",
-    "dev": "echo web dev",
-    "lint": "echo web lint",
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start",
     "test": "echo web test"
+  },
+  "dependencies": {
+    "next": "15.1.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
   }
 }
