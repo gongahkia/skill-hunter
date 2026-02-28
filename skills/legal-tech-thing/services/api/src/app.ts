@@ -3,6 +3,7 @@ import helmet from "@fastify/helmet";
 import Fastify from "fastify";
 
 import prismaPlugin from "./plugins/prisma";
+import redisPlugin from "./plugins/redis";
 import registerRoutes from "./routes";
 
 export function buildApp() {
@@ -18,6 +19,7 @@ export function buildApp() {
     credentials: true
   });
   app.register(prismaPlugin);
+  app.register(redisPlugin);
   app.register(registerRoutes);
 
   return app;
