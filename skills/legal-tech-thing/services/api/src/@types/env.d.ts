@@ -5,6 +5,7 @@ declare global {
     interface ProcessEnv {
       DATABASE_URL?: string;
       REDIS_URL?: string;
+      REDIS_QUEUE_PREFIX?: string;
       S3_ENDPOINT?: string;
       S3_REGION?: string;
       S3_ACCESS_KEY_ID?: string;

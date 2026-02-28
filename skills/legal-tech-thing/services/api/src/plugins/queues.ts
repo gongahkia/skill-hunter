@@ -1,0 +1,64 @@
+import { Queue } from "bullmq";
+import fp from "fastify-plugin";
+
+import {
+  CONTRACT_INGESTION_QUEUE,
+  type ContractIngestionJobPayload
+} from "../modules/ingest/types";
+
+type AppQueues = {
+  contractIngestionQueue: Queue;
+};
+
+declare module "fastify" {
+  interface FastifyInstance {
+    queues: AppQueues;
+  }
+}
+
+function getQueuePrefix() {
+  return process.env.REDIS_QUEUE_PREFIX ?? "legal-tech";
+}
+
+function buildQueueConnection() {
+  const redisUrl = new URL(process.env.REDIS_URL ?? "redis://127.0.0.1:6379");
+  const dbPath = redisUrl.pathname.replace("/", "");
+
+  return {
+    host: redisUrl.hostname,
+    port: Number(redisUrl.port || 6379),
+    username: redisUrl.username || undefined,
+    password: redisUrl.password || undefined,
+    db: dbPath ? Number(dbPath) : 0,
+    tls: redisUrl.protocol === "rediss:" ? {} : undefined
+  };
+}
+
+const queuesPlugin = fp(async (app) => {
+  const contractIngestionQueue = new Queue<ContractIngestionJobPayload>(
+    CONTRACT_INGESTION_QUEUE,
+    {
+      connection: buildQueueConnection(),
+      prefix: getQueuePrefix(),
+      defaultJobOptions: {
+        attempts: 5,
+        removeOnComplete: 1000,
+        removeOnFail: 5000,
+        backoff: {
+          type: "exponential",
+          delay: 1000
+        }
+      }
+    }
+  );
+
+  app.decorate("queues", {
+    contractIngestionQueue
+  });
+
+  app.addHook("onClose", async () => {
+    await app.queues.contractIngestionQueue.close();
+  });
+});
+
+export default queuesPlugin;

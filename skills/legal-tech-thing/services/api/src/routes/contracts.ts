@@ -1,4 +1,7 @@
-import { ContractSourceType, ContractProcessingStatus } from "@prisma/client";
+import {
+  ContractSourceType,
+  ContractProcessingStatus
+} from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import type { FastifyPluginAsync } from "fastify";
@@ -9,7 +12,7 @@ const createContractBodySchema = z.object({
   sourceType: z.nativeEnum(ContractSourceType)
 });
 
-const uploadUrlParamsSchema = z.object({
+const contractIdParamsSchema = z.object({
   id: z.string().uuid()
 });
 
@@ -17,6 +20,14 @@ const uploadUrlBodySchema = z.object({
   fileName: z.string().min(1).max(512),
   mimeType: z.string().min(1).max(255),
   contentLength: z.number().int().positive().max(100 * 1024 * 1024)
+});
+
+const ingestBodySchema = z.object({
+  objectUri: z.string().min(1),
+  objectKey: z.string().min(1),
+  mimeType: z.string().min(1).max(255),
+  contentLength: z.number().int().positive().max(100 * 1024 * 1024),
+  checksum: z.string().min(1)
 });
 
 function sanitizeFileName(fileName: string) {
@@ -63,7 +74,7 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post("/:id/upload-url", async (request, reply) => {
-    const paramsResult = uploadUrlParamsSchema.safeParse(request.params);
+    const paramsResult = contractIdParamsSchema.safeParse(request.params);
     const bodyResult = uploadUrlBodySchema.safeParse(request.body);
 
     if (!paramsResult.success || !bodyResult.success) {
@@ -116,6 +127,83 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
       expiresInSeconds: upload.expiresInSeconds,
       expectedContentLength: bodyResult.data.contentLength,
       expectedContentType: bodyResult.data.mimeType
+    });
+  });
+
+  app.post("/:id/ingest", async (request, reply) => {
+    const paramsResult = contractIdParamsSchema.safeParse(request.params);
+    const bodyResult = ingestBodySchema.safeParse(request.body);
+
+    if (!paramsResult.success || !bodyResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: {
+          params: paramsResult.success ? null : paramsResult.error.flatten(),
+          body: bodyResult.success ? null : bodyResult.error.flatten()
+        }
+      });
+    }
+
+    const contract = await app.prisma.contract.findFirst({
+      where: {
+        id: paramsResult.data.id,
+        ownerId: request.auth.userId
+      },
+      select: {
+        id: true,
+        ownerId: true,
+        sourceType: true
+      }
+    });
+
+    if (!contract) {
+      return reply.status(404).send({
+        error: "CONTRACT_NOT_FOUND"
+      });
+    }
+
+    const contractVersion = await app.prisma.contractVersion.create({
+      data: {
+        contractId: contract.id,
+        checksum: bodyResult.data.checksum,
+        storageUri: bodyResult.data.objectUri
+      },
+      select: {
+        id: true,
+        contractId: true,
+        checksum: true,
+        storageUri: true,
+        createdAt: true
+      }
+    });
+
+    const job = await app.queues.contractIngestionQueue.add(
+      `contract-ingest:${contract.id}:${contractVersion.id}`,
+      {
+        contractId: contract.id,
+        contractVersionId: contractVersion.id,
+        ownerId: contract.ownerId,
+        objectUri: bodyResult.data.objectUri,
+        objectKey: bodyResult.data.objectKey,
+        mimeType: bodyResult.data.mimeType,
+        contentLength: bodyResult.data.contentLength,
+        sourceType: contract.sourceType
+      }
+    );
+
+    await app.prisma.contract.update({
+      where: {
+        id: contract.id
+      },
+      data: {
+        status: ContractProcessingStatus.QUEUED
+      }
+    });
+
+    return reply.status(202).send({
+      queued: true,
+      queueJobId: job.id,
+      contractVersion
     });
   });
 
