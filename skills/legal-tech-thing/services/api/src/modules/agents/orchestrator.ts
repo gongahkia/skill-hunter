@@ -1,4 +1,5 @@
 import { adjudicateFindings, type SourcedFinding } from "./adjudication";
+import { scoreFindings } from "./scoring";
 import {
   AgentRuntime,
   type AgentName,
@@ -18,7 +19,12 @@ export type OrchestrationResult = {
   reviewRunId: string;
   agentResults: AgentRunResult[];
   rawFindings: SourcedFinding[];
-  findings: Array<AgentRuntimeOutput["findings"][number] & { sourceAgents: AgentName[] }>;
+  findings: Array<
+    AgentRuntimeOutput["findings"][number] & {
+      sourceAgents: AgentName[];
+      severityScore: number;
+    }
+  >;
 };
 
 const defaultSpecialistAgentOrder: AgentName[] = [
@@ -76,7 +82,8 @@ export async function runSpecialistAgentsForReview(
     }));
   });
 
-  const findings = adjudicateFindings(rawFindings);
+  const adjudicatedFindings = adjudicateFindings(rawFindings);
+  const findings = scoreFindings(adjudicatedFindings, input.policyRules);
 
   return {
     reviewRunId: input.reviewRunId,

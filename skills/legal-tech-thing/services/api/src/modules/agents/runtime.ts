@@ -39,7 +39,8 @@ export const agentRuntimeInputSchema = z
             requiredPattern: z.string().nullable(),
             forbiddenPattern: z.string().nullable(),
             allowException: z.boolean(),
-            active: z.boolean()
+            active: z.boolean(),
+            priority: z.number().int().positive().default(100)
           })
           .strict()
       )
