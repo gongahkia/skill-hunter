@@ -25,6 +25,7 @@ export const agentRuntimeInputSchema = z
     contractId: z.string().uuid(),
     contractVersionId: z.string().uuid(),
     reviewRunId: z.string().uuid(),
+    contractType: z.string().min(1).optional(),
     language: z.string().min(2),
     policyProfileId: z.string().uuid(),
     clauses: z.array(agentClauseInputSchema)
