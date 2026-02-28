@@ -31,6 +31,37 @@ export type PolicyProfile = {
   updatedAt: string;
 };
 
+export type ClauseRequirement =
+  | "DEFINITIONS"
+  | "SCOPE"
+  | "PAYMENT"
+  | "TERM"
+  | "TERMINATION"
+  | "LIABILITY"
+  | "INDEMNITY"
+  | "IP"
+  | "CONFIDENTIALITY"
+  | "PRIVACY"
+  | "GOVERNING_LAW"
+  | "DISPUTE_RESOLUTION"
+  | "MISC"
+  | "UNKNOWN";
+
+export type PolicyRule = {
+  id: string;
+  profileId: string;
+  clauseRequirement: ClauseRequirement | null;
+  clauseSelector: string;
+  requiredPattern: string | null;
+  forbiddenPattern: string | null;
+  allowException: boolean;
+  active: boolean;
+  priority: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type PolicyProfileResponse = {
   profile: {
     id: string;
@@ -164,4 +195,87 @@ export async function updateMyPolicyProfile(input: UpdatePolicyProfileInput) {
   });
 
   return normalizePolicyProfile(response);
+}
+
+type PolicyRuleListResponse = {
+  items: PolicyRule[];
+};
+
+type PolicyRuleResponse = {
+  rule: PolicyRule;
+};
+
+export type CreatePolicyRuleInput = {
+  clauseRequirement: ClauseRequirement | null;
+  clauseSelector: string;
+  requiredPattern: string;
+  forbiddenPattern: string;
+  allowException: boolean;
+  priority: number;
+};
+
+export type UpdatePolicyRuleInput = {
+  expectedVersion: number;
+  clauseRequirement: ClauseRequirement | null;
+  clauseSelector: string;
+  requiredPattern: string;
+  forbiddenPattern: string;
+  allowException: boolean;
+  active: boolean;
+  priority: number;
+};
+
+function normalizeOptionalString(value: string) {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeOptionalStringOrNull(value: string) {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+export async function fetchPolicyRules() {
+  const response = await apiClient.request<PolicyRuleListResponse>("/policy/rules");
+  return response.items;
+}
+
+export async function createPolicyRule(input: CreatePolicyRuleInput) {
+  const response = await apiClient.request<PolicyRuleResponse>("/policy/rules", {
+    method: "POST",
+    body: {
+      clauseRequirement: input.clauseRequirement ?? undefined,
+      clauseSelector: input.clauseSelector.trim(),
+      requiredPattern: normalizeOptionalString(input.requiredPattern),
+      forbiddenPattern: normalizeOptionalString(input.forbiddenPattern),
+      allowException: input.allowException,
+      priority: input.priority
+    }
+  });
+
+  return response.rule;
+}
+
+export async function updatePolicyRule(ruleId: string, input: UpdatePolicyRuleInput) {
+  const response = await apiClient.request<PolicyRuleResponse>(`/policy/rules/${ruleId}`, {
+    method: "PATCH",
+    body: {
+      expectedVersion: input.expectedVersion,
+      clauseRequirement: input.clauseRequirement,
+      clauseSelector: input.clauseSelector.trim(),
+      requiredPattern: normalizeOptionalStringOrNull(input.requiredPattern),
+      forbiddenPattern: normalizeOptionalStringOrNull(input.forbiddenPattern),
+      allowException: input.allowException,
+      active: input.active,
+      priority: input.priority
+    }
+  });
+
+  return response.rule;
+}
+
+export async function deletePolicyRule(ruleId: string) {
+  await apiClient.request(`/policy/rules/${ruleId}`, {
+    method: "DELETE"
+  });
 }
