@@ -45,7 +45,7 @@
 
 ## Supported browsers
 
-Find `Lovely Ghostwriter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
 
 | Browser | Status | Link |
 | :--- | :--- | :--- | 
