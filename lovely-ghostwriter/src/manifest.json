@@ -1,0 +1,77 @@
+{
+  "manifest_version": 3,
+  "version": "2.0.0",
+  "name": "Lovely Ghostwriter",
+  "description": "Transform Singapore legislation into a clean, readable format",
+  "author": "Gabriel Ong",
+  "homepage_url": "https://github.com/gongahkia/skill-hunter",
+
+  "icons": {
+    "16": "local_asset/lovely-ghostwriter-16.png",
+    "24": "local_asset/lovely-ghostwriter-24.png",
+    "32": "local_asset/lovely-ghostwriter-32.png",
+    "64": "local_asset/lovely-ghostwriter-64.png",
+    "128": "local_asset/lovely-ghostwriter-128.png"
+  },
+
+  "action": {
+    "default_icon": {
+      "16": "local_asset/lovely-ghostwriter-16.png",
+      "24": "local_asset/lovely-ghostwriter-24.png",
+      "32": "local_asset/lovely-ghostwriter-32.png",
+      "64": "local_asset/lovely-ghostwriter-64.png",
+      "128": "local_asset/lovely-ghostwriter-128.png"
+    },
+    "default_title": "Simplify legislation with Lovely Ghostwriter",
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://sso.agc.gov.sg/Act/*?WholeDoc=1",
+        "https://sso.agc.gov.sg/SL/*WholeDoc=1",
+        "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
+      ],
+      "js": ["content.js"],
+      "css": ["styles/main.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "https://sso.agc.gov.sg/*"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "local_asset/*.png",
+        "styles/*.css"
+      ],
+      "matches": ["https://sso.agc.gov.sg/*"]
+    }
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lovely-ghostwriter@gongahkia.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

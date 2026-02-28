@@ -1,0 +1,48 @@
+{
+  "name": "@double-face/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test dist/**/*.test.js",
+    "worker:ingestion": "tsx src/workers/ingestion-worker.ts",
+    "worker:embeddings": "tsx src/workers/embeddings-worker.ts",
+    "worker:feedback-aggregation": "tsx src/workers/feedback-aggregation-worker.ts",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "prisma:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@double-face/shared-types": "workspace:*",
+    "@aws-sdk/client-s3": "^3.917.0",
+    "@aws-sdk/s3-request-presigner": "^3.917.0",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "@prisma/client": "^6.16.3",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.63.2",
+    "cheerio": "^1.1.2",
+    "fast-xml-parser": "^5.3.0",
+    "fastify": "^5.6.1",
+    "fastify-plugin": "^5.1.0",
+    "franc": "^6.2.0",
+    "ioredis": "^5.7.0",
+    "jose": "^6.1.2",
+    "jszip": "^3.10.1",
+    "langs": "^2.0.0",
+    "pdfjs-dist": "^5.4.296",
+    "tesseract.js": "^6.0.1",
+    "zod": "^3.24.1",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/langs": "^2.0.4",
+    "@types/node": "^22.10.5",
+    "@types/zxcvbn": "^4.4.5",
+    "prisma": "^6.16.3",
+    "tsx": "^4.20.6"
+  }
+}

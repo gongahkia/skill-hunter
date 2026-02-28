@@ -12,28 +12,28 @@
 
 `Skill Hunter` currently supports the following skills.
 
-* `Skill Hunter`: Browser extension for readable Singapore legislation on SSO
-    * [SSO](https://sso.agc.gov.sg/) is the most-referenced source for lawyers when keeping up to date with Singapore Legislation. Time is often spent poring over definitions and navigating between interpretation and offence sections. `Skill Hunter` simplifies the heavily-nested DOM structure of the webpage to one that is intuitive and easily understood by lawyers and programmers alike.
-* `Legal Tech Thing`: Multi-app contract review platform
-    * `legal-tech-thing` extends this repository into a full contract-ingestion and review stack (web, extension, desktop, API, workers), so one repo now contains two legal-productivity "skills" with different use cases.
+* `Lovely Ghostwriter`: Browser extension for readable Singapore legislation on SSO
+    * `Lovely Ghostwriter` simplifies the heavily-nested DOM structure of [SSO](https://sso.agc.gov.sg/) to one that is intuitive and easily understood by lawyers and programmers alike.
+* `Double Face`: Multi-app contract review platform
+    * `Double Face` provides a full contract-ingestion and review stack (web, extension, desktop, API, workers).
 
 ## Screenshots
 
-### Skill Hunter
+### Lovely Ghostwriter
 
 ![](./asset/screenshots/skill-hunter-screenshot-4.png)
 
-### Legal Tech Thing
+### Double Face
 
 ![](./asset/screenshots/)
 
 ## Stack
 
-### Skill Hunter (`skill-hunter/`)
+### Lovely Ghostwriter (`lovely-ghostwriter`)
 
-* [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/)
+* *Frontend*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/)
 
-### Legal Tech Thing (`legal-tech-thing/`)
+### Double Face (`double-face`)
 
 * *Frontend*: [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/)
 * *Backend*: [Fastify](https://fastify.dev/), [BullMQ](https://docs.bullmq.io/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo)
@@ -45,7 +45,7 @@
 
 ## Supported browsers
 
-Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+Find `Lovely Ghostwriter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
 
 | Browser | Status | Link |
 | :--- | :--- | :--- | 
@@ -64,9 +64,9 @@ Build the monorepo locally.
 ```console
 $ git clone https://github.com/gongahkia/skill-hunter
 $ cd skill-hunter
-$ npm install
+$ cd lovely-ghostwriter && npm install
 $ make
-$ cd skills/legal-tech-thing
+$ cd ../double-face
 $ pnpm install
 $ pnpm build
 ```
