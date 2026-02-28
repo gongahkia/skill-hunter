@@ -1,5 +1,6 @@
 import { ContractProcessingStatus, PrismaClient } from "@prisma/client";
 
+import { parseContractByMimeType } from "./parser-router";
 import type { ContractIngestionJobPayload } from "./types";
 
 const prisma = new PrismaClient();
@@ -16,7 +17,9 @@ export async function processContractIngestionJob(
     }
   });
 
-  // Normalization steps are added incrementally in subsequent tasks.
+  // Source retrieval is wired in a subsequent task; parser routing is available now.
+  await parseContractByMimeType(payload.mimeType, Buffer.from(""));
+
   await prisma.contract.update({
     where: {
       id: payload.contractId
