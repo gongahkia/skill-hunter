@@ -10,6 +10,7 @@ import {
 import { installPreAcceptInterceptor } from "./acceptance-interceptor";
 import type { DomExtractionResult } from "./dom-extractor";
 import { extractGmailMessageBody } from "./gmail-extractor";
+import { extractGoogleDocsTextByCopyFallback } from "./google-docs-extractor";
 import {
   APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE,
   CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE,
@@ -26,6 +27,7 @@ const PRE_ACCEPT_MARKER = "data-legal-tech-pre-accept-interceptor";
 const LAST_SCAN_URL_MARKER = "data-legal-tech-last-scan-url";
 const SPA_URL_CHANGE_EVENT = "legal-tech-extension:url-change";
 const RESCAN_DEBOUNCE_MS = 250;
+const GOOGLE_DOCS_FALLBACK_MIN_EXTRACTED_CHARS = 300;
 
 if (!document.documentElement.hasAttribute(CONTENT_SCRIPT_MARKER)) {
   document.documentElement.setAttribute(CONTENT_SCRIPT_MARKER, "active");
@@ -37,9 +39,22 @@ if (!document.documentElement.hasAttribute(CONTENT_SCRIPT_MARKER)) {
   const runScan = () => {
     const pageUrl = window.location.href;
     const detectionResult = detectContractLikePage(document, pageUrl);
-    const extractionResult =
+    let extractionResult =
       extractGmailMessageBody(document, pageUrl, detectionResult.matchedPhrases) ??
       extractVisibleContractText(document, pageUrl);
+    if (extractionResult.extractedCharacters < GOOGLE_DOCS_FALLBACK_MIN_EXTRACTED_CHARS) {
+      const googleDocsFallback = extractGoogleDocsTextByCopyFallback(
+        document,
+        pageUrl,
+        detectionResult.matchedPhrases
+      );
+      if (
+        googleDocsFallback &&
+        googleDocsFallback.extractedCharacters > extractionResult.extractedCharacters
+      ) {
+        extractionResult = googleDocsFallback;
+      }
+    }
     const termsLinksResult = extractTermsLinksNearConsentControls(document, pageUrl);
     latestExtractionResult = extractionResult;
 
