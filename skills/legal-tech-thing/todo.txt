@@ -1,4 +1,3 @@
-(A) Implement `PUT /policy/profiles/me` to upsert configurable thresholds and provider preferences +api +policy
 (A) Implement `GET /policy/rules` to list active policy rules ordered by priority +api +policy
 (A) Implement `POST /policy/rules` to create a deterministic policy rule with clause selectors +api +policy
 (A) Implement `PATCH /policy/rules/:id` to modify a policy rule with optimistic version check +api +policy
