@@ -11,6 +11,7 @@ import {
 } from "../../../src/contracts/detail-api";
 import {
   fetchContractFindings,
+  updateFindingStatus,
   type ContractFinding
 } from "../../../src/findings/api";
 
@@ -34,6 +35,8 @@ export default function ContractDetailPage() {
   const [selectedClause, setSelectedClause] = useState<ContractClause | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
+  const [updatingFindingId, setUpdatingFindingId] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ContractFinding[]>();
@@ -75,6 +78,27 @@ export default function ContractDetailPage() {
     void loadDetail();
   }, [contractId]);
 
+  async function handleUpdateStatus(
+    findingId: string,
+    status: "accepted" | "dismissed"
+  ) {
+    setStatusUpdateError(null);
+    setUpdatingFindingId(findingId);
+
+    try {
+      const updated = await updateFindingStatus(findingId, status);
+      setFindings((current) =>
+        current.map((finding) => (finding.id === updated.id ? updated : finding))
+      );
+    } catch (updateError) {
+      setStatusUpdateError(
+        updateError instanceof Error ? updateError.message : "STATUS_UPDATE_FAILED"
+      );
+    } finally {
+      setUpdatingFindingId(null);
+    }
+  }
+
   return (
     <main>
       <p>
@@ -94,6 +118,7 @@ export default function ContractDetailPage() {
 
           <section>
             <h2>Findings by Severity</h2>
+            {statusUpdateError ? <p>{statusUpdateError}</p> : null}
             {groupedFindings.length === 0 ? <p>No findings yet.</p> : null}
             {groupedFindings.map((group) => (
               <article key={group.severity}>
@@ -107,6 +132,22 @@ export default function ContractDetailPage() {
                       <span>Confidence: {toConfidencePercentage(finding.confidence)}</span>
                       <p>{finding.description}</p>
                       <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
+                      <p>
+                        <button
+                          disabled={updatingFindingId === finding.id}
+                          onClick={() => void handleUpdateStatus(finding.id, "accepted")}
+                          type="button"
+                        >
+                          Accept
+                        </button>{" "}
+                        <button
+                          disabled={updatingFindingId === finding.id}
+                          onClick={() => void handleUpdateStatus(finding.id, "dismissed")}
+                          type="button"
+                        >
+                          Dismiss
+                        </button>
+                      </p>
                     </li>
                   ))}
                 </ul>
