@@ -2,6 +2,7 @@ import { apiClient } from "../lib/api-client";
 
 export type ContractFinding = {
   id: string;
+  contractVersionId: string;
   title: string;
   description: string;
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
@@ -22,7 +23,7 @@ export type FeedbackSeverity = "critical" | "high" | "medium" | "low" | "info";
 
 export async function fetchContractFindings(contractId: string) {
   const response = (await apiClient.request(
-    `/contracts/${contractId}/findings?limit=200`
+    `/contracts/${contractId}/findings?limit=100`
   )) as {
     items: ContractFinding[];
   };

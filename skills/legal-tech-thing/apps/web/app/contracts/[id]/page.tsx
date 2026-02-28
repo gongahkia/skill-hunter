@@ -10,6 +10,10 @@ import {
   type ContractDetailResponse
 } from "../../../src/contracts/detail-api";
 import {
+  fetchContractVersionDiff,
+  type ContractVersionDiffResponse
+} from "../../../src/contracts/version-diff-api";
+import {
   createFindingFeedback,
   fetchContractFindings,
   updateFindingStatus,
@@ -49,6 +53,26 @@ function toConfidencePercentage(confidence: string) {
   return `${Math.round(value * 100)}%`;
 }
 
+function buildFindingDiffKey(finding: ContractFinding) {
+  const title = finding.title.trim().toLowerCase();
+  return `${title}:${finding.evidenceSpan.startOffset}:${finding.evidenceSpan.endOffset}`;
+}
+
+async function fetchOptionalVersionDiff(contractId: string) {
+  try {
+    const response = await fetchContractVersionDiff(contractId);
+    return {
+      data: response,
+      error: null as string | null
+    };
+  } catch (error) {
+    return {
+      data: null as ContractVersionDiffResponse | null,
+      error: error instanceof Error ? error.message : "VERSION_DIFF_LOAD_FAILED"
+    };
+  }
+}
+
 export default function ContractDetailPage() {
   const params = useParams<{ id: string }>();
   const contractId = params.id;
@@ -71,6 +95,8 @@ export default function ContractDetailPage() {
   const [trackedReviewRunId, setTrackedReviewRunId] = useState("");
   const [liveProgress, setLiveProgress] = useState<ReviewRunProgress | null>(null);
   const [comparisonResult, setComparisonResult] = useState<CompareReviewRunsResponse | null>(null);
+  const [versionDiff, setVersionDiff] = useState<ContractVersionDiffResponse | null>(null);
+  const [versionDiffError, setVersionDiffError] = useState<string | null>(null);
   const [realtimeError, setRealtimeError] = useState<string | null>(null);
   const [feedbackDrafts, setFeedbackDrafts] = useState<
     Record<string, { rationale: string; correctedSeverity: FeedbackSeverity | "" }>
@@ -96,20 +122,68 @@ export default function ContractDetailPage() {
       .filter((group) => group.items.length > 0);
   }, [findings]);
 
+  const versionFindingDelta = useMemo(() => {
+    if (!versionDiff) {
+      return null;
+    }
+
+    const fromFindings = findings.filter(
+      (finding) => finding.contractVersionId === versionDiff.fromVersion.id
+    );
+    const toFindings = findings.filter(
+      (finding) => finding.contractVersionId === versionDiff.toVersion.id
+    );
+
+    const fromByKey = new Map(
+      fromFindings.map((finding) => [buildFindingDiffKey(finding), finding])
+    );
+    const toByKey = new Map(toFindings.map((finding) => [buildFindingDiffKey(finding), finding]));
+
+    const introduced = Array.from(toByKey.entries())
+      .filter(([key]) => !fromByKey.has(key))
+      .map(([, finding]) => finding);
+    const resolved = Array.from(fromByKey.entries())
+      .filter(([key]) => !toByKey.has(key))
+      .map(([, finding]) => finding);
+
+    return {
+      fromVersionId: versionDiff.fromVersion.id,
+      toVersionId: versionDiff.toVersion.id,
+      fromVersionCreatedAt: versionDiff.fromVersion.createdAt,
+      toVersionCreatedAt: versionDiff.toVersion.createdAt,
+      fromCount: fromFindings.length,
+      toCount: toFindings.length,
+      introduced,
+      resolved,
+      clauseSummary: versionDiff.diff.summary
+    };
+  }, [findings, versionDiff]);
+
   useEffect(() => {
     async function loadDetail() {
       setError(null);
+      setVersionDiffError(null);
+      setVersionDiff(null);
       setIsLoading(true);
 
       try {
-        const [detailResponse, findingsResponse, profileResponse] = await Promise.all([
+        const [detailResponse, findingsResponse, profileResponse, versionDiffResult] =
+          await Promise.all([
           fetchContractDetail(contractId),
           fetchContractFindings(contractId),
-          fetchMyPolicyProfile().catch(() => null)
+          fetchMyPolicyProfile().catch(() => null),
+          fetchOptionalVersionDiff(contractId)
         ]);
 
         setDetail(detailResponse);
         setFindings(findingsResponse);
+        setVersionDiff(versionDiffResult.data);
+        setVersionDiffError(
+          versionDiffResult.error &&
+            versionDiffResult.error !== "CONTRACT_VERSION_DIFF_REQUIRES_TWO_VERSIONS"
+            ? versionDiffResult.error
+            : null
+        );
         setProfileOptions(
           profileResponse
             ? [
@@ -521,6 +595,72 @@ export default function ContractDetailPage() {
               </>
             ) : (
               <p>No contract version is available yet for review launch.</p>
+            )}
+          </section>
+
+          <section>
+            <h2>Version Finding Diff</h2>
+            {versionDiffError ? <p>{versionDiffError}</p> : null}
+            {versionFindingDelta ? (
+              <article>
+                <p>
+                  Comparing{" "}
+                  <strong>
+                    {versionFindingDelta.fromVersionId}
+                  </strong>{" "}
+                  (
+                  {new Date(versionFindingDelta.fromVersionCreatedAt).toLocaleString()}
+                  ) against{" "}
+                  <strong>
+                    {versionFindingDelta.toVersionId}
+                  </strong>{" "}
+                  (
+                  {new Date(versionFindingDelta.toVersionCreatedAt).toLocaleString()}
+                  )
+                </p>
+                <p>
+                  Findings in older version: {versionFindingDelta.fromCount} | Findings in newer
+                  version: {versionFindingDelta.toCount}
+                </p>
+                <p>
+                  Introduced: {versionFindingDelta.introduced.length} | Resolved:{" "}
+                  {versionFindingDelta.resolved.length}
+                </p>
+                <p>
+                  Clause changes - unchanged: {versionFindingDelta.clauseSummary.unchanged},
+                  modified: {versionFindingDelta.clauseSummary.modified}, added:{" "}
+                  {versionFindingDelta.clauseSummary.added}, removed:{" "}
+                  {versionFindingDelta.clauseSummary.removed}
+                </p>
+                <h3>Newly Introduced Findings</h3>
+                {versionFindingDelta.introduced.length === 0 ? (
+                  <p>None.</p>
+                ) : (
+                  <ul>
+                    {versionFindingDelta.introduced.map((finding) => (
+                      <li key={`introduced-${finding.id}`}>
+                        <strong>{finding.title}</strong> [{finding.severity}]{" "}
+                        <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <h3>Resolved Findings</h3>
+                {versionFindingDelta.resolved.length === 0 ? (
+                  <p>None.</p>
+                ) : (
+                  <ul>
+                    {versionFindingDelta.resolved.map((finding) => (
+                      <li key={`resolved-${finding.id}`}>
+                        <strong>{finding.title}</strong> [{finding.severity}]{" "}
+                        <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            ) : (
+              <p>At least two ingested versions are required to compute cross-version deltas.</p>
             )}
           </section>
 
