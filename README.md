@@ -12,20 +12,14 @@
 
 `Skill Hunter` currently supports the following skills.
 
-* `Lovely Ghostwriter`: Browser extension for readable Singapore legislation on SSO
-    * `Lovely Ghostwriter` simplifies the heavily-nested DOM structure of [SSO](https://sso.agc.gov.sg/) to one that is intuitive and easily understood by lawyers and programmers alike.
-* `Double Face`: Multi-app contract review platform
-    * `Double Face` provides a full contract-ingestion and review stack (web, extension, desktop, API, workers).
-
-## Screenshots
-
-### Lovely Ghostwriter
-
-![](./asset/screenshots/skill-hunter-screenshot-4.png)
-
-### Double Face
-
-![](./asset/screenshots/)
+| Skill | Description | Stack | Screenshot |
+| :--- | :--- | :--- | :--- |
+| `Lovely Ghostwriter` | Browser extension for readable Singapore legislation on SSO. Simplifies the heavily-nested DOM structure of [SSO](https://sso.agc.gov.sg/) to one that is intuitive and easily understood by lawyers and programmers alike. | TypeScript, HTML/CSS, Webpack, Jest, npm | ![](./asset/screenshots/skill-hunter-screenshot-4.png) |
+| `Double Face` | Multi-app contract review platform. Provides a full contract-ingestion and review stack (web, extension, desktop, API, workers). | Next.js, Electron, Fastify, BullMQ, Prisma, PostgreSQL, Redis, pnpm/Turborepo | ![](./asset/screenshots/skill-hunter-screenshot-1.png) |
+| `Conver Hands` | Litigation readiness bundle product. Provides evidence/findings ingestion, bundle generation, hash/signature verification, a static operator console, and a queue-driven export worker. | Fastify, Zod, TypeScript, pnpm, tsx, static web (HTML/CSS/JS) | Screenshot pending. |
+| `Order Stamp` | Adversarial clause detector product. Provides a heuristic detector API, a Manifest V3 browser extension for active-tab scans/highlighting, and a batch detection worker. | Fastify, Zod, TypeScript, pnpm, tsx, Chrome Extension MV3 | Screenshot pending. |
+| `Sun and Moon` | Case chronology builder. Provides case/event ingestion, chronology analytics (gaps/conflicts/monthly grouping), a static chronology console, and a timeline snapshot worker. | Fastify, Zod, TypeScript, pnpm, tsx, static web (HTML/CSS/JS) | Screenshot pending. |
+| `Fun Fun Cloth` | Policy-to-clause compiler. Provides a policy DSL compiler API, clause simulation endpoints, a static policy editor/simulator, and a batch policy compiler worker. | Fastify, Zod, TypeScript, pnpm, tsx, static web (HTML/CSS/JS) | Screenshot pending. |
 
 ## Stack
 
@@ -39,9 +33,35 @@
 * *Backend*: [Fastify](https://fastify.dev/), [BullMQ](https://docs.bullmq.io/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo)
 * *DB*: [Prisma](https://www.prisma.io/), [PostgreSQL](https://www.postgresql.org/), [Redis](https://redis.io/)
 
+### Conver Hands (`conver-hands`)
+
+* *Frontend*: [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/)
+* *Workers*: [tsx](https://tsx.is/), [TypeScript](https://www.typescriptlang.org/)
+
+### Order Stamp (`order-stamp`)
+
+* *Frontend*: [Chrome Extension Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/)
+* *Workers*: [tsx](https://tsx.is/), [TypeScript](https://www.typescriptlang.org/)
+
+### Sun and Moon (`sun-and-moon`)
+
+* *Frontend*: [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/)
+* *Workers*: [tsx](https://tsx.is/), [TypeScript](https://www.typescriptlang.org/)
+
+### Fun Fun Cloth (`fun-fun-cloth`)
+
+* *Frontend*: [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/)
+* *Workers*: [tsx](https://tsx.is/), [TypeScript](https://www.typescriptlang.org/)
+
 ### Shared
 
 * *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
+
+## [Presentation](./asset/presentation/class_part.pdf)
 
 ## Supported browsers
 
@@ -53,22 +73,62 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 | Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
 | Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
 
-## [Presentation](./asset/presentation/class_part.pdf)
-
 ## Installation
 
 Build the monorepo locally.
 
 ### CLI
 
+Manually install everything yourself
+
 ```console
 $ git clone https://github.com/gongahkia/skill-hunter
 $ cd skill-hunter
+$ ./onboard.sh
+```
+
+Optional build pass after install.
+
+```console
+$ ./onboard.sh --build
+```
+
+Manual setup (fallback).
+
+```console
 $ cd lovely-ghostwriter && npm install
 $ make
 $ cd ../double-face
 $ pnpm install
 $ pnpm build
+$ cd ..
+$ pnpm -C conver-hands/api install
+$ pnpm -C conver-hands/web install
+$ pnpm -C conver-hands/worker-export install
+$ pnpm -C order-stamp/api install
+$ pnpm -C order-stamp/worker-detection install
+$ pnpm -C sun-and-moon/api install
+$ pnpm -C sun-and-moon/web install
+$ pnpm -C sun-and-moon/worker-timeline install
+$ pnpm -C fun-fun-cloth/api install
+$ pnpm -C fun-fun-cloth/web install
+$ pnpm -C fun-fun-cloth/worker-compiler install
+```
+
+Run the new standalone tools from repo root.
+
+```console
+$ pnpm -C conver-hands dev:api          # http://127.0.0.1:4011
+$ pnpm -C conver-hands dev:web          # http://127.0.0.1:4171
+$ pnpm -C order-stamp dev:api           # http://127.0.0.1:4012
+$ pnpm -C sun-and-moon dev:api          # http://127.0.0.1:4013
+$ pnpm -C sun-and-moon dev:web          # http://127.0.0.1:4173
+$ pnpm -C fun-fun-cloth dev:api         # http://127.0.0.1:4014
+$ pnpm -C fun-fun-cloth dev:web         # http://127.0.0.1:4174
+$ pnpm -C conver-hands worker
+$ pnpm -C order-stamp worker
+$ pnpm -C sun-and-moon worker
+$ pnpm -C fun-fun-cloth worker
 ```
 
 ### GUI
