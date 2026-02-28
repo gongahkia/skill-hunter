@@ -8,6 +8,12 @@ import {
   type StoredAuthTokens
 } from "../auth/storage";
 import { submitExtractedContractSource } from "../contracts/api";
+import {
+  applyPolicyModePreset,
+  fetchMyPolicyProfile,
+  inferPolicyMode,
+  type ExtensionPolicyMode
+} from "../policy/api";
 
 function formatTokenPreview(token: string) {
   if (token.length <= 16) {
@@ -232,6 +238,10 @@ export function SidePanelApp() {
   const [submitStatus, setSubmitStatus] = useState<string | null>(null);
   const [highlightError, setHighlightError] = useState<string | null>(null);
   const [activeHighlightFindingId, setActiveHighlightFindingId] = useState<string | null>(null);
+  const [policyMode, setPolicyMode] = useState<ExtensionPolicyMode>("personal");
+  const [isUpdatingPolicyMode, setIsUpdatingPolicyMode] = useState(false);
+  const [policyModeError, setPolicyModeError] = useState<string | null>(null);
+  const [policyModeStatus, setPolicyModeStatus] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStoredSession() {
@@ -247,6 +257,40 @@ export function SidePanelApp() {
 
     void loadStoredSession();
   }, []);
+
+  useEffect(() => {
+    if (!tokens?.accessToken) {
+      setPolicyMode("personal");
+      setPolicyModeError(null);
+      setPolicyModeStatus(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    void fetchMyPolicyProfile(tokens.accessToken)
+      .then((profile) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setPolicyMode(inferPolicyMode(profile));
+        setPolicyModeError(null);
+      })
+      .catch((error) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setPolicyModeError(
+          error instanceof Error ? error.message : "POLICY_PROFILE_LOAD_FAILED"
+        );
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tokens?.accessToken]);
 
   const isAuthenticated = useMemo(() => tokens !== null, [tokens]);
   const scanStatus = useMemo(() => deriveScanStatus(scanState, isScanLoading), [scanState, isScanLoading]);
@@ -356,6 +400,32 @@ export function SidePanelApp() {
       setTokens(null);
       setStatus("Cleared auth tokens from chrome.storage.local.");
       setIsLoggingOut(false);
+    }
+  }
+
+  async function handleSwitchPolicyMode(nextMode: ExtensionPolicyMode) {
+    if (!tokens?.accessToken) {
+      setPolicyModeError("AUTH_REQUIRED");
+      return;
+    }
+
+    setIsUpdatingPolicyMode(true);
+    setPolicyModeError(null);
+    setPolicyModeStatus(null);
+
+    try {
+      const profile = await applyPolicyModePreset(tokens.accessToken, nextMode);
+      const resolvedMode = inferPolicyMode(profile);
+      setPolicyMode(resolvedMode);
+      setPolicyModeStatus(
+        `Policy mode updated to ${resolvedMode === "strict" ? "strict" : "personal"}.`
+      );
+    } catch (error) {
+      setPolicyModeError(
+        error instanceof Error ? error.message : "POLICY_MODE_UPDATE_FAILED"
+      );
+    } finally {
+      setIsUpdatingPolicyMode(false);
     }
   }
 
@@ -519,6 +589,36 @@ export function SidePanelApp() {
         ) : (
           <p className="empty-findings">No findings for the active tab yet.</p>
         )}
+      </section>
+
+      <section className="panel-section">
+        <h2>Review Mode</h2>
+        <p className="meta-row">
+          Quick switch policy profile between personal and strict review presets.
+        </p>
+        <div className="mode-switch-row">
+          <button
+            className={policyMode === "personal" ? "mode-button-active" : "button-secondary"}
+            disabled={!isAuthenticated || isUpdatingPolicyMode}
+            onClick={() => void handleSwitchPolicyMode("personal")}
+            type="button"
+          >
+            Personal
+          </button>
+          <button
+            className={policyMode === "strict" ? "mode-button-active" : "button-secondary"}
+            disabled={!isAuthenticated || isUpdatingPolicyMode}
+            onClick={() => void handleSwitchPolicyMode("strict")}
+            type="button"
+          >
+            Strict
+          </button>
+        </div>
+        <p className="meta-row">
+          Active mode: {policyMode === "strict" ? "Strict" : "Personal"}
+        </p>
+        {policyModeError ? <p className="message message-error">{policyModeError}</p> : null}
+        {policyModeStatus ? <p className="message message-success">{policyModeStatus}</p> : null}
       </section>
 
       {!isInitializing && !isAuthenticated ? (

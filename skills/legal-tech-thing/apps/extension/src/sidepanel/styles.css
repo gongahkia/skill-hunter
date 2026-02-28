@@ -201,3 +201,14 @@ button:disabled {
   font-size: 0.85rem;
   color: #64748b;
 }
+
+.mode-switch-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mode-button-active {
+  background: #0f172a;
+  color: #f8fafc;
+}
