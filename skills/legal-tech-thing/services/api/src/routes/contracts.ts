@@ -1,6 +1,8 @@
 import {
   ContractSourceType,
-  ContractProcessingStatus
+  ContractProcessingStatus,
+  FindingSeverity,
+  FindingStatus
 } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
@@ -29,6 +31,59 @@ const ingestBodySchema = z.object({
   contentLength: z.number().int().positive().max(100 * 1024 * 1024),
   checksum: z.string().min(1)
 });
+
+const contractFindingsQuerySchema = z.object({
+  cursor: z.string().uuid().optional(),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  severity: z
+    .enum(["critical", "high", "medium", "low", "info"])
+    .optional(),
+  status: z.enum(["open", "accepted", "dismissed", "needs-edit"]).optional()
+});
+
+function toFindingSeverity(value: string | undefined) {
+  if (value === "critical") {
+    return FindingSeverity.CRITICAL;
+  }
+
+  if (value === "high") {
+    return FindingSeverity.HIGH;
+  }
+
+  if (value === "medium") {
+    return FindingSeverity.MEDIUM;
+  }
+
+  if (value === "low") {
+    return FindingSeverity.LOW;
+  }
+
+  if (value === "info") {
+    return FindingSeverity.INFO;
+  }
+
+  return undefined;
+}
+
+function toFindingStatus(value: string | undefined) {
+  if (value === "open") {
+    return FindingStatus.OPEN;
+  }
+
+  if (value === "accepted") {
+    return FindingStatus.ACCEPTED;
+  }
+
+  if (value === "dismissed") {
+    return FindingStatus.DISMISSED;
+  }
+
+  if (value === "needs-edit") {
+    return FindingStatus.NEEDS_EDIT;
+  }
+
+  return undefined;
+}
 
 function sanitizeFileName(fileName: string) {
   const baseName = path.basename(fileName);
@@ -204,6 +259,85 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
       queued: true,
       queueJobId: job.id,
       contractVersion
+    });
+  });
+
+  app.get("/:id/findings", async (request, reply) => {
+    const paramsResult = contractIdParamsSchema.safeParse(request.params);
+    const queryResult = contractFindingsQuerySchema.safeParse(request.query);
+
+    if (!paramsResult.success || !queryResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: {
+          params: paramsResult.success ? null : paramsResult.error.flatten(),
+          query: queryResult.success ? null : queryResult.error.flatten()
+        }
+      });
+    }
+
+    const contract = await app.prisma.contract.findFirst({
+      where: {
+        id: paramsResult.data.id,
+        ownerId: request.auth.userId
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!contract) {
+      return reply.status(404).send({
+        error: "CONTRACT_NOT_FOUND"
+      });
+    }
+
+    const severityFilter = toFindingSeverity(queryResult.data.severity);
+    const statusFilter = toFindingStatus(queryResult.data.status);
+    const take = queryResult.data.limit + 1;
+
+    const findings = await app.prisma.finding.findMany({
+      where: {
+        contractVersion: {
+          contractId: contract.id
+        },
+        severity: severityFilter,
+        status: statusFilter
+      },
+      include: {
+        evidenceSpan: {
+          select: {
+            id: true,
+            startOffset: true,
+            endOffset: true,
+            excerpt: true,
+            pageNumber: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      take,
+      ...(queryResult.data.cursor
+        ? {
+            cursor: {
+              id: queryResult.data.cursor
+            },
+            skip: 1
+          }
+        : {})
+    });
+
+    const hasNextPage = findings.length > queryResult.data.limit;
+    const paginatedItems = hasNextPage ? findings.slice(0, -1) : findings;
+    const lastItem = paginatedItems[paginatedItems.length - 1];
+
+    return reply.status(200).send({
+      items: paginatedItems,
+      pagination: {
+        nextCursor: hasNextPage && lastItem ? lastItem.id : null
+      }
     });
   });
 
