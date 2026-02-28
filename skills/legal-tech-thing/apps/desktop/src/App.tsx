@@ -172,6 +172,25 @@ export function App() {
     setIsInitializing(false);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = window.desktopBridge.onGlobalCaptureHotkey((payload) => {
+      setCapturedScreen(payload.capture);
+      setSelectionRect(null);
+      setRegionCaptureDataUrl(null);
+      setOcrText("");
+      setOcrError(null);
+      setOcrStatus(null);
+      setCaptureError(null);
+      setStatus(
+        `Global capture hotkey (${payload.shortcut}) triggered at ${new Date(
+          payload.triggeredAt
+        ).toLocaleTimeString()}.`
+      );
+    });
+
+    return unsubscribe;
+  }, []);
+
   const isAuthenticated = useMemo(() => tokens !== null, [tokens]);
   const findings = useMemo(() => buildFindingsFromText(ocrText), [ocrText]);
   const filteredFindings = useMemo(() => {
@@ -556,6 +575,9 @@ export function App() {
           </button>
         </div>
         {captureError ? <p className="message message-error">{captureError}</p> : null}
+        <p className="meta-row">
+          Global shortcut: Cmd/Ctrl+Shift+R captures the primary screen from any app.
+        </p>
         {capturedScreen ? <p>Captured {capturedScreen.name}. Drag on image to select a region.</p> : null}
 
         {capturedScreen ? (

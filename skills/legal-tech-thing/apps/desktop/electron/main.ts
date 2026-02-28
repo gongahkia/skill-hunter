@@ -1,4 +1,13 @@
-import { app, BrowserWindow, clipboard, desktopCapturer, dialog, ipcMain, screen } from "electron";
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  desktopCapturer,
+  dialog,
+  globalShortcut,
+  ipcMain,
+  screen
+} from "electron";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -6,6 +15,10 @@ const rendererDevServerUrl = process.env.VITE_DEV_SERVER_URL;
 const rendererEntryPath = path.join(__dirname, "../dist/renderer/index.html");
 const preloadPath = path.join(__dirname, "preload.js");
 const MAX_IMPORT_FILE_SIZE_BYTES = 35 * 1024 * 1024;
+const GLOBAL_CAPTURE_SHORTCUT = "CommandOrControl+Shift+R";
+const GLOBAL_CAPTURE_EVENT_NAME = "desktop:global-capture-hotkey";
+
+let mainWindow: BrowserWindow | null = null;
 
 type ImportedContractFile = {
   path: string;
@@ -24,6 +37,12 @@ type CapturedScreenResult = {
   height: number;
   dataUrl: string;
   capturedAt: string;
+};
+
+type GlobalCaptureHotkeyPayload = {
+  shortcut: string;
+  triggeredAt: string;
+  capture: CapturedScreenResult;
 };
 
 function toKind(fileName: string): ImportedContractFile["kind"] | null {
@@ -103,7 +122,11 @@ async function readImportedContractFile(filePath: string): Promise<ImportedContr
 }
 
 function createMainWindow() {
-  const mainWindow = new BrowserWindow({
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    return mainWindow;
+  }
+
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 840,
     minWidth: 1024,
@@ -122,6 +145,75 @@ function createMainWindow() {
   } else {
     void mainWindow.loadFile(rendererEntryPath);
   }
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
+  return mainWindow;
+}
+
+async function capturePrimaryScreen(): Promise<CapturedScreenResult> {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const sources = await desktopCapturer.getSources({
+    types: ["screen"],
+    thumbnailSize: {
+      width: primaryDisplay.size.width,
+      height: primaryDisplay.size.height
+    }
+  });
+
+  const source =
+    sources.find((candidate) => candidate.display_id === String(primaryDisplay.id)) ?? sources[0];
+
+  if (!source) {
+    throw new Error("SCREEN_CAPTURE_SOURCE_NOT_FOUND");
+  }
+
+  const size = source.thumbnail.getSize();
+  return {
+    id: source.id,
+    name: source.name,
+    width: size.width,
+    height: size.height,
+    dataUrl: source.thumbnail.toDataURL(),
+    capturedAt: new Date().toISOString()
+  };
+}
+
+function sendGlobalHotkeyCapture(window: BrowserWindow, payload: GlobalCaptureHotkeyPayload) {
+  const deliverPayload = () => {
+    window.webContents.send(GLOBAL_CAPTURE_EVENT_NAME, payload);
+  };
+
+  if (window.webContents.isLoadingMainFrame()) {
+    window.webContents.once("did-finish-load", deliverPayload);
+    return;
+  }
+
+  deliverPayload();
+}
+
+function registerGlobalCaptureShortcut() {
+  return globalShortcut.register(GLOBAL_CAPTURE_SHORTCUT, () => {
+    const window = createMainWindow();
+    if (window.isMinimized()) {
+      window.restore();
+    }
+
+    window.show();
+    window.focus();
+
+    void capturePrimaryScreen()
+      .then((capture) => {
+        sendGlobalHotkeyCapture(window, {
+          shortcut: GLOBAL_CAPTURE_SHORTCUT,
+          triggeredAt: new Date().toISOString(),
+          capture
+        });
+      })
+      .catch(() => undefined);
+  });
 }
 
 app.whenReady().then(() => {
@@ -151,43 +243,24 @@ app.whenReady().then(() => {
     return imports;
   });
 
-  ipcMain.handle("desktop:capture-primary-screen", async (): Promise<CapturedScreenResult> => {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const sources = await desktopCapturer.getSources({
-      types: ["screen"],
-      thumbnailSize: {
-        width: primaryDisplay.size.width,
-        height: primaryDisplay.size.height
-      }
-    });
-
-    const source =
-      sources.find((candidate) => candidate.display_id === String(primaryDisplay.id)) ?? sources[0];
-
-    if (!source) {
-      throw new Error("SCREEN_CAPTURE_SOURCE_NOT_FOUND");
-    }
-
-    const size = source.thumbnail.getSize();
-    return {
-      id: source.id,
-      name: source.name,
-      width: size.width,
-      height: size.height,
-      dataUrl: source.thumbnail.toDataURL(),
-      capturedAt: new Date().toISOString()
-    };
-  });
+  ipcMain.handle("desktop:capture-primary-screen", async (): Promise<CapturedScreenResult> =>
+    capturePrimaryScreen()
+  );
 
   ipcMain.handle("desktop:clipboard-read-text", async () => clipboard.readText());
 
   createMainWindow();
+  registerGlobalCaptureShortcut();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createMainWindow();
     }
   });
+});
+
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
 });
 
 app.on("window-all-closed", () => {

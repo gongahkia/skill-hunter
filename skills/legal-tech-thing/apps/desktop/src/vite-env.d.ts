@@ -6,6 +6,9 @@ interface DesktopBridge {
   pickContractFiles: () => Promise<ImportedContractFile[]>;
   capturePrimaryScreen: () => Promise<CapturedScreenResult>;
   readClipboardText: () => Promise<string>;
+  onGlobalCaptureHotkey: (
+    handler: (payload: GlobalCaptureHotkeyPayload) => void
+  ) => () => void;
 }
 
 interface ImportedContractFile {
@@ -25,6 +28,12 @@ interface CapturedScreenResult {
   height: number;
   dataUrl: string;
   capturedAt: string;
+}
+
+interface GlobalCaptureHotkeyPayload {
+  shortcut: string;
+  triggeredAt: string;
+  capture: CapturedScreenResult;
 }
 
 interface Window {
