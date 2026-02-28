@@ -1,6 +1,5 @@
 import { API_BASE_URL } from "../config";
 
-const SOURCE_TYPE = "DESKTOP_SCREEN";
 const SOURCE_MIME_TYPE = "text/plain; charset=utf-8";
 
 interface CreateContractResponse {
@@ -40,6 +39,8 @@ export interface SubmitDesktopOcrContractResult {
   contractVersionId: string;
   queueJobId: string | number;
 }
+
+type TextSourceType = "DESKTOP_SCREEN" | "CLIPBOARD";
 
 async function parseErrorCode(response: Response) {
   const fallbackCode = `HTTP_${response.status}`;
@@ -95,9 +96,10 @@ async function uploadExtractedContent(uploadUrl: string, content: string) {
   }
 }
 
-export async function submitDesktopOcrContractSource(
+async function submitTextContractSource(
   input: SubmitDesktopOcrContractInput,
-  accessToken: string
+  accessToken: string,
+  sourceType: TextSourceType
 ): Promise<SubmitDesktopOcrContractResult> {
   const content = input.content.trim();
   const title = input.title.trim();
@@ -119,7 +121,7 @@ export async function submitDesktopOcrContractSource(
     accessToken,
     body: {
       title,
-      sourceType: SOURCE_TYPE
+      sourceType
     }
   });
 
@@ -158,4 +160,18 @@ export async function submitDesktopOcrContractSource(
     contractVersionId: ingest.contractVersion.id,
     queueJobId: ingest.queueJobId
   };
+}
+
+export async function submitDesktopOcrContractSource(
+  input: SubmitDesktopOcrContractInput,
+  accessToken: string
+) {
+  return submitTextContractSource(input, accessToken, "DESKTOP_SCREEN");
+}
+
+export async function submitClipboardContractSource(
+  input: SubmitDesktopOcrContractInput,
+  accessToken: string
+) {
+  return submitTextContractSource(input, accessToken, "CLIPBOARD");
 }

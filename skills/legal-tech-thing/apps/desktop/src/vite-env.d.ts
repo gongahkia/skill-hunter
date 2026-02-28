@@ -5,6 +5,7 @@ interface DesktopBridge {
   electronVersion: string;
   pickContractFiles: () => Promise<ImportedContractFile[]>;
   capturePrimaryScreen: () => Promise<CapturedScreenResult>;
+  readClipboardText: () => Promise<string>;
 }
 
 interface ImportedContractFile {

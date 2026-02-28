@@ -7,7 +7,7 @@ import {
   setStoredAuthTokens,
   type AuthTokens
 } from "./auth/token-store";
-import { submitDesktopOcrContractSource } from "./contracts/api";
+import { submitClipboardContractSource, submitDesktopOcrContractSource } from "./contracts/api";
 import { extractTextFromCapturedImage } from "./ocr/pipeline";
 
 function formatTokenPreview(token: string) {
@@ -160,6 +160,9 @@ export function App() {
   const [ocrStatus, setOcrStatus] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<"all" | FindingSeverity>("all");
   const [activeFindingId, setActiveFindingId] = useState<string | null>(null);
+  const [isSubmittingClipboard, setIsSubmittingClipboard] = useState(false);
+  const [clipboardError, setClipboardError] = useState<string | null>(null);
+  const [clipboardStatus, setClipboardStatus] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -405,6 +408,43 @@ export function App() {
     setActiveFindingId(filteredFindings[nextIndex]?.id ?? null);
   }
 
+  async function handleQuickClipboardReview() {
+    if (!tokens?.accessToken) {
+      setClipboardError("AUTH_REQUIRED");
+      setClipboardStatus(null);
+      return;
+    }
+
+    setIsSubmittingClipboard(true);
+    setClipboardError(null);
+    setClipboardStatus(null);
+
+    try {
+      const clipboardText = (await window.desktopBridge.readClipboardText()).trim();
+      if (!clipboardText) {
+        throw new Error("CLIPBOARD_TEXT_EMPTY");
+      }
+
+      setOcrText(clipboardText);
+      setSeverityFilter("all");
+      const submission = await submitClipboardContractSource(
+        {
+          title: `Clipboard capture ${new Date().toISOString()}`,
+          content: clipboardText
+        },
+        tokens.accessToken
+      );
+
+      setClipboardStatus(
+        `Submitted clipboard review as contract ${submission.contractId} (version ${submission.contractVersionId}).`
+      );
+    } catch (error) {
+      setClipboardError(error instanceof Error ? error.message : "CLIPBOARD_REVIEW_FAILED");
+    } finally {
+      setIsSubmittingClipboard(false);
+    }
+  }
+
   const activeEvidenceWindow = activeFinding
     ? {
         before: ocrText.slice(Math.max(0, activeFinding.startOffset - 120), activeFinding.startOffset),
@@ -613,7 +653,18 @@ export function App() {
       </section>
 
       <section className="app-card findings-card">
-        <h2>Findings Panel</h2>
+        <div className="importer-header">
+          <h2>Findings Panel</h2>
+          <button
+            disabled={isSubmittingClipboard || !isAuthenticated}
+            onClick={() => void handleQuickClipboardReview()}
+            type="button"
+          >
+            {isSubmittingClipboard ? "Starting..." : "Review Clipboard Text"}
+          </button>
+        </div>
+        {clipboardError ? <p className="message message-error">{clipboardError}</p> : null}
+        {clipboardStatus ? <p className="message message-success">{clipboardStatus}</p> : null}
         <div className="finding-filter-row">
           {(["all", "critical", "high", "medium", "low"] as const).map((filterValue) => (
             <button

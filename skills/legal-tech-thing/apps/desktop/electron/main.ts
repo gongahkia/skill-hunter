@@ -1,4 +1,4 @@
-import { app, BrowserWindow, desktopCapturer, dialog, ipcMain, screen } from "electron";
+import { app, BrowserWindow, clipboard, desktopCapturer, dialog, ipcMain, screen } from "electron";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -178,6 +178,8 @@ app.whenReady().then(() => {
       capturedAt: new Date().toISOString()
     };
   });
+
+  ipcMain.handle("desktop:clipboard-read-text", async () => clipboard.readText());
 
   createMainWindow();
 

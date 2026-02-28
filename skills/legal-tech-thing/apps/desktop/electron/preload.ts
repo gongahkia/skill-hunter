@@ -24,5 +24,6 @@ contextBridge.exposeInMainWorld("desktopBridge", {
   electronVersion: process.versions.electron,
   pickContractFiles: () => ipcRenderer.invoke("desktop:pick-contract-files") as Promise<ImportedContractFile[]>,
   capturePrimaryScreen: () =>
-    ipcRenderer.invoke("desktop:capture-primary-screen") as Promise<CapturedScreenResult>
+    ipcRenderer.invoke("desktop:capture-primary-screen") as Promise<CapturedScreenResult>,
+  readClipboardText: () => ipcRenderer.invoke("desktop:clipboard-read-text") as Promise<string>
 });
