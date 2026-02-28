@@ -1,3 +1,4 @@
+import { adjudicateFindings, type SourcedFinding } from "./adjudication";
 import {
   AgentRuntime,
   type AgentName,
@@ -16,7 +17,8 @@ export type AgentRunResult = {
 export type OrchestrationResult = {
   reviewRunId: string;
   agentResults: AgentRunResult[];
-  findings: Array<AgentRuntimeOutput["findings"][number] & { sourceAgent: AgentName }>;
+  rawFindings: SourcedFinding[];
+  findings: Array<AgentRuntimeOutput["findings"][number] & { sourceAgents: AgentName[] }>;
 };
 
 const defaultSpecialistAgentOrder: AgentName[] = [
@@ -63,7 +65,7 @@ export async function runSpecialistAgentsForReview(
 
   const agentResults = await Promise.all(tasks);
 
-  const findings = agentResults.flatMap((result) => {
+  const rawFindings = agentResults.flatMap((result) => {
     if (result.status !== "completed" || !result.output) {
       return [];
     }
@@ -74,9 +76,12 @@ export async function runSpecialistAgentsForReview(
     }));
   });
 
+  const findings = adjudicateFindings(rawFindings);
+
   return {
     reviewRunId: input.reviewRunId,
     agentResults,
+    rawFindings,
     findings
   };
 }
