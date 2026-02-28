@@ -18,6 +18,119 @@ function formatTokenPreview(token: string) {
   return `${token.slice(0, 8)}...${token.slice(-8)}`;
 }
 
+type FindingSeverity = "critical" | "high" | "medium" | "low";
+
+type FindingRule = {
+  id: string;
+  title: string;
+  severity: FindingSeverity;
+  rationale: string;
+  pattern: RegExp;
+};
+
+type DesktopFinding = {
+  id: string;
+  ruleId: string;
+  title: string;
+  severity: FindingSeverity;
+  rationale: string;
+  startOffset: number;
+  endOffset: number;
+  excerpt: string;
+};
+
+const FINDING_RULES: FindingRule[] = [
+  {
+    id: "arbitration",
+    title: "Arbitration clause detected",
+    severity: "high",
+    rationale: "Arbitration clauses can waive court access and jury trial rights.",
+    pattern: /\barbitration\b/gi
+  },
+  {
+    id: "class-action-waiver",
+    title: "Class action waiver language",
+    severity: "high",
+    rationale: "Class action waivers can limit collective legal recourse.",
+    pattern: /\bclass action waiver\b|\bwaive(?:r)? .*class action\b/gi
+  },
+  {
+    id: "indemnity",
+    title: "Indemnity obligation",
+    severity: "high",
+    rationale: "Indemnity terms may shift broad legal liability to the signer.",
+    pattern: /\bindemnif(?:y|ication)\b/gi
+  },
+  {
+    id: "liability-cap",
+    title: "Limitation of liability",
+    severity: "medium",
+    rationale: "Liability caps can materially reduce available remedies.",
+    pattern: /\blimitation of liability\b|\bliability(?: is)? limited\b/gi
+  },
+  {
+    id: "auto-renewal",
+    title: "Auto-renewal language",
+    severity: "medium",
+    rationale: "Automatic renewal can extend commitments without explicit consent.",
+    pattern: /\bauto(?:matic)? renew(?:al)?\b/gi
+  },
+  {
+    id: "governing-law",
+    title: "Governing law jurisdiction",
+    severity: "low",
+    rationale: "Jurisdiction terms affect where disputes must be handled.",
+    pattern: /\bgoverning law\b|\bjurisdiction\b/gi
+  }
+];
+
+function buildFindingsFromText(text: string) {
+  const findings: DesktopFinding[] = [];
+
+  for (const rule of FINDING_RULES) {
+    const regex = new RegExp(rule.pattern.source, rule.pattern.flags);
+    let match: RegExpExecArray | null = regex.exec(text);
+    let matchCount = 0;
+
+    while (match && match.index >= 0 && matchCount < 20) {
+      const startOffset = match.index;
+      const endOffset = startOffset + match[0].length;
+      const excerptStart = Math.max(0, startOffset - 90);
+      const excerptEnd = Math.min(text.length, endOffset + 90);
+      const excerpt = text.slice(excerptStart, excerptEnd).replace(/\s+/g, " ").trim();
+
+      findings.push({
+        id: `${rule.id}-${startOffset}-${endOffset}`,
+        ruleId: rule.id,
+        title: rule.title,
+        severity: rule.severity,
+        rationale: rule.rationale,
+        startOffset,
+        endOffset,
+        excerpt
+      });
+
+      matchCount += 1;
+      match = regex.exec(text);
+    }
+  }
+
+  const severityRank: Record<FindingSeverity, number> = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1
+  };
+
+  return findings.sort((left, right) => {
+    const rankDelta = severityRank[right.severity] - severityRank[left.severity];
+    if (rankDelta !== 0) {
+      return rankDelta;
+    }
+    return left.startOffset - right.startOffset;
+  });
+}
+
 export function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +158,8 @@ export function App() {
   const [ocrText, setOcrText] = useState("");
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [ocrStatus, setOcrStatus] = useState<string | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<"all" | FindingSeverity>("all");
+  const [activeFindingId, setActiveFindingId] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -55,6 +170,28 @@ export function App() {
   }, []);
 
   const isAuthenticated = useMemo(() => tokens !== null, [tokens]);
+  const findings = useMemo(() => buildFindingsFromText(ocrText), [ocrText]);
+  const filteredFindings = useMemo(() => {
+    if (severityFilter === "all") {
+      return findings;
+    }
+    return findings.filter((finding) => finding.severity === severityFilter);
+  }, [findings, severityFilter]);
+  const activeFinding = useMemo(
+    () => filteredFindings.find((finding) => finding.id === activeFindingId) ?? filteredFindings[0] ?? null,
+    [activeFindingId, filteredFindings]
+  );
+
+  useEffect(() => {
+    if (!activeFinding) {
+      setActiveFindingId(null);
+      return;
+    }
+
+    if (activeFindingId !== activeFinding.id) {
+      setActiveFindingId(activeFinding.id);
+    }
+  }, [activeFinding, activeFindingId]);
 
   function formatFileSize(sizeInBytes: number) {
     if (sizeInBytes < 1024) {
@@ -233,6 +370,7 @@ export function App() {
       }
 
       setOcrText(extractedText);
+      setSeverityFilter("all");
       const submission = await submitDesktopOcrContractSource(
         {
           title: `Screen capture ${new Date().toISOString()}`,
@@ -251,6 +389,29 @@ export function App() {
       setOcrProgress(null);
     }
   }
+
+  function navigateEvidence(direction: "prev" | "next") {
+    if (filteredFindings.length === 0) {
+      return;
+    }
+
+    const currentIndex = activeFinding
+      ? filteredFindings.findIndex((finding) => finding.id === activeFinding.id)
+      : 0;
+    const baseIndex = currentIndex < 0 ? 0 : currentIndex;
+    const delta = direction === "next" ? 1 : -1;
+    const nextIndex = (baseIndex + delta + filteredFindings.length) % filteredFindings.length;
+
+    setActiveFindingId(filteredFindings[nextIndex]?.id ?? null);
+  }
+
+  const activeEvidenceWindow = activeFinding
+    ? {
+        before: ocrText.slice(Math.max(0, activeFinding.startOffset - 120), activeFinding.startOffset),
+        highlighted: ocrText.slice(activeFinding.startOffset, activeFinding.endOffset),
+        after: ocrText.slice(activeFinding.endOffset, Math.min(ocrText.length, activeFinding.endOffset + 120))
+      }
+    : null;
 
   return (
     <main className="app-shell">
@@ -449,6 +610,65 @@ export function App() {
             {ocrText ? <pre className="import-preview">{ocrText}</pre> : null}
           </>
         ) : null}
+      </section>
+
+      <section className="app-card findings-card">
+        <h2>Findings Panel</h2>
+        <div className="finding-filter-row">
+          {(["all", "critical", "high", "medium", "low"] as const).map((filterValue) => (
+            <button
+              className={`filter-chip ${severityFilter === filterValue ? "filter-chip-active" : ""}`}
+              key={filterValue}
+              onClick={() => setSeverityFilter(filterValue)}
+              type="button"
+            >
+              {filterValue}
+            </button>
+          ))}
+        </div>
+
+        {filteredFindings.length > 0 ? (
+          <div className="findings-layout">
+            <ul className="findings-list">
+              {filteredFindings.map((finding) => (
+                <li
+                  className={`finding-item finding-item-${finding.severity} ${activeFinding?.id === finding.id ? "finding-item-active" : ""}`}
+                  key={finding.id}
+                  onClick={() => setActiveFindingId(finding.id)}
+                >
+                  <p className="finding-title">{finding.title}</p>
+                  <p className="finding-meta">
+                    {finding.severity.toUpperCase()} · offset {finding.startOffset}-{finding.endOffset}
+                  </p>
+                  <p className="finding-detail">{finding.rationale}</p>
+                </li>
+              ))}
+            </ul>
+
+            {activeFinding && activeEvidenceWindow ? (
+              <aside className="evidence-panel">
+                <div className="evidence-nav">
+                  <button onClick={() => navigateEvidence("prev")} type="button">
+                    Previous Evidence
+                  </button>
+                  <button onClick={() => navigateEvidence("next")} type="button">
+                    Next Evidence
+                  </button>
+                </div>
+                <p className="finding-meta">
+                  Evidence for {activeFinding.title} ({activeFinding.severity.toUpperCase()})
+                </p>
+                <p className="evidence-text">
+                  {activeEvidenceWindow.before}
+                  <mark>{activeEvidenceWindow.highlighted}</mark>
+                  {activeEvidenceWindow.after}
+                </p>
+              </aside>
+            ) : null}
+          </div>
+        ) : (
+          <p>No findings yet. Run OCR to generate evidence-backed findings.</p>
+        )}
       </section>
     </main>
   );

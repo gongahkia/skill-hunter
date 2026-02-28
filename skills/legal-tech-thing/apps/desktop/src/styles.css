@@ -203,3 +203,98 @@ button:disabled {
   border: 1px solid #cbd5e1;
   border-radius: 0.45rem;
 }
+
+.findings-card {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.finding-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.filter-chip {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.filter-chip-active {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #0f172a;
+}
+
+.findings-layout {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.findings-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.finding-item {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.finding-item-critical,
+.finding-item-high {
+  border-color: #fca5a5;
+  background: #fff1f2;
+}
+
+.finding-item-medium {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.finding-item-low {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.finding-item-active {
+  box-shadow: 0 0 0 2px #0f172a inset;
+}
+
+.finding-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.evidence-panel {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.evidence-nav {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.evidence-text {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
