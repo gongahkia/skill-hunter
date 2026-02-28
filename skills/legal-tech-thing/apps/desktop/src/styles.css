@@ -212,6 +212,13 @@ button:disabled {
   width: 100%;
 }
 
+.review-export-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
 .finding-filter-row {
   display: flex;
   flex-wrap: wrap;

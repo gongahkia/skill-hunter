@@ -28,6 +28,53 @@ export type ReviewRunProgress = {
   updatedAt: string;
 };
 
+export type ReviewExportArtifactResponse = {
+  fileName: string;
+  artifact: {
+    schemaVersion: string;
+    generatedAt: string;
+    reviewRun: {
+      id: string;
+      contractVersionId: string;
+      profileId: string;
+      provider: PolicyProvider;
+      providerModel: string;
+      status: ReviewRunStatus;
+      startedAt: string | null;
+      finishedAt: string | null;
+      errorCode: string | null;
+      errorMessage: string | null;
+      createdAt: string;
+      updatedAt: string;
+    };
+    summary: {
+      totalFindings: number;
+      bySeverity: Record<string, number>;
+      byStatus: Record<string, number>;
+    };
+    findings: Array<{
+      id: string;
+      contractVersionId: string;
+      clauseId: string | null;
+      title: string;
+      description: string;
+      severity: string;
+      status: string;
+      confidence: number;
+      createdAt: string;
+      updatedAt: string;
+      evidence: {
+        id: string;
+        startOffset: number;
+        endOffset: number;
+        excerpt: string;
+        pageNumber: number | null;
+        createdAt: string;
+      };
+    }>;
+  };
+};
+
 type ReviewRunDetailResponse = {
   reviewRun: ReviewRunSummary & {
     orchestrationMeta: Record<string, unknown>;
@@ -188,6 +235,10 @@ export async function fetchBulkReviewProgress(bulkReviewId: string) {
 
 export async function fetchReviewRun(reviewRunId: string) {
   return apiClient.request<ReviewRunDetailResponse>(`/reviews/${reviewRunId}`);
+}
+
+export async function fetchReviewExportArtifact(reviewRunId: string) {
+  return apiClient.request<ReviewExportArtifactResponse>(`/reviews/${reviewRunId}/export`);
 }
 
 type SubscribeReviewRunInput = {

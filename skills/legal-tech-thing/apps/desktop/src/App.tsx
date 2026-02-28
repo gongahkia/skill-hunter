@@ -9,6 +9,7 @@ import {
 } from "./auth/token-store";
 import { submitClipboardContractSource, submitDesktopOcrContractSource } from "./contracts/api";
 import { extractTextFromCapturedImage } from "./ocr/pipeline";
+import { fetchReviewExportArtifact } from "./reviews/api";
 import {
   enqueuePendingScan,
   loadPendingScanQueue,
@@ -192,6 +193,19 @@ function isLikelyOfflineFailure(errorCode: string) {
   );
 }
 
+function downloadJsonArtifact(fileName: string, artifact: unknown) {
+  const json = JSON.stringify(artifact, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = downloadUrl;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(downloadUrl);
+}
+
 export function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -231,6 +245,10 @@ export function App() {
   const [redlineDrafts, setRedlineDrafts] = useState<Record<string, string>>({});
   const [redlineError, setRedlineError] = useState<string | null>(null);
   const [redlineStatus, setRedlineStatus] = useState<string | null>(null);
+  const [reviewExportRunId, setReviewExportRunId] = useState("");
+  const [isDownloadingReviewExport, setIsDownloadingReviewExport] = useState(false);
+  const [reviewExportError, setReviewExportError] = useState<string | null>(null);
+  const [reviewExportStatus, setReviewExportStatus] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -779,6 +797,36 @@ export function App() {
     }
   }
 
+  async function handleDownloadReviewExport() {
+    if (!tokens?.accessToken) {
+      setReviewExportError("AUTH_REQUIRED");
+      setReviewExportStatus(null);
+      return;
+    }
+
+    const reviewRunId = reviewExportRunId.trim();
+    if (!reviewRunId) {
+      setReviewExportError("REVIEW_RUN_ID_REQUIRED");
+      setReviewExportStatus(null);
+      return;
+    }
+
+    setIsDownloadingReviewExport(true);
+    setReviewExportError(null);
+    setReviewExportStatus(null);
+
+    try {
+      const response = await fetchReviewExportArtifact(reviewRunId, tokens.accessToken);
+      const fileName = response.fileName?.trim() || `review-export-${reviewRunId}.json`;
+      downloadJsonArtifact(fileName, response.artifact);
+      setReviewExportStatus(`Downloaded review export artifact: ${fileName}.`);
+    } catch (error) {
+      setReviewExportError(error instanceof Error ? error.message : "REVIEW_EXPORT_DOWNLOAD_FAILED");
+    } finally {
+      setIsDownloadingReviewExport(false);
+    }
+  }
+
   const activeEvidenceWindow = activeFinding
     ? {
         before: ocrText.slice(Math.max(0, activeFinding.startOffset - 120), activeFinding.startOffset),
@@ -1040,6 +1088,26 @@ export function App() {
         </div>
         {clipboardError ? <p className="message message-error">{clipboardError}</p> : null}
         {clipboardStatus ? <p className="message message-success">{clipboardStatus}</p> : null}
+        <div className="review-export-row">
+          <label className="field">
+            Review Run ID
+            <input
+              disabled={isDownloadingReviewExport || !isAuthenticated}
+              onChange={(event) => setReviewExportRunId(event.target.value)}
+              placeholder="Paste review run UUID"
+              value={reviewExportRunId}
+            />
+          </label>
+          <button
+            disabled={isDownloadingReviewExport || !isAuthenticated}
+            onClick={() => void handleDownloadReviewExport()}
+            type="button"
+          >
+            {isDownloadingReviewExport ? "Preparing Export..." : "Download Review Export"}
+          </button>
+        </div>
+        {reviewExportError ? <p className="message message-error">{reviewExportError}</p> : null}
+        {reviewExportStatus ? <p className="message message-success">{reviewExportStatus}</p> : null}
         <div className="finding-filter-row">
           {(["all", "critical", "high", "medium", "low"] as const).map((filterValue) => (
             <button

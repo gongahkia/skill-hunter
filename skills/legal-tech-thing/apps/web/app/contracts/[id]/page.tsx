@@ -27,6 +27,7 @@ import {
 import {
   compareReviewRuns,
   createReviewRun,
+  fetchReviewExportArtifact,
   fetchReviewRun,
   subscribeToReviewRunEvents,
   type CompareReviewRunsResponse,
@@ -73,6 +74,19 @@ async function fetchOptionalVersionDiff(contractId: string) {
   }
 }
 
+function downloadJsonArtifact(fileName: string, artifact: unknown) {
+  const payload = JSON.stringify(artifact, null, 2);
+  const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
 export default function ContractDetailPage() {
   const params = useParams<{ id: string }>();
   const contractId = params.id;
@@ -104,6 +118,9 @@ export default function ContractDetailPage() {
   const [submittingFeedbackId, setSubmittingFeedbackId] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [feedbackStatus, setFeedbackStatus] = useState<string | null>(null);
+  const [isDownloadingExport, setIsDownloadingExport] = useState(false);
+  const [downloadExportError, setDownloadExportError] = useState<string | null>(null);
+  const [downloadExportStatus, setDownloadExportStatus] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ContractFinding[]>();
@@ -352,6 +369,32 @@ export default function ContractDetailPage() {
     setTrackedReviewRunId(reviewRunId);
   }
 
+  async function handleDownloadReviewExport() {
+    const reviewRunId = trackedReviewRunId || trackedReviewIdInput.trim();
+    if (!reviewRunId) {
+      setDownloadExportError("REVIEW_RUN_ID_REQUIRED");
+      setDownloadExportStatus(null);
+      return;
+    }
+
+    setIsDownloadingExport(true);
+    setDownloadExportError(null);
+    setDownloadExportStatus(null);
+
+    try {
+      const response = await fetchReviewExportArtifact(reviewRunId);
+      const fileName = response.fileName || `review-export-${reviewRunId}.json`;
+      downloadJsonArtifact(fileName, response.artifact);
+      setDownloadExportStatus(`Downloaded review export artifact: ${fileName}.`);
+    } catch (error) {
+      setDownloadExportError(
+        error instanceof Error ? error.message : "REVIEW_EXPORT_DOWNLOAD_FAILED"
+      );
+    } finally {
+      setIsDownloadingExport(false);
+    }
+  }
+
   async function handleSubmitFeedback(finding: ContractFinding) {
     const draft = feedbackDrafts[finding.id] ?? {
       rationale: "",
@@ -530,8 +573,19 @@ export default function ContractDetailPage() {
                     Stop tracking
                   </button>
                 </p>
+                <p>
+                  <button
+                    disabled={isDownloadingExport}
+                    onClick={() => void handleDownloadReviewExport()}
+                    type="button"
+                  >
+                    {isDownloadingExport ? "Preparing export..." : "Download review export"}
+                  </button>
+                </p>
                 {reviewLaunchError ? <p>{reviewLaunchError}</p> : null}
                 {reviewLaunchStatus ? <p>{reviewLaunchStatus}</p> : null}
+                {downloadExportError ? <p>{downloadExportError}</p> : null}
+                {downloadExportStatus ? <p>{downloadExportStatus}</p> : null}
                 {comparisonResult ? (
                   <article>
                     <p>
