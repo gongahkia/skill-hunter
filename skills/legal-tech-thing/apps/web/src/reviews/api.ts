@@ -57,8 +57,73 @@ type CreateReviewRunInput = {
   selectedAgents?: string[];
 };
 
+export type CompareReviewRunsResponse = {
+  contractVersionId: string;
+  providers: {
+    primary: PolicyProvider;
+    primaryModel: string;
+    comparison: PolicyProvider;
+    comparisonModel: string;
+  };
+  selectedAgents: string[];
+  counts: {
+    primary: number;
+    comparison: number;
+    introduced: number;
+    resolved: number;
+    changed: number;
+    unchanged: number;
+  };
+  deltas: {
+    introduced: Array<{
+      key: string;
+      type: string;
+      title: string;
+      severity: string;
+      confidence: number;
+    }>;
+    resolved: Array<{
+      key: string;
+      type: string;
+      title: string;
+      severity: string;
+      confidence: number;
+    }>;
+    changed: Array<{
+      key: string;
+      title: string;
+      primarySeverity: string;
+      comparisonSeverity: string;
+      primaryConfidence: number;
+      comparisonConfidence: number;
+    }>;
+    unchanged: Array<{
+      key: string;
+      type: string;
+      title: string;
+      severity: string;
+      confidence: number;
+    }>;
+  };
+};
+
+type CompareReviewRunsInput = {
+  contractVersionId: string;
+  profileId?: string;
+  primaryProvider?: PolicyProvider;
+  comparisonProvider: PolicyProvider;
+  selectedAgents?: string[];
+};
+
 export async function createReviewRun(input: CreateReviewRunInput) {
   return apiClient.request<CreateReviewRunResponse>("/reviews", {
+    method: "POST",
+    body: input
+  });
+}
+
+export async function compareReviewRuns(input: CompareReviewRunsInput) {
+  return apiClient.request<CompareReviewRunsResponse>("/reviews/compare", {
     method: "POST",
     body: input
   });

@@ -21,9 +21,11 @@ import {
   type PolicyProvider
 } from "../../../src/policy/api";
 import {
+  compareReviewRuns,
   createReviewRun,
   fetchReviewRun,
   subscribeToReviewRunEvents,
+  type CompareReviewRunsResponse,
   type ReviewRunProgress
 } from "../../../src/reviews/api";
 
@@ -58,6 +60,8 @@ export default function ContractDetailPage() {
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
   const [updatingFindingId, setUpdatingFindingId] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<PolicyProvider>("OPENAI");
+  const [isComparisonEnabled, setIsComparisonEnabled] = useState(false);
+  const [comparisonProvider, setComparisonProvider] = useState<PolicyProvider>("ANTHROPIC");
   const [profileOptions, setProfileOptions] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedProfileId, setSelectedProfileId] = useState("");
   const [isLaunchingReview, setIsLaunchingReview] = useState(false);
@@ -66,6 +70,7 @@ export default function ContractDetailPage() {
   const [trackedReviewIdInput, setTrackedReviewIdInput] = useState("");
   const [trackedReviewRunId, setTrackedReviewRunId] = useState("");
   const [liveProgress, setLiveProgress] = useState<ReviewRunProgress | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<CompareReviewRunsResponse | null>(null);
   const [realtimeError, setRealtimeError] = useState<string | null>(null);
   const [feedbackDrafts, setFeedbackDrafts] = useState<
     Record<string, { rationale: string; correctedSeverity: FeedbackSeverity | "" }>
@@ -126,6 +131,17 @@ export default function ContractDetailPage() {
 
     void loadDetail();
   }, [contractId]);
+
+  useEffect(() => {
+    if (comparisonProvider !== selectedProvider) {
+      return;
+    }
+
+    const fallback = providers.find((provider) => provider !== selectedProvider);
+    if (fallback) {
+      setComparisonProvider(fallback);
+    }
+  }, [comparisonProvider, selectedProvider]);
 
   useEffect(() => {
     if (!trackedReviewRunId) {
@@ -209,9 +225,29 @@ export default function ContractDetailPage() {
 
     setReviewLaunchError(null);
     setReviewLaunchStatus(null);
+    setComparisonResult(null);
     setIsLaunchingReview(true);
 
     try {
+      if (isComparisonEnabled) {
+        if (comparisonProvider === selectedProvider) {
+          throw new Error("COMPARISON_PROVIDER_MUST_DIFFER");
+        }
+
+        const comparison = await compareReviewRuns({
+          contractVersionId: detail.latestVersion.id,
+          profileId: selectedProfileId || undefined,
+          primaryProvider: selectedProvider,
+          comparisonProvider
+        });
+
+        setComparisonResult(comparison);
+        setReviewLaunchStatus(
+          `Comparison complete: ${comparison.counts.primary} vs ${comparison.counts.comparison}`
+        );
+        return;
+      }
+
       const response = await createReviewRun({
         contractVersionId: detail.latestVersion.id,
         profileId: selectedProfileId || undefined,
@@ -332,6 +368,39 @@ export default function ContractDetailPage() {
                 </p>
                 <p>
                   <label>
+                    <input
+                      checked={isComparisonEnabled}
+                      disabled={isLaunchingReview}
+                      onChange={(event) => setIsComparisonEnabled(event.target.checked)}
+                      type="checkbox"
+                    />{" "}
+                    Compare against second provider
+                  </label>
+                </p>
+                {isComparisonEnabled ? (
+                  <p>
+                    <label>
+                      Comparison provider{" "}
+                      <select
+                        disabled={isLaunchingReview}
+                        onChange={(event) =>
+                          setComparisonProvider(event.target.value as PolicyProvider)
+                        }
+                        value={comparisonProvider}
+                      >
+                        {providers
+                          .filter((provider) => provider !== selectedProvider)
+                          .map((provider) => (
+                            <option key={provider} value={provider}>
+                              {provider}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </p>
+                ) : null}
+                <p>
+                  <label>
                     Policy profile{" "}
                     <select
                       disabled={isLaunchingReview || profileOptions.length === 0}
@@ -355,7 +424,13 @@ export default function ContractDetailPage() {
                     onClick={() => void handleLaunchReview()}
                     type="button"
                   >
-                    {isLaunchingReview ? "Launching..." : "Launch review"}
+                    {isLaunchingReview
+                      ? isComparisonEnabled
+                        ? "Comparing..."
+                        : "Launching..."
+                      : isComparisonEnabled
+                        ? "Run provider comparison"
+                        : "Launch review"}
                   </button>
                 </p>
                 <p>
@@ -383,6 +458,40 @@ export default function ContractDetailPage() {
                 </p>
                 {reviewLaunchError ? <p>{reviewLaunchError}</p> : null}
                 {reviewLaunchStatus ? <p>{reviewLaunchStatus}</p> : null}
+                {comparisonResult ? (
+                  <article>
+                    <p>
+                      Provider comparison: {comparisonResult.providers.primary} vs{" "}
+                      {comparisonResult.providers.comparison}
+                    </p>
+                    <p>
+                      Findings - primary: {comparisonResult.counts.primary}, comparison:{" "}
+                      {comparisonResult.counts.comparison}
+                    </p>
+                    <p>
+                      Introduced: {comparisonResult.counts.introduced} | Resolved:{" "}
+                      {comparisonResult.counts.resolved} | Changed:{" "}
+                      {comparisonResult.counts.changed} | Unchanged:{" "}
+                      {comparisonResult.counts.unchanged}
+                    </p>
+                    {comparisonResult.deltas.introduced.length > 0 ? (
+                      <p>
+                        Introduced titles:{" "}
+                        {comparisonResult.deltas.introduced
+                          .map((item) => item.title)
+                          .join(", ")}
+                      </p>
+                    ) : null}
+                    {comparisonResult.deltas.resolved.length > 0 ? (
+                      <p>
+                        Resolved titles:{" "}
+                        {comparisonResult.deltas.resolved
+                          .map((item) => item.title)
+                          .join(", ")}
+                      </p>
+                    ) : null}
+                  </article>
+                ) : null}
                 {realtimeError ? <p>{realtimeError}</p> : null}
                 {trackedReviewRunId ? <p>Live stream: {trackedReviewRunId}</p> : null}
                 {liveProgress ? (
