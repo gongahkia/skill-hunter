@@ -557,4 +557,59 @@ describe("upload to findings integration flow", () => {
     assert.ok(ingestBody.queueJobId);
     assert.ok(ingestBody.contractVersion.id);
   });
+
+  it("accepts desktop OCR screenshot payload submissions through upload and ingest endpoints", async (t) => {
+    const app = await buildIntegrationApp();
+    t.after(async () => {
+      await app.close();
+    });
+
+    const mockedOcrPayload = [
+      "SERVICE AGREEMENT",
+      "Customer must provide 90 days notice before termination.",
+      "Liability is uncapped for all indirect damages."
+    ].join("\\n\\n");
+    const contentLength = new TextEncoder().encode(mockedOcrPayload).byteLength;
+
+    const createContractResponse = await app.inject({
+      method: "POST",
+      url: "/contracts",
+      payload: {
+        title: "Desktop OCR Capture",
+        sourceType: "DESKTOP_SCREEN"
+      }
+    });
+    assert.equal(createContractResponse.statusCode, 201);
+    const createContractBody = createContractResponse.json();
+    const contractId = createContractBody.contract.id as string;
+    assert.equal(createContractBody.contract.sourceType, "DESKTOP_SCREEN");
+
+    const uploadUrlResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/upload-url`,
+      payload: {
+        fileName: "desktop-ocr-capture.txt",
+        mimeType: "text/plain; charset=utf-8",
+        contentLength
+      }
+    });
+    assert.equal(uploadUrlResponse.statusCode, 200);
+    const uploadUrlBody = uploadUrlResponse.json();
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/ingest`,
+      payload: {
+        objectUri: uploadUrlBody.objectUri,
+        objectKey: uploadUrlBody.objectKey,
+        mimeType: "text/plain; charset=utf-8",
+        contentLength,
+        checksum: "desktop-ocr-checksum"
+      }
+    });
+    assert.equal(ingestResponse.statusCode, 202);
+    const ingestBody = ingestResponse.json();
+    assert.ok(ingestBody.queueJobId);
+    assert.ok(ingestBody.contractVersion.id);
+  });
 });
