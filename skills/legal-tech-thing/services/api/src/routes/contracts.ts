@@ -355,12 +355,37 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         sourceType: true,
         status: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        versions: {
+          orderBy: {
+            createdAt: "desc"
+          },
+          take: 1,
+          select: {
+            reviewRuns: {
+              orderBy: {
+                createdAt: "desc"
+              },
+              take: 1,
+              select: {
+                createdAt: true
+              }
+            }
+          }
+        }
       }
     });
 
     return {
-      items: contracts
+      items: contracts.map((contract) => ({
+        id: contract.id,
+        title: contract.title,
+        sourceType: contract.sourceType,
+        status: contract.status,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
+        lastReviewAt: contract.versions[0]?.reviewRuns[0]?.createdAt ?? null
+      }))
     };
   });
 };
