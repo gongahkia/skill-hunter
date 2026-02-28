@@ -10,6 +10,7 @@ import {
   failContractIngestionJob,
   processContractIngestionJob
 } from "../modules/ingest/worker";
+import { scrubPii } from "../modules/security/pii-scrubber";
 
 function buildQueueConnection() {
   const redisUrl = new URL(process.env.REDIS_URL ?? "redis://127.0.0.1:6379");
@@ -51,12 +52,15 @@ worker.on("ready", () => {
 });
 
 worker.on("failed", (job, error) => {
-  console.error("Ingestion job failed", {
-    jobId: job?.id,
-    requestId: job?.data?.requestId,
-    contractId: job?.data?.contractId,
-    error
-  });
+  console.error(
+    "Ingestion job failed",
+    scrubPii({
+      jobId: job?.id,
+      requestId: job?.data?.requestId,
+      contractId: job?.data?.contractId,
+      error
+    })
+  );
 
   if (!job) {
     return;

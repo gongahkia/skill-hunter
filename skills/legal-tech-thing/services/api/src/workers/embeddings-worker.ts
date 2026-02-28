@@ -9,6 +9,7 @@ import {
   type ClauseEmbeddingJobPayload
 } from "../modules/embeddings/types";
 import { closeDeadLetterQueues, enqueueDeadLetterJob } from "../modules/queue/dead-letter";
+import { scrubPii } from "../modules/security/pii-scrubber";
 
 function buildQueueConnection() {
   const redisUrl = new URL(process.env.REDIS_URL ?? "redis://127.0.0.1:6379");
@@ -33,12 +34,15 @@ const worker = new Worker<ClauseEmbeddingJobPayload>(
   async (job: Job<ClauseEmbeddingJobPayload>) => {
     const result = await generateClauseEmbeddings(job.data.contractVersionId);
 
-    console.log("Generated clause embeddings", {
-      requestId: job.data.requestId,
-      contractVersionId: job.data.contractVersionId,
-      provider: result.providerName,
-      count: result.embeddings.length
-    });
+    console.log(
+      "Generated clause embeddings",
+      scrubPii({
+        requestId: job.data.requestId,
+        contractVersionId: job.data.contractVersionId,
+        provider: result.providerName,
+        count: result.embeddings.length
+      })
+    );
   },
   {
     connection: buildQueueConnection(),
@@ -52,12 +56,15 @@ worker.on("ready", () => {
 });
 
 worker.on("failed", (job, error) => {
-  console.error("Embeddings job failed", {
-    jobId: job?.id,
-    requestId: job?.data?.requestId,
-    contractVersionId: job?.data?.contractVersionId,
-    error
-  });
+  console.error(
+    "Embeddings job failed",
+    scrubPii({
+      jobId: job?.id,
+      requestId: job?.data?.requestId,
+      contractVersionId: job?.data?.contractVersionId,
+      error
+    })
+  );
 
   if (!job) {
     return;

@@ -1,6 +1,8 @@
 import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 
+import { scrubLogMessage, scrubPii } from "../modules/security/pii-scrubber";
+
 type ErrorEnvelope = {
   error: {
     code: string;
@@ -111,11 +113,11 @@ const errorEnvelopePlugin: FastifyPluginAsync = async (app) => {
         : undefined;
 
     app.log.error(
-      {
+      scrubPii({
         requestId: request.id,
         error
-      },
-      "Unhandled request error"
+      }),
+      scrubLogMessage("Unhandled request error")
     );
 
     const errorMessage = error instanceof Error ? error.message : "Unexpected error";
