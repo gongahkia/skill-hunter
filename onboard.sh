@@ -98,9 +98,9 @@ run_cmd npm --prefix "$ROOT_DIR/lovely-ghostwriter" install
 log "Installing pnpm dependencies across monorepo projects."
 PNPM_PATHS=(
   "double-face"
-  "conver-hands/api"
-  "conver-hands/web"
-  "conver-hands/worker-export"
+  "convert-hands/api"
+  "convert-hands/web"
+  "convert-hands/worker-export"
   "order-stamp/api"
   "order-stamp/worker-detection"
   "sun-and-moon/api"
@@ -119,7 +119,7 @@ if [[ "$WITH_BUILD" -eq 1 ]]; then
   log "Running builds."
   run_cmd npm --prefix "$ROOT_DIR/lovely-ghostwriter" run build
   run_cmd pnpm -C "double-face" build
-  run_cmd pnpm -C "conver-hands" build
+  run_cmd pnpm -C "convert-hands" build
   run_cmd pnpm -C "order-stamp" build
   run_cmd pnpm -C "sun-and-moon" build
   run_cmd pnpm -C "fun-fun-cloth" build
@@ -130,7 +130,7 @@ cat <<'EOF'
 [onboard] Setup complete.
 
 Quick start:
-  pnpm -C conver-hands dev:api
+  pnpm -C convert-hands dev:api
   pnpm -C order-stamp dev:api
   pnpm -C sun-and-moon dev:api
   pnpm -C fun-fun-cloth dev:api

@@ -2,7 +2,7 @@
 
 This workspace contains only the newly requested standalone tools:
 
-- `conver-hands` (litigation readiness bundle)
+- `convert-hands` (litigation readiness bundle)
 - `order-stamp` (adversarial clause detector)
 - `sun-and-moon` (case chronology builder)
 - `fun-fun-cloth` (policy-to-clause compiler)
@@ -17,7 +17,7 @@ This workspace contains only the newly requested standalone tools:
 
 ```text
 skills/
-  conver-hands/
+  convert-hands/
     api/
     web/
     worker-export/
@@ -67,10 +67,10 @@ pnpm lint
 
 Use filters to run a single tool.
 
-- `conver-hands` only:
+- `convert-hands` only:
 
 ```bash
-pnpm --filter "./conver-hands/**" dev
+pnpm --filter "./convert-hands/**" dev
 ```
 
 - `order-stamp` only:

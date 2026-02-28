@@ -15,7 +15,7 @@ type QueueState = {
 };
 
 const queueFilePath = path.resolve(process.cwd(), "data", "queue.json");
-const apiBaseUrl = (process.env.CONVER_HANDS_API_URL ?? "http://127.0.0.1:4011").replace(/\/$/, "");
+const apiBaseUrl = (process.env.CONVERT_HANDS_API_URL ?? "http://127.0.0.1:4011").replace(/\/$/, "");
 
 async function ensureQueueFile() {
   await mkdir(path.dirname(queueFilePath), { recursive: true });
@@ -71,7 +71,7 @@ async function processPendingJobs() {
   }
 
   await writeQueue(state);
-  console.log(`[conver-hands/worker-export] processed ${processed} job(s)`);
+  console.log(`[convert-hands/worker-export] processed ${processed} job(s)`);
 }
 
 await processPendingJobs();

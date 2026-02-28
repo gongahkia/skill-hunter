@@ -1,6 +1,6 @@
-# conver-hands
+# convert-hands
 
-`conver-hands` is a standalone litigation readiness bundle product.
+`convert-hands` is a standalone litigation readiness bundle product.
 
 ## Components
 
@@ -53,5 +53,5 @@ Worker reads queue jobs from `worker-export/data/queue.json`.
 
 ## Notes
 
-- Bundle signatures use `CONVER_HANDS_SIGNING_SECRET` (`conver-hands-dev-secret` by default).
+- Bundle signatures use `CONVERT_HANDS_SIGNING_SECRET` (`convert-hands-dev-secret` by default).
 - Artifacts are written to `api/data/bundles/*.json`.

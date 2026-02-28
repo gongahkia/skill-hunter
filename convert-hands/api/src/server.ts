@@ -37,7 +37,7 @@ const generateBundleSchema = z.object({
 const app = Fastify({ logger: true });
 await app.register(cors, { origin: true });
 
-app.get("/health", async () => ({ status: "ok", tool: "conver-hands" }));
+app.get("/health", async () => ({ status: "ok", tool: "convert-hands" }));
 
 app.get("/cases", async () => {
   const store = await readStore();

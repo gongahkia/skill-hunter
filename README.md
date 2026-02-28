@@ -16,7 +16,7 @@
 | :--- | :--- | :--- | :--- |
 | `Lovely Ghostwriter` | Browser extension for readable Singapore legislation on SSO. Simplifies the heavily-nested DOM structure of [SSO](https://sso.agc.gov.sg/) to one that is intuitive and easily understood by lawyers and programmers alike. | [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/) | ![](./asset/screenshots/skill-hunter-screenshot-4.png) |
 | `Double Face` | Multi-app contract review platform. Provides a full contract-ingestion and review stack (web, extension, desktop, API, workers). | [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/), [Fastify](https://fastify.dev/), [BullMQ](https://docs.bullmq.io/), [Prisma](https://www.prisma.io/), [PostgreSQL](https://www.postgresql.org/), [Redis](https://redis.io/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo) | ![](./asset/screenshots/skill-hunter-screenshot-1.png) |
-| `Conver Hands` | Litigation readiness bundle product. Provides evidence/findings ingestion, bundle generation, hash/signature verification, a static operator console, and a queue-driven export worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | Screenshot pending. |
+| `Convert Hands` | Litigation readiness bundle product. Provides evidence/findings ingestion, bundle generation, hash/signature verification, a static operator console, and a queue-driven export worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | Screenshot pending. |
 | `Order Stamp` | Adversarial clause detector product. Provides a heuristic detector API, a Manifest V3 browser extension for active-tab scans/highlighting, and a batch detection worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [Chrome Extension Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3) | Screenshot pending. |
 | `Sun and Moon` | Case chronology builder. Provides case/event ingestion, chronology analytics (gaps/conflicts/monthly grouping), a static chronology console, and a timeline snapshot worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | Screenshot pending. |
 | `Fun Fun Cloth` | Policy-to-clause compiler. Provides a policy DSL compiler API, clause simulation endpoints, a static policy editor/simulator, and a batch policy compiler worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | Screenshot pending. |
@@ -39,9 +39,9 @@ $ cd ../double-face
 $ pnpm install
 $ pnpm build
 $ cd ..
-$ pnpm -C conver-hands/api install
-$ pnpm -C conver-hands/web install
-$ pnpm -C conver-hands/worker-export install
+$ pnpm -C convert-hands/api install
+$ pnpm -C convert-hands/web install
+$ pnpm -C convert-hands/worker-export install
 $ pnpm -C order-stamp/api install
 $ pnpm -C order-stamp/worker-detection install
 $ pnpm -C sun-and-moon/api install
@@ -69,14 +69,14 @@ $ pnpm -C fun-fun-cloth/worker-compiler install
 Then run `Skill Hunter`'s standalone tools.
 
 ```console
-$ pnpm -C conver-hands dev:api  
-$ pnpm -C conver-hands dev:web  
+$ pnpm -C convert-hands dev:api  
+$ pnpm -C convert-hands dev:web  
 $ pnpm -C order-stamp dev:api   
 $ pnpm -C sun-and-moon dev:api  
 $ pnpm -C sun-and-moon dev:web  
 $ pnpm -C fun-fun-cloth dev:api 
 $ pnpm -C fun-fun-cloth dev:web 
-$ pnpm -C conver-hands worker
+$ pnpm -C convert-hands worker
 $ pnpm -C order-stamp worker
 $ pnpm -C sun-and-moon worker
 $ pnpm -C fun-fun-cloth worker

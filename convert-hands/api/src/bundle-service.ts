@@ -14,7 +14,7 @@ import type {
 const bundleDir = path.resolve(process.cwd(), "data", "bundles");
 
 function getSigningSecret() {
-  return process.env.CONVER_HANDS_SIGNING_SECRET ?? "conver-hands-dev-secret";
+  return process.env.CONVERT_HANDS_SIGNING_SECRET ?? "convert-hands-dev-secret";
 }
 
 function hashById<T extends { id: string }>(items: T[]) {

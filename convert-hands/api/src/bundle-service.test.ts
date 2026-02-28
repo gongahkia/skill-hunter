@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { signDigest, stableStringify } from "./crypto.js";
 
-describe("conver-hands crypto primitives", () => {
+describe("convert-hands crypto primitives", () => {
   it("stableStringify sorts keys deterministically", () => {
     const left = stableStringify({ b: 2, a: 1 });
     const right = stableStringify({ a: 1, b: 2 });

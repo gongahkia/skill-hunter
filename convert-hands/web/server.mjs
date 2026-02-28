@@ -25,5 +25,5 @@ createServer(async (req, res) => {
     res.end("Not found");
   }
 }).listen(port, "0.0.0.0", () => {
-  console.log(`[conver-hands/web] listening on ${port}`);
+  console.log(`[convert-hands/web] listening on ${port}`);
 });
