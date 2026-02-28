@@ -1,4 +1,3 @@
-(A) Implement finding normalization that maps all agent outputs into one canonical finding schema +findings
 (A) Implement evidence anchoring that stores start and end offsets for each finding +findings
 (A) Implement suggested redline generator for high-severity findings with fallback safe clause +redline
 (A) Implement `POST /reviews` to start a review run for a specific contract version +api +orchestrator

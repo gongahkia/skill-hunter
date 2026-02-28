@@ -1,4 +1,5 @@
 import { adjudicateFindings, type SourcedFinding } from "./adjudication";
+import { normalizeFindings, type CanonicalFinding } from "./normalize-findings";
 import { scoreFindings } from "./scoring";
 import {
   AgentRuntime,
@@ -17,6 +18,7 @@ export type AgentRunResult = {
 
 export type OrchestrationResult = {
   reviewRunId: string;
+  contractVersionId: string;
   agentResults: AgentRunResult[];
   rawFindings: SourcedFinding[];
   findings: Array<
@@ -25,6 +27,7 @@ export type OrchestrationResult = {
       severityScore: number;
     }
   >;
+  canonicalFindings: CanonicalFinding[];
 };
 
 const defaultSpecialistAgentOrder: AgentName[] = [
@@ -84,11 +87,18 @@ export async function runSpecialistAgentsForReview(
 
   const adjudicatedFindings = adjudicateFindings(rawFindings);
   const findings = scoreFindings(adjudicatedFindings, input.policyRules);
+  const canonicalFindings = normalizeFindings(
+    input.reviewRunId,
+    input.contractVersionId,
+    findings
+  );
 
   return {
     reviewRunId: input.reviewRunId,
+    contractVersionId: input.contractVersionId,
     agentResults,
     rawFindings,
-    findings
+    findings,
+    canonicalFindings
   };
 }
