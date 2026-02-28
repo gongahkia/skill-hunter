@@ -1,0 +1,58 @@
+:root {
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: #111827;
+  background: linear-gradient(140deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0.6rem 0 0;
+  color: #334155;
+  max-width: 56ch;
+}
+
+.app-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  padding: 1rem;
+  max-width: 480px;
+}
+
+.app-card h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.app-card p {
+  margin: 0.3rem 0;
+}

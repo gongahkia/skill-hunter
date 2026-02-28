@@ -4,6 +4,7 @@ node_modules
 .next
 out
 dist
+dist-electron
 coverage
 .env
 .env.*
