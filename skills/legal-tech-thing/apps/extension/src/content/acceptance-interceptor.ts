@@ -193,7 +193,7 @@ function ensureWarningModalStyles(doc: Document) {
   (doc.head ?? doc.documentElement).appendChild(styleElement);
 }
 
-export function installPreAcceptInterceptor(doc: Document, pageUrl: string) {
+export function installPreAcceptInterceptor(doc: Document, getCurrentUrl: () => string) {
   const root = doc.body ?? doc.documentElement;
   let lastInterceptSignature = "";
   let lastInterceptAtMs = 0;
@@ -216,7 +216,7 @@ export function installPreAcceptInterceptor(doc: Document, pageUrl: string) {
     lastInterceptAtMs = now;
 
     const payload: PreAcceptInterceptPayload = {
-      url: pageUrl,
+      url: getCurrentUrl(),
       title: doc.title ?? "",
       interceptedAt: new Date().toISOString(),
       eventType,
