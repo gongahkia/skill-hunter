@@ -14,8 +14,14 @@ import {
   updateFindingStatus,
   type ContractFinding
 } from "../../../src/findings/api";
+import {
+  fetchMyPolicyProfile,
+  type PolicyProvider
+} from "../../../src/policy/api";
+import { createReviewRun } from "../../../src/reviews/api";
 
 const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const;
+const providers: PolicyProvider[] = ["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"];
 
 function toConfidencePercentage(confidence: string) {
   const value = Number(confidence);
@@ -37,6 +43,12 @@ export default function ContractDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
   const [updatingFindingId, setUpdatingFindingId] = useState<string | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<PolicyProvider>("OPENAI");
+  const [profileOptions, setProfileOptions] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState("");
+  const [isLaunchingReview, setIsLaunchingReview] = useState(false);
+  const [reviewLaunchError, setReviewLaunchError] = useState<string | null>(null);
+  const [reviewLaunchStatus, setReviewLaunchStatus] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ContractFinding[]>();
@@ -61,13 +73,26 @@ export default function ContractDetailPage() {
       setIsLoading(true);
 
       try {
-        const [detailResponse, findingsResponse] = await Promise.all([
+        const [detailResponse, findingsResponse, profileResponse] = await Promise.all([
           fetchContractDetail(contractId),
-          fetchContractFindings(contractId)
+          fetchContractFindings(contractId),
+          fetchMyPolicyProfile().catch(() => null)
         ]);
 
         setDetail(detailResponse);
         setFindings(findingsResponse);
+        setProfileOptions(
+          profileResponse
+            ? [
+                {
+                  id: profileResponse.id,
+                  label: `Default profile (${profileResponse.defaultProvider})`
+                }
+              ]
+            : []
+        );
+        setSelectedProfileId(profileResponse?.id ?? "");
+        setSelectedProvider(profileResponse?.defaultProvider ?? "OPENAI");
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : "DETAIL_LOAD_FAILED");
       } finally {
@@ -99,6 +124,31 @@ export default function ContractDetailPage() {
     }
   }
 
+  async function handleLaunchReview() {
+    if (!detail?.latestVersion?.id) {
+      return;
+    }
+
+    setReviewLaunchError(null);
+    setReviewLaunchStatus(null);
+    setIsLaunchingReview(true);
+
+    try {
+      const response = await createReviewRun({
+        contractVersionId: detail.latestVersion.id,
+        profileId: selectedProfileId || undefined,
+        provider: selectedProvider
+      });
+      setReviewLaunchStatus(`Review queued: ${response.reviewRun.id}`);
+    } catch (launchError) {
+      setReviewLaunchError(
+        launchError instanceof Error ? launchError.message : "REVIEW_LAUNCH_FAILED"
+      );
+    } finally {
+      setIsLaunchingReview(false);
+    }
+  }
+
   return (
     <main>
       <p>
@@ -115,6 +165,64 @@ export default function ContractDetailPage() {
           <p>
             Latest version: {detail.latestVersion?.id ?? "-"} | Clauses: {detail.clauses.length}
           </p>
+
+          <section>
+            <h2>Launch Review Run</h2>
+            {detail.latestVersion ? (
+              <>
+                <p>
+                  <label>
+                    Provider{" "}
+                    <select
+                      disabled={isLaunchingReview}
+                      onChange={(event) =>
+                        setSelectedProvider(event.target.value as PolicyProvider)
+                      }
+                      value={selectedProvider}
+                    >
+                      {providers.map((provider) => (
+                        <option key={provider} value={provider}>
+                          {provider}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </p>
+                <p>
+                  <label>
+                    Policy profile{" "}
+                    <select
+                      disabled={isLaunchingReview || profileOptions.length === 0}
+                      onChange={(event) => setSelectedProfileId(event.target.value)}
+                      value={selectedProfileId}
+                    >
+                      {profileOptions.length === 0 ? (
+                        <option value="">Use server default profile</option>
+                      ) : null}
+                      {profileOptions.map((profile) => (
+                        <option key={profile.id} value={profile.id}>
+                          {profile.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </p>
+                <p>
+                  <button
+                    disabled={isLaunchingReview}
+                    onClick={() => void handleLaunchReview()}
+                    type="button"
+                  >
+                    {isLaunchingReview ? "Launching..." : "Launch review"}
+                  </button>
+                </p>
+                {reviewLaunchError ? <p>{reviewLaunchError}</p> : null}
+                {reviewLaunchStatus ? <p>{reviewLaunchStatus}</p> : null}
+              </>
+            ) : (
+              <p>No contract version is available yet for review launch.</p>
+            )}
+          </section>
 
           <section>
             <h2>Findings by Severity</h2>
