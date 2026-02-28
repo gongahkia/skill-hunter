@@ -1,4 +1,3 @@
-(A) Implement image OCR parser using Tesseract worker with bounding box output +ocr +ingest
 (A) Implement fallback plain-text parser for unknown text-based MIME types +parser +ingest
 (A) Implement language detection step for extracted contract text +ingest
 (A) Implement contract text cleanup pipeline for whitespace normalization and unicode canonicalization +ingest
