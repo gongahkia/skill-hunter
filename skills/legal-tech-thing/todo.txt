@@ -1,4 +1,3 @@
-(A) Implement provider adapter for Google Gemini API with retry and timeout policies +providers
 (A) Implement provider adapter for local Ollama endpoint with streaming-disabled deterministic mode +providers
 (A) Implement provider registry that resolves model provider from policy profile config +providers +agent-runtime
 (A) Implement prompt template loader for specialist review agents from versioned template files +prompts

@@ -24,6 +24,9 @@ declare global {
       ANTHROPIC_API_KEY?: string;
       ANTHROPIC_BASE_URL?: string;
       ANTHROPIC_MODEL?: string;
+      GEMINI_API_KEY?: string;
+      GEMINI_BASE_URL?: string;
+      GEMINI_MODEL?: string;
       OLLAMA_BASE_URL?: string;
       OLLAMA_EMBEDDING_MODEL?: string;
     }
