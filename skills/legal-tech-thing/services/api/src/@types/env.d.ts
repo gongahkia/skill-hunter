@@ -11,6 +11,7 @@ declare global {
       S3_SECRET_ACCESS_KEY?: string;
       S3_BUCKET?: string;
       S3_FORCE_PATH_STYLE?: string;
+      S3_PRESIGNED_UPLOAD_TTL_SECONDS?: string;
       JWT_ACCESS_SECRET?: string;
       ACCESS_TOKEN_TTL?: string;
       REFRESH_TOKEN_TTL_DAYS?: string;
