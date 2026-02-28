@@ -1,4 +1,3 @@
-(A) Implement prompt template loader for specialist review agents from versioned template files +prompts
 (A) Implement `risk-scanner` agent that flags risky language in extracted clauses +agents
 (A) Implement `missing-clause` agent that detects absent mandatory sections by contract type +agents
 (A) Implement `ambiguity` agent that detects vague terms and undefined references +agents
