@@ -1,4 +1,3 @@
-(A) Create `contract_versions` table with source checksum and object storage URI +db
 (A) Create `clauses` table with normalized text, clause type, offsets, and version foreign key +db
 (A) Create `findings` table with severity, confidence, status, and evidence span foreign keys +db
 (A) Create `policy_profiles` table keyed by user id with JSON risk thresholds +db +policy
