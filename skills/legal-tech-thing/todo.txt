@@ -1,4 +1,3 @@
-(A) Export OpenAPI-compatible DTO types from `packages/shared-types` for API and clients +shared-types
 (A) Scaffold `services/api` using Fastify and TypeScript with modular route registration +api
 (A) Configure PostgreSQL connection in API using Prisma with migration support +db
 (A) Enable `pgvector` extension migration in PostgreSQL for embeddings storage +db
