@@ -27,10 +27,18 @@
 
 ## Stack
 
-* *Scripts* : [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/)
-* *Frontend*: 
-* *Backend* [Fastify](https://fastify.dev/), [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/), [Prisma](https://www.prisma.io/), [BullMQ](https://docs.bullmq.io/), [Redis](https://redis.io/), [PostgreSQL](https://www.postgresql.org/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo)
-* *DB*: 
+### Skill Hunter (`skill-hunter/`)
+
+* [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/)
+
+### Legal Tech Thing (`legal-tech-thing/`)
+
+* *Frontend*: [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/)
+* *Backend*: [Fastify](https://fastify.dev/), [BullMQ](https://docs.bullmq.io/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo)
+* *DB*: [Prisma](https://www.prisma.io/), [PostgreSQL](https://www.postgresql.org/), [Redis](https://redis.io/)
+
+### Shared
+
 * *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
 
 ## Supported browsers
