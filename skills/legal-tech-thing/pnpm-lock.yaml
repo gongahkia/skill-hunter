@@ -21,7 +21,11 @@ importers:
 
   apps/web: {}
 
-  packages/shared-types: {}
+  packages/shared-types:
+    dependencies:
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
 
   packages/tsconfig: {}
 
@@ -68,6 +72,9 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
 snapshots:
 
   turbo-darwin-64@2.8.12:
@@ -98,3 +105,5 @@ snapshots:
       turbo-windows-arm64: 2.8.12
 
   typescript@5.9.3: {}
+
+  zod@3.25.76: {}
