@@ -1,4 +1,3 @@
-(A) Implement `POST /findings/:id/feedback` to persist reviewer rationale and corrected outcome +api +feedback
 (A) Implement `GET /policy/profiles/me` to fetch current user policy profile +api +policy
 (A) Implement `PUT /policy/profiles/me` to upsert configurable thresholds and provider preferences +api +policy
 (A) Implement `GET /policy/rules` to list active policy rules ordered by priority +api +policy
