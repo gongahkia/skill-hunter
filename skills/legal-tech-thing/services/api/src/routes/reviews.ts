@@ -1,5 +1,6 @@
 import { createReviewBodySchema, reviewIdParamsSchema } from "@legal-tech/shared-types";
 import { LlmProvider, ReviewRunStatus } from "@prisma/client";
+import { createHash } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
 
 function getProviderModel(provider: LlmProvider) {
@@ -42,6 +43,56 @@ const defaultRiskThresholds = {
   mediumMinConfidence: 0.6,
   autoEscalateSeverity: "high"
 };
+
+const IDEMPOTENCY_HEADER_NAME = "idempotency-key";
+const IDEMPOTENCY_TTL_SECONDS = Number(process.env.REVIEW_IDEMPOTENCY_TTL_SECONDS ?? 86_400);
+
+type ReviewIdempotencyRecord = {
+  requestHash: string;
+  status: "in-progress" | "completed";
+  response?: {
+    reviewRun: {
+      id: string;
+      contractVersionId: string;
+      profileId: string;
+      provider: LlmProvider;
+      providerModel: string;
+      status: ReviewRunStatus;
+      createdAt: Date;
+    };
+    queued: true;
+    queueJobId: string | number;
+  };
+  createdAt: string;
+};
+
+function buildReviewRequestHash(payload: {
+  contractVersionId: string;
+  profileId?: string;
+  provider?: LlmProvider;
+  selectedAgents?: string[];
+}) {
+  const normalizedPayload = {
+    contractVersionId: payload.contractVersionId,
+    profileId: payload.profileId ?? null,
+    provider: payload.provider ?? null,
+    selectedAgents: [...(payload.selectedAgents ?? [])].sort()
+  };
+
+  return createHash("sha256").update(JSON.stringify(normalizedPayload)).digest("hex");
+}
+
+function getIdempotencyHeader(request: { headers: Record<string, unknown> }) {
+  const raw =
+    request.headers[IDEMPOTENCY_HEADER_NAME] ??
+    request.headers[IDEMPOTENCY_HEADER_NAME.toUpperCase()];
+  if (typeof raw !== "string") {
+    return null;
+  }
+
+  const value = raw.trim();
+  return value.length > 0 ? value : null;
+}
 
 async function getReviewRunForUser(
   app: Parameters<FastifyPluginAsync>[0],
@@ -91,133 +142,212 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         selectedAgents?: string[];
       };
 
-      const contractVersion = await app.prisma.contractVersion.findFirst({
-        where: {
-          id: body.contractVersionId,
-          contract: {
-            ownerId: request.auth.userId
+      const idempotencyKey = getIdempotencyHeader(request);
+      const requestHash = buildReviewRequestHash(body);
+      const idempotencyRedisKey = idempotencyKey
+        ? `idempotency:reviews:${request.auth.userId}:${idempotencyKey}`
+        : null;
+
+      if (idempotencyRedisKey) {
+        const existingRecordRaw = await app.redis.get(idempotencyRedisKey);
+        if (existingRecordRaw) {
+          const existingRecord = JSON.parse(existingRecordRaw) as ReviewIdempotencyRecord;
+
+          if (existingRecord.requestHash !== requestHash) {
+            return reply.status(409).send({
+              error: "IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_PAYLOAD"
+            });
           }
-        },
-        select: {
-          id: true,
-          contractId: true
+
+          if (existingRecord.status === "completed" && existingRecord.response) {
+            return reply.status(200).send({
+              ...existingRecord.response,
+              idempotentReplay: true
+            });
+          }
+
+          return reply.status(409).send({
+            error: "IDEMPOTENT_REQUEST_IN_PROGRESS"
+          });
         }
-      });
 
-    if (!contractVersion) {
-      return reply.status(404).send({
-        error: "CONTRACT_VERSION_NOT_FOUND"
-      });
-    }
+        const reservationPayload: ReviewIdempotencyRecord = {
+          requestHash,
+          status: "in-progress",
+          createdAt: new Date().toISOString()
+        };
+        const reserved = await app.redis.set(
+          idempotencyRedisKey,
+          JSON.stringify(reservationPayload),
+          "EX",
+          IDEMPOTENCY_TTL_SECONDS,
+          "NX"
+        );
 
-    let profile = null as
-      | {
-          id: string;
-          defaultProvider: LlmProvider;
+        if (reserved !== "OK") {
+          return reply.status(409).send({
+            error: "IDEMPOTENT_REQUEST_IN_PROGRESS"
+          });
         }
-      | null;
-
-      if (body.profileId) {
-      profile = await app.prisma.policyProfile.findFirst({
-        where: {
-          id: body.profileId,
-          userId: request.auth.userId
-        },
-        select: {
-          id: true,
-          defaultProvider: true
-        }
-      });
-
-      if (!profile) {
-        return reply.status(404).send({
-          error: "POLICY_PROFILE_NOT_FOUND"
-        });
       }
-    } else {
-      profile = await app.prisma.policyProfile.findFirst({
-        where: {
-          userId: request.auth.userId
-        },
-        orderBy: {
-          createdAt: "asc"
-        },
-        select: {
-          id: true,
-          defaultProvider: true
-        }
-      });
 
-      if (!profile) {
-        const createdProfile = await app.prisma.policyProfile.create({
-          data: {
-            userId: request.auth.userId,
-            defaultProvider: LlmProvider.OPENAI,
-            riskThresholds: defaultRiskThresholds
+      try {
+        const contractVersion = await app.prisma.contractVersion.findFirst({
+          where: {
+            id: body.contractVersionId,
+            contract: {
+              ownerId: request.auth.userId
+            }
           },
           select: {
             id: true,
-            defaultProvider: true
+            contractId: true
           }
         });
 
-        profile = createdProfile;
-      }
-    }
-
-      const provider = body.provider ?? profile.defaultProvider;
-    const providerModel = getProviderModel(provider);
-      const selectedAgents = body.selectedAgents ?? [
-      "risk-scanner",
-      "missing-clause",
-      "ambiguity",
-      "compliance",
-      "cross-clause-conflict"
-    ];
-
-      const reviewRun = await app.prisma.reviewRun.create({
-      data: {
-        contractVersionId: contractVersion.id,
-        profileId: profile.id,
-        provider,
-        providerModel,
-        status: ReviewRunStatus.QUEUED,
-        orchestrationMeta: {
-          selectedAgents,
-          progressPercent: 0
+        if (!contractVersion) {
+          if (idempotencyRedisKey) {
+            await app.redis.del(idempotencyRedisKey);
+          }
+          return reply.status(404).send({
+            error: "CONTRACT_VERSION_NOT_FOUND"
+          });
         }
-      },
-      select: {
-        id: true,
-        contractVersionId: true,
-        profileId: true,
-        provider: true,
-        providerModel: true,
-        status: true,
-        createdAt: true
-      }
-    });
 
-      const queueJob = await app.queues.reviewRunQueue.add(
-      `review-run:${reviewRun.id}`,
-      {
-        requestId: request.id,
-        reviewRunId: reviewRun.id,
-        contractVersionId: reviewRun.contractVersionId,
-        profileId: reviewRun.profileId,
-        provider: reviewRun.provider,
-        selectedAgents
-      },
-      {
-        jobId: reviewRun.id
-      }
-    );
+        let profile = null as
+          | {
+              id: string;
+              defaultProvider: LlmProvider;
+            }
+          | null;
 
-      return reply.status(202).send({
-      reviewRun,
-      queued: true,
-      queueJobId: queueJob.id
-    });
+        if (body.profileId) {
+          profile = await app.prisma.policyProfile.findFirst({
+            where: {
+              id: body.profileId,
+              userId: request.auth.userId
+            },
+            select: {
+              id: true,
+              defaultProvider: true
+            }
+          });
+
+          if (!profile) {
+            if (idempotencyRedisKey) {
+              await app.redis.del(idempotencyRedisKey);
+            }
+            return reply.status(404).send({
+              error: "POLICY_PROFILE_NOT_FOUND"
+            });
+          }
+        } else {
+          profile = await app.prisma.policyProfile.findFirst({
+            where: {
+              userId: request.auth.userId
+            },
+            orderBy: {
+              createdAt: "asc"
+            },
+            select: {
+              id: true,
+              defaultProvider: true
+            }
+          });
+
+          if (!profile) {
+            const createdProfile = await app.prisma.policyProfile.create({
+              data: {
+                userId: request.auth.userId,
+                defaultProvider: LlmProvider.OPENAI,
+                riskThresholds: defaultRiskThresholds
+              },
+              select: {
+                id: true,
+                defaultProvider: true
+              }
+            });
+
+            profile = createdProfile;
+          }
+        }
+
+        const provider = body.provider ?? profile.defaultProvider;
+        const providerModel = getProviderModel(provider);
+        const selectedAgents = body.selectedAgents ?? [
+          "risk-scanner",
+          "missing-clause",
+          "ambiguity",
+          "compliance",
+          "cross-clause-conflict"
+        ];
+
+        const reviewRun = await app.prisma.reviewRun.create({
+          data: {
+            contractVersionId: contractVersion.id,
+            profileId: profile.id,
+            provider,
+            providerModel,
+            status: ReviewRunStatus.QUEUED,
+            orchestrationMeta: {
+              selectedAgents,
+              progressPercent: 0
+            }
+          },
+          select: {
+            id: true,
+            contractVersionId: true,
+            profileId: true,
+            provider: true,
+            providerModel: true,
+            status: true,
+            createdAt: true
+          }
+        });
+
+        const queueJob = await app.queues.reviewRunQueue.add(
+          `review-run:${reviewRun.id}`,
+          {
+            requestId: request.id,
+            reviewRunId: reviewRun.id,
+            contractVersionId: reviewRun.contractVersionId,
+            profileId: reviewRun.profileId,
+            provider: reviewRun.provider,
+            selectedAgents
+          },
+          {
+            jobId: reviewRun.id
+          }
+        );
+
+        const responsePayload = {
+          reviewRun,
+          queued: true as const,
+          queueJobId: queueJob.id ?? reviewRun.id
+        };
+
+        if (idempotencyRedisKey) {
+          const completedPayload: ReviewIdempotencyRecord = {
+            requestHash,
+            status: "completed",
+            response: responsePayload,
+            createdAt: new Date().toISOString()
+          };
+          await app.redis.set(
+            idempotencyRedisKey,
+            JSON.stringify(completedPayload),
+            "EX",
+            IDEMPOTENCY_TTL_SECONDS
+          );
+        }
+
+        return reply.status(202).send(responsePayload);
+      } catch (error) {
+        if (idempotencyRedisKey) {
+          await app.redis.del(idempotencyRedisKey);
+        }
+        throw error;
+      }
     }
   );
 
