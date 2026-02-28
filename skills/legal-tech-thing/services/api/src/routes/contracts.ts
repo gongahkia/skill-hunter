@@ -9,9 +9,10 @@ import {
   ContractSourceType,
   ContractProcessingStatus,
   FindingSeverity,
-  FindingStatus
+  FindingStatus,
+  Prisma
 } from "@prisma/client";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import type { FastifyPluginAsync } from "fastify";
 
@@ -62,6 +63,29 @@ function toFindingStatus(value: string | undefined) {
 function sanitizeFileName(fileName: string) {
   const baseName = path.basename(fileName);
   return baseName.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function normalizeChecksum(checksum: string) {
+  const trimmed = checksum.trim();
+  const withoutPrefix = trimmed.replace(/^sha256:/i, "");
+  const isHex = /^[a-fA-F0-9]+$/.test(withoutPrefix);
+  return isHex ? withoutPrefix.toLowerCase() : withoutPrefix;
+}
+
+function buildContractFingerprint(input: {
+  checksum: string;
+  mimeType: string;
+  contentLength: number;
+}) {
+  const normalizedPayload = {
+    checksum: normalizeChecksum(input.checksum),
+    mimeType: input.mimeType.trim().toLowerCase(),
+    contentLength: input.contentLength
+  };
+
+  return createHash("sha256")
+    .update(JSON.stringify(normalizedPayload))
+    .digest("hex");
 }
 
 const contractRoutes: FastifyPluginAsync = async (app) => {
@@ -187,6 +211,11 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         contentLength: number;
         checksum: string;
       };
+      const fingerprint = buildContractFingerprint({
+        checksum: body.checksum,
+        mimeType: body.mimeType,
+        contentLength: body.contentLength
+      });
 
       const contract = await app.prisma.contract.findFirst({
         where: {
@@ -206,11 +235,10 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         });
       }
 
-      const contractVersion = await app.prisma.contractVersion.create({
-        data: {
+      const existingVersion = await app.prisma.contractVersion.findFirst({
+        where: {
           contractId: contract.id,
-          checksum: body.checksum,
-          storageUri: body.objectUri
+          checksum: fingerprint
         },
         select: {
           id: true,
@@ -220,6 +248,70 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
           createdAt: true
         }
       });
+
+      if (existingVersion) {
+        return reply.status(200).send({
+          queued: false,
+          deduplicated: true,
+          queueJobId: existingVersion.id,
+          contractVersion: existingVersion
+        });
+      }
+
+      let contractVersion: {
+        id: string;
+        contractId: string;
+        checksum: string;
+        storageUri: string;
+        createdAt: Date;
+      };
+
+      try {
+        contractVersion = await app.prisma.contractVersion.create({
+          data: {
+            contractId: contract.id,
+            checksum: fingerprint,
+            storageUri: body.objectUri
+          },
+          select: {
+            id: true,
+            contractId: true,
+            checksum: true,
+            storageUri: true,
+            createdAt: true
+          }
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          const duplicatedVersion = await app.prisma.contractVersion.findFirst({
+            where: {
+              contractId: contract.id,
+              checksum: fingerprint
+            },
+            select: {
+              id: true,
+              contractId: true,
+              checksum: true,
+              storageUri: true,
+              createdAt: true
+            }
+          });
+
+          if (duplicatedVersion) {
+            return reply.status(200).send({
+              queued: false,
+              deduplicated: true,
+              queueJobId: duplicatedVersion.id,
+              contractVersion: duplicatedVersion
+            });
+          }
+        }
+
+        throw error;
+      }
 
       const job = await app.queues.contractIngestionQueue.add(
         `contract-ingest:${contract.id}:${contractVersion.id}`,
