@@ -59,6 +59,14 @@ export const createReviewBodySchema = z.object({
   selectedAgents: z.array(z.string().min(1)).min(1).optional()
 });
 
+export const compareReviewsBodySchema = z.object({
+  contractVersionId: z.string().uuid(),
+  profileId: z.string().uuid().optional(),
+  primaryProvider: z.enum(["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"]).optional(),
+  comparisonProvider: z.enum(["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"]),
+  selectedAgents: z.array(z.string().min(1)).min(1).optional()
+});
+
 export const reviewIdParamsSchema = z.object({
   id: z.string().uuid()
 });

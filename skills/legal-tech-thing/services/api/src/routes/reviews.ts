@@ -1,7 +1,14 @@
-import { createReviewBodySchema, reviewIdParamsSchema } from "@legal-tech/shared-types";
+import {
+  compareReviewsBodySchema,
+  createReviewBodySchema,
+  reviewIdParamsSchema
+} from "@legal-tech/shared-types";
 import { LlmProvider, ReviewRunStatus } from "@prisma/client";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
+
+import { runSpecialistAgentsForReview } from "../modules/agents/orchestrator";
+import type { AgentName } from "../modules/agents/runtime";
 
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
@@ -43,6 +50,15 @@ const defaultRiskThresholds = {
   mediumMinConfidence: 0.6,
   autoEscalateSeverity: "high"
 };
+const defaultSelectedAgents: AgentName[] = [
+  "risk-scanner",
+  "missing-clause",
+  "ambiguity",
+  "compliance",
+  "cross-clause-conflict"
+];
+const selectedAgentSet = new Set<AgentName>(defaultSelectedAgents);
+type ComparableFinding = Awaited<ReturnType<typeof runSpecialistAgentsForReview>>["findings"][number];
 
 const IDEMPOTENCY_HEADER_NAME = "idempotency-key";
 const IDEMPOTENCY_TTL_SECONDS = Number(process.env.REVIEW_IDEMPOTENCY_TTL_SECONDS ?? 86_400);
@@ -92,6 +108,76 @@ function getIdempotencyHeader(request: { headers: Record<string, unknown> }) {
 
   const value = raw.trim();
   return value.length > 0 ? value : null;
+}
+
+function normalizeSelectedAgents(selectedAgents?: string[]) {
+  if (!selectedAgents || selectedAgents.length === 0) {
+    return [...defaultSelectedAgents];
+  }
+
+  const normalized = Array.from(new Set(selectedAgents.map((item) => item.trim())));
+  if (normalized.some((agent) => !selectedAgentSet.has(agent as AgentName))) {
+    return null;
+  }
+
+  return normalized as AgentName[];
+}
+
+async function getOrCreateReviewProfile(
+  app: Parameters<FastifyPluginAsync>[0],
+  userId: string,
+  profileId?: string
+) {
+  if (profileId) {
+    return app.prisma.policyProfile.findFirst({
+      where: {
+        id: profileId,
+        userId
+      },
+      select: {
+        id: true,
+        defaultProvider: true
+      }
+    });
+  }
+
+  const existing = await app.prisma.policyProfile.findFirst({
+    where: {
+      userId
+    },
+    orderBy: {
+      createdAt: "asc"
+    },
+    select: {
+      id: true,
+      defaultProvider: true
+    }
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  return app.prisma.policyProfile.create({
+    data: {
+      userId,
+      defaultProvider: LlmProvider.OPENAI,
+      riskThresholds: defaultRiskThresholds
+    },
+    select: {
+      id: true,
+      defaultProvider: true
+    }
+  });
+}
+
+function buildFindingComparisonKey(finding: ComparableFinding) {
+  const evidenceKey = finding.evidence
+    .map((item) => `${item.clauseId ?? "none"}:${item.startOffset}:${item.endOffset}`)
+    .sort()
+    .join("|");
+
+  return `${finding.type}:${finding.title.trim().toLowerCase()}:${evidenceKey}`;
 }
 
 async function getReviewRunForUser(
@@ -182,73 +268,33 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
           });
         }
 
-        let profile = null as
-          | {
-              id: string;
-              defaultProvider: LlmProvider;
-            }
-          | null;
+        const profile = await getOrCreateReviewProfile(
+          app,
+          request.auth.userId,
+          body.profileId
+        );
 
-        if (body.profileId) {
-          profile = await app.prisma.policyProfile.findFirst({
-            where: {
-              id: body.profileId,
-              userId: request.auth.userId
-            },
-            select: {
-              id: true,
-              defaultProvider: true
-            }
-          });
-
-          if (!profile) {
-            if (idempotencyRedisKey) {
-              await app.redis.del(idempotencyRedisKey);
-            }
-            return reply.status(404).send({
-              error: "POLICY_PROFILE_NOT_FOUND"
-            });
+        if (!profile) {
+          if (idempotencyRedisKey) {
+            await app.redis.del(idempotencyRedisKey);
           }
-        } else {
-          profile = await app.prisma.policyProfile.findFirst({
-            where: {
-              userId: request.auth.userId
-            },
-            orderBy: {
-              createdAt: "asc"
-            },
-            select: {
-              id: true,
-              defaultProvider: true
-            }
+          return reply.status(404).send({
+            error: "POLICY_PROFILE_NOT_FOUND"
           });
-
-          if (!profile) {
-            const createdProfile = await app.prisma.policyProfile.create({
-              data: {
-                userId: request.auth.userId,
-                defaultProvider: LlmProvider.OPENAI,
-                riskThresholds: defaultRiskThresholds
-              },
-              select: {
-                id: true,
-                defaultProvider: true
-              }
-            });
-
-            profile = createdProfile;
-          }
         }
 
         const provider = body.provider ?? profile.defaultProvider;
         const providerModel = getProviderModel(provider);
-        const selectedAgents = body.selectedAgents ?? [
-          "risk-scanner",
-          "missing-clause",
-          "ambiguity",
-          "compliance",
-          "cross-clause-conflict"
-        ];
+        const selectedAgents = normalizeSelectedAgents(body.selectedAgents);
+
+        if (!selectedAgents) {
+          if (idempotencyRedisKey) {
+            await app.redis.del(idempotencyRedisKey);
+          }
+          return reply.status(400).send({
+            error: "INVALID_SELECTED_AGENTS"
+          });
+        }
 
         const reviewRun = await app.prisma.reviewRun.create({
           data: {
@@ -316,6 +362,252 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         }
         throw error;
       }
+    }
+  );
+
+  app.post(
+    "/compare",
+    {
+      preHandler: app.buildValidationPreHandler({
+        body: compareReviewsBodySchema
+      })
+    },
+    async (request, reply) => {
+      const body = request.validated.body as {
+        contractVersionId: string;
+        profileId?: string;
+        primaryProvider?: LlmProvider;
+        comparisonProvider: LlmProvider;
+        selectedAgents?: string[];
+      };
+
+      const selectedAgents = normalizeSelectedAgents(body.selectedAgents);
+      if (!selectedAgents) {
+        return reply.status(400).send({
+          error: "INVALID_SELECTED_AGENTS"
+        });
+      }
+
+      const contractVersion = await app.rbac.getOwnedContractVersion(
+        body.contractVersionId,
+        request.auth.userId
+      );
+      if (!contractVersion) {
+        return reply.status(404).send({
+          error: "CONTRACT_VERSION_NOT_FOUND"
+        });
+      }
+
+      const profile = await getOrCreateReviewProfile(
+        app,
+        request.auth.userId,
+        body.profileId
+      );
+      if (!profile) {
+        return reply.status(404).send({
+          error: "POLICY_PROFILE_NOT_FOUND"
+        });
+      }
+
+      const primaryProvider = body.primaryProvider ?? profile.defaultProvider;
+      const comparisonProvider = body.comparisonProvider;
+      if (primaryProvider === comparisonProvider) {
+        return reply.status(400).send({
+          error: "COMPARISON_PROVIDERS_MUST_DIFFER"
+        });
+      }
+
+      const clauses = await app.prisma.clause.findMany({
+        where: {
+          contractVersionId: contractVersion.id
+        },
+        orderBy: {
+          startOffset: "asc"
+        },
+        select: {
+          id: true,
+          type: true,
+          normalizedText: true,
+          startOffset: true,
+          endOffset: true
+        }
+      });
+
+      const policyRules = await app.prisma.policyRule.findMany({
+        where: {
+          profileId: profile.id,
+          active: true
+        },
+        orderBy: [
+          {
+            priority: "asc"
+          },
+          {
+            createdAt: "asc"
+          }
+        ],
+        select: {
+          id: true,
+          clauseRequirement: true,
+          clauseSelector: true,
+          requiredPattern: true,
+          forbiddenPattern: true,
+          allowException: true,
+          active: true,
+          priority: true
+        }
+      });
+
+      const runtimeInputBase = {
+        contractId: contractVersion.contractId,
+        contractVersionId: contractVersion.id,
+        contractType: undefined,
+        jurisdiction: undefined,
+        language: "en",
+        policyProfileId: profile.id,
+        policyRules,
+        clauses: clauses.map((clause) => ({
+          id: clause.id,
+          heading: null,
+          type: clause.type,
+          text: clause.normalizedText,
+          startOffset: clause.startOffset,
+          endOffset: clause.endOffset
+        }))
+      };
+
+      const [primaryResult, comparisonResult] = await Promise.all([
+        runSpecialistAgentsForReview(
+          {
+            ...runtimeInputBase,
+            reviewRunId: randomUUID()
+          },
+          selectedAgents
+        ),
+        runSpecialistAgentsForReview(
+          {
+            ...runtimeInputBase,
+            reviewRunId: randomUUID()
+          },
+          selectedAgents
+        )
+      ]);
+
+      const primaryByKey = new Map<string, ComparableFinding>();
+      for (const finding of primaryResult.findings) {
+        primaryByKey.set(buildFindingComparisonKey(finding), finding);
+      }
+
+      const comparisonByKey = new Map<string, ComparableFinding>();
+      for (const finding of comparisonResult.findings) {
+        comparisonByKey.set(buildFindingComparisonKey(finding), finding);
+      }
+
+      const introduced = [] as Array<{
+        key: string;
+        type: ComparableFinding["type"];
+        title: string;
+        severity: ComparableFinding["severity"];
+        confidence: number;
+      }>;
+      const resolved = [] as Array<{
+        key: string;
+        type: ComparableFinding["type"];
+        title: string;
+        severity: ComparableFinding["severity"];
+        confidence: number;
+      }>;
+      const changed = [] as Array<{
+        key: string;
+        title: string;
+        primarySeverity: ComparableFinding["severity"];
+        comparisonSeverity: ComparableFinding["severity"];
+        primaryConfidence: number;
+        comparisonConfidence: number;
+      }>;
+      const unchanged = [] as Array<{
+        key: string;
+        type: ComparableFinding["type"];
+        title: string;
+        severity: ComparableFinding["severity"];
+        confidence: number;
+      }>;
+
+      for (const [key, finding] of comparisonByKey) {
+        const primary = primaryByKey.get(key);
+        if (!primary) {
+          introduced.push({
+            key,
+            type: finding.type,
+            title: finding.title,
+            severity: finding.severity,
+            confidence: finding.confidence
+          });
+          continue;
+        }
+
+        if (
+          primary.severity !== finding.severity ||
+          Math.abs(primary.confidence - finding.confidence) >= 0.0001
+        ) {
+          changed.push({
+            key,
+            title: finding.title,
+            primarySeverity: primary.severity,
+            comparisonSeverity: finding.severity,
+            primaryConfidence: primary.confidence,
+            comparisonConfidence: finding.confidence
+          });
+          continue;
+        }
+
+        unchanged.push({
+          key,
+          type: finding.type,
+          title: finding.title,
+          severity: finding.severity,
+          confidence: finding.confidence
+        });
+      }
+
+      for (const [key, finding] of primaryByKey) {
+        if (comparisonByKey.has(key)) {
+          continue;
+        }
+
+        resolved.push({
+          key,
+          type: finding.type,
+          title: finding.title,
+          severity: finding.severity,
+          confidence: finding.confidence
+        });
+      }
+
+      return reply.status(200).send({
+        contractVersionId: contractVersion.id,
+        providers: {
+          primary: primaryProvider,
+          primaryModel: getProviderModel(primaryProvider),
+          comparison: comparisonProvider,
+          comparisonModel: getProviderModel(comparisonProvider)
+        },
+        selectedAgents,
+        counts: {
+          primary: primaryResult.findings.length,
+          comparison: comparisonResult.findings.length,
+          introduced: introduced.length,
+          resolved: resolved.length,
+          changed: changed.length,
+          unchanged: unchanged.length
+        },
+        deltas: {
+          introduced,
+          resolved,
+          changed,
+          unchanged
+        }
+      });
     }
   );
 

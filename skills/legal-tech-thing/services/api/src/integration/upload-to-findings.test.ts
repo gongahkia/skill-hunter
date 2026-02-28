@@ -27,11 +27,36 @@ type ContractVersionRow = {
   createdAt: Date;
 };
 
+type ClauseRow = {
+  id: string;
+  contractVersionId: string;
+  type: string;
+  normalizedText: string;
+  startOffset: number;
+  endOffset: number;
+  sourceParser: string;
+  parserConfidence: number;
+  createdAt: Date;
+};
+
 type PolicyProfileRow = {
   id: string;
   userId: string;
   defaultProvider: "OPENAI" | "ANTHROPIC" | "GEMINI" | "OLLAMA";
   riskThresholds: Record<string, unknown>;
+  createdAt: Date;
+};
+
+type PolicyRuleRow = {
+  id: string;
+  profileId: string;
+  clauseRequirement: string | null;
+  clauseSelector: string;
+  requiredPattern: string | null;
+  forbiddenPattern: string | null;
+  allowException: boolean;
+  active: boolean;
+  priority: number;
   createdAt: Date;
 };
 
@@ -78,7 +103,9 @@ type FindingRow = {
 function createInMemoryPrisma(userId: string) {
   const contracts: ContractRow[] = [];
   const versions: ContractVersionRow[] = [];
+  const clauses: ClauseRow[] = [];
   const profiles: PolicyProfileRow[] = [];
+  const policyRules: PolicyRuleRow[] = [];
   const reviewRuns: ReviewRunRow[] = [];
   const evidenceSpans: EvidenceSpanRow[] = [];
   const findings: FindingRow[] = [];
@@ -198,6 +225,20 @@ function createInMemoryPrisma(userId: string) {
         );
       }
     },
+    clause: {
+      async findMany(args: {
+        where?: {
+          contractVersionId?: string;
+        };
+      }) {
+        const contractVersionId = args.where?.contractVersionId;
+        const filtered = clauses.filter((clause) =>
+          contractVersionId ? clause.contractVersionId === contractVersionId : true
+        );
+
+        return filtered.sort((left, right) => left.startOffset - right.startOffset);
+      }
+    },
     policyProfile: {
       async findFirst(args: {
         where?: {
@@ -238,6 +279,27 @@ function createInMemoryPrisma(userId: string) {
 
         profiles.push(profile);
         return profile;
+      }
+    },
+    policyRule: {
+      async findMany(args: {
+        where?: {
+          profileId?: string;
+          active?: boolean;
+        };
+      }) {
+        const where = args.where ?? {};
+        return policyRules
+          .filter((rule) => {
+            if (where.profileId && rule.profileId !== where.profileId) {
+              return false;
+            }
+            if (where.active !== undefined && rule.active !== where.active) {
+              return false;
+            }
+            return true;
+          })
+          .sort((left, right) => left.priority - right.priority);
       }
     },
     reviewRun: {
@@ -316,7 +378,22 @@ function createInMemoryPrisma(userId: string) {
 
   const queues = {
     contractIngestionQueue: {
-      async add(_name: string) {
+      async add(_name: string, data?: { contractVersionId?: string }) {
+        if (data?.contractVersionId) {
+          clauses.push({
+            id: randomUUID(),
+            contractVersionId: data.contractVersionId,
+            type: "UNKNOWN",
+            normalizedText:
+              "The provider may terminate at any time and liability shall not be limited.",
+            startOffset: 0,
+            endOffset: 75,
+            sourceParser: "text",
+            parserConfidence: 0.88,
+            createdAt: new Date()
+          });
+        }
+
         return {
           id: `ingest-${randomUUID()}`
         };
@@ -501,6 +578,70 @@ describe("upload to findings integration flow", () => {
     assert.equal(findingsBody.items[0].severity, "HIGH");
     assert.equal(findingsBody.items[0].status, "OPEN");
     assert.equal(findingsBody.items[0].evidenceSpan?.excerpt, "Sample risky language excerpt.");
+  });
+
+  it("runs comparison mode across two providers and returns finding deltas", async (t) => {
+    const app = await buildIntegrationApp();
+    t.after(async () => {
+      await app.close();
+    });
+
+    const createContractResponse = await app.inject({
+      method: "POST",
+      url: "/contracts",
+      payload: {
+        title: "Comparison Test Contract",
+        sourceType: "UPLOAD"
+      }
+    });
+    assert.equal(createContractResponse.statusCode, 201);
+    const contractId = createContractResponse.json().contract.id as string;
+
+    const uploadUrlResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/upload-url`,
+      payload: {
+        fileName: "comparison.txt",
+        mimeType: "text/plain",
+        contentLength: 256
+      }
+    });
+    assert.equal(uploadUrlResponse.statusCode, 200);
+    const uploadUrlBody = uploadUrlResponse.json();
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/ingest`,
+      payload: {
+        objectUri: uploadUrlBody.objectUri,
+        objectKey: uploadUrlBody.objectKey,
+        mimeType: "text/plain",
+        contentLength: 256,
+        checksum: "comparison-checksum"
+      }
+    });
+    assert.equal(ingestResponse.statusCode, 202);
+    const contractVersionId = ingestResponse.json().contractVersion.id as string;
+
+    const compareResponse = await app.inject({
+      method: "POST",
+      url: "/reviews/compare",
+      payload: {
+        contractVersionId,
+        primaryProvider: "OPENAI",
+        comparisonProvider: "ANTHROPIC"
+      }
+    });
+    assert.equal(compareResponse.statusCode, 200);
+    const compareBody = compareResponse.json();
+
+    assert.equal(compareBody.providers.primary, "OPENAI");
+    assert.equal(compareBody.providers.comparison, "ANTHROPIC");
+    assert.ok(compareBody.counts.primary >= 1);
+    assert.equal(compareBody.counts.introduced, 0);
+    assert.equal(compareBody.counts.resolved, 0);
+    assert.equal(compareBody.counts.changed, 0);
+    assert.equal(compareBody.counts.unchanged, compareBody.counts.primary);
   });
 
   it("accepts extension-style DOM payload submissions through upload and ingest endpoints", async (t) => {
