@@ -26,8 +26,24 @@ export const agentRuntimeInputSchema = z
     contractVersionId: z.string().uuid(),
     reviewRunId: z.string().uuid(),
     contractType: z.string().min(1).optional(),
+    jurisdiction: z.string().min(1).optional(),
     language: z.string().min(2),
     policyProfileId: z.string().uuid(),
+    policyRules: z
+      .array(
+        z
+          .object({
+            id: z.string().uuid(),
+            clauseRequirement: z.string().nullable(),
+            clauseSelector: z.string().min(1),
+            requiredPattern: z.string().nullable(),
+            forbiddenPattern: z.string().nullable(),
+            allowException: z.boolean(),
+            active: z.boolean()
+          })
+          .strict()
+      )
+      .default([]),
     clauses: z.array(agentClauseInputSchema)
   })
   .strict();
