@@ -69,6 +69,14 @@ function appendQueryParams(path: string, query: RequestOptions["query"]) {
   return `${path}?${serialized}`;
 }
 
+function generateRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `req-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
 export class LegalTechClient {
   private readonly baseUrl: string;
 
@@ -360,6 +368,7 @@ export class LegalTechClient {
     const requestPath = appendQueryParams(path, options.query);
 
     const headers: Record<string, string> = {
+      "x-request-id": generateRequestId(),
       ...(options.body !== undefined ? { "content-type": "application/json" } : {}),
       ...(options.headers ?? {})
     };

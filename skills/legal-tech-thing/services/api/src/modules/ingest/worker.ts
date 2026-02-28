@@ -68,10 +68,12 @@ export async function processContractIngestionJob(
     }
   });
   await enqueueClauseEmbeddingJob({
+    requestId: payload.requestId,
     contractVersionId: payload.contractVersionId
   });
 
   console.log("Detected contract language", {
+    requestId: payload.requestId,
     contractId: payload.contractId,
     contractVersionId: payload.contractVersionId,
     iso6393: detectedLanguage.iso6393,

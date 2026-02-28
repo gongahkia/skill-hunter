@@ -1,6 +1,7 @@
 export const CLAUSE_EMBEDDINGS_QUEUE = "clause-embeddings";
 
 export type ClauseEmbeddingJobPayload = {
+  requestId: string;
   contractVersionId: string;
 };
 

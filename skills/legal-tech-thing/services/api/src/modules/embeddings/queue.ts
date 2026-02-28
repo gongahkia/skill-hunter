@@ -51,7 +51,7 @@ function getClauseEmbeddingsQueue() {
 export async function enqueueClauseEmbeddingJob(payload: ClauseEmbeddingJobPayload) {
   const queue = getClauseEmbeddingsQueue();
 
-  return queue.add(`clause-embeddings:${payload.contractVersionId}`, payload, {
+  return queue.add(`clause-embeddings:${payload.contractVersionId}:${payload.requestId}`, payload, {
     jobId: payload.contractVersionId
   });
 }

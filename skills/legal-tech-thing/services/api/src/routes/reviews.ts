@@ -207,6 +207,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
     const queueJob = await app.queues.reviewRunQueue.add(
       `review-run:${reviewRun.id}`,
       {
+        requestId: request.id,
         reviewRunId: reviewRun.id,
         contractVersionId: reviewRun.contractVersionId,
         profileId: reviewRun.profileId,

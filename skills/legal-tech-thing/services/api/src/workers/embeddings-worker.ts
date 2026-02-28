@@ -33,6 +33,7 @@ const worker = new Worker<ClauseEmbeddingJobPayload>(
     const result = await generateClauseEmbeddings(job.data.contractVersionId);
 
     console.log("Generated clause embeddings", {
+      requestId: job.data.requestId,
       contractVersionId: job.data.contractVersionId,
       provider: result.providerName,
       count: result.embeddings.length
@@ -52,6 +53,7 @@ worker.on("ready", () => {
 worker.on("failed", (job, error) => {
   console.error("Embeddings job failed", {
     jobId: job?.id,
+    requestId: job?.data?.requestId,
     contractVersionId: job?.data?.contractVersionId,
     error
   });

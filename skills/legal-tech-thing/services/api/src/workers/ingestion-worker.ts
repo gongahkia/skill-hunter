@@ -52,6 +52,7 @@ worker.on("ready", () => {
 worker.on("failed", (job, error) => {
   console.error("Ingestion job failed", {
     jobId: job?.id,
+    requestId: job?.data?.requestId,
     contractId: job?.data?.contractId,
     error
   });

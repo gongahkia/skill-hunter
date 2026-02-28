@@ -235,6 +235,7 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
     const job = await app.queues.contractIngestionQueue.add(
       `contract-ingest:${contract.id}:${contractVersion.id}`,
       {
+        requestId: request.id,
         contractId: contract.id,
         contractVersionId: contractVersion.id,
         ownerId: contract.ownerId,

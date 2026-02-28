@@ -30,6 +30,14 @@ interface RequestOptions {
   accessToken: string;
 }
 
+function generateRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `req-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
 export interface SubmitExtensionContractInput {
   title: string;
   content: string;
@@ -52,6 +60,7 @@ async function requestWithAccessToken<T>(path: string, options: RequestOptions):
     method: options.method ?? "GET",
     headers: {
       authorization: `Bearer ${options.accessToken}`,
+      "x-request-id": generateRequestId(),
       ...(options.body !== undefined ? { "content-type": "application/json" } : {})
     },
     ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {})
@@ -85,6 +94,7 @@ async function uploadExtractedContent(uploadUrl: string, content: string) {
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
+      "x-request-id": generateRequestId(),
       "content-type": SOURCE_MIME_TYPE
     },
     body: content

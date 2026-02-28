@@ -29,6 +29,14 @@ type RequestOptions = {
   retryOnUnauthorized?: boolean;
 };
 
+function generateRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `req-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
 class ApiClient {
   private refreshPromise: Promise<AuthTokens | null> | null = null;
 
@@ -88,6 +96,7 @@ class ApiClient {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers: {
+        "x-request-id": generateRequestId(),
         ...(body !== undefined ? { "content-type": "application/json" } : {}),
         ...(tokens?.accessToken
           ? {
