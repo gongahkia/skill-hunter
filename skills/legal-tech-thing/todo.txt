@@ -1,0 +1,144 @@
+(A) Configure Turbo pipeline for `build`, `lint`, `test`, and `dev` tasks across all workspaces +monorepo
+(A) Add shared TypeScript base config in `packages/tsconfig` and extend it from every workspace +monorepo
+(A) Create `packages/shared-types` with Zod schemas for contracts, clauses, findings, policies, and review jobs +shared-types
+(A) Export OpenAPI-compatible DTO types from `packages/shared-types` for API and clients +shared-types
+(A) Scaffold `services/api` using Fastify and TypeScript with modular route registration +api
+(A) Configure PostgreSQL connection in API using Prisma with migration support +db
+(A) Enable `pgvector` extension migration in PostgreSQL for embeddings storage +db
+(A) Add Redis connection module for queueing and distributed locks +queue
+(A) Create S3-compatible object storage client module for file binaries and artifacts +storage
+(A) Create `users` table with unique email, password hash, and created timestamps +db +auth
+(A) Create `sessions` table for refresh token tracking with token family rotation fields +db +auth
+(A) Create `contracts` table with source type, title, owner id, and processing status +db
+(A) Create `contract_versions` table with source checksum and object storage URI +db
+(A) Create `clauses` table with normalized text, clause type, offsets, and version foreign key +db
+(A) Create `findings` table with severity, confidence, status, and evidence span foreign keys +db
+(A) Create `policy_profiles` table keyed by user id with JSON risk thresholds +db +policy
+(A) Create `policy_rules` table for clause requirements, forbidden patterns, and exception flags +db +policy
+(A) Create `review_runs` table for orchestration state and provider metadata +db +orchestrator
+(A) Create `review_feedback` table for accepted, dismissed, and edited findings +db +feedback
+(A) Implement `POST /auth/register` with bcrypt password hashing and unique email validation +auth +api
+(A) Implement `POST /auth/login` to issue JWT access token and rotating refresh token +auth +api
+(A) Implement `POST /auth/refresh` with refresh token rotation and revocation on reuse detection +auth +api
+(A) Implement `POST /auth/logout` to revoke active refresh session record +auth +api
+(A) Add JWT auth middleware to protect all non-auth API routes +auth +api
+(A) Implement password strength validation with zxcvbn-style entropy threshold in registration flow +auth
+(A) Implement per-IP and per-email auth rate limiting with Redis counters +auth +security
+(A) Implement `POST /contracts` to create contract records and return upload instructions +api +contracts
+(A) Implement `POST /contracts/:id/upload-url` to mint presigned S3 URLs for source files +api +storage
+(A) Implement `POST /contracts/:id/ingest` to enqueue ingestion job with source metadata +api +queue
+(A) Implement ingestion worker consumer using BullMQ for contract normalization jobs +queue +ingest
+(A) Implement MIME-based parser routing for `text/html`, `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, and images +ingest
+(A) Implement HTML parser that strips scripts/styles and preserves heading hierarchy offsets +parser +ingest
+(A) Implement PDF parser that extracts text blocks with page number and character offsets +parser +ingest
+(A) Implement DOCX parser that preserves paragraph boundaries and list numbering in extracted text +parser +ingest
+(A) Implement image OCR parser using Tesseract worker with bounding box output +ocr +ingest
+(A) Implement fallback plain-text parser for unknown text-based MIME types +parser +ingest
+(A) Implement language detection step for extracted contract text +ingest
+(A) Implement contract text cleanup pipeline for whitespace normalization and unicode canonicalization +ingest
+(A) Implement clause segmentation by headings, numbering patterns, and sentence boundary heuristics +clause-engine
+(A) Implement clause type classifier baseline using rule patterns for core legal sections +clause-engine
+(A) Persist clause records with source offsets and parser confidence metadata +db +clause-engine
+(A) Implement embeddings generation job for clause vectors using provider-agnostic embedding interface +embeddings
+(A) Store clause embeddings in `pgvector` for semantic retrieval during review +db +embeddings
+(A) Implement agent runtime interface with strict input and output schema validation +agent-runtime
+(A) Implement provider adapter for OpenAI chat completions with retry and timeout policies +providers
+(A) Implement provider adapter for Anthropic messages API with retry and timeout policies +providers
+(A) Implement provider adapter for Google Gemini API with retry and timeout policies +providers
+(A) Implement provider adapter for local Ollama endpoint with streaming-disabled deterministic mode +providers
+(A) Implement provider registry that resolves model provider from policy profile config +providers +agent-runtime
+(A) Implement prompt template loader for specialist review agents from versioned template files +prompts
+(A) Implement `risk-scanner` agent that flags risky language in extracted clauses +agents
+(A) Implement `missing-clause` agent that detects absent mandatory sections by contract type +agents
+(A) Implement `ambiguity` agent that detects vague terms and undefined references +agents
+(A) Implement `compliance` agent that checks jurisdiction-sensitive language against policy rules +agents
+(A) Implement `cross-clause-conflict` agent that identifies contradictions across clause pairs +agents
+(A) Implement orchestration engine to run specialist agents in parallel per review job +orchestrator
+(A) Implement adjudication stage to merge duplicated findings by overlapping evidence spans +orchestrator
+(A) Implement severity scoring function combining agent output, policy rule weight, and confidence +orchestrator +policy
+(A) Implement finding normalization that maps all agent outputs into one canonical finding schema +findings
+(A) Implement evidence anchoring that stores start and end offsets for each finding +findings
+(A) Implement suggested redline generator for high-severity findings with fallback safe clause +redline
+(A) Implement `POST /reviews` to start a review run for a specific contract version +api +orchestrator
+(A) Implement `GET /reviews/:id` to return run status, progress, and provider metadata +api +orchestrator
+(A) Implement `GET /contracts/:id/findings` with pagination, severity filter, and status filter +api +findings
+(A) Implement `PATCH /findings/:id` to update finding status as `open`, `accepted`, `dismissed`, or `needs-edit` +api +findings
+(A) Implement `POST /findings/:id/feedback` to persist reviewer rationale and corrected outcome +api +feedback
+(A) Implement `GET /policy/profiles/me` to fetch current user policy profile +api +policy
+(A) Implement `PUT /policy/profiles/me` to upsert configurable thresholds and provider preferences +api +policy
+(A) Implement `GET /policy/rules` to list active policy rules ordered by priority +api +policy
+(A) Implement `POST /policy/rules` to create a deterministic policy rule with clause selectors +api +policy
+(A) Implement `PATCH /policy/rules/:id` to modify a policy rule with optimistic version check +api +policy
+(A) Implement `DELETE /policy/rules/:id` for policy rule removal with soft-delete flag +api +policy
+(A) Implement webhook-safe job state updates from workers to API using signed internal tokens +queue +security
+(A) Implement server-sent events stream for real-time review progress updates +realtime +api
+(A) Scaffold `apps/web` with Next.js App Router and TypeScript +web
+(A) Implement web auth pages for register, login, logout, and token refresh bootstrapping +web +auth
+(A) Implement secure API client in web app with automatic access token refresh on 401 +web +auth
+(A) Implement web dashboard showing contract list with status, source type, and last review date +web +contracts
+(A) Implement drag-and-drop upload flow for PDF, DOCX, image, and text files +web +upload
+(A) Implement contract detail page that renders extracted clause list with clickable offsets +web +viewer
+(A) Implement finding panel grouped by severity with evidence excerpt and confidence badge +web +findings
+(A) Implement inline status controls to accept or dismiss findings from contract detail page +web +findings
+(A) Implement policy profile editor form for thresholds, provider choice, and agent toggles +web +policy
+(A) Implement policy rules CRUD UI for required clauses and forbidden phrase checks +web +policy
+(A) Implement review run launcher button with provider and profile selection +web +orchestrator
+(A) Implement live review progress UI using server-sent events subscription +web +realtime
+(A) Implement finding feedback UI with rationale input and corrected severity selector +web +feedback
+(A) Scaffold `apps/extension` with Manifest V3, React, and TypeScript +extension
+(A) Implement extension login flow using backend auth tokens stored in `chrome.storage.local` +extension +auth
+(A) Implement content script detector for contract-like pages using legal phrase heuristics +extension +detection
+(A) Implement DOM extractor that captures visible contract text with stable node offsets +extension +ingest
+(A) Implement extractor for linked Terms URLs near consent checkboxes and acceptance buttons +extension +detection
+(A) Implement pre-accept interception for click events on likely acceptance controls +extension +detection
+(A) Implement extension side panel UI that displays scan status and top findings +extension +ui
+(A) Implement extension action to submit extracted content as a contract source to backend +extension +api
+(A) Implement extension warning modal that blocks acceptance click until user confirms override +extension +ui
+(A) Implement extension badge states for `idle`, `scanning`, `issues`, and `clear` +extension +ui
+(A) Implement extension auto-rescan when page URL changes in single-page apps +extension +detection
+(A) Implement extension mapping from findings to highlighted DOM ranges when offsets are resolvable +extension +ui
+(A) Scaffold `apps/desktop` with Electron, React, and TypeScript +desktop
+(A) Implement desktop login flow sharing the same backend auth endpoints +desktop +auth
+(A) Implement desktop local file importer for PDF, DOCX, image, and TXT contracts +desktop +ingest
+(A) Implement desktop screen-region capture using native screenshot APIs +desktop +capture
+(A) Implement desktop OCR pipeline that sends captured image text for contract review +desktop +ocr
+(A) Implement desktop findings panel with severity filters and evidence navigation +desktop +findings
+(A) Implement desktop quick action to start review from clipboard text +desktop +ingest
+(A) Implement shared client SDK package for auth, contract ingest, review runs, and findings APIs +sdk
+(A) Implement shared state models for finding statuses and policy profiles used by all clients +sdk
+(A) Implement request id propagation across API, workers, and clients for traceable review runs +observability
+(A) Implement centralized error envelope format with machine-readable error codes +api
+(A) Implement API input validation middleware using Zod schemas from shared package +api +validation
+(A) Implement queue retry policy with exponential backoff and dead-letter queue for failed jobs +queue
+(A) Implement idempotency keys for `POST /reviews` to prevent duplicate review runs +api +orchestrator
+(A) Implement deterministic contract fingerprinting to skip duplicate ingestion processing +ingest
+(A) Implement RBAC guard that restricts contract access to owning user account +security +auth
+(A) Implement signed URL expiry enforcement for uploaded source downloads +storage +security
+(A) Implement PII scrubber for logs to redact emails, names, and account tokens +security +observability
+(A) Implement unit tests for auth token rotation and replay attack revocation logic +tests +auth
+(A) Implement unit tests for parser routing and MIME fallbacks +tests +ingest
+(A) Implement unit tests for clause segmentation with numbered and unnumbered legal text +tests +clause-engine
+(A) Implement unit tests for finding deduplication by overlapping evidence spans +tests +orchestrator
+(A) Implement integration test for full flow from upload to findings retrieval +tests +e2e
+(A) Implement integration test for extension submission endpoint using mocked DOM payloads +tests +extension
+(A) Implement integration test for desktop screenshot OCR ingestion endpoint +tests +desktop
+(B) Implement comparison mode endpoint that runs two provider stacks and returns finding deltas +orchestrator +providers
+(B) Implement web UI toggle to compare outputs from two model providers in one review run +web +providers
+(B) Implement adaptive ranking model that boosts finding types frequently accepted by reviewer +feedback +ranking
+(B) Implement nightly feedback aggregation job that recalibrates severity thresholds per user +feedback +policy
+(B) Implement contract version diff engine that maps changed clauses between uploads +contracts +diff
+(B) Implement web diff UI showing resolved and newly introduced findings between versions +web +diff
+(B) Implement extension support for Gmail message body extraction when legal terms are detected +extension +ingest
+(B) Implement Google Docs extraction fallback via copy-to-clipboard content script strategy +extension +ingest
+(B) Implement desktop global hotkey to trigger screen capture review from any app +desktop +capture
+(B) Implement offline desktop queue that syncs pending scans when network reconnects +desktop +sync
+(B) Implement multi-language prompt routing using detected language to choose localized templates +agents +prompts
+(B) Implement optional human escalation queue for findings below confidence threshold +review-workflow
+(B) Implement clause-library retrieval module for reusable fallback language snippets +redline +library
+(B) Implement semantic search endpoint over clause embeddings for precedent lookup +search +embeddings
+(B) Implement bulk review endpoint for multiple contracts with per-item progress tracking +api +orchestrator
+(B) Implement web bulk upload and bulk review launcher with batched polling +web +upload
+(B) Implement extension policy profile quick switcher for personal vs strict review modes +extension +policy
+(B) Implement desktop side-by-side original text and suggested redline editor +desktop +redline
+(B) Implement review export endpoint generating JSON artifact with findings and evidence +api +export
+(B) Implement desktop and web download action for exported review artifacts +web +desktop +export
