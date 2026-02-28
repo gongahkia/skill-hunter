@@ -91,6 +91,37 @@ const FINDING_RULES: FindingRule[] = [
   }
 ];
 
+const REDLINE_TEMPLATES_BY_RULE: Record<string, string> = {
+  arbitration:
+    "Any dispute may be brought in a court of competent jurisdiction, and mandatory pre-dispute arbitration is excluded unless both parties agree in writing after a dispute arises.",
+  "class-action-waiver":
+    "No class-action waiver applies; each party preserves the right to pursue collective claims where permitted by law.",
+  indemnity:
+    "Each party indemnifies the other only for third-party claims caused by its own negligence, willful misconduct, or material breach, subject to prompt notice and defense control rights.",
+  "liability-cap":
+    "Liability is limited only for indirect damages; direct damages, confidentiality breaches, and willful misconduct remain fully recoverable.",
+  "auto-renewal":
+    "Term renews only with explicit written opt-in at least 30 days before expiry; absent opt-in, the agreement terminates at the end of the current term.",
+  "governing-law":
+    "This agreement is governed by mutually agreed law, with non-exclusive jurisdiction where both parties can reasonably appear."
+};
+
+function buildSuggestedRedlineDraft(finding: DesktopFinding) {
+  const template = REDLINE_TEMPLATES_BY_RULE[finding.ruleId];
+  if (template) {
+    return template;
+  }
+
+  return `Rewrite the highlighted clause in concrete terms, define objective thresholds, and preserve statutory rights.`;
+}
+
+function buildRedlineOriginalContext(text: string, finding: DesktopFinding) {
+  const contextPadding = 160;
+  const contextStart = Math.max(0, finding.startOffset - contextPadding);
+  const contextEnd = Math.min(text.length, finding.endOffset + contextPadding);
+  return text.slice(contextStart, contextEnd).trim();
+}
+
 function buildFindingsFromText(text: string) {
   const findings: DesktopFinding[] = [];
 
@@ -197,6 +228,9 @@ export function App() {
   const [isSyncingPendingQueue, setIsSyncingPendingQueue] = useState(false);
   const [pendingQueueError, setPendingQueueError] = useState<string | null>(null);
   const [pendingQueueStatus, setPendingQueueStatus] = useState<string | null>(null);
+  const [redlineDrafts, setRedlineDrafts] = useState<Record<string, string>>({});
+  const [redlineError, setRedlineError] = useState<string | null>(null);
+  const [redlineStatus, setRedlineStatus] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -249,6 +283,18 @@ export function App() {
       setActiveFindingId(activeFinding.id);
     }
   }, [activeFinding, activeFindingId]);
+
+  useEffect(() => {
+    setRedlineDrafts((current) => {
+      const next: Record<string, string> = {};
+
+      for (const finding of findings) {
+        next[finding.id] = current[finding.id] ?? buildSuggestedRedlineDraft(finding);
+      }
+
+      return next;
+    });
+  }, [findings]);
 
   const syncPendingQueue = useCallback(
     async (origin: "manual" | "online" | "auth") => {
@@ -542,6 +588,8 @@ export function App() {
 
       setOcrText(extractedText);
       setSeverityFilter("all");
+      setRedlineError(null);
+      setRedlineStatus(null);
       const submissionTitle = `Screen capture ${new Date().toISOString()}`;
       if (!window.navigator.onLine) {
         queuePendingScan(
@@ -608,6 +656,58 @@ export function App() {
     setActiveFindingId(filteredFindings[nextIndex]?.id ?? null);
   }
 
+  function handleResetActiveRedlineDraft() {
+    if (!activeFinding) {
+      setRedlineError("NO_ACTIVE_FINDING");
+      return;
+    }
+
+    setRedlineDrafts((current) => ({
+      ...current,
+      [activeFinding.id]: buildSuggestedRedlineDraft(activeFinding)
+    }));
+    setRedlineError(null);
+    setRedlineStatus("Reset suggested redline to default template.");
+  }
+
+  function handleApplyActiveRedlineDraft() {
+    if (!activeFinding) {
+      setRedlineError("NO_ACTIVE_FINDING");
+      return;
+    }
+
+    const redlineDraft = (redlineDrafts[activeFinding.id] ?? "").trim();
+    if (!redlineDraft) {
+      setRedlineError("REDLINE_DRAFT_EMPTY");
+      return;
+    }
+
+    if (
+      activeFinding.startOffset < 0 ||
+      activeFinding.endOffset > ocrText.length ||
+      activeFinding.startOffset >= activeFinding.endOffset
+    ) {
+      setRedlineError("REDLINE_OFFSET_INVALID");
+      return;
+    }
+
+    setOcrText((currentText) => {
+      if (
+        activeFinding.startOffset < 0 ||
+        activeFinding.endOffset > currentText.length ||
+        activeFinding.startOffset >= activeFinding.endOffset
+      ) {
+        return currentText;
+      }
+
+      return `${currentText.slice(0, activeFinding.startOffset)}${redlineDraft}${currentText.slice(
+        activeFinding.endOffset
+      )}`;
+    });
+    setRedlineError(null);
+    setRedlineStatus("Applied suggested redline to the review text.");
+  }
+
   async function handleQuickClipboardReview() {
     if (!tokens?.accessToken) {
       setClipboardError("AUTH_REQUIRED");
@@ -627,6 +727,8 @@ export function App() {
 
       setOcrText(clipboardText);
       setSeverityFilter("all");
+      setRedlineError(null);
+      setRedlineStatus(null);
       const submissionTitle = `Clipboard capture ${new Date().toISOString()}`;
       if (!window.navigator.onLine) {
         queuePendingScan(
@@ -684,6 +786,10 @@ export function App() {
         after: ocrText.slice(activeFinding.endOffset, Math.min(ocrText.length, activeFinding.endOffset + 120))
       }
     : null;
+  const activeRedlineOriginalText =
+    activeFinding && ocrText ? buildRedlineOriginalContext(ocrText, activeFinding) : "";
+  const activeRedlineDraft =
+    activeFinding ? redlineDrafts[activeFinding.id] ?? buildSuggestedRedlineDraft(activeFinding) : "";
 
   return (
     <main className="app-shell">
@@ -966,24 +1072,69 @@ export function App() {
             </ul>
 
             {activeFinding && activeEvidenceWindow ? (
-              <aside className="evidence-panel">
-                <div className="evidence-nav">
-                  <button onClick={() => navigateEvidence("prev")} type="button">
-                    Previous Evidence
-                  </button>
-                  <button onClick={() => navigateEvidence("next")} type="button">
-                    Next Evidence
-                  </button>
-                </div>
-                <p className="finding-meta">
-                  Evidence for {activeFinding.title} ({activeFinding.severity.toUpperCase()})
-                </p>
-                <p className="evidence-text">
-                  {activeEvidenceWindow.before}
-                  <mark>{activeEvidenceWindow.highlighted}</mark>
-                  {activeEvidenceWindow.after}
-                </p>
-              </aside>
+              <div className="review-detail-stack">
+                <aside className="evidence-panel">
+                  <div className="evidence-nav">
+                    <button onClick={() => navigateEvidence("prev")} type="button">
+                      Previous Evidence
+                    </button>
+                    <button onClick={() => navigateEvidence("next")} type="button">
+                      Next Evidence
+                    </button>
+                  </div>
+                  <p className="finding-meta">
+                    Evidence for {activeFinding.title} ({activeFinding.severity.toUpperCase()})
+                  </p>
+                  <p className="evidence-text">
+                    {activeEvidenceWindow.before}
+                    <mark>{activeEvidenceWindow.highlighted}</mark>
+                    {activeEvidenceWindow.after}
+                  </p>
+                </aside>
+
+                <aside className="redline-editor-panel">
+                  <div className="redline-toolbar">
+                    <p className="finding-meta">
+                      Suggested redline for offsets {activeFinding.startOffset}-{activeFinding.endOffset}
+                    </p>
+                    <div className="evidence-nav">
+                      <button onClick={handleResetActiveRedlineDraft} type="button">
+                        Reset Draft
+                      </button>
+                      <button onClick={handleApplyActiveRedlineDraft} type="button">
+                        Apply to Review Text
+                      </button>
+                    </div>
+                  </div>
+                  {redlineError ? <p className="message message-error">{redlineError}</p> : null}
+                  {redlineStatus ? <p className="message message-success">{redlineStatus}</p> : null}
+                  <div className="redline-columns">
+                    <label className="field">
+                      Original Text
+                      <textarea
+                        className="redline-textarea"
+                        readOnly
+                        value={activeRedlineOriginalText}
+                      />
+                    </label>
+                    <label className="field">
+                      Suggested Redline
+                      <textarea
+                        className="redline-textarea"
+                        onChange={(event) => {
+                          setRedlineDrafts((current) => ({
+                            ...current,
+                            [activeFinding.id]: event.target.value
+                          }));
+                          setRedlineError(null);
+                          setRedlineStatus(null);
+                        }}
+                        value={activeRedlineDraft}
+                      />
+                    </label>
+                  </div>
+                </aside>
+              </div>
             ) : null}
           </div>
         ) : (

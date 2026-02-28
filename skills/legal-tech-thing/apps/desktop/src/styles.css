@@ -73,7 +73,8 @@ body {
   font-size: 0.9rem;
 }
 
-input {
+input,
+textarea {
   font: inherit;
   border: 1px solid #cbd5e1;
   border-radius: 0.35rem;
@@ -207,6 +208,8 @@ button:disabled {
 .findings-card {
   display: grid;
   gap: 0.7rem;
+  max-width: min(1200px, 100%);
+  width: 100%;
 }
 
 .finding-filter-row {
@@ -234,6 +237,13 @@ button:disabled {
 .findings-layout {
   display: grid;
   gap: 0.8rem;
+}
+
+@media (min-width: 960px) {
+  .findings-layout {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    align-items: start;
+  }
 }
 
 .findings-list {
@@ -297,4 +307,45 @@ button:disabled {
   margin: 0;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.review-detail-stack {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.redline-editor-panel {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.redline-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.redline-columns {
+  display: grid;
+  gap: 0.6rem;
+}
+
+@media (min-width: 1120px) {
+  .redline-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.redline-textarea {
+  width: 100%;
+  min-height: 170px;
+  resize: vertical;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
