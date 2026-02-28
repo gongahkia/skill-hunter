@@ -7,6 +7,8 @@ import {
   setStoredAuthTokens,
   type AuthTokens
 } from "./auth/token-store";
+import { submitDesktopOcrContractSource } from "./contracts/api";
+import { extractTextFromCapturedImage } from "./ocr/pipeline";
 
 function formatTokenPreview(token: string) {
   if (token.length <= 16) {
@@ -38,6 +40,11 @@ export function App() {
     height: number;
   } | null>(null);
   const [regionCaptureDataUrl, setRegionCaptureDataUrl] = useState<string | null>(null);
+  const [isRunningOcr, setIsRunningOcr] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<number | null>(null);
+  const [ocrText, setOcrText] = useState("");
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const [ocrStatus, setOcrStatus] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -148,6 +155,9 @@ export function App() {
       setCapturedScreen(screenshot);
       setSelectionRect(null);
       setRegionCaptureDataUrl(null);
+      setOcrText("");
+      setOcrError(null);
+      setOcrStatus(null);
     } catch (error) {
       setCaptureError(error instanceof Error ? error.message : "SCREEN_CAPTURE_FAILED");
     } finally {
@@ -195,6 +205,50 @@ export function App() {
       setCaptureError(null);
     } catch (error) {
       setCaptureError(error instanceof Error ? error.message : "SCREEN_REGION_CAPTURE_FAILED");
+    }
+  }
+
+  async function handleRunOcrPipeline() {
+    if (!tokens?.accessToken) {
+      setOcrError("AUTH_REQUIRED");
+      setOcrStatus(null);
+      return;
+    }
+
+    if (!regionCaptureDataUrl) {
+      setOcrError("CAPTURE_REGION_REQUIRED");
+      setOcrStatus(null);
+      return;
+    }
+
+    setIsRunningOcr(true);
+    setOcrProgress(0);
+    setOcrError(null);
+    setOcrStatus(null);
+
+    try {
+      const extractedText = await extractTextFromCapturedImage(regionCaptureDataUrl, setOcrProgress);
+      if (!extractedText.trim()) {
+        throw new Error("OCR_TEXT_EMPTY");
+      }
+
+      setOcrText(extractedText);
+      const submission = await submitDesktopOcrContractSource(
+        {
+          title: `Screen capture ${new Date().toISOString()}`,
+          content: extractedText
+        },
+        tokens.accessToken
+      );
+
+      setOcrStatus(
+        `OCR complete. Submitted contract ${submission.contractId} and queued version ${submission.contractVersionId}.`
+      );
+    } catch (error) {
+      setOcrError(error instanceof Error ? error.message : "OCR_PIPELINE_FAILED");
+    } finally {
+      setIsRunningOcr(false);
+      setOcrProgress(null);
     }
   }
 
@@ -375,11 +429,25 @@ export function App() {
         ) : null}
 
         {regionCaptureDataUrl ? (
-          <img
-            alt="Selected region capture"
-            className="capture-region-preview"
-            src={regionCaptureDataUrl}
-          />
+          <>
+            <img
+              alt="Selected region capture"
+              className="capture-region-preview"
+              src={regionCaptureDataUrl}
+            />
+            <button
+              disabled={isRunningOcr || !isAuthenticated}
+              onClick={() => void handleRunOcrPipeline()}
+              type="button"
+            >
+              {isRunningOcr
+                ? `Running OCR${ocrProgress !== null ? ` (${ocrProgress}%)` : ""}...`
+                : "Run OCR + Submit for Review"}
+            </button>
+            {ocrError ? <p className="message message-error">{ocrError}</p> : null}
+            {ocrStatus ? <p className="message message-success">{ocrStatus}</p> : null}
+            {ocrText ? <pre className="import-preview">{ocrText}</pre> : null}
+          </>
         ) : null}
       </section>
     </main>
