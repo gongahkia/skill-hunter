@@ -2,6 +2,7 @@ import {
   contractFindingsQuerySchema,
   contractIdParamsSchema,
   contractSourceDownloadQuerySchema,
+  contractVersionDiffQuerySchema,
   createContractBodySchema,
   createUploadUrlBodySchema,
   ingestContractBodySchema
@@ -16,6 +17,8 @@ import {
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import type { FastifyPluginAsync } from "fastify";
+
+import { diffContractVersions } from "../modules/contracts/version-diff";
 
 function toFindingSeverity(value: string | undefined) {
   if (value === "critical") {
@@ -409,6 +412,102 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         contractVersionId: contractVersion.id,
         downloadUrl: download.downloadUrl,
         expiresInSeconds: download.expiresInSeconds
+      });
+    });
+  
+  app.get(
+    "/:id/versions/diff",
+    {
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema,
+          query: contractVersionDiffQuerySchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
+    },
+    async (request, reply) => {
+      const query = request.validated.query as {
+        fromVersionId?: string;
+        toVersionId?: string;
+      };
+      const contract = request.contractAccess;
+
+      if (!contract) {
+        return reply.status(404).send({
+          error: "CONTRACT_NOT_FOUND"
+        });
+      }
+
+      const hasExplicitFromVersion = Boolean(query.fromVersionId);
+      const hasExplicitToVersion = Boolean(query.toVersionId);
+      if (hasExplicitFromVersion !== hasExplicitToVersion) {
+        return reply.status(400).send({
+          error: "CONTRACT_VERSION_DIFF_BOTH_IDS_REQUIRED"
+        });
+      }
+
+      const versions = await app.prisma.contractVersion.findMany({
+        where: {
+          contractId: contract.id
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        select: {
+          id: true,
+          createdAt: true,
+          clauses: {
+            orderBy: {
+              startOffset: "asc"
+            },
+            select: {
+              id: true,
+              type: true,
+              normalizedText: true,
+              startOffset: true,
+              endOffset: true
+            }
+          }
+        }
+      });
+
+      const versionsById = new Map(versions.map((version) => [version.id, version]));
+      const isExplicitSelection = hasExplicitFromVersion && hasExplicitToVersion;
+      const fromVersion = query.fromVersionId
+        ? versionsById.get(query.fromVersionId) ?? null
+        : versions[1] ?? null;
+      const toVersion = query.toVersionId
+        ? versionsById.get(query.toVersionId) ?? null
+        : versions[0] ?? null;
+
+      if (!fromVersion || !toVersion) {
+        return reply.status(isExplicitSelection ? 404 : 400).send({
+          error: isExplicitSelection
+            ? "CONTRACT_VERSION_NOT_FOUND"
+            : "CONTRACT_VERSION_DIFF_REQUIRES_TWO_VERSIONS"
+        });
+      }
+
+      if (fromVersion.id === toVersion.id) {
+        return reply.status(400).send({
+          error: "CONTRACT_VERSION_DIFF_IDENTICAL_VERSIONS"
+        });
+      }
+
+      const diff = diffContractVersions(fromVersion.clauses, toVersion.clauses);
+
+      return reply.status(200).send({
+        contractId: contract.id,
+        fromVersion: {
+          id: fromVersion.id,
+          createdAt: fromVersion.createdAt
+        },
+        toVersion: {
+          id: toVersion.id,
+          createdAt: toVersion.createdAt
+        },
+        diff
       });
     });
   
