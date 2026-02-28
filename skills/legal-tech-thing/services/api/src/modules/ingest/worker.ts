@@ -1,5 +1,6 @@
 import { ContractProcessingStatus, PrismaClient } from "@prisma/client";
 
+import { detectContractLanguage } from "./language";
 import { parseContractByMimeType } from "./parser-router";
 import type { ContractIngestionJobPayload } from "./types";
 
@@ -18,7 +19,16 @@ export async function processContractIngestionJob(
   });
 
   // Source retrieval is wired in a subsequent task; parser routing is available now.
-  await parseContractByMimeType(payload.mimeType, Buffer.from(""));
+  const parsedDocument = await parseContractByMimeType(payload.mimeType, Buffer.from(""));
+  const detectedLanguage = detectContractLanguage(parsedDocument.text);
+
+  console.log("Detected contract language", {
+    contractId: payload.contractId,
+    contractVersionId: payload.contractVersionId,
+    iso6393: detectedLanguage.iso6393,
+    iso6391: detectedLanguage.iso6391,
+    languageName: detectedLanguage.languageName
+  });
 
   await prisma.contract.update({
     where: {
