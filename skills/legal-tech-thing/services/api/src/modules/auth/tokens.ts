@@ -10,12 +10,34 @@ type AccessTokenClaims = {
   sid: string;
 };
 
+type RefreshTokenBundleOptions = {
+  tokenFamilyId?: string;
+};
+
 function getAccessTokenSecret(): Uint8Array {
   const secret =
     process.env.JWT_ACCESS_SECRET ??
     "dev_only_access_secret_change_me_before_production_32_chars";
 
   return new TextEncoder().encode(secret);
+}
+
+function getRefreshTtlDays() {
+  return Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? DEFAULT_REFRESH_TOKEN_TTL_DAYS);
+}
+
+export function hashRefreshToken(refreshToken: string) {
+  return createHash("sha256").update(refreshToken).digest("hex");
+}
+
+export function parseRefreshTokenSessionId(refreshToken: string) {
+  const [sessionId] = refreshToken.split(".");
+
+  if (!sessionId) {
+    return null;
+  }
+
+  return sessionId;
 }
 
 export async function signAccessToken(claims: AccessTokenClaims) {
@@ -29,18 +51,15 @@ export async function signAccessToken(claims: AccessTokenClaims) {
     .sign(getAccessTokenSecret());
 }
 
-export function buildRefreshTokenBundle() {
+export function buildRefreshTokenBundle(options: RefreshTokenBundleOptions = {}) {
   const sessionId = randomUUID();
-  const tokenFamilyId = randomUUID();
+  const tokenFamilyId = options.tokenFamilyId ?? randomUUID();
   const tokenSecret = randomBytes(48).toString("base64url");
   const refreshToken = `${sessionId}.${tokenSecret}`;
-  const refreshTokenHash = createHash("sha256").update(refreshToken).digest("hex");
-  const refreshTtlDays = Number(
-    process.env.REFRESH_TOKEN_TTL_DAYS ?? DEFAULT_REFRESH_TOKEN_TTL_DAYS
-  );
+  const refreshTokenHash = hashRefreshToken(refreshToken);
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + refreshTtlDays);
+  expiresAt.setDate(expiresAt.getDate() + getRefreshTtlDays());
 
   return {
     sessionId,
