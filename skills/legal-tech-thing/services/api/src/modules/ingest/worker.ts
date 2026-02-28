@@ -6,6 +6,10 @@ import { segmentContractClauses } from "./clause-segmentation";
 import { detectContractLanguage } from "./language";
 import { parseContractByMimeType } from "./parser-router";
 import type { ContractIngestionJobPayload } from "./types";
+import {
+  closeEmbeddingsQueue,
+  enqueueClauseEmbeddingJob
+} from "../embeddings/queue";
 
 const prisma = new PrismaClient();
 const parserConfidenceByParser = {
@@ -63,6 +67,9 @@ export async function processContractIngestionJob(
       });
     }
   });
+  await enqueueClauseEmbeddingJob({
+    contractVersionId: payload.contractVersionId
+  });
 
   console.log("Detected contract language", {
     contractId: payload.contractId,
@@ -97,5 +104,6 @@ export async function failContractIngestionJob(contractId: string) {
 }
 
 export async function closeIngestionWorkerResources() {
+  await closeEmbeddingsQueue();
   await prisma.$disconnect();
 }

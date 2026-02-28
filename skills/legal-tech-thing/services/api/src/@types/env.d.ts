@@ -16,6 +16,12 @@ declare global {
       JWT_ACCESS_SECRET?: string;
       ACCESS_TOKEN_TTL?: string;
       REFRESH_TOKEN_TTL_DAYS?: string;
+      EMBEDDING_PROVIDER?: string;
+      OPENAI_API_KEY?: string;
+      OPENAI_BASE_URL?: string;
+      OPENAI_EMBEDDING_MODEL?: string;
+      OLLAMA_BASE_URL?: string;
+      OLLAMA_EMBEDDING_MODEL?: string;
     }
   }
 }
