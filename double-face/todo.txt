@@ -1,5 +1,0 @@
-(B) Implement extension policy profile quick switcher for personal vs strict review modes +extension +policy
-(B) Implement desktop side-by-side original text and suggested redline editor +desktop +redline
-(B) Implement review export endpoint generating JSON artifact with findings and evidence +api +export
-(B) Implement desktop and web download action for exported review artifacts +web +desktop +export
-(B) Combine this with skill-hunter repo one directory out, clarify with me how i'd like to combine them before doing it
