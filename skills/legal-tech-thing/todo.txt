@@ -1,4 +1,3 @@
-(A) Add JWT auth middleware to protect all non-auth API routes +auth +api
 (A) Implement password strength validation with zxcvbn-style entropy threshold in registration flow +auth
 (A) Implement per-IP and per-email auth rate limiting with Redis counters +auth +security
 (A) Implement `POST /contracts` to create contract records and return upload instructions +api +contracts

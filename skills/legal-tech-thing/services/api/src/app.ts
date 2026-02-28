@@ -2,6 +2,7 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import Fastify from "fastify";
 
+import authGuardPlugin from "./plugins/auth-guard";
 import prismaPlugin from "./plugins/prisma";
 import redisPlugin from "./plugins/redis";
 import storagePlugin from "./plugins/storage";
@@ -22,6 +23,7 @@ export function buildApp() {
   app.register(prismaPlugin);
   app.register(redisPlugin);
   app.register(storagePlugin);
+  app.register(authGuardPlugin);
   app.register(registerRoutes);
 
   return app;
