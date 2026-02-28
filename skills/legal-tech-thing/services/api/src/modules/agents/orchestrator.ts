@@ -8,6 +8,7 @@ import {
   type AgentRuntimeOutput
 } from "./runtime";
 import { specialistAgents } from "./specialists";
+import { applySuggestedRedlines } from "../redline/generator";
 
 export type AgentRunResult = {
   agent: AgentName;
@@ -86,7 +87,8 @@ export async function runSpecialistAgentsForReview(
   });
 
   const adjudicatedFindings = adjudicateFindings(rawFindings);
-  const findings = scoreFindings(adjudicatedFindings, input.policyRules);
+  const scoredFindings = scoreFindings(adjudicatedFindings, input.policyRules);
+  const findings = applySuggestedRedlines(scoredFindings);
   const canonicalFindings = normalizeFindings(
     input.reviewRunId,
     input.contractVersionId,
