@@ -5,7 +5,12 @@ import {
   createReviewBodySchema,
   reviewIdParamsSchema
 } from "@legal-tech/shared-types";
-import { FindingStatus, LlmProvider, ReviewRunStatus } from "@prisma/client";
+import {
+  FindingSeverity,
+  FindingStatus,
+  LlmProvider,
+  ReviewRunStatus
+} from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
 
@@ -51,6 +56,21 @@ function getProgressFromStatus(status: ReviewRunStatus, metadata: Record<string,
 
   return 100;
 }
+
+const reviewExportSeverityBuckets: FindingSeverity[] = [
+  FindingSeverity.CRITICAL,
+  FindingSeverity.HIGH,
+  FindingSeverity.MEDIUM,
+  FindingSeverity.LOW,
+  FindingSeverity.INFO
+];
+
+const reviewExportStatusBuckets: FindingStatus[] = [
+  FindingStatus.OPEN,
+  FindingStatus.ACCEPTED,
+  FindingStatus.DISMISSED,
+  FindingStatus.NEEDS_EDIT
+];
 
 const defaultRiskThresholds = {
   criticalMinConfidence: 0.8,
@@ -213,6 +233,31 @@ async function getReviewRunForUser(
   userId: string
 ) {
   return app.rbac.getOwnedReviewRun(reviewRunId, userId);
+}
+
+function toReviewExportSummary(
+  findings: Array<{
+    severity: FindingSeverity;
+    status: FindingStatus;
+  }>
+) {
+  const bySeverity = Object.fromEntries(
+    reviewExportSeverityBuckets.map((severity) => [severity, 0])
+  ) as Record<FindingSeverity, number>;
+  const byStatus = Object.fromEntries(
+    reviewExportStatusBuckets.map((status) => [status, 0])
+  ) as Record<FindingStatus, number>;
+
+  for (const finding of findings) {
+    bySeverity[finding.severity] += 1;
+    byStatus[finding.status] += 1;
+  }
+
+  return {
+    totalFindings: findings.length,
+    bySeverity,
+    byStatus
+  };
 }
 
 const reviewRoutes: FastifyPluginAsync = async (app) => {
@@ -1047,6 +1092,105 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         minConfidence: escalationConfig.minConfidence,
         queuedCount: escalationItems.length,
         items: escalationItems
+      });
+    }
+  );
+
+  app.get(
+    "/:id/export",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: reviewIdParamsSchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+
+      const reviewRun = await getReviewRunForUser(
+        app,
+        params.id,
+        request.auth.userId
+      );
+
+      if (!reviewRun) {
+        return reply.status(404).send({
+          error: "REVIEW_RUN_NOT_FOUND"
+        });
+      }
+
+      const findings = await app.prisma.finding.findMany({
+        where: {
+          contractVersionId: reviewRun.contractVersionId
+        },
+        include: {
+          evidenceSpan: {
+            select: {
+              id: true,
+              startOffset: true,
+              endOffset: true,
+              excerpt: true,
+              pageNumber: true,
+              createdAt: true
+            }
+          }
+        },
+        orderBy: [
+          {
+            createdAt: "asc"
+          },
+          {
+            id: "asc"
+          }
+        ]
+      });
+
+      const exportedFindings = findings.map((finding) => ({
+        id: finding.id,
+        contractVersionId: finding.contractVersionId,
+        clauseId: finding.clauseId,
+        title: finding.title,
+        description: finding.description,
+        severity: finding.severity,
+        status: finding.status,
+        confidence: toConfidenceNumber(finding.confidence),
+        createdAt: finding.createdAt.toISOString(),
+        updatedAt: finding.updatedAt.toISOString(),
+        evidence: {
+          id: finding.evidenceSpan.id,
+          startOffset: finding.evidenceSpan.startOffset,
+          endOffset: finding.evidenceSpan.endOffset,
+          excerpt: finding.evidenceSpan.excerpt,
+          pageNumber: finding.evidenceSpan.pageNumber,
+          createdAt: finding.evidenceSpan.createdAt.toISOString()
+        }
+      }));
+
+      const artifact = {
+        schemaVersion: "1.0",
+        generatedAt: new Date().toISOString(),
+        reviewRun: {
+          id: reviewRun.id,
+          contractVersionId: reviewRun.contractVersionId,
+          profileId: reviewRun.profileId,
+          provider: reviewRun.provider,
+          providerModel: reviewRun.providerModel,
+          status: reviewRun.status,
+          startedAt: reviewRun.startedAt ? reviewRun.startedAt.toISOString() : null,
+          finishedAt: reviewRun.finishedAt ? reviewRun.finishedAt.toISOString() : null,
+          errorCode: reviewRun.errorCode,
+          errorMessage: reviewRun.errorMessage,
+          createdAt: reviewRun.createdAt.toISOString(),
+          updatedAt: reviewRun.updatedAt.toISOString()
+        },
+        summary: toReviewExportSummary(exportedFindings),
+        findings: exportedFindings
+      };
+
+      return reply.status(200).send({
+        fileName: `review-export-${reviewRun.id}.json`,
+        artifact
       });
     }
   );

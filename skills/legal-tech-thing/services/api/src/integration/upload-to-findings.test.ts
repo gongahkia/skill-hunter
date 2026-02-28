@@ -332,11 +332,44 @@ function createInMemoryPrisma(userId: string) {
 
         reviewRuns.push(reviewRun);
         return reviewRun;
+      },
+      async findFirst(args: {
+        where?: {
+          id?: string;
+          contractVersion?: {
+            contract?: {
+              ownerId?: string;
+            };
+          };
+        };
+      }) {
+        const where = args.where ?? {};
+
+        return (
+          reviewRuns.find((reviewRun) => {
+            if (where.id && reviewRun.id !== where.id) {
+              return false;
+            }
+
+            if (where.contractVersion?.contract?.ownerId) {
+              const version = versions.find((item) => item.id === reviewRun.contractVersionId);
+              const contract = version
+                ? contracts.find((item) => item.id === version.contractId)
+                : null;
+              if (!contract || contract.ownerId !== where.contractVersion.contract.ownerId) {
+                return false;
+              }
+            }
+
+            return true;
+          }) ?? null
+        );
       }
     },
     finding: {
       async findMany(args: {
         where?: {
+          contractVersionId?: string;
           contractVersion?: {
             contractId?: string;
           };
@@ -346,8 +379,13 @@ function createInMemoryPrisma(userId: string) {
       }) {
         const where = args.where ?? {};
         const contractIdFilter = where.contractVersion?.contractId;
+        const contractVersionIdFilter = where.contractVersionId;
 
         const filtered = findings.filter((finding) => {
+          if (contractVersionIdFilter && finding.contractVersionId !== contractVersionIdFilter) {
+            return false;
+          }
+
           if (contractIdFilter) {
             const version = versions.find((item) => item.id === finding.contractVersionId);
             if (!version || version.contractId !== contractIdFilter) {
@@ -583,6 +621,81 @@ describe("upload to findings integration flow", () => {
     assert.equal(findingsBody.items[0].severity, "HIGH");
     assert.equal(findingsBody.items[0].status, "OPEN");
     assert.equal(findingsBody.items[0].evidenceSpan?.excerpt, "Sample risky language excerpt.");
+  });
+
+  it("exports a review artifact containing findings and evidence payloads", async (t) => {
+    const app = await buildIntegrationApp();
+    t.after(async () => {
+      await app.close();
+    });
+
+    const createContractResponse = await app.inject({
+      method: "POST",
+      url: "/contracts",
+      payload: {
+        title: "Exportable Review Contract",
+        sourceType: "UPLOAD"
+      }
+    });
+    assert.equal(createContractResponse.statusCode, 201);
+    const contractId = createContractResponse.json().contract.id as string;
+
+    const uploadUrlResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/upload-url`,
+      payload: {
+        fileName: "exportable.txt",
+        mimeType: "text/plain",
+        contentLength: 160
+      }
+    });
+    assert.equal(uploadUrlResponse.statusCode, 200);
+    const uploadUrlBody = uploadUrlResponse.json();
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/ingest`,
+      payload: {
+        objectUri: uploadUrlBody.objectUri,
+        objectKey: uploadUrlBody.objectKey,
+        mimeType: "text/plain",
+        contentLength: 160,
+        checksum: "exportable-checksum"
+      }
+    });
+    assert.equal(ingestResponse.statusCode, 202);
+    const contractVersionId = ingestResponse.json().contractVersion.id as string;
+
+    const reviewResponse = await app.inject({
+      method: "POST",
+      url: "/reviews",
+      payload: {
+        contractVersionId
+      }
+    });
+    assert.equal(reviewResponse.statusCode, 202);
+    const reviewRunId = reviewResponse.json().reviewRun.id as string;
+
+    const exportResponse = await app.inject({
+      method: "GET",
+      url: `/reviews/${reviewRunId}/export`
+    });
+    assert.equal(exportResponse.statusCode, 200);
+    const exportBody = exportResponse.json();
+
+    assert.equal(exportBody.fileName, `review-export-${reviewRunId}.json`);
+    assert.equal(exportBody.artifact.reviewRun.id, reviewRunId);
+    assert.equal(exportBody.artifact.reviewRun.contractVersionId, contractVersionId);
+    assert.equal(exportBody.artifact.summary.totalFindings, 1);
+    assert.equal(exportBody.artifact.summary.bySeverity.HIGH, 1);
+    assert.equal(exportBody.artifact.summary.byStatus.OPEN, 1);
+    assert.equal(exportBody.artifact.findings.length, 1);
+    assert.equal(exportBody.artifact.findings[0].title, "Auto-generated risk finding");
+    assert.equal(
+      exportBody.artifact.findings[0].evidence.excerpt,
+      "Sample risky language excerpt."
+    );
+    assert.equal(typeof exportBody.artifact.findings[0].confidence, "number");
   });
 
   it("runs comparison mode across two providers and returns finding deltas", async (t) => {
