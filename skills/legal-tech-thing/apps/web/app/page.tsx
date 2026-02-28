@@ -158,8 +158,8 @@ export default function HomePage() {
     <main>
       <h1>Contracts Dashboard</h1>
       <p>
-        <Link href="/login">Login</Link> | <Link href="/register">Register</Link> |
-        <Link href="/logout"> Logout</Link>
+        <Link href="/login">Login</Link> | <Link href="/register">Register</Link> |{" "}
+        <Link href="/logout">Logout</Link> | <Link href="/policy">Policy</Link>
       </p>
 
       <section>
