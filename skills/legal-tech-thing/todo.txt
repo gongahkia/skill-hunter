@@ -1,4 +1,3 @@
-(A) Implement `ambiguity` agent that detects vague terms and undefined references +agents
 (A) Implement `compliance` agent that checks jurisdiction-sensitive language against policy rules +agents
 (A) Implement `cross-clause-conflict` agent that identifies contradictions across clause pairs +agents
 (A) Implement orchestration engine to run specialist agents in parallel per review job +orchestrator
