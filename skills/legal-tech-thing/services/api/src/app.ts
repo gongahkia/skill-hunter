@@ -4,6 +4,7 @@ import Fastify from "fastify";
 
 import prismaPlugin from "./plugins/prisma";
 import redisPlugin from "./plugins/redis";
+import storagePlugin from "./plugins/storage";
 import registerRoutes from "./routes";
 
 export function buildApp() {
@@ -20,6 +21,7 @@ export function buildApp() {
   });
   app.register(prismaPlugin);
   app.register(redisPlugin);
+  app.register(storagePlugin);
   app.register(registerRoutes);
 
   return app;

@@ -1,4 +1,3 @@
-(A) Create S3-compatible object storage client module for file binaries and artifacts +storage
 (A) Create `users` table with unique email, password hash, and created timestamps +db +auth
 (A) Create `sessions` table for refresh token tracking with token family rotation fields +db +auth
 (A) Create `contracts` table with source type, title, owner id, and processing status +db
