@@ -30,6 +30,7 @@ declare global {
       OLLAMA_BASE_URL?: string;
       OLLAMA_CHAT_MODEL?: string;
       OLLAMA_EMBEDDING_MODEL?: string;
+      INTERNAL_WEBHOOK_SECRET?: string;
     }
   }
 }

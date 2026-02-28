@@ -1,4 +1,3 @@
-(A) Implement webhook-safe job state updates from workers to API using signed internal tokens +queue +security
 (A) Implement server-sent events stream for real-time review progress updates +realtime +api
 (A) Scaffold `apps/web` with Next.js App Router and TypeScript +web
 (A) Implement web auth pages for register, login, logout, and token refresh bootstrapping +web +auth

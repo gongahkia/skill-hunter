@@ -10,13 +10,23 @@ const PUBLIC_PATHS = new Set([
   "/auth/logout"
 ]);
 
+function isPublicPath(url: string) {
+  const pathname = url.split("?")[0] ?? url;
+
+  if (PUBLIC_PATHS.has(pathname)) {
+    return true;
+  }
+
+  return pathname.startsWith("/internal/jobs/");
+}
+
 const authGuardPlugin = fp(async (app) => {
   app.addHook("preHandler", async (request, reply) => {
     if (request.method === "OPTIONS") {
       return;
     }
 
-    if (PUBLIC_PATHS.has(request.url)) {
+    if (isPublicPath(request.url)) {
       return;
     }
 
