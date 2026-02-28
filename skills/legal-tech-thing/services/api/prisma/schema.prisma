@@ -153,10 +153,23 @@ model Clause {
   createdAt         DateTime        @default(now()) @map("created_at")
   contractVersion   ContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
   findings          Finding[]
+  embedding         ClauseEmbedding?
 
   @@index([contractVersionId])
   @@index([type])
   @@map("clauses")
+}
+
+model ClauseEmbedding {
+  clauseId    String                @id @map("clause_id") @db.Uuid
+  provider    String
+  dimensions  Int
+  embedding   Unsupported("vector")
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+  clause      Clause                @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+
+  @@map("clause_embeddings")
 }
 
 model EvidenceSpan {

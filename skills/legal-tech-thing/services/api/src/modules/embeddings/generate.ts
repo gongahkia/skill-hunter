@@ -9,6 +9,49 @@ export type ClauseEmbeddingResult = {
   vector: number[];
 };
 
+function toVectorLiteral(vector: number[]) {
+  const normalized = vector.map((value) => {
+    if (!Number.isFinite(value)) {
+      throw new Error("INVALID_EMBEDDING_VALUE");
+    }
+
+    return value;
+  });
+
+  return `[${normalized.join(",")}]`;
+}
+
+async function upsertClauseEmbedding(
+  providerName: string,
+  embedding: ClauseEmbeddingResult
+) {
+  const vectorLiteral = toVectorLiteral(embedding.vector);
+
+  await prisma.$executeRawUnsafe(
+    `
+      INSERT INTO clause_embeddings (
+        clause_id,
+        provider,
+        dimensions,
+        embedding,
+        created_at,
+        updated_at
+      )
+      VALUES ($1, $2, $3, $4::vector, now(), now())
+      ON CONFLICT (clause_id) DO UPDATE
+      SET
+        provider = EXCLUDED.provider,
+        dimensions = EXCLUDED.dimensions,
+        embedding = EXCLUDED.embedding,
+        updated_at = now()
+    `,
+    embedding.clauseId,
+    providerName,
+    embedding.vector.length,
+    vectorLiteral
+  );
+}
+
 export async function generateClauseEmbeddings(contractVersionId: string) {
   const clauses = await prisma.clause.findMany({
     where: {
@@ -39,12 +82,18 @@ export async function generateClauseEmbeddings(contractVersionId: string) {
     throw new Error("EMBEDDING_VECTOR_COUNT_MISMATCH");
   }
 
+  const embeddings = clauses.map((clause, index) => ({
+    clauseId: clause.id,
+    vector: vectors[index] ?? []
+  }));
+
+  for (const embedding of embeddings) {
+    await upsertClauseEmbedding(provider.name, embedding);
+  }
+
   return {
     providerName: provider.name,
-    embeddings: clauses.map((clause, index) => ({
-      clauseId: clause.id,
-      vector: vectors[index] ?? []
-    }))
+    embeddings
   };
 }
 
