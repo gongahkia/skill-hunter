@@ -9,6 +9,7 @@ import type { FastifyPluginAsync } from "fastify";
 
 import { runSpecialistAgentsForReview } from "../modules/agents/orchestrator";
 import type { AgentName } from "../modules/agents/runtime";
+import { buildAdaptiveFindingTypeBoosts } from "../modules/feedback/adaptive-ranking";
 
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
@@ -295,6 +296,10 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
             error: "INVALID_SELECTED_AGENTS"
           });
         }
+        const adaptiveTypeBoosts = await buildAdaptiveFindingTypeBoosts(
+          app.prisma,
+          request.auth.userId
+        );
 
         const reviewRun = await app.prisma.reviewRun.create({
           data: {
@@ -305,7 +310,8 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
             status: ReviewRunStatus.QUEUED,
             orchestrationMeta: {
               selectedAgents,
-              progressPercent: 0
+              progressPercent: 0,
+              adaptiveTypeBoosts
             }
           },
           select: {
@@ -416,6 +422,10 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
           error: "COMPARISON_PROVIDERS_MUST_DIFFER"
         });
       }
+      const adaptiveTypeBoosts = await buildAdaptiveFindingTypeBoosts(
+        app.prisma,
+        request.auth.userId
+      );
 
       const clauses = await app.prisma.clause.findMany({
         where: {
@@ -482,14 +492,20 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
             ...runtimeInputBase,
             reviewRunId: randomUUID()
           },
-          selectedAgents
+          selectedAgents,
+          {
+            adaptiveTypeBoosts
+          }
         ),
         runSpecialistAgentsForReview(
           {
             ...runtimeInputBase,
             reviewRunId: randomUUID()
           },
-          selectedAgents
+          selectedAgents,
+          {
+            adaptiveTypeBoosts
+          }
         )
       ]);
 
@@ -593,6 +609,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
           comparisonModel: getProviderModel(comparisonProvider)
         },
         selectedAgents,
+        adaptiveTypeBoosts,
         counts: {
           primary: primaryResult.findings.length,
           comparison: comparisonResult.findings.length,

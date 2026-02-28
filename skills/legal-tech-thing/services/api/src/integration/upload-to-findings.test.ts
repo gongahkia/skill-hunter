@@ -373,6 +373,11 @@ function createInMemoryPrisma(userId: string) {
             evidenceSpan: evidenceSpans.find((span) => span.id === finding.evidenceSpanId) ?? null
           }));
       }
+    },
+    reviewFeedback: {
+      async findMany() {
+        return [];
+      }
     }
   };
 

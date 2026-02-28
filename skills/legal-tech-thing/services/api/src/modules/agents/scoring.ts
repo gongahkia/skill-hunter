@@ -8,6 +8,7 @@ const baseSeverityScore = {
   low: 25,
   info: 10
 } as const;
+type FindingType = AdjudicatedFinding["type"];
 
 function getPolicyWeight(
   finding: AdjudicatedFinding,
@@ -50,23 +51,26 @@ function getPolicyWeight(
 
 export function scoreFinding(
   finding: AdjudicatedFinding,
-  policyRules: AgentRuntimeInput["policyRules"]
+  policyRules: AgentRuntimeInput["policyRules"],
+  typeBoosts: Partial<Record<FindingType, number>> = {}
 ) {
   const severity = baseSeverityScore[finding.severity];
   const confidence = finding.confidence * 30;
   const policy = getPolicyWeight(finding, policyRules);
+  const adaptiveBoost = typeBoosts[finding.type] ?? 0;
 
-  return Math.round((severity + confidence + policy) * 100) / 100;
+  return Math.round((severity + confidence + policy + adaptiveBoost) * 100) / 100;
 }
 
 export function scoreFindings(
   findings: AdjudicatedFinding[],
-  policyRules: AgentRuntimeInput["policyRules"]
+  policyRules: AgentRuntimeInput["policyRules"],
+  typeBoosts: Partial<Record<FindingType, number>> = {}
 ) {
   return findings
     .map((finding) => ({
       ...finding,
-      severityScore: scoreFinding(finding, policyRules)
+      severityScore: scoreFinding(finding, policyRules, typeBoosts)
     }))
     .sort((left, right) => right.severityScore - left.severityScore);
 }

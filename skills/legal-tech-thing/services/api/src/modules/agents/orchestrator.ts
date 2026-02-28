@@ -30,6 +30,9 @@ export type OrchestrationResult = {
   >;
   canonicalFindings: CanonicalFinding[];
 };
+export type AdaptiveTypeBoosts = Partial<
+  Record<AgentRuntimeOutput["findings"][number]["type"], number>
+>;
 
 const defaultSpecialistAgentOrder: AgentName[] = [
   "risk-scanner",
@@ -51,7 +54,10 @@ function buildAgentRuntime() {
 
 export async function runSpecialistAgentsForReview(
   input: AgentRuntimeInput,
-  selectedAgents: AgentName[] = defaultSpecialistAgentOrder
+  selectedAgents: AgentName[] = defaultSpecialistAgentOrder,
+  options: {
+    adaptiveTypeBoosts?: AdaptiveTypeBoosts;
+  } = {}
 ): Promise<OrchestrationResult> {
   const runtime = buildAgentRuntime();
 
@@ -87,7 +93,11 @@ export async function runSpecialistAgentsForReview(
   });
 
   const adjudicatedFindings = adjudicateFindings(rawFindings);
-  const scoredFindings = scoreFindings(adjudicatedFindings, input.policyRules);
+  const scoredFindings = scoreFindings(
+    adjudicatedFindings,
+    input.policyRules,
+    options.adaptiveTypeBoosts
+  );
   const findings = applySuggestedRedlines(scoredFindings);
   const canonicalFindings = normalizeFindings(
     input.reviewRunId,
