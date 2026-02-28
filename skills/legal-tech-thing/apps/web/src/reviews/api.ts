@@ -57,6 +57,52 @@ type CreateReviewRunInput = {
   selectedAgents?: string[];
 };
 
+type CreateBulkReviewRunInput = {
+  contractVersionIds: string[];
+  profileId?: string;
+  provider?: PolicyProvider;
+  selectedAgents?: string[];
+};
+
+export type BulkReviewLaunchResponse = {
+  bulkReviewId: string;
+  createdAt: string;
+  queuedCount: number;
+  failedCount: number;
+  items: Array<{
+    contractVersionId: string;
+    reviewRunId: string | null;
+    queueJobId: string | number | null;
+    status: "queued" | "failed";
+    error: string | null;
+  }>;
+};
+
+export type BulkReviewProgressResponse = {
+  bulkReviewId: string;
+  createdAt: string;
+  summary: {
+    total: number;
+    queued: number;
+    running: number;
+    completed: number;
+    failed: number;
+    cancelled: number;
+  };
+  items: Array<{
+    contractVersionId: string;
+    reviewRunId: string | null;
+    status: ReviewRunStatus;
+    progressPercent: number;
+    provider: PolicyProvider | null;
+    providerModel: string | null;
+    errorCode: string | null;
+    errorMessage: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+  }>;
+};
+
 export type CompareReviewRunsResponse = {
   contractVersionId: string;
   providers: {
@@ -122,11 +168,22 @@ export async function createReviewRun(input: CreateReviewRunInput) {
   });
 }
 
+export async function createBulkReviewRun(input: CreateBulkReviewRunInput) {
+  return apiClient.request<BulkReviewLaunchResponse>("/reviews/bulk", {
+    method: "POST",
+    body: input
+  });
+}
+
 export async function compareReviewRuns(input: CompareReviewRunsInput) {
   return apiClient.request<CompareReviewRunsResponse>("/reviews/compare", {
     method: "POST",
     body: input
   });
+}
+
+export async function fetchBulkReviewProgress(bulkReviewId: string) {
+  return apiClient.request<BulkReviewProgressResponse>(`/reviews/bulk/${bulkReviewId}`);
 }
 
 export async function fetchReviewRun(reviewRunId: string) {
