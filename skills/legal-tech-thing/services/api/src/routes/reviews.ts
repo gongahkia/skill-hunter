@@ -1,17 +1,6 @@
+import { createReviewBodySchema, reviewIdParamsSchema } from "@legal-tech/shared-types";
 import { LlmProvider, ReviewRunStatus } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
-import { z } from "zod";
-
-const createReviewBodySchema = z.object({
-  contractVersionId: z.string().uuid(),
-  profileId: z.string().uuid().optional(),
-  provider: z.nativeEnum(LlmProvider).optional(),
-  selectedAgents: z.array(z.string().min(1)).min(1).optional()
-});
-
-const reviewIdParamsSchema = z.object({
-  id: z.string().uuid()
-});
 
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
@@ -87,28 +76,33 @@ async function getReviewRunForUser(
 }
 
 const reviewRoutes: FastifyPluginAsync = async (app) => {
-  app.post("/", async (request, reply) => {
-    const parseResult = createReviewBodySchema.safeParse(request.body);
+  app.post(
+    "/",
+    {
+      preHandler: app.buildValidationPreHandler({
+        body: createReviewBodySchema
+      })
+    },
+    async (request, reply) => {
+      const body = request.validated.body as {
+        contractVersionId: string;
+        profileId?: string;
+        provider?: LlmProvider;
+        selectedAgents?: string[];
+      };
 
-    if (!parseResult.success) {
-      return reply.status(400).send({
-        error: "VALIDATION_ERROR",
-        details: parseResult.error.flatten()
-      });
-    }
-
-    const contractVersion = await app.prisma.contractVersion.findFirst({
-      where: {
-        id: parseResult.data.contractVersionId,
-        contract: {
-          ownerId: request.auth.userId
+      const contractVersion = await app.prisma.contractVersion.findFirst({
+        where: {
+          id: body.contractVersionId,
+          contract: {
+            ownerId: request.auth.userId
+          }
+        },
+        select: {
+          id: true,
+          contractId: true
         }
-      },
-      select: {
-        id: true,
-        contractId: true
-      }
-    });
+      });
 
     if (!contractVersion) {
       return reply.status(404).send({
@@ -123,10 +117,10 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         }
       | null;
 
-    if (parseResult.data.profileId) {
+      if (body.profileId) {
       profile = await app.prisma.policyProfile.findFirst({
         where: {
-          id: parseResult.data.profileId,
+          id: body.profileId,
           userId: request.auth.userId
         },
         select: {
@@ -171,9 +165,9 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       }
     }
 
-    const provider = parseResult.data.provider ?? profile.defaultProvider;
+      const provider = body.provider ?? profile.defaultProvider;
     const providerModel = getProviderModel(provider);
-    const selectedAgents = parseResult.data.selectedAgents ?? [
+      const selectedAgents = body.selectedAgents ?? [
       "risk-scanner",
       "missing-clause",
       "ambiguity",
@@ -181,7 +175,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       "cross-clause-conflict"
     ];
 
-    const reviewRun = await app.prisma.reviewRun.create({
+      const reviewRun = await app.prisma.reviewRun.create({
       data: {
         contractVersionId: contractVersion.id,
         profileId: profile.id,
@@ -204,7 +198,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       }
     });
 
-    const queueJob = await app.queues.reviewRunQueue.add(
+      const queueJob = await app.queues.reviewRunQueue.add(
       `review-run:${reviewRun.id}`,
       {
         requestId: request.id,
@@ -219,26 +213,29 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       }
     );
 
-    return reply.status(202).send({
+      return reply.status(202).send({
       reviewRun,
       queued: true,
       queueJobId: queueJob.id
     });
-  });
-
-  app.get("/:id", async (request, reply) => {
-    const parseResult = reviewIdParamsSchema.safeParse(request.params);
-
-    if (!parseResult.success) {
-      return reply.status(400).send({
-        error: "VALIDATION_ERROR",
-        details: parseResult.error.flatten()
-      });
     }
+  );
 
-    const reviewRun = await getReviewRunForUser(
+  app.get(
+    "/:id",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: reviewIdParamsSchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+
+      const reviewRun = await getReviewRunForUser(
       app,
-      parseResult.data.id,
+      params.id,
       request.auth.userId
     );
 
@@ -251,7 +248,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
     const metadata = (reviewRun.orchestrationMeta ?? {}) as Record<string, unknown>;
     const progressPercent = getProgressFromStatus(reviewRun.status, metadata);
 
-    return reply.status(200).send({
+      return reply.status(200).send({
       reviewRun: {
         ...reviewRun,
         progressPercent,
@@ -261,21 +258,24 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         }
       }
     });
-  });
-
-  app.get("/:id/events", async (request, reply) => {
-    const parseResult = reviewIdParamsSchema.safeParse(request.params);
-
-    if (!parseResult.success) {
-      return reply.status(400).send({
-        error: "VALIDATION_ERROR",
-        details: parseResult.error.flatten()
-      });
     }
+  );
 
-    const reviewRun = await getReviewRunForUser(
+  app.get(
+    "/:id/events",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: reviewIdParamsSchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+
+      const reviewRun = await getReviewRunForUser(
       app,
-      parseResult.data.id,
+      params.id,
       request.auth.userId
     );
 
@@ -314,7 +314,7 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
     const pushReviewState = async () => {
       const nextRun = await getReviewRunForUser(
         app,
-        parseResult.data.id,
+        params.id,
         request.auth.userId
       );
 
@@ -351,7 +351,8 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       clearInterval(interval);
       reply.raw.end();
     });
-  });
+    }
+  );
 };
 
 export default reviewRoutes;

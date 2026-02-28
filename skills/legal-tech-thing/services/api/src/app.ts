@@ -9,6 +9,7 @@ import prismaPlugin from "./plugins/prisma";
 import queuesPlugin from "./plugins/queues";
 import redisPlugin from "./plugins/redis";
 import storagePlugin from "./plugins/storage";
+import validationPlugin from "./plugins/validation";
 import registerRoutes from "./routes";
 
 export function buildApp() {
@@ -44,6 +45,7 @@ export function buildApp() {
   app.register(storagePlugin);
   app.register(authGuardPlugin);
   app.register(errorEnvelopePlugin);
+  app.register(validationPlugin);
   app.register(registerRoutes);
 
   return app;

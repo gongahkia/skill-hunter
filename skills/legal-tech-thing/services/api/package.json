@@ -15,6 +15,7 @@
     "prisma:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma"
   },
   "dependencies": {
+    "@legal-tech/shared-types": "workspace:*",
     "@aws-sdk/client-s3": "^3.917.0",
     "@aws-sdk/s3-request-presigner": "^3.917.0",
     "@fastify/cors": "^11.1.0",

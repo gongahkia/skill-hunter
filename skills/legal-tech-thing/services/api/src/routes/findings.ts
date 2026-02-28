@@ -1,25 +1,12 @@
+import {
+  createFeedbackBodySchema,
+  findingIdParamsSchema,
+  updateFindingBodySchema
+} from "@legal-tech/shared-types";
 import { FeedbackAction, FindingSeverity, FindingStatus } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
-import { z } from "zod";
 
-const findingIdParamsSchema = z.object({
-  id: z.string().uuid()
-});
-
-const updateFindingBodySchema = z.object({
-  status: z.enum(["open", "accepted", "dismissed", "needs-edit"])
-});
-
-const createFeedbackBodySchema = z.object({
-  action: z.enum(["accepted", "dismissed", "edited"]).optional(),
-  rationale: z.string().min(1),
-  correctedSeverity: z
-    .enum(["critical", "high", "medium", "low", "info"])
-    .optional(),
-  correctedTitle: z.string().min(1).max(255).optional()
-});
-
-function toFindingStatus(status: z.infer<typeof updateFindingBodySchema>["status"]) {
+function toFindingStatus(status: "open" | "accepted" | "dismissed" | "needs-edit") {
   if (status === "open") {
     return FindingStatus.OPEN;
   }
@@ -68,33 +55,35 @@ function toFindingSeverity(value: "critical" | "high" | "medium" | "low" | "info
 }
 
 const findingRoutes: FastifyPluginAsync = async (app) => {
-  app.patch("/:id", async (request, reply) => {
-    const paramsResult = findingIdParamsSchema.safeParse(request.params);
-    const bodyResult = updateFindingBodySchema.safeParse(request.body);
+  app.patch(
+    "/:id",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: findingIdParamsSchema,
+        body: updateFindingBodySchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+      const body = request.validated.body as {
+        status: "open" | "accepted" | "dismissed" | "needs-edit";
+      };
 
-    if (!paramsResult.success || !bodyResult.success) {
-      return reply.status(400).send({
-        error: "VALIDATION_ERROR",
-        details: {
-          params: paramsResult.success ? null : paramsResult.error.flatten(),
-          body: bodyResult.success ? null : bodyResult.error.flatten()
+      const finding = await app.prisma.finding.findFirst({
+        where: {
+          id: params.id,
+          contractVersion: {
+            contract: {
+              ownerId: request.auth.userId
+            }
+          }
+        },
+        select: {
+          id: true
         }
       });
-    }
-
-    const finding = await app.prisma.finding.findFirst({
-      where: {
-        id: paramsResult.data.id,
-        contractVersion: {
-          contract: {
-            ownerId: request.auth.userId
-          }
-        }
-      },
-      select: {
-        id: true
-      }
-    });
 
     if (!finding) {
       return reply.status(404).send({
@@ -102,12 +91,12 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const updatedFinding = await app.prisma.finding.update({
+      const updatedFinding = await app.prisma.finding.update({
       where: {
         id: finding.id
       },
       data: {
-        status: toFindingStatus(bodyResult.data.status)
+          status: toFindingStatus(body.status)
       },
       include: {
         evidenceSpan: {
@@ -122,28 +111,34 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
       }
     });
 
-    return reply.status(200).send({
+      return reply.status(200).send({
       finding: updatedFinding
     });
-  });
-
-  app.post("/:id/feedback", async (request, reply) => {
-    const paramsResult = findingIdParamsSchema.safeParse(request.params);
-    const bodyResult = createFeedbackBodySchema.safeParse(request.body);
-
-    if (!paramsResult.success || !bodyResult.success) {
-      return reply.status(400).send({
-        error: "VALIDATION_ERROR",
-        details: {
-          params: paramsResult.success ? null : paramsResult.error.flatten(),
-          body: bodyResult.success ? null : bodyResult.error.flatten()
-        }
-      });
     }
+  );
 
-    const finding = await app.prisma.finding.findFirst({
+  app.post(
+    "/:id/feedback",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: findingIdParamsSchema,
+        body: createFeedbackBodySchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+      const body = request.validated.body as {
+        action?: "accepted" | "dismissed" | "edited";
+        rationale: string;
+        correctedSeverity?: "critical" | "high" | "medium" | "low" | "info";
+        correctedTitle?: string;
+      };
+
+      const finding = await app.prisma.finding.findFirst({
       where: {
-        id: paramsResult.data.id,
+          id: params.id,
         contractVersion: {
           contract: {
             ownerId: request.auth.userId
@@ -162,24 +157,24 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const inferredAction: "accepted" | "dismissed" | "edited" =
-      bodyResult.data.action ??
+      const inferredAction: "accepted" | "dismissed" | "edited" =
+        body.action ??
       (finding.status === FindingStatus.ACCEPTED
         ? "accepted"
         : finding.status === FindingStatus.DISMISSED
           ? "dismissed"
           : "edited");
 
-    const updatedFinding = await app.prisma.$transaction(async (tx) => {
+      const updatedFinding = await app.prisma.$transaction(async (tx) => {
       await tx.reviewFeedback.create({
         data: {
           findingId: finding.id,
           action: toFeedbackAction(inferredAction),
-          rationale: bodyResult.data.rationale,
-          correctedSeverity: bodyResult.data.correctedSeverity
-            ? toFindingSeverity(bodyResult.data.correctedSeverity)
+            rationale: body.rationale,
+          correctedSeverity: body.correctedSeverity
+            ? toFindingSeverity(body.correctedSeverity)
             : undefined,
-          correctedTitle: bodyResult.data.correctedTitle
+            correctedTitle: body.correctedTitle
         }
       });
 
@@ -194,11 +189,11 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
               : inferredAction === "dismissed"
                 ? FindingStatus.DISMISSED
                 : FindingStatus.NEEDS_EDIT,
-          ...(bodyResult.data.correctedSeverity
-            ? { severity: toFindingSeverity(bodyResult.data.correctedSeverity) }
+            ...(body.correctedSeverity
+            ? { severity: toFindingSeverity(body.correctedSeverity) }
             : {}),
-          ...(bodyResult.data.correctedTitle
-            ? { title: bodyResult.data.correctedTitle }
+            ...(body.correctedTitle
+            ? { title: body.correctedTitle }
             : {})
         },
         include: {
@@ -215,10 +210,11 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
       });
     });
 
-    return reply.status(201).send({
+      return reply.status(201).send({
       finding: updatedFinding
     });
-  });
+    }
+  );
 };
 
 export default findingRoutes;

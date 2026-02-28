@@ -108,6 +108,8 @@ importers:
         specifier: ^19.0.2
         version: 19.2.3(@types/react@19.2.14)
 
+  packages/client-sdk: {}
+
   packages/shared-types:
     dependencies:
       zod:
@@ -133,6 +135,9 @@ importers:
       '@fastify/helmet':
         specifier: ^13.0.2
         version: 13.0.2
+      '@legal-tech/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@prisma/client':
         specifier: ^6.16.3
         version: 6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3)
