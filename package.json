@@ -1,0 +1,11 @@
+{
+  "name": "skill-hunter-tooling",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "capture:demos": "node scripts/capture-demo-screenshots.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}
