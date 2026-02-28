@@ -304,6 +304,65 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
       rule: updatedRule
     });
   });
+
+  app.delete("/rules/:id", async (request, reply) => {
+    const paramsResult = policyRuleIdParamsSchema.safeParse(request.params);
+
+    if (!paramsResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: paramsResult.error.flatten()
+      });
+    }
+
+    const profile = await app.prisma.policyProfile.findFirst({
+      where: {
+        userId: request.auth.userId
+      },
+      orderBy: {
+        createdAt: "asc"
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!profile) {
+      return reply.status(404).send({
+        error: "POLICY_PROFILE_NOT_FOUND"
+      });
+    }
+
+    const existingRule = await app.prisma.policyRule.findFirst({
+      where: {
+        id: paramsResult.data.id,
+        profileId: profile.id
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!existingRule) {
+      return reply.status(404).send({
+        error: "POLICY_RULE_NOT_FOUND"
+      });
+    }
+
+    await app.prisma.policyRule.update({
+      where: {
+        id: existingRule.id
+      },
+      data: {
+        active: false,
+        version: {
+          increment: 1
+        }
+      }
+    });
+
+    return reply.status(204).send();
+  });
 };
 
 export default policyRoutes;
