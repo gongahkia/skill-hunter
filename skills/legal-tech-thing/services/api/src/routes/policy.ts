@@ -1,4 +1,4 @@
-import { LlmProvider } from "@prisma/client";
+import { ClauseType, LlmProvider } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 
@@ -23,6 +23,26 @@ const updatePolicyProfileBodySchema = z.object({
   enabledAgents: enabledAgentsSchema.optional()
 });
 
+const createPolicyRuleBodySchema = z
+  .object({
+    clauseRequirement: z.nativeEnum(ClauseType).optional(),
+    clauseSelector: z.string().min(1),
+    requiredPattern: z.string().min(1).optional(),
+    forbiddenPattern: z.string().min(1).optional(),
+    allowException: z.boolean().default(false),
+    active: z.boolean().default(true),
+    priority: z.number().int().positive().default(100)
+  })
+  .superRefine((value, ctx) => {
+    if (!value.requiredPattern && !value.forbiddenPattern) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Either requiredPattern or forbiddenPattern must be provided",
+        path: ["requiredPattern"]
+      });
+    }
+  });
+
 const defaultRiskThresholds = {
   criticalMinConfidence: 0.8,
   highMinConfidence: 0.7,
@@ -38,29 +58,35 @@ const defaultEnabledAgents = {
   crossClauseConflict: true
 };
 
+async function getOrCreatePolicyProfile(app: Parameters<FastifyPluginAsync>[0], userId: string) {
+  const existingProfile = await app.prisma.policyProfile.findFirst({
+    where: {
+      userId
+    },
+    orderBy: {
+      createdAt: "asc"
+    }
+  });
+
+  if (existingProfile) {
+    return existingProfile;
+  }
+
+  return app.prisma.policyProfile.create({
+    data: {
+      userId,
+      defaultProvider: LlmProvider.OPENAI,
+      riskThresholds: {
+        thresholds: defaultRiskThresholds,
+        enabledAgents: defaultEnabledAgents
+      }
+    }
+  });
+}
+
 const policyRoutes: FastifyPluginAsync = async (app) => {
   app.get("/profiles/me", async (request, reply) => {
-    let profile = await app.prisma.policyProfile.findFirst({
-      where: {
-        userId: request.auth.userId
-      },
-      orderBy: {
-        createdAt: "asc"
-      }
-    });
-
-    if (!profile) {
-      profile = await app.prisma.policyProfile.create({
-        data: {
-          userId: request.auth.userId,
-          defaultProvider: LlmProvider.OPENAI,
-          riskThresholds: {
-            thresholds: defaultRiskThresholds,
-            enabledAgents: defaultEnabledAgents
-          }
-        }
-      });
-    }
+    const profile = await getOrCreatePolicyProfile(app, request.auth.userId);
 
     return reply.status(200).send({
       profile
@@ -77,17 +103,10 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const currentProfile = await app.prisma.policyProfile.findFirst({
-      where: {
-        userId: request.auth.userId
-      },
-      orderBy: {
-        createdAt: "asc"
-      }
-    });
+    const currentProfile = await getOrCreatePolicyProfile(app, request.auth.userId);
 
     const existingRiskThresholds =
-      (currentProfile?.riskThresholds as Record<string, unknown> | null) ?? {};
+      (currentProfile.riskThresholds as Record<string, unknown> | null) ?? {};
 
     const nextRiskThresholds = {
       ...existingRiskThresholds,
@@ -103,31 +122,16 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
         : {})
     };
 
-    const profile = currentProfile
-      ? await app.prisma.policyProfile.update({
-          where: {
-            id: currentProfile.id
-          },
-          data: {
-            defaultProvider:
-              parseResult.data.defaultProvider ?? currentProfile.defaultProvider,
-            riskThresholds: nextRiskThresholds
-          }
-        })
-      : await app.prisma.policyProfile.create({
-          data: {
-            userId: request.auth.userId,
-            defaultProvider:
-              parseResult.data.defaultProvider ?? LlmProvider.OPENAI,
-            riskThresholds:
-              Object.keys(nextRiskThresholds).length > 0
-                ? nextRiskThresholds
-                : {
-                    thresholds: defaultRiskThresholds,
-                    enabledAgents: defaultEnabledAgents
-                  }
-          }
-        });
+    const profile = await app.prisma.policyProfile.update({
+      where: {
+        id: currentProfile.id
+      },
+      data: {
+        defaultProvider:
+          parseResult.data.defaultProvider ?? currentProfile.defaultProvider,
+        riskThresholds: nextRiskThresholds
+      }
+    });
 
     return reply.status(200).send({
       profile
@@ -163,6 +167,36 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
 
     return reply.status(200).send({
       items: rules
+    });
+  });
+
+  app.post("/rules", async (request, reply) => {
+    const parseResult = createPolicyRuleBodySchema.safeParse(request.body);
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: parseResult.error.flatten()
+      });
+    }
+
+    const profile = await getOrCreatePolicyProfile(app, request.auth.userId);
+
+    const createdRule = await app.prisma.policyRule.create({
+      data: {
+        profileId: profile.id,
+        clauseRequirement: parseResult.data.clauseRequirement,
+        clauseSelector: parseResult.data.clauseSelector,
+        requiredPattern: parseResult.data.requiredPattern,
+        forbiddenPattern: parseResult.data.forbiddenPattern,
+        allowException: parseResult.data.allowException,
+        active: parseResult.data.active,
+        priority: parseResult.data.priority
+      }
+    });
+
+    return reply.status(201).send({
+      rule: createdRule
     });
   });
 };
