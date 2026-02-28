@@ -1,0 +1,1 @@
+combine all existing functionality from legal-tech-thing under this repo to make skill-hunter a new monorepo and rebrand it as such, change README.md and description as necessary
