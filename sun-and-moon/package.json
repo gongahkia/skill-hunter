@@ -1,0 +1,12 @@
+{
+  "name": "sun-and-moon",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:api": "pnpm -C api dev",
+    "dev:web": "pnpm -C web dev",
+    "build": "pnpm -C api build",
+    "test": "pnpm -C api test",
+    "worker": "pnpm -C worker-timeline run run"
+  }
+}

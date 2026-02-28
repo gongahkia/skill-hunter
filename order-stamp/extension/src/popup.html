@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>order-stamp</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>order-stamp</h1>
+      <label>
+        Detector API URL
+        <input id="apiUrl" value="http://127.0.0.1:4012" />
+      </label>
+      <button id="scanBtn">Scan Active Tab</button>
+      <button id="clearBtn">Clear Highlight</button>
+      <p id="summary"></p>
+      <ul id="findings"></ul>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

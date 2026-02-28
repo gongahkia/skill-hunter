@@ -1,0 +1,11 @@
+{
+  "name": "order-stamp-extension",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "echo 'Load unpacked extension from this folder'",
+    "dev": "echo 'Edit extension files and reload in browser'",
+    "lint": "echo 'No lint configured'",
+    "test": "echo 'No tests configured'"
+  }
+}

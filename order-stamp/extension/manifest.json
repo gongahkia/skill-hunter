@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "order-stamp",
+  "version": "0.1.0",
+  "description": "Detect adversarial legal clauses on the active page.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_title": "order-stamp",
+    "default_popup": "src/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

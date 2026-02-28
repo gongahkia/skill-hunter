@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sun-and-moon</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>sun-and-moon</h1>
+      <p>Case chronology builder.</p>
+
+      <section>
+        <h2>API</h2>
+        <label>
+          API Base URL
+          <input id="apiBase" value="http://127.0.0.1:4013" />
+        </label>
+      </section>
+
+      <section>
+        <h2>Create Case</h2>
+        <label>Name <input id="caseName" /></label>
+        <label>Jurisdiction <input id="jurisdiction" /></label>
+        <label>Owner <input id="owner" /></label>
+        <button id="createCaseBtn">Create Case</button>
+      </section>
+
+      <section>
+        <h2>Cases</h2>
+        <button id="refreshCasesBtn">Refresh Cases</button>
+        <select id="caseSelect"></select>
+      </section>
+
+      <section>
+        <h2>Add Event</h2>
+        <label>Event Type
+          <select id="eventType">
+            <option value="fact">fact</option>
+            <option value="evidence">evidence</option>
+            <option value="filing">filing</option>
+            <option value="communication">communication</option>
+            <option value="hearing">hearing</option>
+          </select>
+        </label>
+        <label>Title <input id="eventTitle" /></label>
+        <label>Description <textarea id="eventDescription"></textarea></label>
+        <label>Event Date (ISO8601) <input id="eventDate" placeholder="2026-03-01T00:00:00.000Z" /></label>
+        <label>Source Ref <input id="sourceRef" /></label>
+        <label>Citation <input id="citation" /></label>
+        <label>Tags (comma-separated) <input id="tags" placeholder="termination,renewal" /></label>
+        <button id="addEventBtn">Add Event</button>
+      </section>
+
+      <section>
+        <h2>Chronology</h2>
+        <button id="loadChronologyBtn">Load Chronology</button>
+        <pre id="output"></pre>
+      </section>
+    </main>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

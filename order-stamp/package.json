@@ -1,0 +1,11 @@
+{
+  "name": "order-stamp",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:api": "pnpm -C api dev",
+    "build": "pnpm -C api build",
+    "test": "pnpm -C api test",
+    "worker": "pnpm -C worker-detection run run"
+  }
+}
