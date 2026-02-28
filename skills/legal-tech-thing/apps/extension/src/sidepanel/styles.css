@@ -1,0 +1,23 @@
+:root {
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+body {
+  margin: 0;
+}
+
+.panel {
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0.5rem 0;
+  line-height: 1.45;
+}
