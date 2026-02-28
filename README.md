@@ -6,7 +6,11 @@
 <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-Monorepo for legal workflow tools.
+[Monorepo](#skills) for legal workflow tools.
+
+## Skills
+
+* Root (`/`) `Skill Hunter` browser extension for readable Singapore legislation on SSO
 
 ## Motivation
 
@@ -18,11 +22,9 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 `legal-tech-thing` extends this repository into a full contract-ingestion and review stack (web, extension, desktop, API, workers), so one repo now contains two legal-productivity "skills" with different use cases.
 
-## Purpose
 
-* One monorepo, two skills:
-  * Root (`/`) `Skill Hunter` browser extension for readable Singapore legislation on SSO
-  * `skills/legal-tech-thing/` multi-app contract review platform
+
+* `skills/legal-tech-thing/` multi-app contract review platform
 * Keep the extension lightweight while enabling deeper contract review workflows in the second skill
 * Preserve full commit history for both projects in a single repository
 
