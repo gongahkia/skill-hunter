@@ -1,5 +1,11 @@
 {
   "name": "@legal-tech/extension",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "scripts": {
+    "build": "echo extension build",
+    "dev": "echo extension dev",
+    "lint": "echo extension lint",
+    "test": "echo extension test"
+  }
 }

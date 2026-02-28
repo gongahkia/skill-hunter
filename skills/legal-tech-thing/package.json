@@ -3,9 +3,12 @@
   "private": true,
   "packageManager": "pnpm@9.12.3",
   "scripts": {
-    "build": "echo 'configure turbo in next task'",
-    "dev": "echo 'configure turbo in next task'",
-    "lint": "echo 'configure turbo in next task'",
-    "test": "echo 'configure turbo in next task'"
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4"
   }
 }

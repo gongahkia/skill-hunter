@@ -1,5 +1,11 @@
 {
   "name": "@legal-tech/shared-types",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "scripts": {
+    "build": "echo shared-types build",
+    "dev": "echo shared-types dev",
+    "lint": "echo shared-types lint",
+    "test": "echo shared-types test"
+  }
 }

@@ -1,5 +1,11 @@
 {
   "name": "@legal-tech/desktop",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "scripts": {
+    "build": "echo desktop build",
+    "dev": "echo desktop dev",
+    "lint": "echo desktop lint",
+    "test": "echo desktop test"
+  }
 }

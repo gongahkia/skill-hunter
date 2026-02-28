@@ -1,5 +1,11 @@
 {
   "name": "@legal-tech/web",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "scripts": {
+    "build": "echo web build",
+    "dev": "echo web dev",
+    "lint": "echo web lint",
+    "test": "echo web test"
+  }
 }
