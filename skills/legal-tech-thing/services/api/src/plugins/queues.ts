@@ -2,17 +2,19 @@ import { Queue } from "bullmq";
 import fp from "fastify-plugin";
 
 import {
-  CONTRACT_INGESTION_QUEUE,
-  type ContractIngestionJobPayload
-} from "../modules/ingest/types";
-import {
   CLAUSE_EMBEDDINGS_QUEUE,
   type ClauseEmbeddingJobPayload
 } from "../modules/embeddings/types";
+import {
+  CONTRACT_INGESTION_QUEUE,
+  type ContractIngestionJobPayload
+} from "../modules/ingest/types";
+import { REVIEW_RUN_QUEUE, type ReviewRunJobPayload } from "../modules/reviews/types";
 
 type AppQueues = {
   contractIngestionQueue: Queue;
   clauseEmbeddingsQueue: Queue;
+  reviewRunQueue: Queue;
 };
 
 declare module "fastify" {
@@ -72,15 +74,30 @@ const queuesPlugin = fp(async (app) => {
       }
     }
   );
+  const reviewRunQueue = new Queue<ReviewRunJobPayload>(REVIEW_RUN_QUEUE, {
+    connection: buildQueueConnection(),
+    prefix: getQueuePrefix(),
+    defaultJobOptions: {
+      attempts: 3,
+      removeOnComplete: 1000,
+      removeOnFail: 5000,
+      backoff: {
+        type: "exponential",
+        delay: 1000
+      }
+    }
+  });
 
   app.decorate("queues", {
     contractIngestionQueue,
-    clauseEmbeddingsQueue
+    clauseEmbeddingsQueue,
+    reviewRunQueue
   });
 
   app.addHook("onClose", async () => {
     await app.queues.contractIngestionQueue.close();
     await app.queues.clauseEmbeddingsQueue.close();
+    await app.queues.reviewRunQueue.close();
   });
 });
 
