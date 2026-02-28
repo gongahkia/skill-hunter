@@ -18,7 +18,12 @@ import {
   fetchMyPolicyProfile,
   type PolicyProvider
 } from "../../../src/policy/api";
-import { createReviewRun } from "../../../src/reviews/api";
+import {
+  createReviewRun,
+  fetchReviewRun,
+  subscribeToReviewRunEvents,
+  type ReviewRunProgress
+} from "../../../src/reviews/api";
 
 const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const;
 const providers: PolicyProvider[] = ["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"];
@@ -49,6 +54,10 @@ export default function ContractDetailPage() {
   const [isLaunchingReview, setIsLaunchingReview] = useState(false);
   const [reviewLaunchError, setReviewLaunchError] = useState<string | null>(null);
   const [reviewLaunchStatus, setReviewLaunchStatus] = useState<string | null>(null);
+  const [trackedReviewIdInput, setTrackedReviewIdInput] = useState("");
+  const [trackedReviewRunId, setTrackedReviewRunId] = useState("");
+  const [liveProgress, setLiveProgress] = useState<ReviewRunProgress | null>(null);
+  const [realtimeError, setRealtimeError] = useState<string | null>(null);
 
   const groupedFindings = useMemo(() => {
     const grouped = new Map<string, ContractFinding[]>();
@@ -103,6 +112,60 @@ export default function ContractDetailPage() {
     void loadDetail();
   }, [contractId]);
 
+  useEffect(() => {
+    if (!trackedReviewRunId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    setRealtimeError(null);
+
+    void fetchReviewRun(trackedReviewRunId)
+      .then((response) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setLiveProgress({
+          id: response.reviewRun.id,
+          status: response.reviewRun.status,
+          progressPercent: response.reviewRun.progressPercent,
+          provider: response.reviewRun.providerMetadata.provider,
+          providerModel: response.reviewRun.providerMetadata.model,
+          startedAt: response.reviewRun.startedAt,
+          finishedAt: response.reviewRun.finishedAt,
+          errorCode: response.reviewRun.errorCode,
+          errorMessage: response.reviewRun.errorMessage,
+          updatedAt: response.reviewRun.updatedAt
+        });
+      })
+      .catch((initialError) => {
+        if (isMounted) {
+          setRealtimeError(
+            initialError instanceof Error
+              ? initialError.message
+              : "REVIEW_PROGRESS_LOAD_FAILED"
+          );
+        }
+      });
+
+    const unsubscribe = subscribeToReviewRunEvents({
+      reviewRunId: trackedReviewRunId,
+      onProgress: (event) => {
+        setLiveProgress(event);
+      },
+      onError: (message) => {
+        setRealtimeError(message);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [trackedReviewRunId]);
+
   async function handleUpdateStatus(
     findingId: string,
     status: "accepted" | "dismissed"
@@ -140,6 +203,8 @@ export default function ContractDetailPage() {
         provider: selectedProvider
       });
       setReviewLaunchStatus(`Review queued: ${response.reviewRun.id}`);
+      setTrackedReviewIdInput(response.reviewRun.id);
+      setTrackedReviewRunId(response.reviewRun.id);
     } catch (launchError) {
       setReviewLaunchError(
         launchError instanceof Error ? launchError.message : "REVIEW_LAUNCH_FAILED"
@@ -147,6 +212,19 @@ export default function ContractDetailPage() {
     } finally {
       setIsLaunchingReview(false);
     }
+  }
+
+  function handleTrackReviewRun() {
+    const reviewRunId = trackedReviewIdInput.trim();
+
+    if (!reviewRunId) {
+      setRealtimeError("REVIEW_RUN_ID_REQUIRED");
+      return;
+    }
+
+    setLiveProgress(null);
+    setRealtimeError(null);
+    setTrackedReviewRunId(reviewRunId);
   }
 
   return (
@@ -216,8 +294,57 @@ export default function ContractDetailPage() {
                     {isLaunchingReview ? "Launching..." : "Launch review"}
                   </button>
                 </p>
+                <p>
+                  <label>
+                    Track review run ID{" "}
+                    <input
+                      onChange={(event) => setTrackedReviewIdInput(event.target.value)}
+                      value={trackedReviewIdInput}
+                    />
+                  </label>{" "}
+                  <button onClick={handleTrackReviewRun} type="button">
+                    Track live progress
+                  </button>{" "}
+                  <button
+                    onClick={() => {
+                      setTrackedReviewRunId("");
+                      setTrackedReviewIdInput("");
+                      setLiveProgress(null);
+                      setRealtimeError(null);
+                    }}
+                    type="button"
+                  >
+                    Stop tracking
+                  </button>
+                </p>
                 {reviewLaunchError ? <p>{reviewLaunchError}</p> : null}
                 {reviewLaunchStatus ? <p>{reviewLaunchStatus}</p> : null}
+                {realtimeError ? <p>{realtimeError}</p> : null}
+                {trackedReviewRunId ? <p>Live stream: {trackedReviewRunId}</p> : null}
+                {liveProgress ? (
+                  <article>
+                    <p>
+                      Status: {liveProgress.status} | Provider: {liveProgress.provider} (
+                      {liveProgress.providerModel})
+                    </p>
+                    <p>
+                      Progress: {Math.round(liveProgress.progressPercent)}%{" "}
+                      <progress max={100} value={liveProgress.progressPercent} />
+                    </p>
+                    {liveProgress.errorCode || liveProgress.errorMessage ? (
+                      <p>
+                        Failure: {liveProgress.errorCode ?? "UNKNOWN"}{" "}
+                        {liveProgress.errorMessage ? `(${liveProgress.errorMessage})` : ""}
+                      </p>
+                    ) : null}
+                    <p>
+                      Updated:{" "}
+                      <time dateTime={liveProgress.updatedAt}>
+                        {new Date(liveProgress.updatedAt).toLocaleString()}
+                      </time>
+                    </p>
+                  </article>
+                ) : null}
               </>
             ) : (
               <p>No contract version is available yet for review launch.</p>
