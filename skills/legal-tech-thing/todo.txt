@@ -1,35 +1,5 @@
-(A) Implement centralized error envelope format with machine-readable error codes +api
-(A) Implement API input validation middleware using Zod schemas from shared package +api +validation
-(A) Implement queue retry policy with exponential backoff and dead-letter queue for failed jobs +queue
-(A) Implement idempotency keys for `POST /reviews` to prevent duplicate review runs +api +orchestrator
-(A) Implement deterministic contract fingerprinting to skip duplicate ingestion processing +ingest
-(A) Implement RBAC guard that restricts contract access to owning user account +security +auth
-(A) Implement signed URL expiry enforcement for uploaded source downloads +storage +security
-(A) Implement PII scrubber for logs to redact emails, names, and account tokens +security +observability
-(A) Implement unit tests for auth token rotation and replay attack revocation logic +tests +auth
-(A) Implement unit tests for parser routing and MIME fallbacks +tests +ingest
-(A) Implement unit tests for clause segmentation with numbered and unnumbered legal text +tests +clause-engine
-(A) Implement unit tests for finding deduplication by overlapping evidence spans +tests +orchestrator
-(A) Implement integration test for full flow from upload to findings retrieval +tests +e2e
-(A) Implement integration test for extension submission endpoint using mocked DOM payloads +tests +extension
-(A) Implement integration test for desktop screenshot OCR ingestion endpoint +tests +desktop
-(B) Implement comparison mode endpoint that runs two provider stacks and returns finding deltas +orchestrator +providers
-(B) Implement web UI toggle to compare outputs from two model providers in one review run +web +providers
-(B) Implement adaptive ranking model that boosts finding types frequently accepted by reviewer +feedback +ranking
-(B) Implement nightly feedback aggregation job that recalibrates severity thresholds per user +feedback +policy
-(B) Implement contract version diff engine that maps changed clauses between uploads +contracts +diff
-(B) Implement web diff UI showing resolved and newly introduced findings between versions +web +diff
-(B) Implement extension support for Gmail message body extraction when legal terms are detected +extension +ingest
-(B) Implement Google Docs extraction fallback via copy-to-clipboard content script strategy +extension +ingest
-(B) Implement desktop global hotkey to trigger screen capture review from any app +desktop +capture
-(B) Implement offline desktop queue that syncs pending scans when network reconnects +desktop +sync
-(B) Implement multi-language prompt routing using detected language to choose localized templates +agents +prompts
-(B) Implement optional human escalation queue for findings below confidence threshold +review-workflow
-(B) Implement clause-library retrieval module for reusable fallback language snippets +redline +library
-(B) Implement semantic search endpoint over clause embeddings for precedent lookup +search +embeddings
-(B) Implement bulk review endpoint for multiple contracts with per-item progress tracking +api +orchestrator
-(B) Implement web bulk upload and bulk review launcher with batched polling +web +upload
 (B) Implement extension policy profile quick switcher for personal vs strict review modes +extension +policy
 (B) Implement desktop side-by-side original text and suggested redline editor +desktop +redline
 (B) Implement review export endpoint generating JSON artifact with findings and evidence +api +export
 (B) Implement desktop and web download action for exported review artifacts +web +desktop +export
+(B) Combine this with skill-hunter repo one directory out, clarify with me how i'd like to combine them before doing it
