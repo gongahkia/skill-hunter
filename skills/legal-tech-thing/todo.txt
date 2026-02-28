@@ -1,4 +1,3 @@
-(A) Create `policy_rules` table for clause requirements, forbidden patterns, and exception flags +db +policy
 (A) Create `review_runs` table for orchestration state and provider metadata +db +orchestrator
 (A) Create `review_feedback` table for accepted, dismissed, and edited findings +db +feedback
 (A) Implement `POST /auth/register` with bcrypt password hashing and unique email validation +auth +api

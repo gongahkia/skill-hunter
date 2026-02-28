@@ -174,12 +174,32 @@ model Finding {
 }
 
 model PolicyProfile {
-  id             String   @id @default(uuid()) @db.Uuid
-  userId         String   @unique @map("user_id") @db.Uuid
-  riskThresholds Json     @map("risk_thresholds")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @unique @map("user_id") @db.Uuid
+  riskThresholds Json         @map("risk_thresholds")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rules          PolicyRule[]
 
   @@map("policy_profiles")
+}
+
+model PolicyRule {
+  id               String        @id @default(uuid()) @db.Uuid
+  profileId        String        @map("profile_id") @db.Uuid
+  clauseRequirement ClauseType?  @map("clause_requirement")
+  clauseSelector   String        @map("clause_selector")
+  requiredPattern  String?       @map("required_pattern")
+  forbiddenPattern String?       @map("forbidden_pattern")
+  allowException   Boolean       @default(false) @map("allow_exception")
+  active           Boolean       @default(true)
+  priority         Int           @default(100)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  profile          PolicyProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([priority])
+  @@map("policy_rules")
 }
