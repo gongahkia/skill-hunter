@@ -1,5 +1,7 @@
 import {
+  bulkReviewIdParamsSchema,
   compareReviewsBodySchema,
+  createBulkReviewBodySchema,
   createReviewBodySchema,
   reviewIdParamsSchema
 } from "@legal-tech/shared-types";
@@ -68,6 +70,9 @@ type ComparableFinding = Awaited<ReturnType<typeof runSpecialistAgentsForReview>
 
 const IDEMPOTENCY_HEADER_NAME = "idempotency-key";
 const IDEMPOTENCY_TTL_SECONDS = Number(process.env.REVIEW_IDEMPOTENCY_TTL_SECONDS ?? 86_400);
+const BULK_REVIEW_TRACKING_TTL_SECONDS = Number(
+  process.env.BULK_REVIEW_TRACKING_TTL_SECONDS ?? 86_400
+);
 
 type ReviewIdempotencyRecord = {
   requestHash: string;
@@ -86,6 +91,18 @@ type ReviewIdempotencyRecord = {
     queueJobId: string | number;
   };
   createdAt: string;
+};
+
+type BulkReviewTrackingItem = {
+  contractVersionId: string;
+  reviewRunId: string | null;
+  status: "queued" | "failed";
+  error: string | null;
+};
+
+type BulkReviewTrackingRecord = {
+  createdAt: string;
+  items: BulkReviewTrackingItem[];
 };
 
 function buildReviewRequestHash(payload: {
@@ -114,6 +131,10 @@ function getIdempotencyHeader(request: { headers: Record<string, unknown> }) {
 
   const value = raw.trim();
   return value.length > 0 ? value : null;
+}
+
+function getBulkReviewTrackingRedisKey(userId: string, bulkReviewId: string) {
+  return `bulk-review-tracking:${userId}:${bulkReviewId}`;
 }
 
 function normalizeSelectedAgents(selectedAgents?: string[]) {
@@ -373,6 +394,290 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         }
         throw error;
       }
+    }
+  );
+
+  app.post(
+    "/bulk",
+    {
+      preHandler: app.buildValidationPreHandler({
+        body: createBulkReviewBodySchema
+      })
+    },
+    async (request, reply) => {
+      const body = request.validated.body as {
+        contractVersionIds: string[];
+        profileId?: string;
+        provider?: LlmProvider;
+        selectedAgents?: string[];
+      };
+
+      const selectedAgents = normalizeSelectedAgents(body.selectedAgents);
+      if (!selectedAgents) {
+        return reply.status(400).send({
+          error: "INVALID_SELECTED_AGENTS"
+        });
+      }
+
+      const profile = await getOrCreateReviewProfile(
+        app,
+        request.auth.userId,
+        body.profileId
+      );
+      if (!profile) {
+        return reply.status(404).send({
+          error: "POLICY_PROFILE_NOT_FOUND"
+        });
+      }
+
+      const provider = body.provider ?? profile.defaultProvider;
+      const providerModel = getProviderModel(provider);
+      const adaptiveTypeBoosts = await buildAdaptiveFindingTypeBoosts(
+        app.prisma,
+        request.auth.userId
+      );
+
+      const uniqueContractVersionIds = Array.from(new Set(body.contractVersionIds));
+      const trackedItems = [] as BulkReviewTrackingItem[];
+      const responseItems = [] as Array<{
+        contractVersionId: string;
+        reviewRunId: string | null;
+        queueJobId: string | number | null;
+        status: "queued" | "failed";
+        error: string | null;
+      }>;
+
+      for (const contractVersionId of uniqueContractVersionIds) {
+        const contractVersion = await app.rbac.getOwnedContractVersion(
+          contractVersionId,
+          request.auth.userId
+        );
+        if (!contractVersion) {
+          trackedItems.push({
+            contractVersionId,
+            reviewRunId: null,
+            status: "failed",
+            error: "CONTRACT_VERSION_NOT_FOUND"
+          });
+          responseItems.push({
+            contractVersionId,
+            reviewRunId: null,
+            queueJobId: null,
+            status: "failed",
+            error: "CONTRACT_VERSION_NOT_FOUND"
+          });
+          continue;
+        }
+
+        try {
+          const reviewRun = await app.prisma.reviewRun.create({
+            data: {
+              contractVersionId: contractVersion.id,
+              profileId: profile.id,
+              provider,
+              providerModel,
+              status: ReviewRunStatus.QUEUED,
+              orchestrationMeta: {
+                selectedAgents,
+                progressPercent: 0,
+                adaptiveTypeBoosts
+              }
+            },
+            select: {
+              id: true,
+              contractVersionId: true,
+              profileId: true,
+              provider: true
+            }
+          });
+
+          const queueJob = await app.queues.reviewRunQueue.add(
+            `review-run:${reviewRun.id}`,
+            {
+              requestId: request.id,
+              reviewRunId: reviewRun.id,
+              contractVersionId: reviewRun.contractVersionId,
+              profileId: reviewRun.profileId,
+              provider: reviewRun.provider,
+              selectedAgents
+            },
+            {
+              jobId: reviewRun.id
+            }
+          );
+
+          trackedItems.push({
+            contractVersionId,
+            reviewRunId: reviewRun.id,
+            status: "queued",
+            error: null
+          });
+          responseItems.push({
+            contractVersionId,
+            reviewRunId: reviewRun.id,
+            queueJobId: queueJob.id ?? reviewRun.id,
+            status: "queued",
+            error: null
+          });
+        } catch (error) {
+          const errorCode =
+            error instanceof Error ? error.message : "BULK_REVIEW_QUEUE_FAILED";
+
+          trackedItems.push({
+            contractVersionId,
+            reviewRunId: null,
+            status: "failed",
+            error: errorCode
+          });
+          responseItems.push({
+            contractVersionId,
+            reviewRunId: null,
+            queueJobId: null,
+            status: "failed",
+            error: errorCode
+          });
+        }
+      }
+
+      const bulkReviewId = randomUUID();
+      const trackingRecord: BulkReviewTrackingRecord = {
+        createdAt: new Date().toISOString(),
+        items: trackedItems
+      };
+      await app.redis.set(
+        getBulkReviewTrackingRedisKey(request.auth.userId, bulkReviewId),
+        JSON.stringify(trackingRecord),
+        "EX",
+        BULK_REVIEW_TRACKING_TTL_SECONDS
+      );
+
+      return reply.status(202).send({
+        bulkReviewId,
+        createdAt: trackingRecord.createdAt,
+        queuedCount: responseItems.filter((item) => item.status === "queued").length,
+        failedCount: responseItems.filter((item) => item.status === "failed").length,
+        items: responseItems
+      });
+    }
+  );
+
+  app.get(
+    "/bulk/:id",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: bulkReviewIdParamsSchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+
+      const trackingRecordRaw = await app.redis.get(
+        getBulkReviewTrackingRedisKey(request.auth.userId, params.id)
+      );
+      if (!trackingRecordRaw) {
+        return reply.status(404).send({
+          error: "BULK_REVIEW_NOT_FOUND"
+        });
+      }
+
+      const trackingRecord = JSON.parse(trackingRecordRaw) as BulkReviewTrackingRecord;
+      const reviewRunIds = trackingRecord.items
+        .map((item) => item.reviewRunId)
+        .filter((item): item is string => Boolean(item));
+
+      const reviewRuns =
+        reviewRunIds.length === 0
+          ? []
+          : await app.prisma.reviewRun.findMany({
+              where: {
+                id: {
+                  in: reviewRunIds
+                },
+                contractVersion: {
+                  contract: {
+                    ownerId: request.auth.userId
+                  }
+                }
+              },
+              select: {
+                id: true,
+                status: true,
+                orchestrationMeta: true,
+                provider: true,
+                providerModel: true,
+                errorCode: true,
+                errorMessage: true,
+                createdAt: true,
+                updatedAt: true
+              }
+            });
+
+      const reviewRunsById = new Map(reviewRuns.map((reviewRun) => [reviewRun.id, reviewRun]));
+      const items = trackingRecord.items.map((item) => {
+        if (!item.reviewRunId) {
+          return {
+            contractVersionId: item.contractVersionId,
+            reviewRunId: null,
+            status: "FAILED" as const,
+            progressPercent: 0,
+            provider: null,
+            providerModel: null,
+            errorCode: item.error,
+            errorMessage: item.error,
+            createdAt: null,
+            updatedAt: null
+          };
+        }
+
+        const reviewRun = reviewRunsById.get(item.reviewRunId);
+        if (!reviewRun) {
+          return {
+            contractVersionId: item.contractVersionId,
+            reviewRunId: item.reviewRunId,
+            status: "FAILED" as const,
+            progressPercent: 0,
+            provider: null,
+            providerModel: null,
+            errorCode: "REVIEW_RUN_NOT_FOUND",
+            errorMessage: "REVIEW_RUN_NOT_FOUND",
+            createdAt: null,
+            updatedAt: null
+          };
+        }
+
+        const metadata = (reviewRun.orchestrationMeta ?? {}) as Record<string, unknown>;
+
+        return {
+          contractVersionId: item.contractVersionId,
+          reviewRunId: reviewRun.id,
+          status: reviewRun.status,
+          progressPercent: getProgressFromStatus(reviewRun.status, metadata),
+          provider: reviewRun.provider,
+          providerModel: reviewRun.providerModel,
+          errorCode: reviewRun.errorCode,
+          errorMessage: reviewRun.errorMessage,
+          createdAt: reviewRun.createdAt,
+          updatedAt: reviewRun.updatedAt
+        };
+      });
+
+      const summary = {
+        total: items.length,
+        queued: items.filter((item) => item.status === "QUEUED").length,
+        running: items.filter((item) => item.status === "RUNNING").length,
+        completed: items.filter((item) => item.status === "COMPLETED").length,
+        failed: items.filter((item) => item.status === "FAILED").length,
+        cancelled: items.filter((item) => item.status === "CANCELLED").length
+      };
+
+      return reply.status(200).send({
+        bulkReviewId: params.id,
+        createdAt: trackingRecord.createdAt,
+        summary,
+        items
+      });
     }
   );
 

@@ -64,6 +64,13 @@ export const createReviewBodySchema = z.object({
   selectedAgents: z.array(z.string().min(1)).min(1).optional()
 });
 
+export const createBulkReviewBodySchema = z.object({
+  contractVersionIds: z.array(z.string().uuid()).min(1).max(50),
+  profileId: z.string().uuid().optional(),
+  provider: z.enum(["OPENAI", "ANTHROPIC", "GEMINI", "OLLAMA"]).optional(),
+  selectedAgents: z.array(z.string().min(1)).min(1).optional()
+});
+
 export const semanticClauseSearchBodySchema = z.object({
   queryText: z.string().min(3).max(10_000),
   contractId: z.string().uuid().optional(),
@@ -79,6 +86,10 @@ export const compareReviewsBodySchema = z.object({
 });
 
 export const reviewIdParamsSchema = z.object({
+  id: z.string().uuid()
+});
+
+export const bulkReviewIdParamsSchema = z.object({
   id: z.string().uuid()
 });
 
