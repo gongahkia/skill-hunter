@@ -124,6 +124,8 @@ class ApiClient {
       const code =
         typeof errorBody.error === "string"
           ? errorBody.error
+          : typeof errorBody.error?.code === "string"
+            ? errorBody.error.code
           : `HTTP_${response.status}`;
       throw new ApiError(response.status, code, errorBody);
     }

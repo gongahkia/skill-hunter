@@ -388,9 +388,13 @@ export class LegalTechClient {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
+      const legacyCode = (errorBody as { error?: unknown }).error;
+      const envelopeCode = (errorBody as { error?: { code?: unknown } }).error?.code;
       const code =
-        typeof (errorBody as { error?: unknown }).error === "string"
-          ? ((errorBody as { error: string }).error ?? `HTTP_${response.status}`)
+        typeof legacyCode === "string"
+          ? legacyCode
+          : typeof envelopeCode === "string"
+            ? envelopeCode
           : `HTTP_${response.status}`;
       const apiError = new ApiError(response.status, code, errorBody);
 

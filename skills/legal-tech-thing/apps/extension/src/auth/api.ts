@@ -17,9 +17,18 @@ function generateRequestId() {
 
 async function parseErrorCode(response: Response) {
   const fallbackCode = `HTTP_${response.status}`;
-  const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+  const payload = (await response.json().catch(() => null)) as
+    | { error?: string | { code?: string } }
+    | null;
 
-  return typeof payload?.error === "string" ? payload.error : fallbackCode;
+  if (typeof payload?.error === "string") {
+    return payload.error;
+  }
+  if (typeof payload?.error?.code === "string") {
+    return payload.error.code;
+  }
+
+  return fallbackCode;
 }
 
 export async function loginWithPassword(email: string, password: string) {

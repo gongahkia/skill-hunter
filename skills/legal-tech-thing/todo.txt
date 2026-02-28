@@ -1,31 +1,3 @@
-(A) Implement inline status controls to accept or dismiss findings from contract detail page +web +findings
-(A) Implement policy profile editor form for thresholds, provider choice, and agent toggles +web +policy
-(A) Implement policy rules CRUD UI for required clauses and forbidden phrase checks +web +policy
-(A) Implement review run launcher button with provider and profile selection +web +orchestrator
-(A) Implement live review progress UI using server-sent events subscription +web +realtime
-(A) Implement finding feedback UI with rationale input and corrected severity selector +web +feedback
-(A) Scaffold `apps/extension` with Manifest V3, React, and TypeScript +extension
-(A) Implement extension login flow using backend auth tokens stored in `chrome.storage.local` +extension +auth
-(A) Implement content script detector for contract-like pages using legal phrase heuristics +extension +detection
-(A) Implement DOM extractor that captures visible contract text with stable node offsets +extension +ingest
-(A) Implement extractor for linked Terms URLs near consent checkboxes and acceptance buttons +extension +detection
-(A) Implement pre-accept interception for click events on likely acceptance controls +extension +detection
-(A) Implement extension side panel UI that displays scan status and top findings +extension +ui
-(A) Implement extension action to submit extracted content as a contract source to backend +extension +api
-(A) Implement extension warning modal that blocks acceptance click until user confirms override +extension +ui
-(A) Implement extension badge states for `idle`, `scanning`, `issues`, and `clear` +extension +ui
-(A) Implement extension auto-rescan when page URL changes in single-page apps +extension +detection
-(A) Implement extension mapping from findings to highlighted DOM ranges when offsets are resolvable +extension +ui
-(A) Scaffold `apps/desktop` with Electron, React, and TypeScript +desktop
-(A) Implement desktop login flow sharing the same backend auth endpoints +desktop +auth
-(A) Implement desktop local file importer for PDF, DOCX, image, and TXT contracts +desktop +ingest
-(A) Implement desktop screen-region capture using native screenshot APIs +desktop +capture
-(A) Implement desktop OCR pipeline that sends captured image text for contract review +desktop +ocr
-(A) Implement desktop findings panel with severity filters and evidence navigation +desktop +findings
-(A) Implement desktop quick action to start review from clipboard text +desktop +ingest
-(A) Implement shared client SDK package for auth, contract ingest, review runs, and findings APIs +sdk
-(A) Implement shared state models for finding statuses and policy profiles used by all clients +sdk
-(A) Implement request id propagation across API, workers, and clients for traceable review runs +observability
 (A) Implement centralized error envelope format with machine-readable error codes +api
 (A) Implement API input validation middleware using Zod schemas from shared package +api +validation
 (A) Implement queue retry policy with exponential backoff and dead-letter queue for failed jobs +queue

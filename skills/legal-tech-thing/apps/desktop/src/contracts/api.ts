@@ -52,8 +52,18 @@ type TextSourceType = "DESKTOP_SCREEN" | "CLIPBOARD";
 
 async function parseErrorCode(response: Response) {
   const fallbackCode = `HTTP_${response.status}`;
-  const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-  return typeof payload?.error === "string" ? payload.error : fallbackCode;
+  const payload = (await response.json().catch(() => null)) as
+    | { error?: string | { code?: string } }
+    | null;
+
+  if (typeof payload?.error === "string") {
+    return payload.error;
+  }
+  if (typeof payload?.error?.code === "string") {
+    return payload.error.code;
+  }
+
+  return fallbackCode;
 }
 
 async function requestWithAccessToken<T>(path: string, options: RequestOptions): Promise<T> {

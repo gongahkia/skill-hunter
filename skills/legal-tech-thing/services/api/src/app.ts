@@ -4,6 +4,7 @@ import Fastify from "fastify";
 import { randomUUID } from "node:crypto";
 
 import authGuardPlugin from "./plugins/auth-guard";
+import errorEnvelopePlugin from "./plugins/error-envelope";
 import prismaPlugin from "./plugins/prisma";
 import queuesPlugin from "./plugins/queues";
 import redisPlugin from "./plugins/redis";
@@ -42,6 +43,7 @@ export function buildApp() {
   app.register(queuesPlugin);
   app.register(storagePlugin);
   app.register(authGuardPlugin);
+  app.register(errorEnvelopePlugin);
   app.register(registerRoutes);
 
   return app;
