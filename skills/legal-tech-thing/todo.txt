@@ -1,4 +1,3 @@
-(A) Implement ingestion worker consumer using BullMQ for contract normalization jobs +queue +ingest
 (A) Implement MIME-based parser routing for `text/html`, `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, and images +ingest
 (A) Implement HTML parser that strips scripts/styles and preserves heading hierarchy offsets +parser +ingest
 (A) Implement PDF parser that extracts text blocks with page number and character offsets +parser +ingest
