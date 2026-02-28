@@ -3,7 +3,7 @@ import {
   createReviewBodySchema,
   reviewIdParamsSchema
 } from "@legal-tech/shared-types";
-import { LlmProvider, ReviewRunStatus } from "@prisma/client";
+import { FindingStatus, LlmProvider, ReviewRunStatus } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import type { FastifyPluginAsync } from "fastify";
 
@@ -11,6 +11,10 @@ import { runSpecialistAgentsForReview } from "../modules/agents/orchestrator";
 import type { AgentName } from "../modules/agents/runtime";
 import { buildAdaptiveFindingTypeBoosts } from "../modules/feedback/adaptive-ranking";
 import { detectContractLanguage } from "../modules/ingest/language";
+import {
+  resolveHumanEscalationConfig,
+  toConfidenceNumber
+} from "../modules/review-workflow/human-escalation";
 
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
@@ -633,6 +637,111 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
           changed,
           unchanged
         }
+      });
+    }
+  );
+
+  app.get(
+    "/:id/escalations",
+    {
+      preHandler: app.buildValidationPreHandler({
+        params: reviewIdParamsSchema
+      })
+    },
+    async (request, reply) => {
+      const params = request.validated.params as {
+        id: string;
+      };
+
+      const reviewRun = await getReviewRunForUser(
+        app,
+        params.id,
+        request.auth.userId
+      );
+
+      if (!reviewRun) {
+        return reply.status(404).send({
+          error: "REVIEW_RUN_NOT_FOUND"
+        });
+      }
+
+      const profile = await app.prisma.policyProfile.findFirst({
+        where: {
+          id: reviewRun.profileId,
+          userId: request.auth.userId
+        },
+        select: {
+          riskThresholds: true
+        }
+      });
+
+      if (!profile) {
+        return reply.status(404).send({
+          error: "POLICY_PROFILE_NOT_FOUND"
+        });
+      }
+
+      const escalationConfig = resolveHumanEscalationConfig(profile.riskThresholds);
+      if (!escalationConfig.enabled) {
+        return reply.status(200).send({
+          enabled: false,
+          minConfidence: escalationConfig.minConfidence,
+          queuedCount: 0,
+          items: []
+        });
+      }
+
+      const findings = await app.prisma.finding.findMany({
+        where: {
+          contractVersionId: reviewRun.contractVersionId,
+          status: {
+            in: [FindingStatus.OPEN, FindingStatus.NEEDS_EDIT]
+          }
+        },
+        include: {
+          evidenceSpan: {
+            select: {
+              id: true,
+              startOffset: true,
+              endOffset: true,
+              excerpt: true,
+              pageNumber: true
+            }
+          }
+        },
+        orderBy: [
+          {
+            confidence: "asc"
+          },
+          {
+            createdAt: "asc"
+          }
+        ]
+      });
+
+      const escalationItems = findings
+        .map((finding) => ({
+          ...finding,
+          confidence: toConfidenceNumber(finding.confidence)
+        }))
+        .filter((finding) => finding.confidence < escalationConfig.minConfidence)
+        .map((finding) => ({
+          findingId: finding.id,
+          contractVersionId: finding.contractVersionId,
+          title: finding.title,
+          severity: finding.severity,
+          status: finding.status,
+          confidence: finding.confidence,
+          threshold: escalationConfig.minConfidence,
+          evidenceSpan: finding.evidenceSpan,
+          createdAt: finding.createdAt
+        }));
+
+      return reply.status(200).send({
+        enabled: true,
+        minConfidence: escalationConfig.minConfidence,
+        queuedCount: escalationItems.length,
+        items: escalationItems
       });
     }
   );

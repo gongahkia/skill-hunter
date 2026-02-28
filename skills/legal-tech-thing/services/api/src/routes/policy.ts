@@ -9,6 +9,11 @@ const riskThresholdsSchema = z.object({
   autoEscalateSeverity: z.enum(["critical", "high", "medium", "low", "info"])
 });
 
+const humanEscalationSchema = z.object({
+  enabled: z.boolean(),
+  minConfidence: z.number().min(0).max(1).optional()
+});
+
 const enabledAgentsSchema = z.object({
   riskScanner: z.boolean(),
   missingClause: z.boolean(),
@@ -20,6 +25,7 @@ const enabledAgentsSchema = z.object({
 const updatePolicyProfileBodySchema = z.object({
   defaultProvider: z.nativeEnum(LlmProvider).optional(),
   thresholds: riskThresholdsSchema.optional(),
+  humanEscalation: humanEscalationSchema.optional(),
   enabledAgents: enabledAgentsSchema.optional()
 });
 
@@ -64,6 +70,10 @@ const defaultRiskThresholds = {
   mediumMinConfidence: 0.6,
   autoEscalateSeverity: "high"
 };
+const defaultHumanEscalation = {
+  enabled: false,
+  minConfidence: 0.6
+};
 
 const defaultEnabledAgents = {
   riskScanner: true,
@@ -93,6 +103,7 @@ async function getOrCreatePolicyProfile(app: Parameters<FastifyPluginAsync>[0], 
       defaultProvider: LlmProvider.OPENAI,
       riskThresholds: {
         thresholds: defaultRiskThresholds,
+        humanEscalation: defaultHumanEscalation,
         enabledAgents: defaultEnabledAgents
       }
     }
@@ -133,6 +144,11 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
       ...(parseResult.data.enabledAgents
         ? {
             enabledAgents: parseResult.data.enabledAgents
+          }
+        : {}),
+      ...(parseResult.data.humanEscalation
+        ? {
+            humanEscalation: parseResult.data.humanEscalation
           }
         : {})
     };
