@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { loginWithPassword, logoutWithRefreshToken } from "./auth/api";
 import {
@@ -9,6 +9,13 @@ import {
 } from "./auth/token-store";
 import { submitClipboardContractSource, submitDesktopOcrContractSource } from "./contracts/api";
 import { extractTextFromCapturedImage } from "./ocr/pipeline";
+import {
+  enqueuePendingScan,
+  loadPendingScanQueue,
+  removePendingScanById,
+  updatePendingScanAttempt,
+  type PendingScanItem
+} from "./sync/offline-queue";
 
 function formatTokenPreview(token: string) {
   if (token.length <= 16) {
@@ -131,6 +138,29 @@ function buildFindingsFromText(text: string) {
   });
 }
 
+function toErrorCode(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
+  return "UNKNOWN_ERROR";
+}
+
+function isLikelyOfflineFailure(errorCode: string) {
+  const normalized = errorCode.trim().toUpperCase();
+  return (
+    !window.navigator.onLine ||
+    normalized.includes("FAILED TO FETCH") ||
+    normalized.includes("NETWORK") ||
+    normalized.includes("ERR_INTERNET_DISCONNECTED") ||
+    normalized.includes("ERR_NETWORK_CHANGED")
+  );
+}
+
 export function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -163,12 +193,17 @@ export function App() {
   const [isSubmittingClipboard, setIsSubmittingClipboard] = useState(false);
   const [clipboardError, setClipboardError] = useState<string | null>(null);
   const [clipboardStatus, setClipboardStatus] = useState<string | null>(null);
+  const [pendingQueue, setPendingQueue] = useState<PendingScanItem[]>([]);
+  const [isSyncingPendingQueue, setIsSyncingPendingQueue] = useState(false);
+  const [pendingQueueError, setPendingQueueError] = useState<string | null>(null);
+  const [pendingQueueStatus, setPendingQueueStatus] = useState<string | null>(null);
   const captureStageRef = useRef<HTMLDivElement | null>(null);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const existingTokens = getStoredAuthTokens();
     setTokens(existingTokens);
+    setPendingQueue(loadPendingScanQueue());
     setIsInitializing(false);
   }, []);
 
@@ -214,6 +249,120 @@ export function App() {
       setActiveFindingId(activeFinding.id);
     }
   }, [activeFinding, activeFindingId]);
+
+  const syncPendingQueue = useCallback(
+    async (origin: "manual" | "online" | "auth") => {
+      if (isSyncingPendingQueue) {
+        return;
+      }
+
+      if (!tokens?.accessToken) {
+        if (origin === "manual") {
+          setPendingQueueError("AUTH_REQUIRED");
+        }
+        return;
+      }
+
+      const queuedScans = loadPendingScanQueue();
+      setPendingQueue(queuedScans);
+
+      if (queuedScans.length === 0) {
+        if (origin === "manual") {
+          setPendingQueueStatus("No queued scans to sync.");
+          setPendingQueueError(null);
+        }
+        return;
+      }
+
+      if (!window.navigator.onLine) {
+        if (origin === "manual") {
+          setPendingQueueError("OFFLINE_QUEUE_SYNC_UNAVAILABLE");
+        }
+        return;
+      }
+
+      setIsSyncingPendingQueue(true);
+      setPendingQueueError(null);
+      let syncedCount = 0;
+
+      for (const queuedScan of queuedScans) {
+        try {
+          if (queuedScan.kind === "ocr") {
+            await submitDesktopOcrContractSource(
+              {
+                title: queuedScan.title,
+                content: queuedScan.content
+              },
+              tokens.accessToken
+            );
+          } else {
+            await submitClipboardContractSource(
+              {
+                title: queuedScan.title,
+                content: queuedScan.content
+              },
+              tokens.accessToken
+            );
+          }
+
+          const remainingQueue = removePendingScanById(queuedScan.id);
+          setPendingQueue(remainingQueue);
+          syncedCount += 1;
+        } catch (syncError) {
+          const syncErrorCode = toErrorCode(syncError);
+          const updatedQueue = updatePendingScanAttempt(queuedScan.id, syncErrorCode);
+          setPendingQueue(updatedQueue);
+          setPendingQueueError(syncErrorCode);
+
+          if (isLikelyOfflineFailure(syncErrorCode) || syncErrorCode === "HTTP_401") {
+            break;
+          }
+        }
+      }
+
+      if (syncedCount > 0) {
+        setPendingQueueStatus(`Synced ${syncedCount} queued scan${syncedCount === 1 ? "" : "s"}.`);
+      } else if (origin === "manual") {
+        setPendingQueueStatus("No queued scans were synced.");
+      }
+
+      setIsSyncingPendingQueue(false);
+    },
+    [isSyncingPendingQueue, tokens]
+  );
+
+  useEffect(() => {
+    const handleOnline = () => {
+      void syncPendingQueue("online");
+    };
+
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [syncPendingQueue]);
+
+  useEffect(() => {
+    if (!tokens?.accessToken || pendingQueue.length === 0 || !window.navigator.onLine) {
+      return;
+    }
+
+    void syncPendingQueue("auth");
+  }, [pendingQueue.length, syncPendingQueue, tokens?.accessToken]);
+
+  function queuePendingScan(
+    scan: {
+      kind: "ocr" | "clipboard";
+      title: string;
+      content: string;
+    },
+    statusMessage: string
+  ) {
+    const nextQueue = enqueuePendingScan(scan);
+    setPendingQueue(nextQueue);
+    setPendingQueueError(null);
+    setPendingQueueStatus(statusMessage);
+  }
 
   function formatFileSize(sizeInBytes: number) {
     if (sizeInBytes < 1024) {
@@ -393,17 +542,49 @@ export function App() {
 
       setOcrText(extractedText);
       setSeverityFilter("all");
-      const submission = await submitDesktopOcrContractSource(
-        {
-          title: `Screen capture ${new Date().toISOString()}`,
-          content: extractedText
-        },
-        tokens.accessToken
-      );
+      const submissionTitle = `Screen capture ${new Date().toISOString()}`;
+      if (!window.navigator.onLine) {
+        queuePendingScan(
+          {
+            kind: "ocr",
+            title: submissionTitle,
+            content: extractedText
+          },
+          "Queued OCR scan for sync when connection is restored."
+        );
+        setOcrStatus("OCR complete. Submission queued for automatic sync when back online.");
+        return;
+      }
 
-      setOcrStatus(
-        `OCR complete. Submitted contract ${submission.contractId} and queued version ${submission.contractVersionId}.`
-      );
+      try {
+        const submission = await submitDesktopOcrContractSource(
+          {
+            title: submissionTitle,
+            content: extractedText
+          },
+          tokens.accessToken
+        );
+
+        setOcrStatus(
+          `OCR complete. Submitted contract ${submission.contractId} and queued version ${submission.contractVersionId}.`
+        );
+      } catch (submissionError) {
+        const submissionErrorCode = toErrorCode(submissionError);
+        if (isLikelyOfflineFailure(submissionErrorCode)) {
+          queuePendingScan(
+            {
+              kind: "ocr",
+              title: submissionTitle,
+              content: extractedText
+            },
+            "Queued OCR scan after network failure. It will sync when online."
+          );
+          setOcrStatus("OCR complete. Submission queued because network is unavailable.");
+          return;
+        }
+
+        throw submissionError;
+      }
     } catch (error) {
       setOcrError(error instanceof Error ? error.message : "OCR_PIPELINE_FAILED");
     } finally {
@@ -446,17 +627,49 @@ export function App() {
 
       setOcrText(clipboardText);
       setSeverityFilter("all");
-      const submission = await submitClipboardContractSource(
-        {
-          title: `Clipboard capture ${new Date().toISOString()}`,
-          content: clipboardText
-        },
-        tokens.accessToken
-      );
+      const submissionTitle = `Clipboard capture ${new Date().toISOString()}`;
+      if (!window.navigator.onLine) {
+        queuePendingScan(
+          {
+            kind: "clipboard",
+            title: submissionTitle,
+            content: clipboardText
+          },
+          "Queued clipboard scan for sync when connection is restored."
+        );
+        setClipboardStatus("Clipboard scan queued for automatic sync when back online.");
+        return;
+      }
 
-      setClipboardStatus(
-        `Submitted clipboard review as contract ${submission.contractId} (version ${submission.contractVersionId}).`
-      );
+      try {
+        const submission = await submitClipboardContractSource(
+          {
+            title: submissionTitle,
+            content: clipboardText
+          },
+          tokens.accessToken
+        );
+
+        setClipboardStatus(
+          `Submitted clipboard review as contract ${submission.contractId} (version ${submission.contractVersionId}).`
+        );
+      } catch (submissionError) {
+        const submissionErrorCode = toErrorCode(submissionError);
+        if (isLikelyOfflineFailure(submissionErrorCode)) {
+          queuePendingScan(
+            {
+              kind: "clipboard",
+              title: submissionTitle,
+              content: clipboardText
+            },
+            "Queued clipboard scan after network failure. It will sync when online."
+          );
+          setClipboardStatus("Clipboard scan queued because network is unavailable.");
+          return;
+        }
+
+        throw submissionError;
+      }
     } catch (error) {
       setClipboardError(error instanceof Error ? error.message : "CLIPBOARD_REVIEW_FAILED");
     } finally {
@@ -672,6 +885,40 @@ export function App() {
             {ocrText ? <pre className="import-preview">{ocrText}</pre> : null}
           </>
         ) : null}
+      </section>
+
+      <section className="app-card">
+        <div className="importer-header">
+          <h2>Offline Sync Queue</h2>
+          <button
+            disabled={isSyncingPendingQueue || !isAuthenticated}
+            onClick={() => void syncPendingQueue("manual")}
+            type="button"
+          >
+            {isSyncingPendingQueue ? "Syncing..." : "Sync Pending Scans"}
+          </button>
+        </div>
+        <p>
+          Pending scans: {pendingQueue.length} {pendingQueue.length === 1 ? "item" : "items"}
+        </p>
+        {pendingQueueError ? <p className="message message-error">{pendingQueueError}</p> : null}
+        {pendingQueueStatus ? <p className="message message-success">{pendingQueueStatus}</p> : null}
+        {pendingQueue.length > 0 ? (
+          <ul className="import-list">
+            {pendingQueue.map((item) => (
+              <li className="import-item" key={item.id}>
+                <p className="import-file-name">{item.title}</p>
+                <p className="import-meta">
+                  {item.kind.toUpperCase()} · attempts {item.attempts} · created{" "}
+                  {new Date(item.createdAt).toLocaleString()}
+                </p>
+                {item.lastError ? <p className="message message-error">{item.lastError}</p> : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No queued scans.</p>
+        )}
       </section>
 
       <section className="app-card findings-card">
