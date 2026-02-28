@@ -56,6 +56,21 @@ enum FindingStatus {
   NEEDS_EDIT
 }
 
+enum LlmProvider {
+  OPENAI
+  ANTHROPIC
+  GEMINI
+  OLLAMA
+}
+
+enum ReviewRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id            String         @id @default(uuid()) @db.Uuid
   email         String         @unique
@@ -113,6 +128,7 @@ model ContractVersion {
   clauses       Clause[]
   evidenceSpans EvidenceSpan[]
   findings      Finding[]
+  reviewRuns    ReviewRun[]
 
   @@index([contractId])
   @@unique([contractId, checksum])
@@ -181,25 +197,49 @@ model PolicyProfile {
   updatedAt      DateTime     @updatedAt @map("updated_at")
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   rules          PolicyRule[]
+  reviewRuns     ReviewRun[]
 
   @@map("policy_profiles")
 }
 
 model PolicyRule {
-  id               String        @id @default(uuid()) @db.Uuid
-  profileId        String        @map("profile_id") @db.Uuid
-  clauseRequirement ClauseType?  @map("clause_requirement")
-  clauseSelector   String        @map("clause_selector")
-  requiredPattern  String?       @map("required_pattern")
-  forbiddenPattern String?       @map("forbidden_pattern")
-  allowException   Boolean       @default(false) @map("allow_exception")
-  active           Boolean       @default(true)
-  priority         Int           @default(100)
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
-  profile          PolicyProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id                String        @id @default(uuid()) @db.Uuid
+  profileId         String        @map("profile_id") @db.Uuid
+  clauseRequirement ClauseType?   @map("clause_requirement")
+  clauseSelector    String        @map("clause_selector")
+  requiredPattern   String?       @map("required_pattern")
+  forbiddenPattern  String?       @map("forbidden_pattern")
+  allowException    Boolean       @default(false) @map("allow_exception")
+  active            Boolean       @default(true)
+  priority          Int           @default(100)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  profile           PolicyProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@index([priority])
   @@map("policy_rules")
+}
+
+model ReviewRun {
+  id                String          @id @default(uuid()) @db.Uuid
+  contractVersionId String          @map("contract_version_id") @db.Uuid
+  profileId         String          @map("profile_id") @db.Uuid
+  provider          LlmProvider
+  providerModel     String          @map("provider_model")
+  status            ReviewRunStatus @default(QUEUED)
+  orchestrationMeta Json            @default("{}") @map("orchestration_meta")
+  startedAt         DateTime?       @map("started_at")
+  finishedAt        DateTime?       @map("finished_at")
+  errorCode         String?         @map("error_code")
+  errorMessage      String?         @map("error_message")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  contractVersion   ContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
+  profile           PolicyProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([contractVersionId])
+  @@index([profileId])
+  @@index([status])
+  @@map("review_runs")
 }
