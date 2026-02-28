@@ -8,6 +8,13 @@ import { parseContractByMimeType } from "./parser-router";
 import type { ContractIngestionJobPayload } from "./types";
 
 const prisma = new PrismaClient();
+const parserConfidenceByParser = {
+  html: 0.95,
+  pdf: 0.9,
+  docx: 0.92,
+  image: 0.72,
+  text: 0.88
+} as const;
 
 export async function processContractIngestionJob(
   payload: ContractIngestionJobPayload
@@ -31,6 +38,31 @@ export async function processContractIngestionJob(
     ...clause,
     type: classifyClauseType(clause)
   }));
+  const parserConfidence =
+    parserConfidenceByParser[parsedDocument.parser] ??
+    parserConfidenceByParser.text;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.clause.deleteMany({
+      where: {
+        contractVersionId: payload.contractVersionId
+      }
+    });
+
+    if (typedClauses.length > 0) {
+      await tx.clause.createMany({
+        data: typedClauses.map((clause) => ({
+          contractVersionId: payload.contractVersionId,
+          type: clause.type,
+          normalizedText: clause.text,
+          startOffset: clause.startOffset,
+          endOffset: clause.endOffset,
+          sourceParser: parsedDocument.parser,
+          parserConfidence
+        }))
+      });
+    }
+  });
 
   console.log("Detected contract language", {
     contractId: payload.contractId,
@@ -39,7 +71,8 @@ export async function processContractIngestionJob(
     iso6391: detectedLanguage.iso6391,
     languageName: detectedLanguage.languageName,
     segmentedClauseCount: segmentedClauses.length,
-    classifiedClauseCount: typedClauses.length
+    classifiedClauseCount: typedClauses.length,
+    parserConfidence
   });
 
   await prisma.contract.update({

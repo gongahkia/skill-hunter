@@ -148,6 +148,8 @@ model Clause {
   normalizedText    String          @map("normalized_text")
   startOffset       Int             @map("start_offset")
   endOffset         Int             @map("end_offset")
+  sourceParser      String          @default("unknown") @map("source_parser")
+  parserConfidence  Decimal         @default(0.500) @map("parser_confidence") @db.Decimal(4, 3)
   createdAt         DateTime        @default(now()) @map("created_at")
   contractVersion   ContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
   findings          Finding[]

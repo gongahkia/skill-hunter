@@ -1,4 +1,3 @@
-(A) Persist clause records with source offsets and parser confidence metadata +db +clause-engine
 (A) Implement embeddings generation job for clause vectors using provider-agnostic embedding interface +embeddings
 (A) Store clause embeddings in `pgvector` for semantic retrieval during review +db +embeddings
 (A) Implement agent runtime interface with strict input and output schema validation +agent-runtime
