@@ -1,4 +1,3 @@
-(A) Implement fallback plain-text parser for unknown text-based MIME types +parser +ingest
 (A) Implement language detection step for extracted contract text +ingest
 (A) Implement contract text cleanup pipeline for whitespace normalization and unicode canonicalization +ingest
 (A) Implement clause segmentation by headings, numbering patterns, and sentence boundary heuristics +clause-engine

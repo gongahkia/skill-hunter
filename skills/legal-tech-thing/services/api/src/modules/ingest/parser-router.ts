@@ -10,6 +10,34 @@ const pdfMimeTypes = new Set(["application/pdf"]);
 const docxMimeTypes = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
+const additionalTextMimeTypes = new Set([
+  "application/json",
+  "application/xml",
+  "application/javascript",
+  "application/x-javascript",
+  "application/x-www-form-urlencoded",
+  "application/rtf"
+]);
+
+function isUnknownTextMimeType(mimeType: string) {
+  if (mimeType.startsWith("text/")) {
+    return true;
+  }
+
+  if (additionalTextMimeTypes.has(mimeType)) {
+    return true;
+  }
+
+  if (mimeType.startsWith("application/") && mimeType.endsWith("+json")) {
+    return true;
+  }
+
+  if (mimeType.startsWith("application/") && mimeType.endsWith("+xml")) {
+    return true;
+  }
+
+  return false;
+}
 
 function getParserForMimeType(mimeType: string): ContractParser {
   const normalizedMimeType = mimeType.trim().toLowerCase();
@@ -30,7 +58,11 @@ function getParserForMimeType(mimeType: string): ContractParser {
     return parseImageDocument;
   }
 
-  return parsePlainTextDocument;
+  if (isUnknownTextMimeType(normalizedMimeType)) {
+    return parsePlainTextDocument;
+  }
+
+  throw new Error(`UNSUPPORTED_MIME_TYPE:${normalizedMimeType}`);
 }
 
 export async function parseContractByMimeType(
