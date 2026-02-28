@@ -7,6 +7,7 @@ import {
   setStoredAuthTokens,
   type StoredAuthTokens
 } from "../auth/storage";
+import { submitExtractedContractSource } from "../contracts/api";
 
 function formatTokenPreview(token: string) {
   if (token.length <= 16) {
@@ -28,6 +29,9 @@ interface DetectionSnapshot {
 }
 
 interface ExtractionSnapshot {
+  url: string;
+  title: string;
+  extractedText: string;
   extractedCharacters: number;
   truncated: boolean;
 }
@@ -190,6 +194,9 @@ export function SidePanelApp() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [isScanLoading, setIsScanLoading] = useState(true);
   const [isRefreshingScan, setIsRefreshingScan] = useState(false);
+  const [isSubmittingContract, setIsSubmittingContract] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStoredSession() {
@@ -299,6 +306,51 @@ export function SidePanelApp() {
     }
   }
 
+  async function handleSubmitExtractedContent() {
+    if (!tokens?.accessToken) {
+      setSubmitError("AUTH_REQUIRED");
+      setSubmitStatus(null);
+      return;
+    }
+
+    const extractedText = scanState?.extraction?.extractedText?.trim();
+    if (!extractedText) {
+      setSubmitError("NO_EXTRACTED_CONTENT");
+      setSubmitStatus(null);
+      return;
+    }
+
+    const contractTitle =
+      scanState?.extraction?.title?.trim() ||
+      (scanState?.detection?.isContractLike
+        ? "Contract capture from active tab"
+        : "Page capture from active tab");
+
+    setIsSubmittingContract(true);
+    setSubmitError(null);
+    setSubmitStatus(null);
+
+    try {
+      const submission = await submitExtractedContractSource(
+        {
+          title: contractTitle,
+          content: extractedText
+        },
+        tokens.accessToken
+      );
+
+      setSubmitStatus(
+        `Submitted contract ${submission.contractId} and queued version ${submission.contractVersionId}.`
+      );
+    } catch (submitContractError) {
+      setSubmitError(
+        submitContractError instanceof Error ? submitContractError.message : "CONTRACT_SUBMIT_FAILED"
+      );
+    } finally {
+      setIsSubmittingContract(false);
+    }
+  }
+
   return (
     <main className="panel">
       <header>
@@ -335,6 +387,15 @@ export function SidePanelApp() {
             ? `${scanState.extraction.extractedCharacters.toLocaleString()} chars`
             : "No scan payload yet"}
         </p>
+        <button
+          disabled={isSubmittingContract || !isAuthenticated || !scanState?.extraction?.extractedText}
+          onClick={() => void handleSubmitExtractedContent()}
+          type="button"
+        >
+          {isSubmittingContract ? "Submitting..." : "Submit as Contract Source"}
+        </button>
+        {submitError ? <p className="message message-error">{submitError}</p> : null}
+        {submitStatus ? <p className="message message-success">{submitStatus}</p> : null}
 
         <h3 className="findings-heading">Top Findings</h3>
         {topFindings.length > 0 ? (
