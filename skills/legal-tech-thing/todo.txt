@@ -1,4 +1,3 @@
-(A) Create `review_feedback` table for accepted, dismissed, and edited findings +db +feedback
 (A) Implement `POST /auth/register` with bcrypt password hashing and unique email validation +auth +api
 (A) Implement `POST /auth/login` to issue JWT access token and rotating refresh token +auth +api
 (A) Implement `POST /auth/refresh` with refresh token rotation and revocation on reuse detection +auth +api

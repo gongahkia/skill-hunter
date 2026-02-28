@@ -71,6 +71,12 @@ enum ReviewRunStatus {
   CANCELLED
 }
 
+enum FeedbackAction {
+  ACCEPTED
+  DISMISSED
+  EDITED
+}
+
 model User {
   id            String         @id @default(uuid()) @db.Uuid
   email         String         @unique
@@ -167,20 +173,21 @@ model EvidenceSpan {
 }
 
 model Finding {
-  id                String          @id @default(uuid()) @db.Uuid
-  contractVersionId String          @map("contract_version_id") @db.Uuid
-  clauseId          String?         @map("clause_id") @db.Uuid
-  evidenceSpanId    String          @map("evidence_span_id") @db.Uuid
+  id                String           @id @default(uuid()) @db.Uuid
+  contractVersionId String           @map("contract_version_id") @db.Uuid
+  clauseId          String?          @map("clause_id") @db.Uuid
+  evidenceSpanId    String           @map("evidence_span_id") @db.Uuid
   title             String
   description       String
   severity          FindingSeverity
-  confidence        Decimal         @db.Decimal(5, 4)
-  status            FindingStatus   @default(OPEN)
-  createdAt         DateTime        @default(now()) @map("created_at")
-  updatedAt         DateTime        @updatedAt @map("updated_at")
-  contractVersion   ContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
-  clause            Clause?         @relation(fields: [clauseId], references: [id], onDelete: SetNull)
-  evidenceSpan      EvidenceSpan    @relation(fields: [evidenceSpanId], references: [id], onDelete: Cascade)
+  confidence        Decimal          @db.Decimal(5, 4)
+  status            FindingStatus    @default(OPEN)
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  contractVersion   ContractVersion  @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
+  clause            Clause?          @relation(fields: [clauseId], references: [id], onDelete: SetNull)
+  evidenceSpan      EvidenceSpan     @relation(fields: [evidenceSpanId], references: [id], onDelete: Cascade)
+  feedbackEntries   ReviewFeedback[]
 
   @@index([contractVersionId])
   @@index([clauseId])
@@ -242,4 +249,19 @@ model ReviewRun {
   @@index([profileId])
   @@index([status])
   @@map("review_runs")
+}
+
+model ReviewFeedback {
+  id                String         @id @default(uuid()) @db.Uuid
+  findingId         String         @map("finding_id") @db.Uuid
+  action            FeedbackAction
+  rationale         String?
+  correctedTitle    String?        @map("corrected_title")
+  correctedSeverity FindingSeverity? @map("corrected_severity")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  finding           Finding        @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@index([findingId])
+  @@index([action])
+  @@map("review_feedback")
 }
