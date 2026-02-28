@@ -71,19 +71,7 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
         status: "open" | "accepted" | "dismissed" | "needs-edit";
       };
 
-      const finding = await app.prisma.finding.findFirst({
-        where: {
-          id: params.id,
-          contractVersion: {
-            contract: {
-              ownerId: request.auth.userId
-            }
-          }
-        },
-        select: {
-          id: true
-        }
-      });
+      const finding = await app.rbac.getOwnedFinding(params.id, request.auth.userId);
 
     if (!finding) {
       return reply.status(404).send({
@@ -136,20 +124,7 @@ const findingRoutes: FastifyPluginAsync = async (app) => {
         correctedTitle?: string;
       };
 
-      const finding = await app.prisma.finding.findFirst({
-      where: {
-          id: params.id,
-        contractVersion: {
-          contract: {
-            ownerId: request.auth.userId
-          }
-        }
-      },
-      select: {
-        id: true,
-        status: true
-      }
-    });
+      const finding = await app.rbac.getOwnedFinding(params.id, request.auth.userId);
 
     if (!finding) {
       return reply.status(404).send({

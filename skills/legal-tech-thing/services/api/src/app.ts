@@ -7,6 +7,7 @@ import authGuardPlugin from "./plugins/auth-guard";
 import errorEnvelopePlugin from "./plugins/error-envelope";
 import prismaPlugin from "./plugins/prisma";
 import queuesPlugin from "./plugins/queues";
+import rbacPlugin from "./plugins/rbac";
 import redisPlugin from "./plugins/redis";
 import storagePlugin from "./plugins/storage";
 import validationPlugin from "./plugins/validation";
@@ -44,6 +45,7 @@ export function buildApp() {
   app.register(queuesPlugin);
   app.register(storagePlugin);
   app.register(authGuardPlugin);
+  app.register(rbacPlugin);
   app.register(errorEnvelopePlugin);
   app.register(validationPlugin);
   app.register(registerRoutes);

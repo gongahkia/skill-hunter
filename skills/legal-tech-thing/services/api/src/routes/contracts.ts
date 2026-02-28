@@ -133,30 +133,21 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
   app.post(
     "/:id/upload-url",
     {
-      preHandler: app.buildValidationPreHandler({
-        params: contractIdParamsSchema,
-        body: createUploadUrlBodySchema
-      })
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema,
+          body: createUploadUrlBodySchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
     },
     async (request, reply) => {
-      const params = request.validated.params as {
-        id: string;
-      };
       const body = request.validated.body as {
         fileName: string;
         mimeType: string;
         contentLength: number;
       };
-
-      const contract = await app.prisma.contract.findFirst({
-        where: {
-          id: params.id,
-          ownerId: request.auth.userId
-        },
-        select: {
-          id: true
-        }
-      });
+      const contract = request.contractAccess;
 
       if (!contract) {
         return reply.status(404).send({
@@ -195,15 +186,15 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
   app.post(
     "/:id/ingest",
     {
-      preHandler: app.buildValidationPreHandler({
-        params: contractIdParamsSchema,
-        body: ingestContractBodySchema
-      })
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema,
+          body: ingestContractBodySchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
     },
     async (request, reply) => {
-      const params = request.validated.params as {
-        id: string;
-      };
       const body = request.validated.body as {
         objectUri: string;
         objectKey: string;
@@ -216,18 +207,7 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         mimeType: body.mimeType,
         contentLength: body.contentLength
       });
-
-      const contract = await app.prisma.contract.findFirst({
-        where: {
-          id: params.id,
-          ownerId: request.auth.userId
-        },
-        select: {
-          id: true,
-          ownerId: true,
-          sourceType: true
-        }
-      });
+      const contract = request.contractAccess;
 
       if (!contract) {
         return reply.status(404).send({
@@ -348,9 +328,12 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
   app.get(
     "/:id",
     {
-      preHandler: app.buildValidationPreHandler({
-        params: contractIdParamsSchema
-      })
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
     },
     async (request, reply) => {
       const params = request.validated.params as {
@@ -359,8 +342,7 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
 
       const contract = await app.prisma.contract.findFirst({
         where: {
-          id: params.id,
-          ownerId: request.auth.userId
+          id: params.id
         },
         select: {
           id: true,
@@ -422,31 +404,22 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
   app.get(
     "/:id/findings",
     {
-      preHandler: app.buildValidationPreHandler({
-        params: contractIdParamsSchema,
-        query: contractFindingsQuerySchema
-      })
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema,
+          query: contractFindingsQuerySchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
     },
     async (request, reply) => {
-      const params = request.validated.params as {
-        id: string;
-      };
       const query = request.validated.query as {
         cursor?: string;
         limit: number;
         severity?: "critical" | "high" | "medium" | "low" | "info";
         status?: "open" | "accepted" | "dismissed" | "needs-edit";
       };
-
-      const contract = await app.prisma.contract.findFirst({
-        where: {
-          id: params.id,
-          ownerId: request.auth.userId
-        },
-        select: {
-          id: true
-        }
-      });
+      const contract = request.contractAccess;
 
       if (!contract) {
         return reply.status(404).send({

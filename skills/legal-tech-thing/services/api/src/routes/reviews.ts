@@ -99,31 +99,7 @@ async function getReviewRunForUser(
   reviewRunId: string,
   userId: string
 ) {
-  return app.prisma.reviewRun.findFirst({
-    where: {
-      id: reviewRunId,
-      contractVersion: {
-        contract: {
-          ownerId: userId
-        }
-      }
-    },
-    select: {
-      id: true,
-      contractVersionId: true,
-      profileId: true,
-      provider: true,
-      providerModel: true,
-      status: true,
-      orchestrationMeta: true,
-      startedAt: true,
-      finishedAt: true,
-      errorCode: true,
-      errorMessage: true,
-      createdAt: true,
-      updatedAt: true
-    }
-  });
+  return app.rbac.getOwnedReviewRun(reviewRunId, userId);
 }
 
 const reviewRoutes: FastifyPluginAsync = async (app) => {
@@ -192,18 +168,10 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       }
 
       try {
-        const contractVersion = await app.prisma.contractVersion.findFirst({
-          where: {
-            id: body.contractVersionId,
-            contract: {
-              ownerId: request.auth.userId
-            }
-          },
-          select: {
-            id: true,
-            contractId: true
-          }
-        });
+        const contractVersion = await app.rbac.getOwnedContractVersion(
+          body.contractVersionId,
+          request.auth.userId
+        );
 
         if (!contractVersion) {
           if (idempotencyRedisKey) {
