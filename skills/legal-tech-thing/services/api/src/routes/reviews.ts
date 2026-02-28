@@ -54,6 +54,38 @@ const defaultRiskThresholds = {
   autoEscalateSeverity: "high"
 };
 
+async function getReviewRunForUser(
+  app: Parameters<FastifyPluginAsync>[0],
+  reviewRunId: string,
+  userId: string
+) {
+  return app.prisma.reviewRun.findFirst({
+    where: {
+      id: reviewRunId,
+      contractVersion: {
+        contract: {
+          ownerId: userId
+        }
+      }
+    },
+    select: {
+      id: true,
+      contractVersionId: true,
+      profileId: true,
+      provider: true,
+      providerModel: true,
+      status: true,
+      orchestrationMeta: true,
+      startedAt: true,
+      finishedAt: true,
+      errorCode: true,
+      errorMessage: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+}
+
 const reviewRoutes: FastifyPluginAsync = async (app) => {
   app.post("/", async (request, reply) => {
     const parseResult = createReviewBodySchema.safeParse(request.body);
@@ -203,31 +235,11 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const reviewRun = await app.prisma.reviewRun.findFirst({
-      where: {
-        id: parseResult.data.id,
-        contractVersion: {
-          contract: {
-            ownerId: request.auth.userId
-          }
-        }
-      },
-      select: {
-        id: true,
-        contractVersionId: true,
-        profileId: true,
-        provider: true,
-        providerModel: true,
-        status: true,
-        orchestrationMeta: true,
-        startedAt: true,
-        finishedAt: true,
-        errorCode: true,
-        errorMessage: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const reviewRun = await getReviewRunForUser(
+      app,
+      parseResult.data.id,
+      request.auth.userId
+    );
 
     if (!reviewRun) {
       return reply.status(404).send({
@@ -247,6 +259,96 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
           model: reviewRun.providerModel
         }
       }
+    });
+  });
+
+  app.get("/:id/events", async (request, reply) => {
+    const parseResult = reviewIdParamsSchema.safeParse(request.params);
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: parseResult.error.flatten()
+      });
+    }
+
+    const reviewRun = await getReviewRunForUser(
+      app,
+      parseResult.data.id,
+      request.auth.userId
+    );
+
+    if (!reviewRun) {
+      return reply.status(404).send({
+        error: "REVIEW_RUN_NOT_FOUND"
+      });
+    }
+
+    reply.raw.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive"
+    });
+    reply.raw.flushHeaders?.();
+
+    let lastPayload = "";
+    let isClosed = false;
+
+    const sendEvent = (event: string, data: unknown) => {
+      if (isClosed) {
+        return;
+      }
+
+      const payload = JSON.stringify(data);
+
+      if (payload === lastPayload) {
+        return;
+      }
+
+      lastPayload = payload;
+      reply.raw.write(`event: ${event}\n`);
+      reply.raw.write(`data: ${payload}\n\n`);
+    };
+
+    const pushReviewState = async () => {
+      const nextRun = await getReviewRunForUser(
+        app,
+        parseResult.data.id,
+        request.auth.userId
+      );
+
+      if (!nextRun) {
+        sendEvent("error", { error: "REVIEW_RUN_NOT_FOUND" });
+        return;
+      }
+
+      const metadata = (nextRun.orchestrationMeta ?? {}) as Record<string, unknown>;
+      const progressPercent = getProgressFromStatus(nextRun.status, metadata);
+
+      sendEvent("review-progress", {
+        id: nextRun.id,
+        status: nextRun.status,
+        progressPercent,
+        provider: nextRun.provider,
+        providerModel: nextRun.providerModel,
+        startedAt: nextRun.startedAt,
+        finishedAt: nextRun.finishedAt,
+        errorCode: nextRun.errorCode,
+        errorMessage: nextRun.errorMessage,
+        updatedAt: nextRun.updatedAt
+      });
+    };
+
+    await pushReviewState();
+
+    const interval = setInterval(async () => {
+      await pushReviewState();
+    }, 2000);
+
+    request.raw.on("close", () => {
+      isClosed = true;
+      clearInterval(interval);
+      reply.raw.end();
     });
   });
 };
