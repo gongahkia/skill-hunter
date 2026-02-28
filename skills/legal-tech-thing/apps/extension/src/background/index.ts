@@ -6,8 +6,15 @@ import type { TermsLinkExtractionResult } from "../content/terms-link-extractor"
 import { TERMS_LINK_EXTRACTION_MESSAGE_TYPE } from "../content/terms-link-extractor";
 import type { PreAcceptInterceptPayload } from "../content/acceptance-interceptor";
 import { PRE_ACCEPT_INTERCEPT_MESSAGE_TYPE } from "../content/acceptance-interceptor";
+import {
+  APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE,
+  CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE,
+  type HighlightFindingPayload
+} from "../content/finding-highlighter";
 
 const GET_ACTIVE_SCAN_STATE_MESSAGE_TYPE = "extension.scanState.getActiveTab.v1";
+const HIGHLIGHT_ACTIVE_TAB_MESSAGE_TYPE = "extension.highlightFinding.activeTab.v1";
+const CLEAR_ACTIVE_TAB_HIGHLIGHT_MESSAGE_TYPE = "extension.highlightFinding.activeTab.clear.v1";
 
 const detectionByTabId = new Map<number, ContractDetectionResult>();
 const extractionByTabId = new Map<number, DomExtractionResult>();
@@ -144,12 +151,96 @@ function getTabScanState(tabId: number | null) {
   };
 }
 
+async function getActiveTabId() {
+  const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  return tabs[0]?.id ?? null;
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === HIGHLIGHT_ACTIVE_TAB_MESSAGE_TYPE) {
+    const payload = message?.payload as HighlightFindingPayload | undefined;
+    if (!payload || payload.offsetEnd <= payload.offsetStart) {
+      sendResponse({
+        ok: false,
+        source: "background",
+        error: "INVALID_HIGHLIGHT_OFFSETS"
+      });
+      return true;
+    }
+
+    void getActiveTabId()
+      .then((activeTabId) => {
+        if (activeTabId === null) {
+          sendResponse({
+            ok: false,
+            source: "background",
+            error: "ACTIVE_TAB_NOT_FOUND"
+          });
+          return;
+        }
+
+        return chrome.tabs
+          .sendMessage(activeTabId, {
+            type: APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE,
+            payload
+          })
+          .then((result) => {
+            sendResponse({
+              ok: true,
+              source: "background",
+              ...result
+            });
+          });
+      })
+      .catch((error: unknown) => {
+        sendResponse({
+          ok: false,
+          source: "background",
+          error: error instanceof Error ? error.message : "HIGHLIGHT_FORWARD_FAILED"
+        });
+      });
+
+    return true;
+  }
+
+  if (message?.type === CLEAR_ACTIVE_TAB_HIGHLIGHT_MESSAGE_TYPE) {
+    void getActiveTabId()
+      .then((activeTabId) => {
+        if (activeTabId === null) {
+          sendResponse({
+            ok: true,
+            source: "background",
+            cleared: false
+          });
+          return;
+        }
+
+        return chrome.tabs
+          .sendMessage(activeTabId, {
+            type: CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE
+          })
+          .then(() => {
+            sendResponse({
+              ok: true,
+              source: "background",
+              cleared: true
+            });
+          });
+      })
+      .catch((error: unknown) => {
+        sendResponse({
+          ok: false,
+          source: "background",
+          error: error instanceof Error ? error.message : "CLEAR_HIGHLIGHT_FORWARD_FAILED"
+        });
+      });
+
+    return true;
+  }
+
   if (message?.type === GET_ACTIVE_SCAN_STATE_MESSAGE_TYPE) {
-    void chrome.tabs
-      .query({ active: true, lastFocusedWindow: true })
-      .then((tabs) => {
-        const activeTabId = tabs[0]?.id ?? null;
+    void getActiveTabId()
+      .then((activeTabId) => {
         sendResponse({
           ok: true,
           source: "background",

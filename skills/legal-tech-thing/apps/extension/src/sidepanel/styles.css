@@ -148,6 +148,10 @@ button:disabled {
   gap: 0.25rem;
 }
 
+.finding-item-active {
+  box-shadow: 0 0 0 2px #f59e0b inset;
+}
+
 .finding-item-high {
   border-color: #fca5a5;
   background: #fef2f2;
@@ -167,6 +171,23 @@ button:disabled {
   margin: 0;
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.finding-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.finding-highlight-button {
+  border: 0;
+  border-radius: 0.3rem;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.74rem;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
 }
 
 .finding-detail {

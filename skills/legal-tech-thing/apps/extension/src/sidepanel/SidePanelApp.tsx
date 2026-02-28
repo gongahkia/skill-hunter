@@ -18,6 +18,8 @@ function formatTokenPreview(token: string) {
 }
 
 const GET_ACTIVE_SCAN_STATE_MESSAGE_TYPE = "extension.scanState.getActiveTab.v1";
+const HIGHLIGHT_ACTIVE_TAB_MESSAGE_TYPE = "extension.highlightFinding.activeTab.v1";
+const CLEAR_ACTIVE_TAB_HIGHLIGHT_MESSAGE_TYPE = "extension.highlightFinding.activeTab.clear.v1";
 
 type ScanStatus = "idle" | "scanning" | "issues" | "clear";
 type FindingSeverity = "high" | "medium" | "low";
@@ -26,6 +28,7 @@ interface DetectionSnapshot {
   isContractLike: boolean;
   confidence: number;
   score: number;
+  matchedPhrases: string[];
 }
 
 interface ExtractionSnapshot {
@@ -66,6 +69,29 @@ interface ScanFinding {
   severity: FindingSeverity;
   title: string;
   detail: string;
+  offsetStart?: number;
+  offsetEnd?: number;
+}
+
+function findPhraseOffsetRange(extractedText: string, phrases: string[]) {
+  const normalizedText = extractedText.toLowerCase();
+
+  for (const phrase of phrases) {
+    const normalizedPhrase = phrase.trim().toLowerCase();
+    if (!normalizedPhrase) {
+      continue;
+    }
+
+    const start = normalizedText.indexOf(normalizedPhrase);
+    if (start >= 0) {
+      return {
+        offsetStart: start,
+        offsetEnd: start + normalizedPhrase.length
+      };
+    }
+  }
+
+  return null;
 }
 
 function formatScanStatus(status: ScanStatus) {
@@ -127,12 +153,19 @@ function deriveTopFindings(scanState: ActiveScanState | null) {
   }
 
   const findings: ScanFinding[] = [];
+  const phraseOffsetRange =
+    scanState.extraction && scanState.detection?.matchedPhrases?.length
+      ? findPhraseOffsetRange(scanState.extraction.extractedText, scanState.detection.matchedPhrases)
+      : null;
+
   if (scanState.detection?.isContractLike) {
     findings.push({
       id: "contract-detected",
       severity: "medium",
       title: "Contract-like page detected",
-      detail: `Heuristic confidence ${Math.round(scanState.detection.confidence * 100)}% (score ${scanState.detection.score}).`
+      detail: `Heuristic confidence ${Math.round(scanState.detection.confidence * 100)}% (score ${scanState.detection.score}).`,
+      offsetStart: phraseOffsetRange?.offsetStart,
+      offsetEnd: phraseOffsetRange?.offsetEnd
     });
   }
 
@@ -197,6 +230,8 @@ export function SidePanelApp() {
   const [isSubmittingContract, setIsSubmittingContract] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+  const [highlightError, setHighlightError] = useState<string | null>(null);
+  const [activeHighlightFindingId, setActiveHighlightFindingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStoredSession() {
@@ -216,6 +251,13 @@ export function SidePanelApp() {
   const isAuthenticated = useMemo(() => tokens !== null, [tokens]);
   const scanStatus = useMemo(() => deriveScanStatus(scanState, isScanLoading), [scanState, isScanLoading]);
   const topFindings = useMemo(() => deriveTopFindings(scanState), [scanState]);
+
+  const clearFindingHighlight = useCallback(async () => {
+    await chrome.runtime.sendMessage({
+      type: CLEAR_ACTIVE_TAB_HIGHLIGHT_MESSAGE_TYPE
+    });
+    setActiveHighlightFindingId(null);
+  }, []);
 
   const refreshScanState = useCallback(async (origin: "initial" | "manual" | "poll") => {
     if (origin === "initial") {
@@ -257,6 +299,17 @@ export function SidePanelApp() {
       window.clearInterval(intervalId);
     };
   }, [refreshScanState]);
+
+  useEffect(() => {
+    if (!activeHighlightFindingId) {
+      return;
+    }
+
+    const activeFindingStillVisible = topFindings.some((finding) => finding.id === activeHighlightFindingId);
+    if (!activeFindingStillVisible) {
+      void clearFindingHighlight();
+    }
+  }, [activeHighlightFindingId, clearFindingHighlight, topFindings]);
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -351,6 +404,47 @@ export function SidePanelApp() {
     }
   }
 
+  async function handleHighlightFinding(finding: ScanFinding) {
+    if (finding.offsetStart === undefined || finding.offsetEnd === undefined) {
+      setHighlightError("FINDING_OFFSETS_UNAVAILABLE");
+      return;
+    }
+
+    if (activeHighlightFindingId === finding.id) {
+      try {
+        await clearFindingHighlight();
+        setHighlightError(null);
+      } catch (clearError) {
+        setHighlightError(clearError instanceof Error ? clearError.message : "HIGHLIGHT_CLEAR_FAILED");
+      }
+      return;
+    }
+
+    try {
+      const response = (await chrome.runtime.sendMessage({
+        type: HIGHLIGHT_ACTIVE_TAB_MESSAGE_TYPE,
+        payload: {
+          findingId: finding.id,
+          offsetStart: finding.offsetStart,
+          offsetEnd: finding.offsetEnd
+        }
+      })) as { ok?: boolean; error?: string; highlighted?: boolean };
+
+      if (!response?.ok || response.highlighted !== true) {
+        throw new Error(response?.error || "FINDING_HIGHLIGHT_FAILED");
+      }
+
+      setActiveHighlightFindingId(finding.id);
+      setHighlightError(null);
+    } catch (highlightFindingError) {
+      setHighlightError(
+        highlightFindingError instanceof Error
+          ? highlightFindingError.message
+          : "FINDING_HIGHLIGHT_FAILED"
+      );
+    }
+  }
+
   return (
     <main className="panel">
       <header>
@@ -398,11 +492,26 @@ export function SidePanelApp() {
         {submitStatus ? <p className="message message-success">{submitStatus}</p> : null}
 
         <h3 className="findings-heading">Top Findings</h3>
+        {highlightError ? <p className="message message-error">{highlightError}</p> : null}
         {topFindings.length > 0 ? (
           <ul className="findings-list">
             {topFindings.map((finding) => (
-              <li className={`finding-item finding-item-${finding.severity}`} key={finding.id}>
-                <p className="finding-title">{finding.title}</p>
+              <li
+                className={`finding-item finding-item-${finding.severity} ${activeHighlightFindingId === finding.id ? "finding-item-active" : ""}`}
+                key={finding.id}
+              >
+                <div className="finding-row">
+                  <p className="finding-title">{finding.title}</p>
+                  {finding.offsetStart !== undefined && finding.offsetEnd !== undefined ? (
+                    <button
+                      className="finding-highlight-button"
+                      onClick={() => void handleHighlightFinding(finding)}
+                      type="button"
+                    >
+                      {activeHighlightFindingId === finding.id ? "Clear highlight" : "Highlight"}
+                    </button>
+                  ) : null}
+                </div>
                 <p className="finding-detail">{finding.detail}</p>
               </li>
             ))}

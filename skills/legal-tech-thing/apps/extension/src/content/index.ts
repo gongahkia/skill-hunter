@@ -8,6 +8,14 @@ import {
   extractTermsLinksNearConsentControls
 } from "./terms-link-extractor";
 import { installPreAcceptInterceptor } from "./acceptance-interceptor";
+import type { DomExtractionResult } from "./dom-extractor";
+import {
+  APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE,
+  CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE,
+  clearFindingHighlights,
+  highlightFindingOffsets,
+  type HighlightFindingPayload
+} from "./finding-highlighter";
 
 const CONTENT_SCRIPT_MARKER = "data-legal-tech-extension";
 const PAGE_DETECTION_MARKER = "data-legal-tech-contract-like";
@@ -23,12 +31,14 @@ if (!document.documentElement.hasAttribute(CONTENT_SCRIPT_MARKER)) {
   document.documentElement.setAttribute(PRE_ACCEPT_MARKER, "active");
 
   let rescanTimerId: number | null = null;
+  let latestExtractionResult: DomExtractionResult | null = null;
 
   const runScan = () => {
     const pageUrl = window.location.href;
     const detectionResult = detectContractLikePage(document, pageUrl);
     const extractionResult = extractVisibleContractText(document, pageUrl);
     const termsLinksResult = extractTermsLinksNearConsentControls(document, pageUrl);
+    latestExtractionResult = extractionResult;
 
     document.documentElement.setAttribute(PAGE_DETECTION_MARKER, String(detectionResult.isContractLike));
     document.documentElement.setAttribute(
@@ -110,6 +120,38 @@ if (!document.documentElement.hasAttribute(CONTENT_SCRIPT_MARKER)) {
   runScan();
   installSpaUrlObserver();
   installPreAcceptInterceptor(document, () => window.location.href);
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type === APPLY_FINDING_HIGHLIGHT_MESSAGE_TYPE) {
+      const payload = message?.payload as HighlightFindingPayload | undefined;
+      if (!latestExtractionResult || !payload) {
+        sendResponse({
+          ok: false,
+          error: "NO_EXTRACTION_CONTEXT"
+        });
+        return true;
+      }
+
+      sendResponse(
+        highlightFindingOffsets(document, latestExtractionResult, {
+          findingId: payload.findingId,
+          offsetStart: payload.offsetStart,
+          offsetEnd: payload.offsetEnd
+        })
+      );
+      return true;
+    }
+
+    if (message?.type === CLEAR_FINDING_HIGHLIGHT_MESSAGE_TYPE) {
+      clearFindingHighlights(document);
+      sendResponse({
+        ok: true,
+        cleared: true
+      });
+      return true;
+    }
+
+    return false;
+  });
 
   chrome.runtime.sendMessage({ type: "extension.ping" }).catch(() => undefined);
 }
