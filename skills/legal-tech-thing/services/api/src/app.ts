@@ -2,6 +2,7 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import Fastify from "fastify";
 
+import prismaPlugin from "./plugins/prisma";
 import registerRoutes from "./routes";
 
 export function buildApp() {
@@ -16,6 +17,7 @@ export function buildApp() {
     origin: true,
     credentials: true
   });
+  app.register(prismaPlugin);
   app.register(registerRoutes);
 
   return app;
