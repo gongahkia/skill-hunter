@@ -98,7 +98,9 @@ export async function runSpecialistAgentsForReview(
     input.policyRules,
     options.adaptiveTypeBoosts
   );
-  const findings = applySuggestedRedlines(scoredFindings);
+  const findings = applySuggestedRedlines(scoredFindings, {
+    language: input.language
+  });
   const canonicalFindings = normalizeFindings(
     input.reviewRunId,
     input.contractVersionId,
