@@ -25,6 +25,9 @@ export function App() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [importedFiles, setImportedFiles] = useState<ImportedContractFile[]>([]);
+  const [isImportingFiles, setIsImportingFiles] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     const existingTokens = getStoredAuthTokens();
@@ -33,6 +36,18 @@ export function App() {
   }, []);
 
   const isAuthenticated = useMemo(() => tokens !== null, [tokens]);
+
+  function formatFileSize(sizeInBytes: number) {
+    if (sizeInBytes < 1024) {
+      return `${sizeInBytes} B`;
+    }
+
+    if (sizeInBytes < 1024 * 1024) {
+      return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -80,6 +95,20 @@ export function App() {
       setTokens(null);
       setIsLoggingOut(false);
       setStatus("Cleared desktop auth session.");
+    }
+  }
+
+  async function handleImportContractFiles() {
+    setImportError(null);
+    setIsImportingFiles(true);
+
+    try {
+      const selectedFiles = await window.desktopBridge.pickContractFiles();
+      setImportedFiles(selectedFiles);
+    } catch (pickError) {
+      setImportError(pickError instanceof Error ? pickError.message : "FILE_IMPORT_FAILED");
+    } finally {
+      setIsImportingFiles(false);
     }
   }
 
@@ -141,6 +170,40 @@ export function App() {
               {isLoggingOut ? "Signing out..." : "Sign out"}
             </button>
           </div>
+        ) : null}
+      </section>
+
+      <section className="app-card importer-card">
+        <div className="importer-header">
+          <h2>Local Contract Importer</h2>
+          <button disabled={isImportingFiles} onClick={() => void handleImportContractFiles()} type="button">
+            {isImportingFiles ? "Importing..." : "Import Files"}
+          </button>
+        </div>
+        {importError ? <p className="message message-error">{importError}</p> : null}
+        <p>{importedFiles.length > 0 ? `${importedFiles.length} file(s) selected` : "No files imported yet."}</p>
+
+        {importedFiles.length > 0 ? (
+          <ul className="import-list">
+            {importedFiles.map((file) => (
+              <li className="import-item" key={`${file.path}:${file.size}`}>
+                <p className="import-file-name">{file.name}</p>
+                <p className="import-meta">
+                  {file.kind.toUpperCase()} · {file.mimeType} · {formatFileSize(file.size)}
+                </p>
+                {file.kind === "txt" && file.textPreview ? (
+                  <pre className="import-preview">{file.textPreview}</pre>
+                ) : null}
+                {file.kind === "image" ? (
+                  <img
+                    alt={file.name}
+                    className="import-image-preview"
+                    src={`data:${file.mimeType};base64,${file.base64Content}`}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
         ) : null}
       </section>
     </main>
