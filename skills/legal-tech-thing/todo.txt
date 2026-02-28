@@ -1,4 +1,3 @@
-(A) Implement secure API client in web app with automatic access token refresh on 401 +web +auth
 (A) Implement web dashboard showing contract list with status, source type, and last review date +web +contracts
 (A) Implement drag-and-drop upload flow for PDF, DOCX, image, and text files +web +upload
 (A) Implement contract detail page that renders extracted clause list with clickable offsets +web +viewer

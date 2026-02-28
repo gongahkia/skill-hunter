@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../lib/config";
+import { apiClient } from "../lib/api-client";
 import {
   clearStoredTokens,
   getStoredTokens,
@@ -17,37 +17,19 @@ type LoginPayload = {
 };
 
 export async function registerUser(payload: RegisterPayload) {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+  return apiClient.request("/auth/register", {
     method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify(payload)
+    withAuth: false,
+    body: payload
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error ?? "REGISTER_FAILED");
-  }
-
-  return response.json();
 }
 
 export async function loginUser(payload: LoginPayload) {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  const data = (await apiClient.request("/auth/login", {
     method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error ?? "LOGIN_FAILED");
-  }
-
-  const data = (await response.json()) as {
+    withAuth: false,
+    body: payload
+  })) as {
     accessToken: string;
     refreshToken: string;
   };
@@ -67,32 +49,28 @@ export async function refreshAccessToken() {
     return null;
   }
 
-  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      refreshToken: tokens.refreshToken
-    })
-  });
+  try {
+    const data = (await apiClient.request("/auth/refresh", {
+      method: "POST",
+      withAuth: false,
+      body: {
+        refreshToken: tokens.refreshToken
+      }
+    })) as {
+      accessToken: string;
+      refreshToken: string;
+    };
 
-  if (!response.ok) {
+    setStoredTokens({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken
+    });
+
+    return data;
+  } catch {
     clearStoredTokens();
     return null;
   }
-
-  const data = (await response.json()) as {
-    accessToken: string;
-    refreshToken: string;
-  };
-
-  setStoredTokens({
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken
-  });
-
-  return data;
 }
 
 export async function logoutUser() {
@@ -103,51 +81,35 @@ export async function logoutUser() {
     return;
   }
 
-  await fetch(`${API_BASE_URL}/auth/logout`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      refreshToken: tokens.refreshToken
+  await apiClient
+    .request("/auth/logout", {
+      method: "POST",
+      withAuth: false,
+      body: {
+        refreshToken: tokens.refreshToken
+      }
     })
-  }).catch(() => undefined);
+    .catch(() => undefined);
 
   clearStoredTokens();
 }
 
-export async function authFetch(input: string, init: RequestInit = {}) {
-  const tokens = getStoredTokens();
+export async function authFetch(path: string, init: RequestInit = {}) {
+  const method = init.method ?? "GET";
+  const body = init.body
+    ? typeof init.body === "string"
+      ? JSON.parse(init.body)
+      : init.body
+    : undefined;
 
-  const response = await fetch(`${API_BASE_URL}${input}`, {
-    ...init,
-    headers: {
-      ...(init.headers ?? {}),
-      ...(tokens?.accessToken
-        ? {
-            authorization: `Bearer ${tokens.accessToken}`
-          }
-        : {})
-    }
+  const response = await apiClient.request(path, {
+    method,
+    body,
+    headers: (init.headers as Record<string, string>) ?? {},
+    withAuth: true
   });
 
-  if (response.status !== 401 || !tokens?.refreshToken) {
-    return response;
-  }
+  setStoredAccessToken(getStoredTokens()?.accessToken ?? "");
 
-  const refreshed = await refreshAccessToken();
-
-  if (!refreshed) {
-    return response;
-  }
-
-  setStoredAccessToken(refreshed.accessToken);
-
-  return fetch(`${API_BASE_URL}${input}`, {
-    ...init,
-    headers: {
-      ...(init.headers ?? {}),
-      authorization: `Bearer ${refreshed.accessToken}`
-    }
-  });
+  return response;
 }
