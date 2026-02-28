@@ -19,7 +19,11 @@ declare global {
       EMBEDDING_PROVIDER?: string;
       OPENAI_API_KEY?: string;
       OPENAI_BASE_URL?: string;
+      OPENAI_CHAT_MODEL?: string;
       OPENAI_EMBEDDING_MODEL?: string;
+      ANTHROPIC_API_KEY?: string;
+      ANTHROPIC_BASE_URL?: string;
+      ANTHROPIC_MODEL?: string;
       OLLAMA_BASE_URL?: string;
       OLLAMA_EMBEDDING_MODEL?: string;
     }
