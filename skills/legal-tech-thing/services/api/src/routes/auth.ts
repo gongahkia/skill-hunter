@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { evaluatePasswordStrength } from "../modules/auth/password-strength";
 import { checkAuthRateLimit } from "../modules/auth/rate-limit";
+import { evaluateRefreshAttempt } from "../modules/auth/refresh-session";
 import {
   buildRefreshTokenBundle,
   parseRefreshTokenSessionId,
@@ -222,18 +223,21 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const hashedToken = hashRefreshToken(refreshToken);
+    const refreshDecision = evaluateRefreshAttempt({
+      session: existingSession,
+      hashedToken,
+      now: new Date()
+    });
 
-    if (existingSession.tokenHash !== hashedToken) {
-      await revokeSessionFamily(app, existingSession.tokenFamilyId);
-      return reply.status(401).send(REUSE_DETECTED_ERROR);
-    }
+    if (refreshDecision.decision === "reject") {
+      if (refreshDecision.revokeFamily) {
+        await revokeSessionFamily(app, existingSession.tokenFamilyId);
+      }
 
-    if (existingSession.revokedAt || existingSession.replacedBySessionId) {
-      await revokeSessionFamily(app, existingSession.tokenFamilyId);
-      return reply.status(401).send(REUSE_DETECTED_ERROR);
-    }
+      if (refreshDecision.error === "TOKEN_REUSE_DETECTED") {
+        return reply.status(401).send(REUSE_DETECTED_ERROR);
+      }
 
-    if (existingSession.expiresAt.getTime() <= Date.now()) {
       return reply.status(401).send(INVALID_REFRESH_ERROR);
     }
 
