@@ -6,9 +6,11 @@
 <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-[Monorepo](#skills) for legal workflow tools.
+[Monorepo](#skills) for [LegalTech](https://www.linkedin.com/pulse/legaltech-vs-lawtech-technological-twinship-transforming-2ifgc/) and [LawTech](https://www.linkedin.com/pulse/legaltech-vs-lawtech-technological-twinship-transforming-2ifgc/) workflow tools.
 
 ## Skills
+
+`Skill Hunter` currently supports the following skills.
 
 * `Skill Hunter`: Browser extension for readable Singapore legislation on SSO
     * [SSO](https://sso.agc.gov.sg/) is the most-referenced source for lawyers when keeping up to date with Singapore Legislation. Time is often spent poring over definitions and navigating between interpretation and offence sections. `Skill Hunter` simplifies the heavily-nested DOM structure of the webpage to one that is intuitive and easily understood by lawyers and programmers alike.
