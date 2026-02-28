@@ -7,13 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ContractSourceType {
+  UPLOAD
+  WEB
+  EXTENSION_DOM
+  DESKTOP_SCREEN
+  CLIPBOARD
+}
+
+enum ContractProcessingStatus {
+  CREATED
+  UPLOADING
+  QUEUED
+  INGESTING
+  READY
+  FAILED
+}
+
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
   sessions     Session[]
+  contracts    Contract[]
 
   @@map("users")
 }
@@ -34,4 +52,19 @@ model Session {
   @@index([userId])
   @@index([tokenFamilyId])
   @@map("sessions")
+}
+
+model Contract {
+  id         String                   @id @default(uuid()) @db.Uuid
+  ownerId    String                   @map("owner_id") @db.Uuid
+  title      String
+  sourceType ContractSourceType       @map("source_type")
+  status     ContractProcessingStatus @default(CREATED)
+  createdAt  DateTime                 @default(now()) @map("created_at")
+  updatedAt  DateTime                 @updatedAt @map("updated_at")
+  owner      User                     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("contracts")
 }
