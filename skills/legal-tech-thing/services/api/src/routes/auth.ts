@@ -4,6 +4,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 
 import { evaluatePasswordStrength } from "../modules/auth/password-strength";
+import { checkAuthRateLimit } from "../modules/auth/rate-limit";
 import {
   buildRefreshTokenBundle,
   parseRefreshTokenSessionId,
@@ -53,6 +54,23 @@ async function revokeSessionFamily(app: Parameters<FastifyPluginAsync>[0], token
   });
 }
 
+async function enforceAuthRateLimit(
+  app: Parameters<FastifyPluginAsync>[0],
+  ip: string,
+  email?: string
+) {
+  const rateLimitResult = await checkAuthRateLimit(app.redis, ip, email);
+
+  if (rateLimitResult.isLimited) {
+    return {
+      error: "RATE_LIMITED",
+      retryAfterSeconds: rateLimitResult.retryAfterSeconds
+    };
+  }
+
+  return null;
+}
+
 const authRoutes: FastifyPluginAsync = async (app) => {
   app.post("/register", async (request, reply) => {
     const parseResult = registerBodySchema.safeParse(request.body);
@@ -65,6 +83,12 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const email = parseResult.data.email.trim().toLowerCase();
+    const rateLimit = await enforceAuthRateLimit(app, request.ip, email);
+
+    if (rateLimit) {
+      return reply.status(429).send(rateLimit);
+    }
+
     const strength = evaluatePasswordStrength(parseResult.data.password, email);
 
     if (!strength.isStrongEnough) {
@@ -119,6 +143,11 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const email = parseResult.data.email.trim().toLowerCase();
+    const rateLimit = await enforceAuthRateLimit(app, request.ip, email);
+
+    if (rateLimit) {
+      return reply.status(429).send(rateLimit);
+    }
 
     const user = await app.prisma.user.findUnique({
       where: { email }
@@ -167,6 +196,12 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         error: "VALIDATION_ERROR",
         details: parseResult.error.flatten()
       });
+    }
+
+    const rateLimit = await enforceAuthRateLimit(app, request.ip);
+
+    if (rateLimit) {
+      return reply.status(429).send(rateLimit);
     }
 
     const refreshToken = parseResult.data.refreshToken;
@@ -250,6 +285,12 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         error: "VALIDATION_ERROR",
         details: parseResult.error.flatten()
       });
+    }
+
+    const rateLimit = await enforceAuthRateLimit(app, request.ip);
+
+    if (rateLimit) {
+      return reply.status(429).send(rateLimit);
     }
 
     const refreshToken = parseResult.data.refreshToken;
