@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { loginWithPassword, logoutWithRefreshToken } from "./auth/api";
 import {
@@ -28,6 +28,18 @@ export function App() {
   const [importedFiles, setImportedFiles] = useState<ImportedContractFile[]>([]);
   const [isImportingFiles, setIsImportingFiles] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [capturedScreen, setCapturedScreen] = useState<CapturedScreenResult | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [isCapturingScreen, setIsCapturingScreen] = useState(false);
+  const [selectionRect, setSelectionRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [regionCaptureDataUrl, setRegionCaptureDataUrl] = useState<string | null>(null);
+  const captureStageRef = useRef<HTMLDivElement | null>(null);
+  const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const existingTokens = getStoredAuthTokens();
@@ -109,6 +121,80 @@ export function App() {
       setImportError(pickError instanceof Error ? pickError.message : "FILE_IMPORT_FAILED");
     } finally {
       setIsImportingFiles(false);
+    }
+  }
+
+  function toCaptureCoordinates(clientX: number, clientY: number) {
+    if (!capturedScreen || !captureStageRef.current) {
+      return null;
+    }
+
+    const bounds = captureStageRef.current.getBoundingClientRect();
+    const normalizedX = (clientX - bounds.left) / bounds.width;
+    const normalizedY = (clientY - bounds.top) / bounds.height;
+
+    const x = Math.min(capturedScreen.width, Math.max(0, normalizedX * capturedScreen.width));
+    const y = Math.min(capturedScreen.height, Math.max(0, normalizedY * capturedScreen.height));
+
+    return { x, y };
+  }
+
+  async function handleCapturePrimaryScreen() {
+    setCaptureError(null);
+    setIsCapturingScreen(true);
+
+    try {
+      const screenshot = await window.desktopBridge.capturePrimaryScreen();
+      setCapturedScreen(screenshot);
+      setSelectionRect(null);
+      setRegionCaptureDataUrl(null);
+    } catch (error) {
+      setCaptureError(error instanceof Error ? error.message : "SCREEN_CAPTURE_FAILED");
+    } finally {
+      setIsCapturingScreen(false);
+    }
+  }
+
+  async function handleFinalizeRegionCapture() {
+    if (!capturedScreen || !selectionRect) {
+      setCaptureError("CAPTURE_REGION_REQUIRED");
+      return;
+    }
+
+    const image = new Image();
+    const imageLoaded = new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("SCREENSHOT_IMAGE_LOAD_FAILED"));
+    });
+    image.src = capturedScreen.dataUrl;
+
+    try {
+      await imageLoaded;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(selectionRect.width));
+      canvas.height = Math.max(1, Math.round(selectionRect.height));
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("CANVAS_CONTEXT_UNAVAILABLE");
+      }
+
+      context.drawImage(
+        image,
+        selectionRect.x,
+        selectionRect.y,
+        selectionRect.width,
+        selectionRect.height,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      setRegionCaptureDataUrl(canvas.toDataURL("image/png"));
+      setCaptureError(null);
+    } catch (error) {
+      setCaptureError(error instanceof Error ? error.message : "SCREEN_REGION_CAPTURE_FAILED");
     }
   }
 
@@ -204,6 +290,96 @@ export function App() {
               </li>
             ))}
           </ul>
+        ) : null}
+      </section>
+
+      <section className="app-card capture-card">
+        <div className="importer-header">
+          <h2>Screen Region Capture</h2>
+          <button disabled={isCapturingScreen} onClick={() => void handleCapturePrimaryScreen()} type="button">
+            {isCapturingScreen ? "Capturing..." : "Capture Screen"}
+          </button>
+        </div>
+        {captureError ? <p className="message message-error">{captureError}</p> : null}
+        {capturedScreen ? <p>Captured {capturedScreen.name}. Drag on image to select a region.</p> : null}
+
+        {capturedScreen ? (
+          <>
+            <div
+              className="capture-stage"
+              onMouseDown={(event) => {
+                const coordinates = toCaptureCoordinates(event.clientX, event.clientY);
+                if (!coordinates) {
+                  return;
+                }
+
+                selectionStartRef.current = coordinates;
+                setSelectionRect({
+                  x: coordinates.x,
+                  y: coordinates.y,
+                  width: 0,
+                  height: 0
+                });
+              }}
+              onMouseMove={(event) => {
+                const start = selectionStartRef.current;
+                if (!start) {
+                  return;
+                }
+
+                const current = toCaptureCoordinates(event.clientX, event.clientY);
+                if (!current) {
+                  return;
+                }
+
+                setSelectionRect({
+                  x: Math.min(start.x, current.x),
+                  y: Math.min(start.y, current.y),
+                  width: Math.abs(current.x - start.x),
+                  height: Math.abs(current.y - start.y)
+                });
+              }}
+              onMouseUp={() => {
+                selectionStartRef.current = null;
+              }}
+              onMouseLeave={() => {
+                selectionStartRef.current = null;
+              }}
+              ref={captureStageRef}
+            >
+              <img
+                alt="Full screen capture"
+                className="capture-image"
+                src={capturedScreen.dataUrl}
+              />
+              {selectionRect ? (
+                <div
+                  className="capture-selection"
+                  style={{
+                    left: `${(selectionRect.x / capturedScreen.width) * 100}%`,
+                    top: `${(selectionRect.y / capturedScreen.height) * 100}%`,
+                    width: `${(selectionRect.width / capturedScreen.width) * 100}%`,
+                    height: `${(selectionRect.height / capturedScreen.height) * 100}%`
+                  }}
+                />
+              ) : null}
+            </div>
+            <button
+              disabled={!selectionRect || selectionRect.width < 4 || selectionRect.height < 4}
+              onClick={() => void handleFinalizeRegionCapture()}
+              type="button"
+            >
+              Save Region Capture
+            </button>
+          </>
+        ) : null}
+
+        {regionCaptureDataUrl ? (
+          <img
+            alt="Selected region capture"
+            className="capture-region-preview"
+            src={regionCaptureDataUrl}
+          />
         ) : null}
       </section>
     </main>

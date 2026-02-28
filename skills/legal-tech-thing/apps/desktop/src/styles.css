@@ -171,3 +171,35 @@ button:disabled {
   border-radius: 0.35rem;
   border: 1px solid #cbd5e1;
 }
+
+.capture-card {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.capture-stage {
+  position: relative;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  overflow: hidden;
+  cursor: crosshair;
+  width: min(860px, 100%);
+}
+
+.capture-image {
+  width: 100%;
+  display: block;
+}
+
+.capture-selection {
+  position: absolute;
+  border: 2px solid #f97316;
+  background: rgba(249, 115, 22, 0.2);
+  pointer-events: none;
+}
+
+.capture-region-preview {
+  width: min(560px, 100%);
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+}

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, desktopCapturer, dialog, ipcMain, screen } from "electron";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -15,6 +15,15 @@ type ImportedContractFile = {
   kind: "pdf" | "docx" | "image" | "txt";
   base64Content: string;
   textPreview: string | null;
+};
+
+type CapturedScreenResult = {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  dataUrl: string;
+  capturedAt: string;
 };
 
 function toKind(fileName: string): ImportedContractFile["kind"] | null {
@@ -140,6 +149,34 @@ app.whenReady().then(() => {
     }
 
     return imports;
+  });
+
+  ipcMain.handle("desktop:capture-primary-screen", async (): Promise<CapturedScreenResult> => {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const sources = await desktopCapturer.getSources({
+      types: ["screen"],
+      thumbnailSize: {
+        width: primaryDisplay.size.width,
+        height: primaryDisplay.size.height
+      }
+    });
+
+    const source =
+      sources.find((candidate) => candidate.display_id === String(primaryDisplay.id)) ?? sources[0];
+
+    if (!source) {
+      throw new Error("SCREEN_CAPTURE_SOURCE_NOT_FOUND");
+    }
+
+    const size = source.thumbnail.getSize();
+    return {
+      id: source.id,
+      name: source.name,
+      width: size.width,
+      height: size.height,
+      dataUrl: source.thumbnail.toDataURL(),
+      capturedAt: new Date().toISOString()
+    };
   });
 
   createMainWindow();
