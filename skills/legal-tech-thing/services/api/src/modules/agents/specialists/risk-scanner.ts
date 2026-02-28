@@ -1,4 +1,5 @@
 import type { AgentExecutor, AgentRuntimeInput, AgentRuntimeOutput } from "../runtime";
+import { resolveSpecialistPromptUsage } from "./prompt-usage";
 
 type RiskPattern = {
   title: string;
@@ -58,6 +59,7 @@ export const riskScannerAgent: AgentExecutor = async (
   input: AgentRuntimeInput
 ): Promise<AgentRuntimeOutput> => {
   const findings: AgentRuntimeOutput["findings"] = [];
+  const promptContext = await resolveSpecialistPromptUsage("risk-scanner", input);
 
   for (const clause of input.clauses) {
     for (const pattern of riskPatterns) {
@@ -92,10 +94,6 @@ export const riskScannerAgent: AgentExecutor = async (
 
   return {
     findings,
-    usage: {
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0
-    }
+    usage: promptContext.usage
   };
 };

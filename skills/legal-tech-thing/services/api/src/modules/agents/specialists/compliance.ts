@@ -1,4 +1,5 @@
 import type { AgentExecutor, AgentRuntimeInput, AgentRuntimeOutput } from "../runtime";
+import { resolveSpecialistPromptUsage } from "./prompt-usage";
 
 function buildRegex(pattern: string) {
   try {
@@ -30,6 +31,7 @@ function excerptAround(text: string, localIndex: number) {
 export const complianceAgent: AgentExecutor = async (
   input: AgentRuntimeInput
 ): Promise<AgentRuntimeOutput> => {
+  const promptContext = await resolveSpecialistPromptUsage("compliance", input);
   const findings: AgentRuntimeOutput["findings"] = [];
 
   for (const rule of input.policyRules) {
@@ -106,10 +108,6 @@ export const complianceAgent: AgentExecutor = async (
 
   return {
     findings,
-    usage: {
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0
-    }
+    usage: promptContext.usage
   };
 };

@@ -1,4 +1,5 @@
 import type { AgentExecutor, AgentRuntimeInput, AgentRuntimeOutput } from "../runtime";
+import { resolveSpecialistPromptUsage } from "./prompt-usage";
 
 type ConflictRule = {
   title: string;
@@ -56,6 +57,10 @@ function detectGoverningLaw(clauseText: string) {
 export const crossClauseConflictAgent: AgentExecutor = async (
   input: AgentRuntimeInput
 ): Promise<AgentRuntimeOutput> => {
+  const promptContext = await resolveSpecialistPromptUsage(
+    "cross-clause-conflict",
+    input
+  );
   const findings: AgentRuntimeOutput["findings"] = [];
 
   for (let i = 0; i < input.clauses.length; i += 1) {
@@ -139,10 +144,6 @@ export const crossClauseConflictAgent: AgentExecutor = async (
 
   return {
     findings,
-    usage: {
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0
-    }
+    usage: promptContext.usage
   };
 };

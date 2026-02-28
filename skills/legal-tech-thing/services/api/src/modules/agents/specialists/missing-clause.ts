@@ -1,4 +1,5 @@
 import type { AgentExecutor, AgentRuntimeInput, AgentRuntimeOutput } from "../runtime";
+import { resolveSpecialistPromptUsage } from "./prompt-usage";
 
 type RequiredClause = {
   name: string;
@@ -71,6 +72,7 @@ function clauseMatchesRequirement(clause: AgentRuntimeInput["clauses"][number], 
 export const missingClauseAgent: AgentExecutor = async (
   input: AgentRuntimeInput
 ): Promise<AgentRuntimeOutput> => {
+  const promptContext = await resolveSpecialistPromptUsage("missing-clause", input);
   const requiredClauses = getRequiredClauses(input);
 
   const findings = requiredClauses
@@ -99,10 +101,6 @@ export const missingClauseAgent: AgentExecutor = async (
 
   return {
     findings,
-    usage: {
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0
-    }
+    usage: promptContext.usage
   };
 };

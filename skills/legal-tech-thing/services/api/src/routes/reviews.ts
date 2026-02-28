@@ -10,6 +10,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { runSpecialistAgentsForReview } from "../modules/agents/orchestrator";
 import type { AgentName } from "../modules/agents/runtime";
 import { buildAdaptiveFindingTypeBoosts } from "../modules/feedback/adaptive-ranking";
+import { detectContractLanguage } from "../modules/ingest/language";
 
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
@@ -468,12 +469,20 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         }
       });
 
+      const detectedLanguage = detectContractLanguage(
+        clauses.map((clause) => clause.normalizedText).join("\n")
+      );
+      const runtimeLanguage =
+        detectedLanguage.iso6391 && detectedLanguage.iso6391.length >= 2
+          ? detectedLanguage.iso6391
+          : "en";
+
       const runtimeInputBase = {
         contractId: contractVersion.contractId,
         contractVersionId: contractVersion.id,
         contractType: undefined,
         jurisdiction: undefined,
-        language: "en",
+        language: runtimeLanguage,
         policyProfileId: profile.id,
         policyRules,
         clauses: clauses.map((clause) => ({

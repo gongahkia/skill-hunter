@@ -1,4 +1,5 @@
 import type { AgentExecutor, AgentRuntimeInput, AgentRuntimeOutput } from "../runtime";
+import { resolveSpecialistPromptUsage } from "./prompt-usage";
 
 const vaguePatterns = [
   {
@@ -58,6 +59,7 @@ function excerptAround(text: string, localIndex: number) {
 export const ambiguityAgent: AgentExecutor = async (
   input: AgentRuntimeInput
 ): Promise<AgentRuntimeOutput> => {
+  const promptContext = await resolveSpecialistPromptUsage("ambiguity", input);
   const findings: AgentRuntimeOutput["findings"] = [];
   const definedTerms = collectDefinedTerms(input.clauses);
 
@@ -128,10 +130,6 @@ export const ambiguityAgent: AgentExecutor = async (
 
   return {
     findings,
-    usage: {
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0
-    }
+    usage: promptContext.usage
   };
 };
