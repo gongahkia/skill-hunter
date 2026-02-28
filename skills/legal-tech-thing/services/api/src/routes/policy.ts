@@ -133,6 +133,38 @@ const policyRoutes: FastifyPluginAsync = async (app) => {
       profile
     });
   });
+
+  app.get("/rules", async (request, reply) => {
+    const profile = await app.prisma.policyProfile.findFirst({
+      where: {
+        userId: request.auth.userId
+      },
+      orderBy: {
+        createdAt: "asc"
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!profile) {
+      return reply.status(200).send({
+        items: []
+      });
+    }
+
+    const rules = await app.prisma.policyRule.findMany({
+      where: {
+        profileId: profile.id,
+        active: true
+      },
+      orderBy: [{ priority: "asc" }, { createdAt: "asc" }]
+    });
+
+    return reply.status(200).send({
+      items: rules
+    });
+  });
 };
 
 export default policyRoutes;
