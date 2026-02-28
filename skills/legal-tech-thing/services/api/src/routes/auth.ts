@@ -24,6 +24,10 @@ const refreshBodySchema = z.object({
   refreshToken: z.string().min(1)
 });
 
+const logoutBodySchema = z.object({
+  refreshToken: z.string().min(1)
+});
+
 const INVALID_CREDENTIALS_ERROR = {
   error: "INVALID_CREDENTIALS"
 } as const;
@@ -224,6 +228,49 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       tokenType: "Bearer",
       accessTokenTtl: process.env.ACCESS_TOKEN_TTL ?? "15m"
     });
+  });
+
+  app.post("/logout", async (request, reply) => {
+    const parseResult = logoutBodySchema.safeParse(request.body);
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: parseResult.error.flatten()
+      });
+    }
+
+    const refreshToken = parseResult.data.refreshToken;
+    const sessionId = parseRefreshTokenSessionId(refreshToken);
+
+    if (!sessionId) {
+      return reply.status(204).send();
+    }
+
+    const session = await app.prisma.session.findUnique({
+      where: {
+        id: sessionId
+      }
+    });
+
+    if (!session) {
+      return reply.status(204).send();
+    }
+
+    if (session.tokenHash !== hashRefreshToken(refreshToken)) {
+      return reply.status(204).send();
+    }
+
+    await app.prisma.session.update({
+      where: {
+        id: session.id
+      },
+      data: {
+        revokedAt: new Date()
+      }
+    });
+
+    return reply.status(204).send();
   });
 };
 
