@@ -9,6 +9,10 @@ const createReviewBodySchema = z.object({
   selectedAgents: z.array(z.string().min(1)).min(1).optional()
 });
 
+const reviewIdParamsSchema = z.object({
+  id: z.string().uuid()
+});
+
 function getProviderModel(provider: LlmProvider) {
   if (provider === LlmProvider.OPENAI) {
     return process.env.OPENAI_CHAT_MODEL ?? "gpt-4.1-mini";
@@ -23,6 +27,24 @@ function getProviderModel(provider: LlmProvider) {
   }
 
   return process.env.OLLAMA_CHAT_MODEL ?? "llama3.1:8b-instruct";
+}
+
+function getProgressFromStatus(status: ReviewRunStatus, metadata: Record<string, unknown>) {
+  if (status === ReviewRunStatus.QUEUED) {
+    return 0;
+  }
+
+  if (status === ReviewRunStatus.RUNNING) {
+    const progress = metadata.progressPercent;
+
+    if (typeof progress === "number" && progress >= 0 && progress <= 100) {
+      return progress;
+    }
+
+    return 50;
+  }
+
+  return 100;
 }
 
 const defaultRiskThresholds = {
@@ -135,7 +157,8 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
         providerModel,
         status: ReviewRunStatus.QUEUED,
         orchestrationMeta: {
-          selectedAgents
+          selectedAgents,
+          progressPercent: 0
         }
       },
       select: {
@@ -167,6 +190,63 @@ const reviewRoutes: FastifyPluginAsync = async (app) => {
       reviewRun,
       queued: true,
       queueJobId: queueJob.id
+    });
+  });
+
+  app.get("/:id", async (request, reply) => {
+    const parseResult = reviewIdParamsSchema.safeParse(request.params);
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: parseResult.error.flatten()
+      });
+    }
+
+    const reviewRun = await app.prisma.reviewRun.findFirst({
+      where: {
+        id: parseResult.data.id,
+        contractVersion: {
+          contract: {
+            ownerId: request.auth.userId
+          }
+        }
+      },
+      select: {
+        id: true,
+        contractVersionId: true,
+        profileId: true,
+        provider: true,
+        providerModel: true,
+        status: true,
+        orchestrationMeta: true,
+        startedAt: true,
+        finishedAt: true,
+        errorCode: true,
+        errorMessage: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!reviewRun) {
+      return reply.status(404).send({
+        error: "REVIEW_RUN_NOT_FOUND"
+      });
+    }
+
+    const metadata = (reviewRun.orchestrationMeta ?? {}) as Record<string, unknown>;
+    const progressPercent = getProgressFromStatus(reviewRun.status, metadata);
+
+    return reply.status(200).send({
+      reviewRun: {
+        ...reviewRun,
+        progressPercent,
+        providerMetadata: {
+          provider: reviewRun.provider,
+          model: reviewRun.providerModel
+        }
+      }
     });
   });
 };
