@@ -4,10 +4,13 @@ import type { DomExtractionResult } from "../content/dom-extractor";
 import { DOM_EXTRACTION_MESSAGE_TYPE } from "../content/dom-extractor";
 import type { TermsLinkExtractionResult } from "../content/terms-link-extractor";
 import { TERMS_LINK_EXTRACTION_MESSAGE_TYPE } from "../content/terms-link-extractor";
+import type { PreAcceptInterceptPayload } from "../content/acceptance-interceptor";
+import { PRE_ACCEPT_INTERCEPT_MESSAGE_TYPE } from "../content/acceptance-interceptor";
 
 const detectionByTabId = new Map<number, ContractDetectionResult>();
 const extractionByTabId = new Map<number, DomExtractionResult>();
 const termsLinksByTabId = new Map<number, TermsLinkExtractionResult>();
+const preAcceptInterceptByTabId = new Map<number, PreAcceptInterceptPayload>();
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => undefined);
@@ -53,7 +56,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       source: "background",
       detection: senderTabId !== undefined ? detectionByTabId.get(senderTabId) ?? null : null,
       extraction: senderTabId !== undefined ? extractionByTabId.get(senderTabId) ?? null : null,
-      termsLinks: senderTabId !== undefined ? termsLinksByTabId.get(senderTabId) ?? null : null
+      termsLinks: senderTabId !== undefined ? termsLinksByTabId.get(senderTabId) ?? null : null,
+      preAcceptIntercept:
+        senderTabId !== undefined ? preAcceptInterceptByTabId.get(senderTabId) ?? null : null
     });
     return true;
   }
@@ -64,6 +69,22 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
     if (senderTabId !== undefined && termsLinksPayload) {
       termsLinksByTabId.set(senderTabId, termsLinksPayload);
+    }
+
+    sendResponse({
+      ok: true,
+      source: "background",
+      tabId: senderTabId ?? null
+    });
+    return true;
+  }
+
+  if (message?.type === PRE_ACCEPT_INTERCEPT_MESSAGE_TYPE) {
+    const senderTabId = _sender.tab?.id;
+    const interceptPayload = message?.payload as PreAcceptInterceptPayload | undefined;
+
+    if (senderTabId !== undefined && interceptPayload) {
+      preAcceptInterceptByTabId.set(senderTabId, interceptPayload);
     }
 
     sendResponse({
