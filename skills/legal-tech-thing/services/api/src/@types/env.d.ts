@@ -28,6 +28,7 @@ declare global {
       GEMINI_BASE_URL?: string;
       GEMINI_MODEL?: string;
       OLLAMA_BASE_URL?: string;
+      OLLAMA_CHAT_MODEL?: string;
       OLLAMA_EMBEDDING_MODEL?: string;
     }
   }
