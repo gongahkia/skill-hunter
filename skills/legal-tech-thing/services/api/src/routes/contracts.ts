@@ -262,6 +262,77 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
+  app.get("/:id", async (request, reply) => {
+    const paramsResult = contractIdParamsSchema.safeParse(request.params);
+
+    if (!paramsResult.success) {
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        details: paramsResult.error.flatten()
+      });
+    }
+
+    const contract = await app.prisma.contract.findFirst({
+      where: {
+        id: paramsResult.data.id,
+        ownerId: request.auth.userId
+      },
+      select: {
+        id: true,
+        title: true,
+        sourceType: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        versions: {
+          orderBy: {
+            createdAt: "desc"
+          },
+          take: 1,
+          select: {
+            id: true,
+            createdAt: true,
+            clauses: {
+              orderBy: {
+                startOffset: "asc"
+              },
+              select: {
+                id: true,
+                type: true,
+                normalizedText: true,
+                startOffset: true,
+                endOffset: true,
+                sourceParser: true,
+                parserConfidence: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!contract) {
+      return reply.status(404).send({
+        error: "CONTRACT_NOT_FOUND"
+      });
+    }
+
+    const latestVersion = contract.versions[0] ?? null;
+
+    return reply.status(200).send({
+      contract: {
+        id: contract.id,
+        title: contract.title,
+        sourceType: contract.sourceType,
+        status: contract.status,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt
+      },
+      latestVersion,
+      clauses: latestVersion?.clauses ?? []
+    });
+  });
+
   app.get("/:id/findings", async (request, reply) => {
     const paramsResult = contractIdParamsSchema.safeParse(request.params);
     const queryResult = contractFindingsQuerySchema.safeParse(request.query);

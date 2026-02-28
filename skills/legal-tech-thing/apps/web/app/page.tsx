@@ -229,7 +229,9 @@ export default function HomePage() {
           <tbody>
             {contracts.map((contract) => (
               <tr key={contract.id}>
-                <td>{contract.title}</td>
+                <td>
+                  <Link href={`/contracts/${contract.id}`}>{contract.title}</Link>
+                </td>
                 <td>{contract.sourceType}</td>
                 <td>{contract.status}</td>
                 <td>{formatDate(contract.lastReviewAt)}</td>
