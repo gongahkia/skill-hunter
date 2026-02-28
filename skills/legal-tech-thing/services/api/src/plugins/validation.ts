@@ -1,4 +1,4 @@
-import type { FastifyPluginAsync, preHandlerHookHandler } from "fastify";
+import type { FastifyPluginAsync, FastifyRequest, preHandlerHookHandler } from "fastify";
 import fp from "fastify-plugin";
 import type { ZodTypeAny } from "zod";
 
@@ -25,7 +25,14 @@ declare module "fastify" {
 }
 
 const validationPlugin: FastifyPluginAsync = async (app) => {
-  app.decorateRequest("validated", {});
+  app.decorateRequest("validated", {
+    getter(this: FastifyRequest) {
+      return (this as FastifyRequest & { _validated?: ValidatedPayload })._validated ?? {};
+    },
+    setter(this: FastifyRequest, value: ValidatedPayload) {
+      (this as FastifyRequest & { _validated?: ValidatedPayload })._validated = value;
+    }
+  });
 
   app.decorate("buildValidationPreHandler", (schemas: RequestSchemaSet) => {
     return async (request, reply) => {
