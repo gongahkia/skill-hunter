@@ -2,21 +2,55 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   fetchContractDetail,
   type ContractClause,
   type ContractDetailResponse
 } from "../../../src/contracts/detail-api";
+import {
+  fetchContractFindings,
+  type ContractFinding
+} from "../../../src/findings/api";
+
+const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const;
+
+function toConfidencePercentage(confidence: string) {
+  const value = Number(confidence);
+
+  if (!Number.isFinite(value)) {
+    return "0%";
+  }
+
+  return `${Math.round(value * 100)}%`;
+}
 
 export default function ContractDetailPage() {
   const params = useParams<{ id: string }>();
   const contractId = params.id;
   const [detail, setDetail] = useState<ContractDetailResponse | null>(null);
+  const [findings, setFindings] = useState<ContractFinding[]>([]);
   const [selectedClause, setSelectedClause] = useState<ContractClause | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const groupedFindings = useMemo(() => {
+    const grouped = new Map<string, ContractFinding[]>();
+
+    for (const finding of findings) {
+      const existing = grouped.get(finding.severity) ?? [];
+      existing.push(finding);
+      grouped.set(finding.severity, existing);
+    }
+
+    return severityOrder
+      .map((severity) => ({
+        severity,
+        items: grouped.get(severity) ?? []
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [findings]);
 
   useEffect(() => {
     async function loadDetail() {
@@ -24,8 +58,13 @@ export default function ContractDetailPage() {
       setIsLoading(true);
 
       try {
-        const response = await fetchContractDetail(contractId);
-        setDetail(response);
+        const [detailResponse, findingsResponse] = await Promise.all([
+          fetchContractDetail(contractId),
+          fetchContractFindings(contractId)
+        ]);
+
+        setDetail(detailResponse);
+        setFindings(findingsResponse);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : "DETAIL_LOAD_FAILED");
       } finally {
@@ -52,6 +91,29 @@ export default function ContractDetailPage() {
           <p>
             Latest version: {detail.latestVersion?.id ?? "-"} | Clauses: {detail.clauses.length}
           </p>
+
+          <section>
+            <h2>Findings by Severity</h2>
+            {groupedFindings.length === 0 ? <p>No findings yet.</p> : null}
+            {groupedFindings.map((group) => (
+              <article key={group.severity}>
+                <h3>
+                  {group.severity} ({group.items.length})
+                </h3>
+                <ul>
+                  {group.items.map((finding) => (
+                    <li key={finding.id}>
+                      <strong>{finding.title}</strong> [{finding.status}] <br />
+                      <span>Confidence: {toConfidencePercentage(finding.confidence)}</span>
+                      <p>{finding.description}</p>
+                      <blockquote>{finding.evidenceSpan.excerpt}</blockquote>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </section>
+
           <section>
             <h2>Clauses</h2>
             <ul>
@@ -64,6 +126,7 @@ export default function ContractDetailPage() {
               ))}
             </ul>
           </section>
+
           <section>
             <h2>Selected Clause</h2>
             {selectedClause ? (

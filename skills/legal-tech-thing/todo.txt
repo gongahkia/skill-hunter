@@ -1,4 +1,3 @@
-(A) Implement finding panel grouped by severity with evidence excerpt and confidence badge +web +findings
 (A) Implement inline status controls to accept or dismiss findings from contract detail page +web +findings
 (A) Implement policy profile editor form for thresholds, provider choice, and agent toggles +web +policy
 (A) Implement policy rules CRUD UI for required clauses and forbidden phrase checks +web +policy
