@@ -2,9 +2,12 @@ import type { ContractDetectionResult } from "../content/contract-detector";
 import { CONTRACT_DETECTION_MESSAGE_TYPE } from "../content/contract-detector";
 import type { DomExtractionResult } from "../content/dom-extractor";
 import { DOM_EXTRACTION_MESSAGE_TYPE } from "../content/dom-extractor";
+import type { TermsLinkExtractionResult } from "../content/terms-link-extractor";
+import { TERMS_LINK_EXTRACTION_MESSAGE_TYPE } from "../content/terms-link-extractor";
 
 const detectionByTabId = new Map<number, ContractDetectionResult>();
 const extractionByTabId = new Map<number, DomExtractionResult>();
+const termsLinksByTabId = new Map<number, TermsLinkExtractionResult>();
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => undefined);
@@ -49,7 +52,24 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       ok: true,
       source: "background",
       detection: senderTabId !== undefined ? detectionByTabId.get(senderTabId) ?? null : null,
-      extraction: senderTabId !== undefined ? extractionByTabId.get(senderTabId) ?? null : null
+      extraction: senderTabId !== undefined ? extractionByTabId.get(senderTabId) ?? null : null,
+      termsLinks: senderTabId !== undefined ? termsLinksByTabId.get(senderTabId) ?? null : null
+    });
+    return true;
+  }
+
+  if (message?.type === TERMS_LINK_EXTRACTION_MESSAGE_TYPE) {
+    const senderTabId = _sender.tab?.id;
+    const termsLinksPayload = message?.payload as TermsLinkExtractionResult | undefined;
+
+    if (senderTabId !== undefined && termsLinksPayload) {
+      termsLinksByTabId.set(senderTabId, termsLinksPayload);
+    }
+
+    sendResponse({
+      ok: true,
+      source: "background",
+      tabId: senderTabId ?? null
     });
     return true;
   }
