@@ -64,6 +64,12 @@ export const createReviewBodySchema = z.object({
   selectedAgents: z.array(z.string().min(1)).min(1).optional()
 });
 
+export const semanticClauseSearchBodySchema = z.object({
+  queryText: z.string().min(3).max(10_000),
+  contractId: z.string().uuid().optional(),
+  limit: z.coerce.number().int().positive().max(25).default(10)
+});
+
 export const compareReviewsBodySchema = z.object({
   contractVersionId: z.string().uuid(),
   profileId: z.string().uuid().optional(),
