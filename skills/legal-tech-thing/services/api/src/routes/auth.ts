@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 
+import { evaluatePasswordStrength } from "../modules/auth/password-strength";
 import {
   buildRefreshTokenBundle,
   parseRefreshTokenSessionId,
@@ -64,6 +65,17 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const email = parseResult.data.email.trim().toLowerCase();
+    const strength = evaluatePasswordStrength(parseResult.data.password, email);
+
+    if (!strength.isStrongEnough) {
+      return reply.status(400).send({
+        error: "WEAK_PASSWORD",
+        score: strength.score,
+        warning: strength.warning,
+        suggestions: strength.suggestions
+      });
+    }
+
     const passwordHash = await hash(parseResult.data.password, 12);
 
     try {
