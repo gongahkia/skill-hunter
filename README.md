@@ -6,7 +6,7 @@
 <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-Browser extension that formats legislation to be more readable.
+Monorepo for legal workflow tools.
 
 ## Motivation
 
@@ -16,11 +16,15 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 `Skill Hunter` simplifies the heavily-nested DOM structure of the webpage to one that is intuitive and easily understood by lawyers and programmers alike.
 
+`legal-tech-thing` extends this repository into a full contract-ingestion and review stack (web, extension, desktop, API, workers), so one repo now contains two legal-productivity "skills" with different use cases.
+
 ## Purpose
 
-* BLUF, offence sections and their limbs are laid bare
-* Important terms are defined in place
-* Browser extension with tiny source code binary runnable on most machines
+* One monorepo, two skills:
+  * Root (`/`) `Skill Hunter` browser extension for readable Singapore legislation on SSO
+  * `skills/legal-tech-thing/` multi-app contract review platform
+* Keep the extension lightweight while enabling deeper contract review workflows in the second skill
+* Preserve full commit history for both projects in a single repository
 
 ## Screenshot
 
@@ -28,11 +32,9 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Stack
 
-* *Frontend*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS)
-* *Build*: [Webpack](https://webpack.js.org/), [TypeScript Compiler](https://www.typescriptlang.org/)
-* *Testing*: [Jest](https://jestjs.io/), [ts-jest](https://kulshekhar.github.io/ts-jest/)
+* *Skill Hunter (root extension)*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/)
+* *Legal Tech Thing (`skills/legal-tech-thing`)*: [TypeScript](https://www.typescriptlang.org/), [Fastify](https://fastify.dev/), [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/), [Prisma](https://www.prisma.io/), [BullMQ](https://docs.bullmq.io/), [Redis](https://redis.io/), [PostgreSQL](https://www.postgresql.org/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo)
 * *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
-* *Package Manager*: [npm](https://www.npmjs.com/)
 
 ## Supported browsers
 
@@ -48,14 +50,18 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 
 ## Installation
 
-Build `Skill Hunter` locally.
+Build the monorepo locally.
 
 ### CLI
 
 ```console
 $ git clone https://github.com/gongahkia/skill-hunter
 $ cd skill-hunter
+$ npm install
 $ make
+$ cd skills/legal-tech-thing
+$ pnpm install
+$ pnpm build
 ```
 
 ### GUI
@@ -71,6 +77,13 @@ $ make
 3. Unzip the ZIP file.
 
 ## Usage
+
+### Repository layout
+
+1. Root (`skill-hunter/`): original `Skill Hunter` browser extension.
+2. `skills/legal-tech-thing/`: legal-tech contract review stack (web + extension + desktop + API + workers).
+
+### Skill Hunter extension
 
 ### Chrome
 
@@ -95,9 +108,16 @@ $ make
 
 5. Click the simplify button.
 
+### Legal Tech Thing skill
+
+1. `cd skills/legal-tech-thing`
+2. Start full local stack with `pnpm dev`.
+3. Build all workspaces with `pnpm build`.
+4. Run API tests from `services/api` with `pnpm --filter @legal-tech/api test` (after building test artifacts).
+
 ## Browser support
 
-Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
+Support for browsers like Opera, Vivaldi have not been extensively tested for the extension, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
 
 ## References
 
