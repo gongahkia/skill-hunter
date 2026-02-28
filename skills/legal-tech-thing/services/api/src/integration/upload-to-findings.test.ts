@@ -502,4 +502,59 @@ describe("upload to findings integration flow", () => {
     assert.equal(findingsBody.items[0].status, "OPEN");
     assert.equal(findingsBody.items[0].evidenceSpan?.excerpt, "Sample risky language excerpt.");
   });
+
+  it("accepts extension-style DOM payload submissions through upload and ingest endpoints", async (t) => {
+    const app = await buildIntegrationApp();
+    t.after(async () => {
+      await app.close();
+    });
+
+    const mockedDomPayload = [
+      "Terms of Service",
+      "By clicking Accept, you agree to binding arbitration.",
+      "We may update these terms at any time."
+    ].join("\\n\\n");
+    const contentLength = new TextEncoder().encode(mockedDomPayload).byteLength;
+
+    const createContractResponse = await app.inject({
+      method: "POST",
+      url: "/contracts",
+      payload: {
+        title: "Site Terms (Mock DOM)",
+        sourceType: "EXTENSION_DOM"
+      }
+    });
+    assert.equal(createContractResponse.statusCode, 201);
+    const createContractBody = createContractResponse.json();
+    const contractId = createContractBody.contract.id as string;
+    assert.equal(createContractBody.contract.sourceType, "EXTENSION_DOM");
+
+    const uploadUrlResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/upload-url`,
+      payload: {
+        fileName: "mock-dom-capture.txt",
+        mimeType: "text/plain; charset=utf-8",
+        contentLength
+      }
+    });
+    assert.equal(uploadUrlResponse.statusCode, 200);
+    const uploadUrlBody = uploadUrlResponse.json();
+
+    const ingestResponse = await app.inject({
+      method: "POST",
+      url: `/contracts/${contractId}/ingest`,
+      payload: {
+        objectUri: uploadUrlBody.objectUri,
+        objectKey: uploadUrlBody.objectKey,
+        mimeType: "text/plain; charset=utf-8",
+        contentLength,
+        checksum: "dom-payload-checksum"
+      }
+    });
+    assert.equal(ingestResponse.statusCode, 202);
+    const ingestBody = ingestResponse.json();
+    assert.ok(ingestBody.queueJobId);
+    assert.ok(ingestBody.contractVersion.id);
+  });
 });
