@@ -19,6 +19,16 @@ export type PresignedUploadResult = {
   expiresInSeconds: number;
 };
 
+export type PresignedDownloadRequest = {
+  key: string;
+  expiresInSeconds?: number;
+};
+
+export type PresignedDownloadResult = {
+  downloadUrl: string;
+  expiresInSeconds: number;
+};
+
 export type ObjectStorage = {
   bucket: string;
   putObject: (params: Omit<PutObjectCommandInput, "Bucket">) => Promise<string>;
@@ -27,6 +37,9 @@ export type ObjectStorage = {
   createPresignedUploadUrl: (
     params: PresignedUploadRequest
   ) => Promise<PresignedUploadResult>;
+  createPresignedDownloadUrl: (
+    params: PresignedDownloadRequest
+  ) => Promise<PresignedDownloadResult>;
 };
 
 declare module "fastify" {
@@ -40,7 +53,39 @@ function isPathStyleEnabled(): boolean {
 }
 
 function getPresignedUploadTtlSeconds() {
-  return Number(process.env.S3_PRESIGNED_UPLOAD_TTL_SECONDS ?? 600);
+  return enforcePresignedTtlSeconds(Number(process.env.S3_PRESIGNED_UPLOAD_TTL_SECONDS ?? 600));
+}
+
+function getPresignedDownloadTtlSeconds() {
+  return enforcePresignedTtlSeconds(
+    Number(process.env.S3_PRESIGNED_DOWNLOAD_TTL_SECONDS ?? 300)
+  );
+}
+
+function getPresignedMinTtlSeconds() {
+  return Number(process.env.S3_PRESIGNED_URL_MIN_TTL_SECONDS ?? 60);
+}
+
+function getPresignedMaxTtlSeconds() {
+  const configuredMax = Number(process.env.S3_PRESIGNED_URL_MAX_TTL_SECONDS ?? 3600);
+  const configuredMin = getPresignedMinTtlSeconds();
+  return Math.max(configuredMax, configuredMin);
+}
+
+function enforcePresignedTtlSeconds(value: number) {
+  const floor = getPresignedMinTtlSeconds();
+  const ceiling = getPresignedMaxTtlSeconds();
+  const normalized = Number.isFinite(value) ? Math.floor(value) : floor;
+
+  if (normalized < floor) {
+    return floor;
+  }
+
+  if (normalized > ceiling) {
+    return ceiling;
+  }
+
+  return normalized;
 }
 
 const storagePlugin = fp(async (app) => {
@@ -101,6 +146,23 @@ const storagePlugin = fp(async (app) => {
 
       return {
         uploadUrl,
+        expiresInSeconds
+      };
+    },
+    async createPresignedDownloadUrl(params) {
+      const requestedTtl = params.expiresInSeconds ?? getPresignedDownloadTtlSeconds();
+      const expiresInSeconds = enforcePresignedTtlSeconds(requestedTtl);
+      const command = new GetObjectCommand({
+        Bucket: bucket,
+        Key: params.key
+      });
+
+      const downloadUrl = await getSignedUrl(client, command, {
+        expiresIn: expiresInSeconds
+      });
+
+      return {
+        downloadUrl,
         expiresInSeconds
       };
     }

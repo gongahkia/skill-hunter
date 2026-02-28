@@ -1,6 +1,7 @@
 import {
   contractFindingsQuerySchema,
   contractIdParamsSchema,
+  contractSourceDownloadQuerySchema,
   createContractBodySchema,
   createUploadUrlBodySchema,
   ingestContractBodySchema
@@ -86,6 +87,20 @@ function buildContractFingerprint(input: {
   return createHash("sha256")
     .update(JSON.stringify(normalizedPayload))
     .digest("hex");
+}
+
+function getObjectKeyFromStorageUri(storageUri: string, bucket: string) {
+  const prefix = `${bucket}/`;
+  if (!storageUri.startsWith(prefix)) {
+    return null;
+  }
+
+  const key = storageUri.slice(prefix.length);
+  return key.length > 0 ? key : null;
+}
+
+function isOwnedSourceObjectKey(contractId: string, objectKey: string) {
+  return objectKey.startsWith(`contracts/${contractId}/sources/`);
 }
 
 const contractRoutes: FastifyPluginAsync = async (app) => {
@@ -321,6 +336,79 @@ const contractRoutes: FastifyPluginAsync = async (app) => {
         queued: true,
         queueJobId: job.id,
         contractVersion
+      });
+    });
+  
+
+  app.get(
+    "/:id/source-download-url",
+    {
+      preHandler: [
+        app.buildValidationPreHandler({
+          params: contractIdParamsSchema,
+          query: contractSourceDownloadQuerySchema
+        }),
+        (request, reply) => app.rbac.requireOwnedContract(request, reply)
+      ]
+    },
+    async (request, reply) => {
+      const query = request.validated.query as {
+        versionId?: string;
+      };
+      const contract = request.contractAccess;
+
+      if (!contract) {
+        return reply.status(404).send({
+          error: "CONTRACT_NOT_FOUND"
+        });
+      }
+
+      const contractVersion = await app.prisma.contractVersion.findFirst({
+        where: query.versionId
+          ? {
+              id: query.versionId,
+              contractId: contract.id
+            }
+          : {
+              contractId: contract.id
+            },
+        orderBy: query.versionId
+          ? undefined
+          : {
+              createdAt: "desc"
+            },
+        select: {
+          id: true,
+          storageUri: true,
+          createdAt: true
+        }
+      });
+
+      if (!contractVersion) {
+        return reply.status(404).send({
+          error: "CONTRACT_VERSION_NOT_FOUND"
+        });
+      }
+
+      const objectKey = getObjectKeyFromStorageUri(
+        contractVersion.storageUri,
+        app.objectStorage.bucket
+      );
+
+      if (!objectKey || !isOwnedSourceObjectKey(contract.id, objectKey)) {
+        return reply.status(400).send({
+          error: "CONTRACT_SOURCE_URI_INVALID"
+        });
+      }
+
+      const download = await app.objectStorage.createPresignedDownloadUrl({
+        key: objectKey
+      });
+
+      return reply.status(200).send({
+        contractVersionId: contractVersion.id,
+        downloadUrl: download.downloadUrl,
+        expiresInSeconds: download.expiresInSeconds
       });
     });
   

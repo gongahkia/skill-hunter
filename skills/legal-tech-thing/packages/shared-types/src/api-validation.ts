@@ -27,6 +27,10 @@ export const contractIdParamsSchema = z.object({
   id: z.string().uuid()
 });
 
+export const contractSourceDownloadQuerySchema = z.object({
+  versionId: z.string().uuid().optional()
+});
+
 export const createUploadUrlBodySchema = z.object({
   fileName: z.string().min(1).max(512),
   mimeType: z.string().min(1).max(255),
