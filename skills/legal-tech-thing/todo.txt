@@ -1,4 +1,3 @@
-(A) Implement orchestration engine to run specialist agents in parallel per review job +orchestrator
 (A) Implement adjudication stage to merge duplicated findings by overlapping evidence spans +orchestrator
 (A) Implement severity scoring function combining agent output, policy rule weight, and confidence +orchestrator +policy
 (A) Implement finding normalization that maps all agent outputs into one canonical finding schema +findings
