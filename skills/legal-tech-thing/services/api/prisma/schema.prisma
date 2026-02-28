@@ -24,6 +24,23 @@ enum ContractProcessingStatus {
   FAILED
 }
 
+enum ClauseType {
+  DEFINITIONS
+  SCOPE
+  PAYMENT
+  TERM
+  TERMINATION
+  LIABILITY
+  INDEMNITY
+  IP
+  CONFIDENTIALITY
+  PRIVACY
+  GOVERNING_LAW
+  DISPUTE_RESOLUTION
+  MISC
+  UNKNOWN
+}
+
 model User {
   id           String     @id @default(uuid()) @db.Uuid
   email        String     @unique
@@ -71,14 +88,30 @@ model Contract {
 }
 
 model ContractVersion {
-  id          String   @id @default(uuid()) @db.Uuid
-  contractId  String   @map("contract_id") @db.Uuid
-  checksum    String   @map("source_checksum")
-  storageUri  String   @map("storage_uri")
-  createdAt   DateTime @default(now()) @map("created_at")
-  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  contractId String   @map("contract_id") @db.Uuid
+  checksum   String   @map("source_checksum")
+  storageUri String   @map("storage_uri")
+  createdAt  DateTime @default(now()) @map("created_at")
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  clauses    Clause[]
 
   @@index([contractId])
   @@unique([contractId, checksum])
   @@map("contract_versions")
+}
+
+model Clause {
+  id                String          @id @default(uuid()) @db.Uuid
+  contractVersionId String          @map("contract_version_id") @db.Uuid
+  type              ClauseType      @default(UNKNOWN)
+  normalizedText    String          @map("normalized_text")
+  startOffset       Int             @map("start_offset")
+  endOffset         Int             @map("end_offset")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  contractVersion   ContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
+
+  @@index([contractVersionId])
+  @@index([type])
+  @@map("clauses")
 }
