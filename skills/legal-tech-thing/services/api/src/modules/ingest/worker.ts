@@ -1,6 +1,7 @@
 import { ContractProcessingStatus, PrismaClient } from "@prisma/client";
 
 import { cleanContractText } from "./clean-text";
+import { classifyClauseType } from "./clause-classifier";
 import { segmentContractClauses } from "./clause-segmentation";
 import { detectContractLanguage } from "./language";
 import { parseContractByMimeType } from "./parser-router";
@@ -26,13 +27,19 @@ export async function processContractIngestionJob(
   const detectedLanguage = detectContractLanguage(cleanedText);
   const segmentedClauses = segmentContractClauses(cleanedText);
 
+  const typedClauses = segmentedClauses.map((clause) => ({
+    ...clause,
+    type: classifyClauseType(clause)
+  }));
+
   console.log("Detected contract language", {
     contractId: payload.contractId,
     contractVersionId: payload.contractVersionId,
     iso6393: detectedLanguage.iso6393,
     iso6391: detectedLanguage.iso6391,
     languageName: detectedLanguage.languageName,
-    segmentedClauseCount: segmentedClauses.length
+    segmentedClauseCount: segmentedClauses.length,
+    classifiedClauseCount: typedClauses.length
   });
 
   await prisma.contract.update({
