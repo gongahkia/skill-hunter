@@ -1,0 +1,429 @@
+/**
+ * Main styles for Skill Hunter - Notion-inspired minimalist design
+ */
+
+:root {
+  /* Color palette */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f5;
+  --bg-tertiary: #f1f1ef;
+  --bg-hover: #ebebea;
+  
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --text-tertiary: #9b9a97;
+  
+  --border-color: #e9e9e7;
+  --border-hover: #d3d3d0;
+  
+  --accent-primary: #2383e2;
+  --accent-hover: #1a6cbd;
+  --accent-light: #e8f3ff;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.12);
+  
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Border radius */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #191919;
+    --bg-secondary: #252525;
+    --bg-tertiary: #2e2e2e;
+    --bg-hover: #373737;
+    
+    --text-primary: #e3e3e1;
+    --text-secondary: #9b9b99;
+    --text-tertiary: #6f6f6d;
+    
+    --border-color: #3a3a3a;
+    --border-hover: #4a4a4a;
+    
+    --accent-primary: #5fa3e8;
+    --accent-hover: #7db4ed;
+    --accent-light: #1e3a52;
+  }
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout */
+.skill-hunter-container {
+  display: flex;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Table of Contents */
+.toc-container {
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.toc-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.toc-content {
+  flex: 1;
+  padding: var(--spacing-sm) 0;
+  overflow-y: auto;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-item {
+  margin: 2px var(--spacing-sm);
+}
+
+.toc-link {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.toc-link:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.toc-link:active {
+  background: var(--bg-tertiary);
+}
+
+.toc-section-number {
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-right: var(--spacing-xs);
+  font-size: 13px;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  max-width: 900px;
+  margin-right: auto;
+}
+
+.page-title {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* Section Headers */
+.section-header {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-top: var(--spacing-2xl);
+  margin-bottom: var(--spacing-md);
+  scroll-margin-top: var(--spacing-lg);
+}
+
+.provision-header {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.provision-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Section Body */
+.section-body {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.content-line {
+  margin-bottom: var(--spacing-sm);
+}
+
+.indented-line {
+  margin-bottom: var(--spacing-sm);
+  padding-left: var(--spacing-xl);
+  position: relative;
+}
+
+.indented-line::before {
+  content: '';
+  position: absolute;
+  left: var(--spacing-md);
+  top: 10px;
+  width: 4px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+}
+
+/* Statute Terms with Definitions */
+.statute-term {
+  position: relative;
+  color: var(--accent-primary);
+  font-weight: 500;
+  cursor: help;
+  border-bottom: 1px dotted var(--accent-primary);
+  transition: all var(--transition-fast);
+}
+
+.statute-term:hover {
+  color: var(--accent-hover);
+  border-bottom-color: var(--accent-hover);
+}
+
+/* Tooltip container */
+.statute-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+  white-space: normal;
+  max-width: 400px;
+  min-width: 200px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+  pointer-events: none;
+  z-index: 1000;
+  word-wrap: break-word;
+}
+
+.statute-term:hover .statute-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip positioning adjustments */
+.statute-tooltip.tooltip-left {
+  left: 0;
+  transform: translateY(-8px);
+}
+
+.statute-tooltip.tooltip-right {
+  left: auto;
+  right: 0;
+  transform: translateY(-8px);
+}
+
+.statute-tooltip.tooltip-bottom {
+  bottom: auto;
+  top: 100%;
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* Tooltip content styling */
+.statute-tooltip b i,
+.statute-tooltip i b {
+  color: var(--bg-primary);
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Illustrations */
+.illustration-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.illustration-body {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--accent-primary);
+  margin-bottom: var(--spacing-md);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Logical Connectors */
+b > i,
+i > b {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Loading State */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .toc-container {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
+  .page-title {
+    font-size: 32px;
+  }
+  
+  .section-header {
+    font-size: 24px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .toc-container {
+    display: none;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+  
+  .statute-term {
+    color: inherit;
+    border-bottom: none;
+  }
+  
+  .statute-term::after {
+    display: none;
+  }
+}
+

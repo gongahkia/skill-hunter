@@ -6,50 +6,56 @@
 <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-[Monorepo](#skills) for [LegalTech](https://www.linkedin.com/pulse/legaltech-vs-lawtech-technological-twinship-transforming-2ifgc/) and [LawTech](https://www.linkedin.com/pulse/legaltech-vs-lawtech-technological-twinship-transforming-2ifgc/) workflow tools.
+Browser extension that formats legislation to be more readable.
 
-## Skills
+## Motivation
 
-`Skill Hunter` currently supports the following skills.
+[SSO](https://sso.agc.gov.sg/) is the most-referenced source for lawyers when keeping up to date with Singapore Legislation.
 
-| Skill | Description | Stack | Screenshot |
-| :--- | :--- | :--- | :--- |
-| `Lovely Ghostwriter` | Browser extension for readable Singapore legislation on SSO. Simplifies the heavily-nested DOM structure of [SSO](https://sso.agc.gov.sg/) to one that is intuitive and easily understood by lawyers and programmers alike. | [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [Webpack](https://webpack.js.org/), [Jest](https://jestjs.io/), [npm](https://www.npmjs.com/) | ![](./asset/screenshots/skill-hunter-screenshot-4.png) |
-| `Double Face` | Multi-app contract review platform. Provides a full contract-ingestion and review stack (web, extension, desktop, API, workers). | [Next.js](https://nextjs.org/), [Electron](https://www.electronjs.org/), [Fastify](https://fastify.dev/), [BullMQ](https://docs.bullmq.io/), [Prisma](https://www.prisma.io/), [PostgreSQL](https://www.postgresql.org/), [Redis](https://redis.io/), [pnpm](https://pnpm.io/), [Turborepo](https://turbo.build/repo) | ![](./asset/screenshots/skill-hunter-double-face-demo.png) |
-| `Convert Hands` | Litigation readiness bundle product. Provides evidence/findings ingestion, bundle generation, hash/signature verification, a static operator console, and a queue-driven export worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | ![](./asset/screenshots/skill-hunter-convert-hands-demo.png) |
-| `Order Stamp` | Adversarial clause detector product. Provides a heuristic detector API, a Manifest V3 browser extension for active-tab scans/highlighting, and a batch detection worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [Chrome Extension Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3) | ![](./asset/screenshots/skill-hunter-order-stamp-demo.png) |
-| `Sun and Moon` | Case chronology builder. Provides case/event ingestion, chronology analytics (gaps/conflicts/monthly grouping), a static chronology console, and a timeline snapshot worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | ![](./asset/screenshots/skill-hunter-sun-and-moon-demo.png) |
-| `Fun Fun Cloth` | Policy-to-clause compiler. Provides a policy DSL compiler API, clause simulation endpoints, a static policy editor/simulator, and a batch policy compiler worker. | [Fastify](https://fastify.dev/), [Zod](https://zod.dev/), [TypeScript](https://www.typescriptlang.org/), [pnpm](https://pnpm.io/), [tsx](https://tsx.is/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) | ![](./asset/screenshots/skill-hunter-fun-fun-cloth-demo.png) |
+Time is often spent poring over definitions and navigating between interpretation and offence sections.
+
+`Skill Hunter` simplifies the heavily-nested DOM structure of the webpage to one that is intuitive and easily understood by lawyers and programmers alike.
+
+## Purpose
+
+* BLUF, offence sections and their limbs are laid bare
+* Important terms are defined in place
+* Browser extension with tiny source code binary runnable on most machines
+
+## Screenshot
+
+![](./asset/screenshots/skill-hunter-screenshot-4.png)
+
+## Stack
+
+* *Frontend*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS)
+* *Build*: [Webpack](https://webpack.js.org/), [TypeScript Compiler](https://www.typescriptlang.org/)
+* *Testing*: [Jest](https://jestjs.io/), [ts-jest](https://kulshekhar.github.io/ts-jest/)
+* *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
+* *Package Manager*: [npm](https://www.npmjs.com/)
+
+## Supported browsers
+
+Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+
+| Browser | Status | Link |
+| :--- | :--- | :--- | 
+| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
+
+## [Presentation](./asset/presentation/class_part.pdf)
 
 ## Installation
 
-The below instructions are for building the `Skill Hunter` monorepo locally.
+Build `Skill Hunter` locally.
 
 ### CLI
 
 ```console
 $ git clone https://github.com/gongahkia/skill-hunter
 $ cd skill-hunter
-$ ./onboard.sh # one command to handle onboarding
-$ ./onboard.sh --build
-
-$ cd lovely-ghostwriter && npm install # manual installation as a fallback
 $ make
-$ cd ../double-face
-$ pnpm install
-$ pnpm build
-$ cd ..
-$ pnpm -C convert-hands/api install
-$ pnpm -C convert-hands/web install
-$ pnpm -C convert-hands/worker-export install
-$ pnpm -C order-stamp/api install
-$ pnpm -C order-stamp/worker-detection install
-$ pnpm -C sun-and-moon/api install
-$ pnpm -C sun-and-moon/web install
-$ pnpm -C sun-and-moon/worker-timeline install
-$ pnpm -C fun-fun-cloth/api install
-$ pnpm -C fun-fun-cloth/web install
-$ pnpm -C fun-fun-cloth/worker-compiler install
 ```
 
 ### GUI
@@ -66,31 +72,32 @@ $ pnpm -C fun-fun-cloth/worker-compiler install
 
 ## Usage
 
-Then run `Skill Hunter`'s standalone tools.
+### Chrome
 
-```console
-$ pnpm -C convert-hands dev:api  
-$ pnpm -C convert-hands dev:web  
-$ pnpm -C order-stamp dev:api   
-$ pnpm -C sun-and-moon dev:api  
-$ pnpm -C sun-and-moon dev:web  
-$ pnpm -C fun-fun-cloth dev:api 
-$ pnpm -C fun-fun-cloth dev:web 
-$ pnpm -C convert-hands worker
-$ pnpm -C order-stamp worker
-$ pnpm -C sun-and-moon worker
-$ pnpm -C fun-fun-cloth worker
-```
+1. Copy and paste this link in the search bar *chrome://extensions/*.
+2. Toggle *Developer mode* on.
+3. Click *load unpacked*.
+4. Open the `skill-hunter` repo, click *select*.
+5. Open any **SSO** page, then click *Whole Document*.
 
-## Supported browsers
+![](./asset/screenshots/skill-hunter-screenshot-3.png)
 
-Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/). Support for other browsers like Opera, Vivaldi have not been extensively tested for the extension, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
+6. Click the simplify button.
 
-| Browser | Status | Link |
-| :--- | :--- | :--- | 
-| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
+### Firefox
+
+1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
+2. Click *load temporary add-on*.
+3. Open the `skill-hunter` repo, select `manifest.json`.
+4. Open any **SSO** page, then click *Whole Document*.
+
+![](./asset/screenshots/skill-hunter-screenshot-3.png)
+
+5. Click the simplify button.
+
+## Browser support
+
+Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
 
 ## References
 

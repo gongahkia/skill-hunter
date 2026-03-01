@@ -1,9 +1,0 @@
-{
-  "extends": "../../packages/tsconfig/base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["chrome", "vite/client"]
-  },
-  "include": ["src/**/*", "manifest.config.ts", "vite.config.ts"]
-}
