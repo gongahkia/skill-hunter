@@ -165,18 +165,38 @@ export function getLegislationMetadata(): LegislationMetadata {
 export function getLegislationDefinitions(): Definition[] {
   const definitions: Definition[] = [];
   const definitionTerms = new Set<string>(); // Prevent duplicates
-  const regex = /"([^"]+)"/g;
+  // Handle smart quotes used in legislation - character codes 8220 and 8221
+  const regex = /\u201C([^\u201D]+)\u201D/g;
 
+  logger.info('Starting definition extraction...');
+  
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  provisionContainers.forEach((container) => {
+  logger.info(`Found ${provisionContainers.length} provision containers`);
+  
+  // Also try a broader search to see what's available
+  const allProvisionDivs = safeQuerySelectorAll(document, "div[class^='prov']");
+  logger.info(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
+  
+  // Check for definition cells with different selectors
+  const defCells1 = safeQuerySelectorAll(document, 'td.def');
+  const defCells2 = safeQuerySelectorAll(document, 'td[class*="def"]');
+  const defCells3 = safeQuerySelectorAll(document, 'td[class*="Def"]');
+  
+  logger.info(`Found ${defCells1.length} cells with class 'def'`);
+  logger.info(`Found ${defCells2.length} cells with class containing 'def'`);
+  logger.info(`Found ${defCells3.length} cells with class containing 'Def'`);
+
+  provisionContainers.forEach((container, index) => {
     const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
+    logger.info(`Container ${index}: found ${definitionCells.length} definition cells`);
 
     definitionCells.forEach((cell) => {
       const sentence = cell.textContent?.trim() ?? '';
+      
       if (!sentence) return;
 
       // Reset regex lastIndex for each iteration
@@ -195,7 +215,7 @@ export function getLegislationDefinitions(): Definition[] {
     });
   });
 
-  logger.debug(`Extracted ${definitions.length} definitions`);
+  logger.info(`Extracted ${definitions.length} definitions`);
   return definitions;
 }
 
@@ -205,13 +225,70 @@ export function getLegislationDefinitions(): Definition[] {
 export function getLegislationContent(): ContentToken[] {
   const content: ContentToken[] = [];
 
+  logger.info('Starting content extraction...');
+  
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
+  logger.info(`Found ${provisionContainers.length} provision containers for content extraction`);
+  
+  // Also check what we can find with broader selectors
+  const legisContent = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
+  const legisBody = safeQuerySelector(document, SELECTORS.LEGIS_BODY);
+  logger.info(`Legis content element: ${legisContent ? 'found' : 'not found'}`);
+  logger.info(`Legis body element: ${legisBody ? 'found' : 'not found'}`);
+
   if (provisionContainers.length === 0) {
-    throw new DOMParsingError('No provision containers found in document');
+    logger.warn('No provision containers found, trying alternative selectors...');
+    
+    // Try alternative selectors
+    const altContainers = safeQuerySelectorAll(document, "div[class^='prov']");
+    logger.info(`Found ${altContainers.length} alternative provision containers`);
+    
+    if (altContainers.length === 0) {
+      throw new DOMParsingError('No provision containers found in document');
+    }
+    
+    // Use alternative containers
+    altContainers.forEach((container) => {
+      const rows = safeQuerySelectorAll(container, 'table tbody tr');
+      logger.info(`Alternative container: found ${rows.length} rows`);
+      
+      rows.forEach((row) => {
+        // Section Header
+        const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
+        if (sectionHeader) {
+          const headerText = sectionHeader.textContent?.trim() ?? '';
+          const headerId = sectionHeader.id?.trim() ?? null;
+
+          if (headerText) {
+            content.push({
+              type: 'sectionHeader',
+              ID: headerId,
+              content: headerText,
+            });
+          }
+        }
+
+        // Section Body
+        const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
+        if (sectionBody) {
+          const bodyText = sectionBody.textContent?.trim() ?? '';
+          if (bodyText) {
+            content.push({
+              type: 'sectionBody',
+              ID: null,
+              content: bodyText,
+            });
+          }
+        }
+      });
+    });
+    
+    logger.info(`Extracted ${content.length} content tokens using alternative method`);
+    return content;
   }
 
   provisionContainers.forEach((container) => {
@@ -303,7 +380,7 @@ export function getLegislationContent(): ContentToken[] {
     });
   });
 
-  logger.debug(`Extracted ${content.length} content tokens`);
+  logger.info(`Extracted ${content.length} content tokens`);
   return content;
 }
 
