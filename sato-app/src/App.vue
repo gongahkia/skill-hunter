@@ -85,6 +85,7 @@ const AUTH_ERRORS = {
   invalid_state: 'Spotify returned to Sato with an invalid login state. Start the login flow again.',
   missing_code: 'Spotify did not return an authorization code.',
   access_denied: 'Spotify login was cancelled before Sato received permission.',
+  spotify_config_missing: 'Spotify credentials are missing on the server. Add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to your .env before signing in.',
 }
 
 export default {

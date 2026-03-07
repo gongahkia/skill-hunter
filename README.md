@@ -42,26 +42,29 @@ Web App that provides fine-grained, percentage-based control for making Spotify 
 
 First [register](https://developer.spotify.com/) as a Spotify Developer.
 
-Then *Create app* on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/callback** under *Redirect URIs*.
+Then *Create app* on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/api/auth/callback** under *Redirect URIs*.
 
-Create an `.env` file with the *Client ID* and *Client secret*.
+Create an `.env` file from `.env.example` with the *Client ID* and *Client secret*.
 
 ```env
 SPOTIFY_CLIENT_ID=XXX
 SPOTIFY_CLIENT_SECRET=XXX
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:5000/api/auth/callback
+CLIENT_APP_URL=http://127.0.0.1:5173
 ```
 
 Then run the below.
 
 ```console
 $ git clone https://github.com/gongahkia/sato
-$ cd backend && python3 -m venv myenv && source myenv/bin/activate
-$ cd backend && pip install -r requirements.txt && python3 app.py
-$ cd sato-app && npm install && npm run dev
+$ cd backend && python3 -m venv .venv && source .venv/bin/activate
+$ cd backend && pip install -r requirements.txt
+$ cd sato-app && npm install
+$ ./dev.sh
 ```
 
-* See the frontend at [127.0.0.1:5000](http://127.0.0.1:5000/).  
-* See the backend at [localhost:5000](http://localhost:5000).
+* See the frontend at [127.0.0.1:5173](http://127.0.0.1:5173/).  
+* The frontend proxies API requests to the backend at [127.0.0.1:5000](http://127.0.0.1:5000/).
 
 ## Other notes
 

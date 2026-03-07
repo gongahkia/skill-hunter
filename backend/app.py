@@ -310,10 +310,11 @@ def register_routes(app):
     @app.get("/api/auth/login")
     def login():
         if not app.config["SPOTIFY_CLIENT_ID"] or not app.config["SPOTIFY_CLIENT_SECRET"]:
-            raise ApiError(
-                "Spotify credentials are not configured on the server.",
-                status_code=500,
-                code="spotify_config_missing",
+            return client_redirect(
+                {
+                    "login": "error",
+                    "reason": "spotify_config_missing",
+                }
             )
 
         state = secrets.token_urlsafe(24)
