@@ -72,6 +72,42 @@
               </p>
             </div>
 
+            <div class="config-instructions">
+              <p class="config-instructions__title">How to get them</p>
+              <ol class="config-steps">
+                <li>
+                  Open the
+                  <a
+                    href="https://developer.spotify.com/dashboard"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Spotify Developer Dashboard
+                  </a>
+                  and sign in with your Spotify account.
+                </li>
+                <li>
+                  If this is your first time there, accept the developer terms, then create a new app with any name and description you want for local use.
+                </li>
+                <li>
+                  Open that app’s settings and add this exact Redirect URI:
+                  <code class="config-code">{{ effectiveRedirectUri }}</code>
+                </li>
+                <li>
+                  Save the app settings. Spotify requires the Redirect URI to match exactly, so use <code class="config-inline-code">127.0.0.1</code> here, not <code class="config-inline-code">localhost</code>.
+                </li>
+                <li>
+                  Copy the app’s Client ID and Client Secret from the dashboard, then paste them below.
+                </li>
+                <li>
+                  If your Spotify app is still in development mode, make sure the Spotify account you plan to sign in with is added as a test user in the app dashboard.
+                </li>
+              </ol>
+              <p class="config-note">
+                Use your own Spotify app credentials. The Client Secret is sensitive and should not be shared.
+              </p>
+            </div>
+
             <label class="config-field">
               <span>Client ID</span>
               <input
@@ -159,45 +195,25 @@
 
       <main class="main-column">
         <section class="surface hero-surface">
-          <p class="eyebrow">Made For {{ displayName }}</p>
-          <h2>Build a weighted blend that feels native to Spotify.</h2>
+          <p class="eyebrow">{{ user ? `Made For ${displayName}` : 'Blend Builder' }}</p>
+          <h2>
+            {{
+              user
+                ? 'Build a weighted blend that feels native to Spotify.'
+                : 'Configure Spotify once, then start building blends.'
+            }}
+          </h2>
           <p class="hero-description">
-            Same dark theme, same green action language, but the interface now focuses only on the parts of Sato that actually work: login, resolve, weight, preview, and create.
+            {{
+              user
+                ? 'Same dark theme, same green action language, but the interface now focuses only on the parts of Sato that actually work: login, resolve, weight, preview, and create.'
+                : 'Use the Session panel to add your Spotify app credentials, sign in, and unlock the live blend builder.'
+            }}
           </p>
         </section>
 
-        <section class="surface content-surface">
-          <template v-if="user">
-            <BlendView :user="user" />
-          </template>
-
-          <template v-else>
-            <div class="login-showcase">
-              <article class="login-card">
-                <div class="login-card__icon" aria-hidden="true">
-                  <img :src="satoLogo" alt="" class="brand-mark__image" />
-                </div>
-                <div>
-                  <p class="eyebrow">Spotify Login</p>
-                  <h2>Connect your account to start building blends.</h2>
-                  <p class="hero-description">
-                    Once you sign in, the builder below becomes active and every control you see is live.
-                  </p>
-                  <p v-if="!loadingSpotifyConfig && !canLogin" class="login-card__hint">
-                    Add your Spotify Client ID and Client Secret in the Session panel first.
-                  </p>
-                </div>
-                <button
-                  class="spotify-button"
-                  type="button"
-                  :disabled="loadingSpotifyConfig || !canLogin"
-                  @click="login"
-                >
-                  Continue with Spotify
-                </button>
-              </article>
-            </div>
-          </template>
+        <section v-if="user" class="surface content-surface">
+          <BlendView :user="user" />
         </section>
       </main>
     </div>
@@ -228,6 +244,7 @@ export default {
         clientId: '',
         clientSecret: '',
         configured: false,
+        redirectUri: '',
         source: null,
       },
       loadingSession: true,
@@ -245,6 +262,9 @@ export default {
       return Boolean(
         this.spotifyConfig.clientId.trim() && this.spotifyConfig.clientSecret.trim(),
       )
+    },
+    effectiveRedirectUri() {
+      return this.spotifyConfig.redirectUri || 'http://127.0.0.1:5000/api/auth/callback'
     },
     displayName() {
       return this.user?.display_name || 'You'
@@ -281,6 +301,7 @@ export default {
       try {
         const config = await apiRequest('/api/auth/spotify-config')
         this.spotifyConfig.configured = Boolean(config.configured)
+        this.spotifyConfig.redirectUri = config.redirect_uri || ''
         this.spotifyConfig.source = config.source || null
         if (!this.spotifyConfig.clientId) {
           this.spotifyConfig.clientId = config.client_id || ''
@@ -312,6 +333,7 @@ export default {
         this.spotifyConfig.configured = Boolean(config.configured)
         this.spotifyConfig.source = config.source || null
         this.spotifyConfig.clientId = config.client_id || this.spotifyConfig.clientId
+        this.spotifyConfig.redirectUri = config.redirect_uri || this.spotifyConfig.redirectUri
         this.user = null
         this.authMessage = 'Spotify app credentials saved for this browser session.'
         this.noticeTone = 'notice-banner--success'
@@ -425,8 +447,7 @@ export default {
 .topbar h1,
 .hero-surface h2,
 .session-surface h2,
-.guide-surface h2,
-.login-card h2 {
+.guide-surface h2 {
   margin: 0;
 }
 
@@ -634,8 +655,9 @@ export default {
 
 .config-form__title,
 .config-form__copy,
-.config-status,
-.login-card__hint {
+.config-instructions__title,
+.config-note,
+.config-status {
   margin: 0;
 }
 
@@ -645,11 +667,50 @@ export default {
 }
 
 .config-form__copy,
-.config-status,
-.login-card__hint {
+.config-note,
+.config-status {
   color: var(--spotify-muted);
   font-size: 0.86rem;
   line-height: 1.5;
+}
+
+.config-instructions {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(30, 215, 96, 0.06);
+  border: 1px solid rgba(30, 215, 96, 0.12);
+}
+
+.config-instructions__title {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.config-steps {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #f3f3f3;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.config-code,
+.config-inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.config-code {
+  display: block;
+  margin-top: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  color: #dcffe8;
+  word-break: break-all;
 }
 
 .config-field {
@@ -684,31 +745,6 @@ export default {
   flex-wrap: wrap;
 }
 
-.login-showcase {
-  display: grid;
-}
-
-.login-card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 1rem;
-  padding: 1.1rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, rgba(30, 215, 96, 0.14), rgba(255, 255, 255, 0.03));
-}
-
-.login-card__icon {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  overflow: hidden;
-  background: var(--spotify-accent);
-}
-
 @media (max-width: 980px) {
   .workspace {
     grid-template-columns: 1fr;
@@ -722,10 +758,6 @@ export default {
   .topbar-actions {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .login-card {
-    grid-template-columns: 1fr;
   }
 }
 

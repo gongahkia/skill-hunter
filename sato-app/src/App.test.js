@@ -24,6 +24,7 @@ describe('App', () => {
       .mockResolvedValueOnce({
         configured: false,
         client_id: '',
+        redirect_uri: 'http://127.0.0.1:5000/api/auth/callback',
         source: null,
       })
       .mockRejectedValueOnce({
@@ -32,6 +33,7 @@ describe('App', () => {
       .mockResolvedValueOnce({
         configured: true,
         client_id: 'browser-client-id',
+        redirect_uri: 'http://127.0.0.1:5000/api/auth/callback',
         source: 'session',
       })
 

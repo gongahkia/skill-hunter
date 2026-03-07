@@ -354,6 +354,7 @@ def register_routes(app):
                     credentials["client_id"] and credentials["client_secret"]
                 ),
                 "client_id": credentials["client_id"] or "",
+                "redirect_uri": app.config["SPOTIFY_REDIRECT_URI"],
                 "source": credentials["source"],
             }
         )
@@ -381,6 +382,7 @@ def register_routes(app):
             {
                 "configured": True,
                 "client_id": client_id,
+                "redirect_uri": app.config["SPOTIFY_REDIRECT_URI"],
                 "source": "session",
             }
         )

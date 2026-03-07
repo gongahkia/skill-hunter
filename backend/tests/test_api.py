@@ -196,6 +196,7 @@ def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, f
     assert config_response.get_json() == {
         "configured": True,
         "client_id": "browser-client-id",
+        "redirect_uri": "http://127.0.0.1:5000/api/auth/callback",
         "source": "session",
     }
 
@@ -204,6 +205,7 @@ def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, f
     assert status_response.get_json() == {
         "configured": True,
         "client_id": "browser-client-id",
+        "redirect_uri": "http://127.0.0.1:5000/api/auth/callback",
         "source": "session",
     }
 
