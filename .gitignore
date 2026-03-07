@@ -8,6 +8,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 node_modules
+.venv
+.flask_session
 dist
 dist-ssr
 *.local

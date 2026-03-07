@@ -1,5 +1,8 @@
-requests
-flask
+Flask
+Flask-Session
 flask-cors
 python-dotenv
+redis
+requests
 diagrams
+pytest

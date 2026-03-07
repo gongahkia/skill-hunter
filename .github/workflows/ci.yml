@@ -1,46 +1,46 @@
-name: CI
+name: ci
 
 on:
   push:
-    branches:
-      - main
-      - codex/**
   pull_request:
 
 jobs:
-  backend:
+  test-and-build:
     runs-on: ubuntu-latest
-    env:
-      REDIS_URL: locmem://dorso
-      DJANGO_SECRET_KEY: test-secret
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: sato-app/package-lock.json
+
       - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-      - name: Run backend tests
-        run: |
-          pytest backend
 
-  shared-js:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install shared dependencies
-        run: |
-          cd src/shared
-          npm install
-      - name: Run shared tests
-        run: |
-          cd src/shared
-          npm test -- --runInBand
-      - name: Build extension bundles
-        run: |
-          npm run build
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest
+
+      - name: Install frontend dependencies
+        working-directory: sato-app
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: sato-app
+        run: npm run test -- --run
+
+      - name: Build frontend
+        working-directory: sato-app
+        run: npm run build
