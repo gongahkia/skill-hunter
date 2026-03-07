@@ -1,12 +1,5 @@
 <template>
   <section class="blend-shell">
-    <div class="blend-chip-row">
-      <span class="blend-chip blend-chip--active">All</span>
-      <span class="blend-chip">Resolve</span>
-      <span class="blend-chip">Weights</span>
-      <span class="blend-chip">Preview</span>
-    </div>
-
     <article class="panel panel--resolve">
       <div class="panel-header">
         <div class="panel-title-group">
@@ -539,26 +532,6 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-}
-
-.blend-chip-row {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.blend-chip {
-  padding: 0.55rem 0.9rem;
-  border-radius: 999px;
-  background: #2a2a2a;
-  color: #ffffff;
-  font-size: 0.9rem;
-}
-
-.blend-chip--active {
-  background: #ffffff;
-  color: #121212;
 }
 
 .panel {
