@@ -1,19 +1,20 @@
 :root {
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-family: Circular, "Circular Std", "Avenir Next", "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #17261f;
-  background:
-    radial-gradient(circle at top left, rgba(255, 183, 77, 0.28), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(46, 125, 103, 0.18), transparent 28%),
-    #f5efe5;
+  color: #ffffff;
+  background: #000000;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-text: #17261f;
-  --color-muted: #5e6d65;
-  --color-accent: #167a63;
+  color-scheme: dark;
+  --spotify-text: #ffffff;
+  --spotify-muted: #b3b3b3;
+  --spotify-accent: #1ed760;
+  --spotify-panel: #121212;
+  --spotify-panel-elevated: #181818;
+  --shadow-strong: 0 22px 60px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -29,6 +30,10 @@ body,
 body {
   margin: 0;
   min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(30, 215, 96, 0.08), transparent 28%),
+    linear-gradient(180deg, #171717 0%, #000000 36%);
+  color: var(--spotify-text);
 }
 
 button,
@@ -38,10 +43,24 @@ textarea {
 }
 
 a {
-  color: #0d684f;
+  color: var(--spotify-text);
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
+}
+
+img {
+  display: block;
+}
+
+::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
 }

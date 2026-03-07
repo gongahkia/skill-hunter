@@ -1,10 +1,24 @@
 <template>
   <section class="blend-shell">
-    <article class="panel">
+    <div class="blend-chip-row">
+      <span class="blend-chip blend-chip--active">All</span>
+      <span class="blend-chip">Resolve</span>
+      <span class="blend-chip">Weights</span>
+      <span class="blend-chip">Preview</span>
+    </div>
+
+    <article class="panel panel--resolve">
       <div class="panel-header">
-        <div>
-          <p class="eyebrow">Step 1</p>
-          <h2>Resolve Friends</h2>
+        <div class="panel-title-group">
+          <span class="panel-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" />
+            </svg>
+          </span>
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Resolve Friends</h2>
+          </div>
         </div>
         <span class="panel-caption">Paste one Spotify profile URL per line.</span>
       </div>
@@ -34,24 +48,34 @@
         </ul>
       </div>
 
-      <p v-if="friends.length && !partialIssues.length" class="helper-copy">
+      <p v-if="friends.length && !partialIssues.length" class="helper-copy helper-copy--success">
         {{ friends.length }} friend{{ friends.length === 1 ? '' : 's' }} resolved.
       </p>
     </article>
 
-    <article v-if="friends.length" class="panel">
+    <article v-if="friends.length" class="panel panel--weights">
       <div class="panel-header">
-        <div>
-          <p class="eyebrow">Step 2</p>
-          <h2>Budget the Blend</h2>
+        <div class="panel-title-group">
+          <span class="panel-icon panel-icon--green">
+            <svg viewBox="0 0 24 24">
+              <path d="M7 17 17 7M8 8h8v8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" />
+            </svg>
+          </span>
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Budget the Blend</h2>
+          </div>
         </div>
         <span class="panel-caption">Selected friend weights plus your weight must equal 100.</span>
       </div>
 
       <div class="weight-card">
-        <div>
-          <p class="field-label">Your contribution</p>
-          <p class="weight-value">{{ selfWeight.toFixed(2) }}%</p>
+        <div class="weight-card__top">
+          <div>
+            <p class="field-label field-label--compact">Your contribution</p>
+            <p class="weight-value">{{ selfWeight.toFixed(2) }}%</p>
+          </div>
+          <span class="weight-pill">Owner share</span>
         </div>
         <input
           :value="selfWeight"
@@ -108,6 +132,9 @@
               :alt="`${friend.name} profile image`"
               class="friend-image"
             />
+            <div v-else class="friend-fallback">
+              {{ friend.name.charAt(0).toUpperCase() }}
+            </div>
             <div>
               <p>{{ friend.playlist_count }} public playlists available</p>
               <p class="friend-id">{{ friend.id }}</p>
@@ -117,7 +144,7 @@
           <template v-if="friend.selected">
             <div class="friend-weight">
               <div class="friend-weight__top">
-                <span class="field-label">Friend weight</span>
+                <span class="field-label field-label--compact">Friend weight</span>
                 <strong>{{ Number(friend.weight).toFixed(2) }}%</strong>
               </div>
               <input
@@ -133,7 +160,7 @@
 
             <div class="playlist-picker">
               <div class="playlist-picker__top">
-                <span class="field-label">Playlists used for this friend</span>
+                <span class="field-label field-label--compact">Playlists used for this friend</span>
                 <button
                   class="inline-button"
                   type="button"
@@ -163,11 +190,18 @@
       </div>
     </article>
 
-    <article v-if="friends.length" class="panel">
+    <article v-if="friends.length" class="panel panel--preview">
       <div class="panel-header">
-        <div>
-          <p class="eyebrow">Step 3</p>
-          <h2>Preview and Create</h2>
+        <div class="panel-title-group">
+          <span class="panel-icon panel-icon--purple">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" />
+            </svg>
+          </span>
+          <div>
+            <p class="eyebrow">Step 3</p>
+            <h2>Preview and Create</h2>
+          </div>
         </div>
         <span class="panel-caption">The preview and create endpoints use the same scorer.</span>
       </div>
@@ -245,6 +279,12 @@
               :alt="`${track.name} artwork`"
               class="track-image"
             />
+            <div v-else class="track-image track-image--fallback">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="currentColor" />
+                <path d="M8.2 10.4c2.9-1.1 6.7-.9 9 .6M8.8 13.3c2.1-.7 4.9-.5 6.6.5M9.6 16c1.4-.4 3.1-.3 4.3.3" fill="none" stroke="#121212" stroke-linecap="round" stroke-width="1.6" />
+              </svg>
+            </div>
             <div class="track-copy">
               <div class="track-copy__top">
                 <div>
@@ -497,22 +537,96 @@ export default {
 <style scoped>
 .blend-shell {
   display: grid;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.blend-chip-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.blend-chip {
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: #2a2a2a;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.blend-chip--active {
+  background: #ffffff;
+  color: #121212;
 }
 
 .panel {
-  border-radius: 1.75rem;
-  padding: 1.75rem;
-  background: rgba(255, 250, 243, 0.92);
-  border: 1px solid rgba(16, 29, 25, 0.1);
-  box-shadow: 0 18px 60px rgba(31, 27, 22, 0.08);
+  border-radius: 1rem;
+  padding: 1.15rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.panel--preview {
+  grid-column: 1 / -1;
+}
+
+.panel-header,
+.panel-title-group,
+.friend-card__top,
+.friend-card__summary,
+.friend-weight__top,
+.playlist-picker__top,
+.track-copy__top,
+.weight-card__top {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
 }
 
 .panel-header {
-  display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  align-items: baseline;
+  align-items: flex-start;
+}
+
+.panel-title-group {
+  min-width: 0;
+}
+
+.panel-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  flex: none;
+}
+
+.panel-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.panel-icon--green {
+  background: rgba(30, 215, 96, 0.16);
+  color: #d8ffe5;
+}
+
+.panel-icon--purple {
+  background: rgba(125, 82, 255, 0.2);
+  color: #ece6ff;
+}
+
+.eyebrow {
+  margin: 0 0 0.22rem;
+  color: var(--spotify-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .panel-header h2,
@@ -524,16 +638,22 @@ export default {
 .panel-caption,
 .helper-copy,
 .friend-id,
+.friend-card__summary p,
 .track-copy p,
 .playlist-option small {
-  color: var(--color-muted);
+  color: var(--spotify-muted);
 }
 
 .field-label {
   display: block;
   margin-top: 1rem;
+  color: #ffffff;
   font-size: 0.92rem;
   font-weight: 700;
+}
+
+.field-label--compact {
+  margin-top: 0;
 }
 
 .text-area,
@@ -541,12 +661,16 @@ export default {
   width: 100%;
   margin-top: 0.6rem;
   padding: 0.95rem 1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(16, 29, 25, 0.12);
-  background: rgba(255, 255, 255, 0.74);
-  color: var(--color-text);
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #242424;
+  color: #ffffff;
   font: inherit;
-  box-sizing: border-box;
+}
+
+.text-area::placeholder,
+.text-input::placeholder {
+  color: #8a8a8a;
 }
 
 .text-area {
@@ -558,7 +682,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.9rem;
   margin-top: 1rem;
 }
 
@@ -577,27 +701,19 @@ export default {
 .primary-button,
 .ghost-button {
   border-radius: 999px;
-  padding: 0.85rem 1.15rem;
+  padding: 0.85rem 1.2rem;
   font-weight: 700;
 }
 
 .primary-button {
-  background: linear-gradient(135deg, var(--color-accent), #2d6d59);
-  color: white;
-  box-shadow: 0 12px 24px rgba(45, 109, 89, 0.28);
-}
-
-.primary-button:disabled,
-.ghost-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  box-shadow: none;
+  background: var(--spotify-accent);
+  color: #121212;
 }
 
 .ghost-button,
 .inline-button {
-  background: rgba(16, 29, 25, 0.06);
-  color: var(--color-text);
+  background: #2a2a2a;
+  color: #ffffff;
 }
 
 .inline-button {
@@ -605,57 +721,85 @@ export default {
   border-radius: 999px;
 }
 
+.primary-button:disabled,
+.ghost-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .feedback-card {
   margin-top: 1rem;
-  border-radius: 1.25rem;
-  padding: 1rem 1.1rem;
+  border-radius: 0.95rem;
+  padding: 1rem 1.05rem;
 }
 
 .feedback-card ul {
-  margin: 0.7rem 0 0;
+  margin: 0.6rem 0 0;
   padding-left: 1.1rem;
 }
 
 .feedback-card--warning {
-  background: rgba(255, 193, 7, 0.16);
+  background: rgba(255, 184, 28, 0.16);
+  color: #ffe3a6;
 }
 
 .feedback-card--error {
-  background: rgba(208, 62, 47, 0.14);
-  color: #8d2a21;
+  background: rgba(235, 87, 87, 0.14);
+  color: #ffd8d8;
 }
 
 .feedback-card--success {
-  background: rgba(52, 168, 83, 0.14);
-  color: #1f5130;
+  background: rgba(30, 215, 96, 0.16);
+  color: #d8ffe5;
+}
+
+.helper-copy {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.helper-copy--success {
+  margin-top: 0.9rem;
+  color: #d8ffe5;
 }
 
 .weight-card {
-  display: grid;
-  gap: 0.85rem;
   margin-top: 1rem;
   padding: 1rem;
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.74);
+  border-radius: 1rem;
+  background: #181818;
+}
+
+.weight-card__top {
+  justify-content: space-between;
 }
 
 .weight-value {
-  margin: 0.4rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 2rem;
   font-weight: 700;
 }
 
+.weight-pill {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(30, 215, 96, 0.14);
+  color: #d8ffe5;
+  font-size: 0.84rem;
+}
+
 .weight-slider {
   width: 100%;
-  accent-color: var(--color-accent);
+  margin-top: 0.9rem;
+  accent-color: var(--spotify-accent);
 }
 
 .budget-summary,
 .preview-summary {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem;
   align-items: center;
+  gap: 0.75rem;
   margin-top: 1rem;
 }
 
@@ -665,39 +809,39 @@ export default {
   gap: 0.5rem;
   padding: 0.75rem 0.9rem;
   border-radius: 999px;
-  background: rgba(16, 29, 25, 0.06);
+  background: #202020;
+  color: #ffffff;
 }
 
 .budget-chip--warning {
-  background: rgba(208, 62, 47, 0.14);
+  background: rgba(235, 87, 87, 0.16);
 }
 
-.friend-grid {
+.friend-grid,
+.track-list {
   display: grid;
-  gap: 1rem;
-  margin-top: 1.25rem;
+  gap: 0.9rem;
+  margin-top: 1rem;
 }
 
-.friend-card {
-  border-radius: 1.35rem;
-  border: 1px solid rgba(16, 29, 25, 0.08);
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.72);
+.friend-card,
+.track-card {
+  border-radius: 0.95rem;
+  padding: 0.95rem;
+  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .friend-card--inactive {
-  opacity: 0.7;
+  opacity: 0.68;
 }
 
 .friend-card__top,
-.friend-card__summary,
-.friend-weight__top,
+.track-copy__top,
+.weight-card__top,
 .playlist-picker__top,
-.track-copy__top {
-  display: flex;
+.friend-weight__top {
   justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
 }
 
 .friend-toggle {
@@ -707,20 +851,40 @@ export default {
   font-weight: 700;
 }
 
+.friend-toggle input,
+.playlist-option input {
+  accent-color: var(--spotify-accent);
+}
+
+.friend-meta {
+  color: var(--spotify-muted);
+  font-size: 0.88rem;
+}
+
 .friend-card__summary {
-  justify-content: flex-start;
   margin-top: 0.75rem;
+  align-items: center;
 }
 
 .friend-image,
-.track-image {
-  object-fit: cover;
+.friend-fallback {
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 0.8rem;
+  flex: none;
 }
 
 .friend-image {
-  width: 54px;
-  height: 54px;
-  border-radius: 18px;
+  object-fit: cover;
+}
+
+.friend-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  color: white;
+  font-weight: 700;
 }
 
 .friend-weight,
@@ -730,52 +894,50 @@ export default {
 
 .playlist-picker {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .playlist-option {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.6rem;
+  gap: 0.65rem;
   align-items: center;
-  padding: 0.7rem 0.8rem;
-  border-radius: 0.9rem;
-  background: rgba(16, 29, 25, 0.04);
+  padding: 0.72rem 0.8rem;
+  border-radius: 0.85rem;
+  background: #202020;
 }
 
 .preview-shell {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   display: grid;
   gap: 1rem;
-}
-
-.track-list {
-  display: grid;
-  gap: 0.9rem;
 }
 
 .track-card {
   display: grid;
   grid-template-columns: 76px 1fr;
   gap: 0.9rem;
-  padding: 0.95rem;
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(16, 29, 25, 0.08);
+  align-items: start;
 }
 
 .track-image {
   width: 76px;
   height: 76px;
-  border-radius: 1rem;
+  border-radius: 0.9rem;
+  object-fit: cover;
 }
 
-.track-copy__top {
-  align-items: flex-start;
+.track-image--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1ed760, #509bf5);
+  color: #121212;
 }
 
-.track-copy p {
-  margin: 0.25rem 0 0;
+.track-image--fallback svg {
+  width: 2rem;
+  height: 2rem;
 }
 
 .score-pill,
@@ -787,7 +949,8 @@ export default {
 
 .score-pill {
   padding: 0.5rem 0.8rem;
-  background: rgba(45, 109, 89, 0.12);
+  background: rgba(30, 215, 96, 0.16);
+  color: #d8ffe5;
   font-weight: 700;
 }
 
@@ -795,13 +958,14 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  margin-top: 0.8rem;
+  margin-top: 0.75rem;
 }
 
 .contributor-pill {
-  padding: 0.45rem 0.7rem;
-  background: rgba(16, 29, 25, 0.06);
-  font-size: 0.9rem;
+  padding: 0.45rem 0.75rem;
+  background: #202020;
+  color: #ffffff;
+  font-size: 0.88rem;
 }
 
 .playlist-link {
@@ -809,18 +973,29 @@ export default {
   font-weight: 700;
 }
 
+@media (max-width: 980px) {
+  .blend-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .panel--preview {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 720px) {
   .panel {
-    padding: 1.25rem;
-    border-radius: 1.25rem;
+    padding: 1rem;
   }
 
   .panel-header,
+  .panel-title-group,
   .friend-card__top,
   .friend-card__summary,
-  .friend-weight__top,
+  .track-copy__top,
+  .weight-card__top,
   .playlist-picker__top,
-  .track-copy__top {
+  .friend-weight__top {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -834,7 +1009,8 @@ export default {
     grid-template-columns: 1fr;
   }
 
-  .track-image {
+  .track-image,
+  .track-image--fallback {
     width: 100%;
     height: auto;
     aspect-ratio: 1 / 1;
