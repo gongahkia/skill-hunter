@@ -18,6 +18,7 @@ def make_track(track_id, name, artist, image="https://images.test/cover.png", is
 
 class FakeSpotifyService:
     def __init__(self):
+        self.bound_credentials = None
         self.current_user = {
             "id": "me",
             "display_name": "Sato Tester",
@@ -76,6 +77,11 @@ class FakeSpotifyService:
         self.exchanged_codes = []
 
     def bind(self, **kwargs):
+        self.bound_credentials = {
+            "client_id": kwargs.get("client_id"),
+            "client_secret": kwargs.get("client_secret"),
+            "redirect_uri": kwargs.get("redirect_uri"),
+        }
         self.access_token = kwargs.get("access_token")
         self.refresh_token = kwargs.get("refresh_token")
         self.expires_at = kwargs.get("expires_at")
@@ -177,6 +183,53 @@ def test_callback_rejects_mismatched_state(client, fake_spotify):
     assert fake_spotify.exchanged_codes == []
 
 
+def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, fake_spotify):
+    config_response = client.post(
+        "/api/auth/spotify-config",
+        json={
+            "client_id": "browser-client-id",
+            "client_secret": "browser-client-secret",
+        },
+    )
+
+    assert config_response.status_code == 200
+    assert config_response.get_json() == {
+        "configured": True,
+        "client_id": "browser-client-id",
+        "source": "session",
+    }
+
+    status_response = client.get("/api/auth/spotify-config")
+    assert status_response.status_code == 200
+    assert status_response.get_json() == {
+        "configured": True,
+        "client_id": "browser-client-id",
+        "source": "session",
+    }
+
+    response = client.get("/api/auth/login")
+    assert response.status_code == 302
+    assert response.headers["Location"].startswith("https://accounts.spotify.com/authorize?state=")
+    assert fake_spotify.bound_credentials == {
+        "client_id": "browser-client-id",
+        "client_secret": "browser-client-secret",
+        "redirect_uri": "http://127.0.0.1:5000/api/auth/callback",
+    }
+
+
+def test_spotify_config_validation_requires_both_fields(client):
+    response = client.post(
+        "/api/auth/spotify-config",
+        json={
+            "client_id": "browser-client-id",
+            "client_secret": "",
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "spotify_config_invalid"
+
+
 def test_logout_clears_session(client):
     authenticate(client)
 
@@ -186,6 +239,28 @@ def test_logout_clears_session(client):
 
     with client.session_transaction() as flask_session:
         assert dict(flask_session) == {}
+
+
+def test_logout_preserves_browser_supplied_spotify_config(client):
+    client.post(
+        "/api/auth/spotify-config",
+        json={
+            "client_id": "browser-client-id",
+            "client_secret": "browser-client-secret",
+        },
+    )
+    authenticate(client)
+
+    response = client.post("/api/auth/logout")
+    assert response.status_code == 200
+
+    with client.session_transaction() as flask_session:
+        assert dict(flask_session) == {
+            "spotify_config": {
+                "client_id": "browser-client-id",
+                "client_secret": "browser-client-secret",
+            }
+        }
 
 
 def test_resolve_friends_returns_partial_success_and_keeps_empty_playlist_users(client):

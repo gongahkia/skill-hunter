@@ -90,12 +90,7 @@ def create_app(test_config=None):
     Session(app)
     app.config.setdefault(
         "SPOTIFY_CLIENT_FACTORY",
-        lambda **kwargs: SpotifyClient(
-            client_id=app.config["SPOTIFY_CLIENT_ID"],
-            client_secret=app.config["SPOTIFY_CLIENT_SECRET"],
-            redirect_uri=app.config["SPOTIFY_REDIRECT_URI"],
-            **kwargs,
-        ),
+        lambda **kwargs: SpotifyClient(**kwargs),
     )
 
     logging.basicConfig(level=logging.INFO)
@@ -166,6 +161,45 @@ def register_routes(app):
     def client_redirect(query):
         return redirect(f"{app.config['CLIENT_APP_URL']}/?{urlencode(query)}")
 
+    def get_spotify_credentials():
+        session_config = session.get("spotify_config") or {}
+        if session_config.get("client_id") and session_config.get("client_secret"):
+            return {
+                "client_id": session_config["client_id"],
+                "client_secret": session_config["client_secret"],
+                "source": "session",
+            }
+
+        if app.config["SPOTIFY_CLIENT_ID"] and app.config["SPOTIFY_CLIENT_SECRET"]:
+            return {
+                "client_id": app.config["SPOTIFY_CLIENT_ID"],
+                "client_secret": app.config["SPOTIFY_CLIENT_SECRET"],
+                "source": "server",
+            }
+
+        return {
+            "client_id": None,
+            "client_secret": None,
+            "source": None,
+        }
+
+    def require_spotify_credentials():
+        credentials = get_spotify_credentials()
+        if credentials["client_id"] and credentials["client_secret"]:
+            return credentials
+
+        raise ApiError(
+            "Spotify credentials are not configured. Add them in the web app before signing in.",
+            status_code=400,
+            code="spotify_config_missing",
+        )
+
+    def clear_spotify_auth_state():
+        session.pop("oauth_state", None)
+        session.pop("spotify_tokens", None)
+        session.pop("spotify_user", None)
+        session.modified = True
+
     def store_spotify_tokens(token_payload):
         session["spotify_tokens"] = {
             "access_token": token_payload.get("access_token"),
@@ -176,8 +210,12 @@ def register_routes(app):
 
     def get_spotify_client():
         tokens = session.get("spotify_tokens", {})
+        credentials = require_spotify_credentials()
         factory = app.config["SPOTIFY_CLIENT_FACTORY"]
         return factory(
+            client_id=credentials["client_id"],
+            client_secret=credentials["client_secret"],
+            redirect_uri=app.config["SPOTIFY_REDIRECT_URI"],
             access_token=tokens.get("access_token"),
             refresh_token=tokens.get("refresh_token"),
             expires_at=tokens.get("expires_at"),
@@ -307,9 +345,50 @@ def register_routes(app):
         )
         return current_user, normalized_request, preview
 
+    @app.get("/api/auth/spotify-config")
+    def spotify_config():
+        credentials = get_spotify_credentials()
+        return jsonify(
+            {
+                "configured": bool(
+                    credentials["client_id"] and credentials["client_secret"]
+                ),
+                "client_id": credentials["client_id"] or "",
+                "source": credentials["source"],
+            }
+        )
+
+    @app.post("/api/auth/spotify-config")
+    def update_spotify_config():
+        payload = parse_json_body()
+        client_id = str(payload.get("client_id") or "").strip()
+        client_secret = str(payload.get("client_secret") or "").strip()
+
+        if not client_id or not client_secret:
+            raise ApiError(
+                "Provide both Spotify Client ID and Client Secret.",
+                status_code=400,
+                code="spotify_config_invalid",
+            )
+
+        session["spotify_config"] = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+        clear_spotify_auth_state()
+        session.modified = True
+        return jsonify(
+            {
+                "configured": True,
+                "client_id": client_id,
+                "source": "session",
+            }
+        )
+
     @app.get("/api/auth/login")
     def login():
-        if not app.config["SPOTIFY_CLIENT_ID"] or not app.config["SPOTIFY_CLIENT_SECRET"]:
+        credentials = get_spotify_credentials()
+        if not credentials["client_id"] or not credentials["client_secret"]:
             return client_redirect(
                 {
                     "login": "error",
@@ -350,7 +429,11 @@ def register_routes(app):
 
     @app.post("/api/auth/logout")
     def logout():
+        spotify_config = session.get("spotify_config")
         session.clear()
+        if spotify_config:
+            session["spotify_config"] = spotify_config
+            session.modified = True
         return jsonify({"ok": True})
 
     @app.get("/api/me")

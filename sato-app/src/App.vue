@@ -3,10 +3,7 @@
     <header class="topbar">
       <div class="brand-cluster">
         <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" class="brand-mark__icon">
-            <circle cx="12" cy="12" r="11" fill="currentColor" />
-            <path d="M7.5 10c3.3-1.3 7.2-1 9.8.7M8.2 13c2.4-.8 5.3-.6 7.2.5M9 16c1.5-.5 3.3-.4 4.6.3" fill="none" stroke="#121212" stroke-linecap="round" stroke-width="1.7" />
-          </svg>
+          <img :src="satoLogo" alt="" class="brand-mark__image" />
         </div>
         <div>
           <p class="eyebrow">Spotify Blend Studio</p>
@@ -42,6 +39,7 @@
           v-else
           class="spotify-button"
           type="button"
+          :disabled="loadingSpotifyConfig || !canLogin"
           @click="login"
         >
           Continue with Spotify
@@ -61,6 +59,56 @@
                 : 'Connect your Spotify account before Sato can read public friend profiles or publish playlists.'
             }}
           </p>
+
+          <form
+            v-if="!loadingSpotifyConfig && !user && spotifyConfig.source !== 'server'"
+            class="config-form"
+            @submit.prevent="saveSpotifyConfig"
+          >
+            <div>
+              <p class="config-form__title">Spotify App Credentials</p>
+              <p class="config-form__copy">
+                Enter the Client ID and Client Secret from your Spotify Developer app. Sato keeps them in this browser session instead of requiring a `.env` file.
+              </p>
+            </div>
+
+            <label class="config-field">
+              <span>Client ID</span>
+              <input
+                v-model.trim="spotifyConfig.clientId"
+                class="config-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Spotify Client ID"
+              />
+            </label>
+
+            <label class="config-field">
+              <span>Client Secret</span>
+              <input
+                v-model.trim="spotifyConfig.clientSecret"
+                class="config-input"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Spotify Client Secret"
+              />
+            </label>
+
+            <div class="config-actions">
+              <button
+                class="secondary-button"
+                type="submit"
+                :disabled="savingSpotifyConfig || !canSaveSpotifyConfig"
+              >
+                {{ savingSpotifyConfig ? 'Saving Credentials...' : spotifyConfig.configured ? 'Update Credentials' : 'Save Credentials' }}
+              </button>
+              <p v-if="spotifyConfig.configured" class="config-status">
+                Saved for this browser session.
+              </p>
+            </div>
+          </form>
 
           <div v-if="user" class="session-card">
             <img
@@ -83,6 +131,7 @@
             v-if="!user && !loadingSession"
             class="spotify-button"
             type="button"
+            :disabled="loadingSpotifyConfig || !canLogin"
             @click="login"
           >
             Sign in with Spotify
@@ -126,10 +175,7 @@
             <div class="login-showcase">
               <article class="login-card">
                 <div class="login-card__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" class="brand-mark__icon">
-                    <circle cx="12" cy="12" r="11" fill="currentColor" />
-                    <path d="M7.5 10c3.3-1.3 7.2-1 9.8.7M8.2 13c2.4-.8 5.3-.6 7.2.5M9 16c1.5-.5 3.3-.4 4.6.3" fill="none" stroke="#121212" stroke-linecap="round" stroke-width="1.7" />
-                  </svg>
+                  <img :src="satoLogo" alt="" class="brand-mark__image" />
                 </div>
                 <div>
                   <p class="eyebrow">Spotify Login</p>
@@ -137,8 +183,16 @@
                   <p class="hero-description">
                     Once you sign in, the builder below becomes active and every control you see is live.
                   </p>
+                  <p v-if="!loadingSpotifyConfig && !canLogin" class="login-card__hint">
+                    Add your Spotify Client ID and Client Secret in the Session panel first.
+                  </p>
                 </div>
-                <button class="spotify-button" type="button" @click="login">
+                <button
+                  class="spotify-button"
+                  type="button"
+                  :disabled="loadingSpotifyConfig || !canLogin"
+                  @click="login"
+                >
                   Continue with Spotify
                 </button>
               </article>
@@ -152,13 +206,14 @@
 
 <script>
 import BlendView from './components/BlendView.vue'
+import satoLogo from './assets/sato.png'
 import { apiRequest } from './lib/api'
 
 const AUTH_ERRORS = {
   invalid_state: 'Spotify returned to Sato with an invalid login state. Start the login flow again.',
   missing_code: 'Spotify did not return an authorization code.',
   access_denied: 'Spotify login was cancelled before Sato received permission.',
-  spotify_config_missing: 'Spotify credentials are missing on the server. Add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to your .env before signing in.',
+  spotify_config_missing: 'Spotify credentials are not configured yet. Add your Client ID and Client Secret in the app before signing in.',
 }
 
 export default {
@@ -167,13 +222,30 @@ export default {
   },
   data() {
     return {
+      satoLogo,
       user: null,
+      spotifyConfig: {
+        clientId: '',
+        clientSecret: '',
+        configured: false,
+        source: null,
+      },
       loadingSession: true,
+      loadingSpotifyConfig: true,
+      savingSpotifyConfig: false,
       authMessage: '',
       noticeTone: 'notice-banner--neutral',
     }
   },
   computed: {
+    canLogin() {
+      return this.spotifyConfig.configured
+    },
+    canSaveSpotifyConfig() {
+      return Boolean(
+        this.spotifyConfig.clientId.trim() && this.spotifyConfig.clientSecret.trim(),
+      )
+    },
     displayName() {
       return this.user?.display_name || 'You'
     },
@@ -183,6 +255,11 @@ export default {
   },
   methods: {
     login() {
+      if (!this.canLogin) {
+        this.authMessage = AUTH_ERRORS.spotify_config_missing
+        this.noticeTone = 'notice-banner--error'
+        return
+      }
       window.location.assign('/api/auth/login')
     },
     async logout() {
@@ -193,9 +270,56 @@ export default {
         this.user = null
         this.authMessage = 'Your Spotify session has been cleared.'
         this.noticeTone = 'notice-banner--neutral'
+        await this.loadSpotifyConfig()
       } catch (error) {
         this.authMessage = error.message
         this.noticeTone = 'notice-banner--error'
+      }
+    },
+    async loadSpotifyConfig() {
+      this.loadingSpotifyConfig = true
+      try {
+        const config = await apiRequest('/api/auth/spotify-config')
+        this.spotifyConfig.configured = Boolean(config.configured)
+        this.spotifyConfig.source = config.source || null
+        if (!this.spotifyConfig.clientId) {
+          this.spotifyConfig.clientId = config.client_id || ''
+        }
+      } catch (error) {
+        this.authMessage = error.message
+        this.noticeTone = 'notice-banner--error'
+      } finally {
+        this.loadingSpotifyConfig = false
+      }
+    },
+    async saveSpotifyConfig() {
+      if (!this.canSaveSpotifyConfig) {
+        this.authMessage = 'Provide both Spotify Client ID and Client Secret before saving.'
+        this.noticeTone = 'notice-banner--error'
+        return
+      }
+
+      this.savingSpotifyConfig = true
+      try {
+        const config = await apiRequest('/api/auth/spotify-config', {
+          method: 'POST',
+          body: JSON.stringify({
+            client_id: this.spotifyConfig.clientId.trim(),
+            client_secret: this.spotifyConfig.clientSecret.trim(),
+          }),
+        })
+
+        this.spotifyConfig.configured = Boolean(config.configured)
+        this.spotifyConfig.source = config.source || null
+        this.spotifyConfig.clientId = config.client_id || this.spotifyConfig.clientId
+        this.user = null
+        this.authMessage = 'Spotify app credentials saved for this browser session.'
+        this.noticeTone = 'notice-banner--success'
+      } catch (error) {
+        this.authMessage = error.message
+        this.noticeTone = 'notice-banner--error'
+      } finally {
+        this.savingSpotifyConfig = false
       }
     },
     async loadSession() {
@@ -241,6 +365,7 @@ export default {
   },
   mounted() {
     this.hydrateAuthMessageFromQuery()
+    this.loadSpotifyConfig()
     this.loadSession()
   },
 }
@@ -275,16 +400,18 @@ export default {
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 999px;
-  color: var(--spotify-accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
+  overflow: hidden;
+  background: var(--spotify-accent);
 }
 
-.brand-mark__icon {
-  width: 100%;
-  height: 100%;
+.brand-mark__image {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
 }
 
 .eyebrow {
@@ -435,6 +562,7 @@ export default {
 }
 
 .spotify-button,
+.secondary-button,
 .logout-button {
   border: none;
   border-radius: 999px;
@@ -450,9 +578,17 @@ export default {
   color: #121212;
 }
 
+.secondary-button,
 .logout-button {
   background: #2a2a2a;
   color: #ffffff;
+}
+
+.spotify-button:disabled,
+.secondary-button:disabled,
+.logout-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .notice-banner {
@@ -487,6 +623,67 @@ export default {
   margin-top: 0.8rem;
 }
 
+.config-form {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding: 0.95rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.config-form__title,
+.config-form__copy,
+.config-status,
+.login-card__hint {
+  margin: 0;
+}
+
+.config-form__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.config-form__copy,
+.config-status,
+.login-card__hint {
+  color: var(--spotify-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.config-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.config-field span {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.config-input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.85rem 0.95rem;
+  background: #0f0f0f;
+  color: #ffffff;
+}
+
+.config-input:focus {
+  outline: 2px solid rgba(30, 215, 96, 0.3);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.config-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .login-showcase {
   display: grid;
 }
@@ -503,8 +700,13 @@ export default {
 .login-card__icon {
   width: 4rem;
   height: 4rem;
-  color: var(--spotify-accent);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
+  overflow: hidden;
+  background: var(--spotify-accent);
 }
 
 @media (max-width: 980px) {
