@@ -234,6 +234,13 @@ const AUTH_ERRORS = {
   spotify_config_invalid_credentials: 'Spotify rejected the saved Client ID or Client Secret. Double-check them in the Spotify Developer Dashboard and save again.',
 }
 
+function authErrorMessage(reason, redirectUri) {
+  if (reason === 'server_error') {
+    return `Spotify returned server_error during login. Most often this means your Spotify app settings do not include this exact Redirect URI: ${redirectUri}. Add it in the Spotify Developer Dashboard, save the app settings, and try again. If the app is still in development mode, make sure your Spotify account is added as a test user.`
+  }
+  return AUTH_ERRORS[reason] || 'Spotify login did not complete successfully.'
+}
+
 export default {
   components: {
     BlendView,
@@ -253,6 +260,7 @@ export default {
       loadingSpotifyConfig: true,
       savingSpotifyConfig: false,
       authMessage: '',
+      authReason: '',
       noticeTone: 'notice-banner--neutral',
     }
   },
@@ -303,6 +311,7 @@ export default {
         })
         this.user = null
         this.authMessage = 'Your Spotify session has been cleared.'
+        this.authReason = ''
         this.noticeTone = 'notice-banner--neutral'
         logClientEvent('auth.logout.completed')
         await this.loadSpotifyConfig()
@@ -324,6 +333,10 @@ export default {
         this.spotifyConfig.source = config.source || null
         if (!this.spotifyConfig.clientId) {
           this.spotifyConfig.clientId = config.client_id || ''
+        }
+        if (this.authReason) {
+          this.authMessage = authErrorMessage(this.authReason, this.effectiveRedirectUri)
+          this.noticeTone = 'notice-banner--error'
         }
         logClientEvent('auth.spotify_config.loaded', {
           configured: this.spotifyConfig.configured,
@@ -363,6 +376,7 @@ export default {
         this.spotifyConfig.redirectUri = config.redirect_uri || this.spotifyConfig.redirectUri
         this.user = null
         this.authMessage = 'Spotify app credentials saved for this browser session.'
+        this.authReason = ''
         this.noticeTone = 'notice-banner--success'
         logClientEvent('auth.spotify_config.saved', {
           source: this.spotifyConfig.source,
@@ -383,6 +397,7 @@ export default {
       try {
         const user = await apiRequest('/api/me')
         this.user = user
+        this.authReason = ''
         if (!this.authMessage) {
           this.authMessage = 'Spotify is connected. Create or join a room to start building a blend.'
           this.noticeTone = 'notice-banner--success'
@@ -410,6 +425,7 @@ export default {
       const reason = currentUrl.searchParams.get('reason')
 
       if (loginState === 'success') {
+        this.authReason = ''
         this.authMessage = 'Spotify login completed. Your session is ready.'
         this.noticeTone = 'notice-banner--success'
         logClientEvent('auth.query_state.hydrated', {
@@ -418,7 +434,8 @@ export default {
       }
 
       if (loginState === 'error') {
-        this.authMessage = AUTH_ERRORS[reason] || 'Spotify login did not complete successfully.'
+        this.authReason = reason || ''
+        this.authMessage = authErrorMessage(reason, this.effectiveRedirectUri)
         this.noticeTone = 'notice-banner--error'
         logClientEvent('auth.query_state.hydrated', {
           loginState,

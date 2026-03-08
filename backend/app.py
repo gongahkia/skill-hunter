@@ -825,6 +825,11 @@ def register_routes(app):
     @app.get("/api/auth/callback")
     def callback():
         if request.args.get("error"):
+            debug_event(
+                "auth.login.failed",
+                provider_error=request.args["error"],
+                redirect_uri=app.config["SPOTIFY_REDIRECT_URI"],
+            )
             return client_redirect(
                 next_room_query(
                     {
@@ -1271,9 +1276,12 @@ app = create_app()
 
 if __name__ == "__main__":
     e2e_mode = env_flag("SATO_E2E")
+    server_host = os.getenv("HOST", "127.0.0.1")
+    server_port = int(os.getenv("PORT") or os.getenv("SATO_BACKEND_PORT") or "5000")
+    use_reloader = env_flag("SATO_USE_RELOADER", not e2e_mode)
     app.run(
-        host="127.0.0.1",
-        port=5000,
+        host=server_host,
+        port=server_port,
         debug=not e2e_mode,
-        use_reloader=not e2e_mode,
+        use_reloader=use_reloader,
     )

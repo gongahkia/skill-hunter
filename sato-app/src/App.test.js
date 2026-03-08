@@ -65,4 +65,26 @@ describe('App', () => {
     const updatedSignInButton = wrapper.findAll('button').find((button) => button.text() === 'Sign in with Spotify')
     expect(updatedSignInButton.attributes('disabled')).toBeUndefined()
   })
+
+  it('explains Spotify server_error failures with the exact redirect URI to register', async () => {
+    window.history.replaceState({}, '', '/?login=error&reason=server_error')
+    apiRequest
+      .mockResolvedValueOnce({
+        configured: true,
+        client_id: 'browser-client-id',
+        redirect_uri: 'http://127.0.0.1:5001/api/auth/callback',
+        source: 'session',
+      })
+      .mockRejectedValueOnce({
+        status: 401,
+      })
+
+    const wrapper = mount(App)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Spotify returned server_error during login.')
+    expect(wrapper.text()).toContain('http://127.0.0.1:5001/api/auth/callback')
+    expect(new URL(window.location.href).searchParams.get('login')).toBeNull()
+    expect(new URL(window.location.href).searchParams.get('reason')).toBeNull()
+  })
 })

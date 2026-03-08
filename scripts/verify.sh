@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/sato-app"
 
@@ -27,6 +28,49 @@ elif [[ -x "$BACKEND_DIR/myenv/bin/python" ]]; then
   BACKEND_PYTHON="$BACKEND_DIR/myenv/bin/python"
 else
   BACKEND_PYTHON="${PYTHON:-python3}"
+fi
+
+port_is_available() {
+  "$BACKEND_PYTHON" - "$1" <<'PY'
+import socket
+import sys
+
+port = int(sys.argv[1])
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    sock.bind(("127.0.0.1", port))
+except OSError:
+    raise SystemExit(1)
+finally:
+    sock.close()
+PY
+}
+
+pick_available_port() {
+  local requested_port="$1"
+  local port="$requested_port"
+
+  while ! port_is_available "$port"; do
+    port=$((port + 1))
+  done
+
+  printf '%s\n' "$port"
+}
+
+REQUESTED_E2E_BACKEND_PORT="${SATO_E2E_BACKEND_PORT:-5001}"
+REQUESTED_E2E_FRONTEND_PORT="${SATO_E2E_FRONTEND_PORT:-41731}"
+E2E_BACKEND_PORT="$(pick_available_port "$REQUESTED_E2E_BACKEND_PORT")"
+E2E_FRONTEND_PORT="$(pick_available_port "$REQUESTED_E2E_FRONTEND_PORT")"
+E2E_BACKEND_URL="http://127.0.0.1:$E2E_BACKEND_PORT"
+E2E_APP_URL="http://127.0.0.1:$E2E_FRONTEND_PORT"
+
+if [[ "$E2E_BACKEND_PORT" != "$REQUESTED_E2E_BACKEND_PORT" ]]; then
+  echo "E2E backend port $REQUESTED_E2E_BACKEND_PORT is busy. Using $E2E_BACKEND_PORT instead."
+fi
+
+if [[ "$E2E_FRONTEND_PORT" != "$REQUESTED_E2E_FRONTEND_PORT" ]]; then
+  echo "E2E frontend port $REQUESTED_E2E_FRONTEND_PORT is busy. Using $E2E_FRONTEND_PORT instead."
 fi
 
 run_step() {
@@ -66,6 +110,12 @@ run_step \
 
 run_step \
   "Browser end-to-end tests" \
+  env \
+  SATO_E2E_BACKEND_PORT="$E2E_BACKEND_PORT" \
+  SATO_E2E_FRONTEND_PORT="$E2E_FRONTEND_PORT" \
+  SATO_E2E_BACKEND_URL="$E2E_BACKEND_URL" \
+  SATO_E2E_APP_URL="$E2E_APP_URL" \
+  SATO_E2E_BACKEND_PYTHON="$BACKEND_PYTHON" \
   npm --prefix "$FRONTEND_DIR" run test:e2e
 
 echo
