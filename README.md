@@ -8,11 +8,12 @@ Web app for building collaborative [Spotify Blends](https://community.spotify.co
 
 ## Stack
 
-* *Backend*: [Flask](https://flask.palletsprojects.com/en/stable/), [Redis](https://redis.io/), [Python](https://www.python.org/)
-* *Frontend*: [Vue.js](https://vuejs.org/)
+* *Frontend*: [Vue.js](https://vuejs.org/), [Vite](https://vite.dev/), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Python](https://www.python.org/), [Flask](https://flask.palletsprojects.com/en/stable/), [Flask-Session](https://flask-session.readthedocs.io/en/latest/), [cachelib FileSystemCache](https://cachelib.readthedocs.io/en/stable/), [Redis](https://redis.io/)
 * *Auth*: [OAuth 2.0](https://oauth.net/2/)
 * *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
-* *Deploy*: [Netlify](https://www.netlify.com/), [Heroku](https://www.heroku.com/)
+* *Testing*: [pytest](https://pytest.org/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/)
+* *CI/CD*: [GitHub Actions](https://github.com/features/actions)
 
 ## Screenshots
 
@@ -23,29 +24,30 @@ Web app for building collaborative [Spotify Blends](https://community.spotify.co
 
 ## Usage
 
-First [register](https://developer.spotify.com/) as a Spotify Developer.
+The below instructions are for locally hosting `Sato`.
 
-Then create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/api/auth/callback** under *Redirect URIs*.
+1. First register as a Spotify Developer [here](https://developer.spotify.com/) and create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard). 
 
-The app credentials can now be pasted directly into the web UI, so a local `.env` file is optional. Server-side env vars still work as a fallback if you prefer them.
-
-Run the below.
+2. Next, run the below to install `Sato` and its dependancies.
 
 ```console
-$ git clone https://github.com/gongahkia/sato
-$ cd backend && python3 -m venv .venv && source .venv/bin/activate
-$ cd backend && pip install -r requirements.txt
-$ cd sato-app && npm install
-$ ./dev.sh
+$ git clone https://github.com/gongahkia/sato && cd sato
+$ python3 -m venv backend/.venv
+$ source backend/.venv/bin/activate
+$ pip install -r backend/requirements.txt
+$ npm --prefix sato-app install
 ```
 
-* See the frontend at [127.0.0.1:5173](http://127.0.0.1:5173/).  
-* The frontend proxies API requests to the backend at [127.0.0.1:5000](http://127.0.0.1:5000/).
-* Paste your Spotify app credentials into the Session panel, sign in, create a room, invite other members, save contributions, then let the host preview, create, and open the Blend Wrapped deck.
+3. Finally run the below to begin using `Sato`.
+
+```console
+$ ./scripts/dev.sh # starts Sato frontend and backend
+$ ./scripts/verify.sh # runs full local verification pass
+```
 
 ## Architecture
 
-![](./asset/reference/v2/architecture.png)
+![](./asset/reference/architecture.png)
 
 ## Other notes
 
