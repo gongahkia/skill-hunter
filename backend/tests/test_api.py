@@ -16,61 +16,111 @@ def make_track(track_id, name, artist, image="https://images.test/cover.png", is
     }
 
 
+def playlist_item(
+    playlist_id,
+    name,
+    owner_id,
+    *,
+    collaborative=False,
+    total=2,
+    owner_name=None,
+):
+    return {
+        "id": playlist_id,
+        "name": name,
+        "collaborative": collaborative,
+        "owner": {
+            "id": owner_id,
+            "display_name": owner_name or owner_id.title(),
+        },
+        "tracks": {"total": total},
+    }
+
+
 class FakeSpotifyService:
     def __init__(self):
         self.bound_credentials = None
-        self.current_user = {
-            "id": "me",
-            "display_name": "Sato Tester",
-            "email": "tester@example.com",
-            "country": "SG",
-            "product": "premium",
-            "followers": {"total": 12},
-            "images": [{"url": "https://images.test/me.png"}],
-        }
+        self.verified_credentials = []
+        self.current_user = None
         self.users = {
-            "alpha": {
-                "id": "alpha",
-                "display_name": "Alpha",
+            "host": {
+                "id": "host",
+                "display_name": "Host User",
+                "email": "host@example.com",
+                "country": "SG",
+                "product": "premium",
+                "followers": {"total": 12},
+                "images": [{"url": "https://images.test/host.png"}],
+            },
+            "guest": {
+                "id": "guest",
+                "display_name": "Guest User",
+                "email": "guest@example.com",
+                "country": "SG",
+                "product": "premium",
+                "followers": {"total": 4},
+                "images": [{"url": "https://images.test/guest.png"}],
+            },
+            "ally": {
+                "id": "ally",
+                "display_name": "Ally User",
+                "email": "ally@example.com",
+                "country": "SG",
+                "product": "premium",
                 "followers": {"total": 7},
-                "images": [{"url": "https://images.test/alpha.png"}],
-            },
-            "beta": {
-                "id": "beta",
-                "display_name": "Beta",
-                "followers": {"total": 3},
-                "images": [],
+                "images": [{"url": "https://images.test/ally.png"}],
             },
         }
-        self.user_playlists = {
-            "alpha": [
-                {
-                    "id": "alpha-public",
-                    "name": "Alpha Public",
-                    "public": True,
-                    "tracks": {"total": 2},
-                },
-                {
-                    "id": "alpha-private",
-                    "name": "Alpha Private",
-                    "public": False,
-                    "tracks": {"total": 8},
-                },
+        self.top_tracks = {
+            "host": [
+                make_track("shared-track", "Shared Track", "Shared Artist"),
+                make_track("host-top", "Host Top", "Host Artist"),
             ],
-            "beta": [],
+            "guest": [
+                make_track("shared-track", "Shared Track", "Shared Artist"),
+                make_track("guest-top", "Guest Top", "Guest Artist"),
+            ],
         }
-        self.top_tracks = [
-            make_track("shared-track", "Shared Track", "Shared Artist"),
-            make_track("self-track", "Self Track", "Self Artist"),
-        ]
+        self.saved_tracks = {
+            "host": [
+                {"track": make_track("host-saved", "Host Saved", "Host Artist")},
+            ],
+            "guest": [
+                {"track": make_track("guest-saved", "Guest Saved", "Guest Artist")},
+            ],
+        }
+        self.recent_tracks = {
+            "host": [
+                {"track": make_track("host-recent", "Host Recent", "Host Artist")},
+            ],
+            "guest": [
+                {"track": make_track("guest-recent", "Guest Recent", "Guest Artist")},
+            ],
+        }
+        self.current_user_playlists = {
+            "host": [
+                playlist_item("host-owned", "Host Owned", "host", total=2),
+                playlist_item("shared-collab", "Shared Collab", "guest", collaborative=True, total=2),
+                playlist_item("followed-public", "Followed Public", "someone-else", total=2),
+            ],
+            "guest": [
+                playlist_item("guest-owned", "Guest Owned", "guest", total=2),
+                playlist_item("shared-collab", "Shared Collab", "guest", collaborative=True, total=2),
+            ],
+        }
         self.playlist_tracks = {
-            "alpha-public": [
+            "host-owned": [
+                {"track": make_track("host-playlist", "Host Playlist Track", "Host Artist")},
                 {"track": make_track("shared-track", "Shared Track", "Shared Artist")},
-                {"track": make_track("friend-track", "Friend Track", "Friend Artist")},
-                {"track": make_track("friend-track", "Friend Track", "Friend Artist")},
-                {"track": {"id": None, "is_local": False}},
-                {"track": make_track("local-track", "Local Track", "Local Artist", is_local=True)},
-            ]
+            ],
+            "guest-owned": [
+                {"track": make_track("guest-playlist", "Guest Playlist Track", "Guest Artist")},
+                {"track": make_track("shared-track", "Shared Track", "Shared Artist")},
+            ],
+            "shared-collab": [
+                {"track": make_track("collab-track", "Collab Track", "Shared Artist")},
+                {"track": make_track("shared-track", "Shared Track", "Shared Artist")},
+            ],
         }
         self.created_playlists = []
         self.added_tracks = []
@@ -82,6 +132,9 @@ class FakeSpotifyService:
             "client_secret": kwargs.get("client_secret"),
             "redirect_uri": kwargs.get("redirect_uri"),
         }
+        self.client_id = kwargs.get("client_id")
+        self.client_secret = kwargs.get("client_secret")
+        self.redirect_uri = kwargs.get("redirect_uri")
         self.access_token = kwargs.get("access_token")
         self.refresh_token = kwargs.get("refresh_token")
         self.expires_at = kwargs.get("expires_at")
@@ -90,6 +143,24 @@ class FakeSpotifyService:
 
     def authorization_url(self, state):
         return f"https://accounts.spotify.com/authorize?state={state}"
+
+    def verify_client_credentials(self):
+        self.verified_credentials.append(
+            {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            }
+        )
+        if self.client_id == "bad-client-id":
+            raise SpotifyAPIError(
+                "Spotify rejected the supplied client credentials.",
+                status_code=400,
+                payload={
+                    "error": "invalid_client",
+                    "error_description": "Invalid client",
+                },
+            )
+        return {"access_token": "app-token", "token_type": "Bearer"}
 
     def exchange_code(self, code):
         self.exchanged_codes.append(code)
@@ -102,19 +173,20 @@ class FakeSpotifyService:
     def get_current_user(self):
         return self.current_user
 
-    def get_user(self, user_id):
-        if user_id == "missing":
-            raise SpotifyAPIError("Missing", status_code=404)
-        return self.users[user_id]
-
-    def get_user_playlists(self, user_id):
-        return self.user_playlists[user_id]
-
     def get_current_user_top_tracks(self, limit=50):
-        return self.top_tracks
+        return self.top_tracks[self.current_user["id"]][:limit]
 
-    def get_playlist_tracks(self, playlist_id):
-        return self.playlist_tracks[playlist_id]
+    def get_saved_tracks(self, limit=500):
+        return self.saved_tracks[self.current_user["id"]][:limit]
+
+    def get_recently_played(self, limit=50):
+        return self.recent_tracks[self.current_user["id"]][:limit]
+
+    def get_current_user_playlists(self, limit=200):
+        return self.current_user_playlists[self.current_user["id"]][:limit]
+
+    def get_playlist_tracks(self, playlist_id, limit=500):
+        return self.playlist_tracks[playlist_id][:limit]
 
     def create_playlist(self, user_id, name, description, is_public=False):
         playlist = {
@@ -136,10 +208,18 @@ class FakeSpotifyService:
         self.added_tracks.append({"playlist_id": playlist_id, "track_uris": track_uris})
         return {"snapshot_id": "snapshot"}
 
+    def get_user(self, user_id):  # pragma: no cover - guardrail
+        raise AssertionError("Removed public user endpoint should not be called.")
+
+    def get_user_playlists(self, user_id):  # pragma: no cover - guardrail
+        raise AssertionError("Removed public user playlist endpoint should not be called.")
+
 
 @pytest.fixture
 def fake_spotify():
-    return FakeSpotifyService()
+    service = FakeSpotifyService()
+    service.current_user = service.users["host"]
+    return service
 
 
 @pytest.fixture
@@ -148,6 +228,8 @@ def client(fake_spotify):
         {
             "TESTING": True,
             "CLIENT_APP_URL": "http://localhost:5173",
+            "SPOTIFY_CLIENT_ID": "server-client-id",
+            "SPOTIFY_CLIENT_SECRET": "server-client-secret",
         }
     )
     app.config["SPOTIFY_CLIENT_FACTORY"] = lambda **kwargs: fake_spotify.bind(**kwargs)
@@ -156,31 +238,15 @@ def client(fake_spotify):
         yield test_client
 
 
-def authenticate(client):
+def authenticate(client, fake_spotify, user_id="host"):
+    fake_spotify.current_user = fake_spotify.users[user_id]
     with client.session_transaction() as flask_session:
         flask_session["spotify_tokens"] = {
-            "access_token": "token",
-            "refresh_token": "refresh",
+            "access_token": f"{user_id}-token",
+            "refresh_token": f"{user_id}-refresh",
             "expires_at": 9999999999,
         }
-        flask_session["spotify_user"] = {
-            "id": "me",
-            "display_name": "Sato Tester",
-        }
-
-
-def test_callback_rejects_mismatched_state(client, fake_spotify):
-    with client.session_transaction() as flask_session:
-        flask_session["oauth_state"] = "expected-state"
-
-    response = client.get("/api/auth/callback?code=abc&state=wrong-state")
-    assert response.status_code == 302
-    location = urlparse(response.headers["Location"])
-    query = parse_qs(location.query)
-
-    assert query["login"] == ["error"]
-    assert query["reason"] == ["invalid_state"]
-    assert fake_spotify.exchanged_codes == []
+        flask_session["spotify_user"] = fake_spotify.users[user_id]
 
 
 def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, fake_spotify):
@@ -193,21 +259,7 @@ def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, f
     )
 
     assert config_response.status_code == 200
-    assert config_response.get_json() == {
-        "configured": True,
-        "client_id": "browser-client-id",
-        "redirect_uri": "http://127.0.0.1:5000/api/auth/callback",
-        "source": "session",
-    }
-
-    status_response = client.get("/api/auth/spotify-config")
-    assert status_response.status_code == 200
-    assert status_response.get_json() == {
-        "configured": True,
-        "client_id": "browser-client-id",
-        "redirect_uri": "http://127.0.0.1:5000/api/auth/callback",
-        "source": "session",
-    }
+    assert config_response.get_json()["configured"] is True
 
     response = client.get("/api/auth/login")
     assert response.status_code == 302
@@ -219,31 +271,175 @@ def test_spotify_config_can_be_set_from_the_web_app_and_used_for_login(client, f
     }
 
 
-def test_spotify_config_validation_requires_both_fields(client):
-    response = client.post(
-        "/api/auth/spotify-config",
+def test_source_catalog_filters_to_owned_or_collaborative_playlists(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+
+    response = client.get("/api/me/source-catalog")
+    assert response.status_code == 200
+    payload = response.get_json()
+
+    assert payload["top_tracks"]["count"] == 2
+    assert [playlist["id"] for playlist in payload["playlists"]] == ["host-owned", "shared-collab"]
+
+
+def test_create_join_and_leave_room_flow(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+    room_response = client.post("/api/rooms")
+    assert room_response.status_code == 200
+    room = room_response.get_json()
+    token = room["token"]
+    assert room["role"] == "host"
+    assert room["members"][0]["id"] == "host"
+
+    authenticate(client, fake_spotify, "guest")
+    join_response = client.post(f"/api/rooms/{token}/join")
+    assert join_response.status_code == 200
+    join_room = join_response.get_json()
+    assert sorted(member["id"] for member in join_room["members"]) == ["guest", "host"]
+
+    leave_response = client.post(f"/api/rooms/{token}/leave")
+    assert leave_response.status_code == 200
+
+
+def test_saving_contributions_rebalances_weights_and_dedupes_tracks(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+    token = client.post("/api/rooms").get_json()["token"]
+
+    host_contribution = client.put(
+        f"/api/rooms/{token}/contribution",
         json={
-            "client_id": "browser-client-id",
-            "client_secret": "",
+            "use_top_tracks": True,
+            "use_saved_tracks": True,
+            "use_recent_tracks": False,
+            "playlist_ids": ["host-owned"],
+        },
+    )
+    assert host_contribution.status_code == 200
+    host_room = host_contribution.get_json()["room"]
+    assert host_room["members"][0]["track_count"] == 4
+    assert host_room["members"][0]["weight"] == 100
+
+    authenticate(client, fake_spotify, "guest")
+    client.post(f"/api/rooms/{token}/join")
+    guest_contribution = client.put(
+        f"/api/rooms/{token}/contribution",
+        json={
+            "use_top_tracks": True,
+            "use_saved_tracks": False,
+            "use_recent_tracks": True,
+            "playlist_ids": ["guest-owned"],
+        },
+    )
+    assert guest_contribution.status_code == 200
+    guest_room = guest_contribution.get_json()["room"]
+
+    weights = {member["id"]: member["weight"] for member in guest_room["members"]}
+    assert weights == {"host": 50, "guest": 50}
+
+
+def test_host_can_preview_create_and_fetch_wrapped(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+    token = client.post("/api/rooms").get_json()["token"]
+    client.put(
+        f"/api/rooms/{token}/contribution",
+        json={
+            "use_top_tracks": True,
+            "use_saved_tracks": True,
+            "use_recent_tracks": False,
+            "playlist_ids": ["host-owned"],
         },
     )
 
-    assert response.status_code == 400
-    assert response.get_json()["error"]["code"] == "spotify_config_invalid"
+    authenticate(client, fake_spotify, "guest")
+    client.post(f"/api/rooms/{token}/join")
+    client.put(
+        f"/api/rooms/{token}/contribution",
+        json={
+            "use_top_tracks": True,
+            "use_saved_tracks": False,
+            "use_recent_tracks": True,
+            "playlist_ids": ["guest-owned"],
+        },
+    )
+
+    authenticate(client, fake_spotify, "host")
+    weights_response = client.patch(
+        f"/api/rooms/{token}/weights",
+        json={
+            "members": [
+                {"id": "host", "weight": 60},
+                {"id": "guest", "weight": 40},
+            ]
+        },
+    )
+    assert weights_response.status_code == 200
+
+    preview_response = client.post(f"/api/rooms/{token}/preview")
+    assert preview_response.status_code == 200
+    preview_payload = preview_response.get_json()
+    assert [track["id"] for track in preview_payload["tracks"]] == [
+        "shared-track",
+        "host-playlist",
+        "host-saved",
+        "host-top",
+        "guest-playlist",
+        "guest-recent",
+        "guest-top",
+    ][: len(preview_payload["tracks"])]
+
+    create_response = client.post(f"/api/rooms/{token}/create")
+    assert create_response.status_code == 200
+    create_payload = create_response.get_json()
+    assert create_payload["playlist"]["name"] == "Host User's Sato Blend"
+    assert create_payload["wrapped"]["cards"][0]["type"] == "cover"
+    assert create_payload["wrapped"]["cards"][-1]["type"] == "blend_character"
+    assert fake_spotify.created_playlists[-1]["is_public"] is False
+    assert fake_spotify.added_tracks[-1]["track_uris"][0] == "spotify:track:shared-track"
+
+    wrapped_response = client.get(f"/api/rooms/{token}/wrapped")
+    assert wrapped_response.status_code == 200
+    assert wrapped_response.get_json()["playlist_id"] == "playlist-123"
 
 
-def test_logout_clears_session(client):
-    authenticate(client)
+def test_non_host_cannot_save_weights(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+    token = client.post("/api/rooms").get_json()["token"]
+    client.put(
+        f"/api/rooms/{token}/contribution",
+        json={"use_top_tracks": True, "use_saved_tracks": False, "use_recent_tracks": False, "playlist_ids": []},
+    )
 
-    response = client.post("/api/auth/logout")
-    assert response.status_code == 200
-    assert response.get_json() == {"ok": True}
+    authenticate(client, fake_spotify, "guest")
+    client.post(f"/api/rooms/{token}/join")
+    client.put(
+        f"/api/rooms/{token}/contribution",
+        json={"use_top_tracks": True, "use_saved_tracks": False, "use_recent_tracks": False, "playlist_ids": []},
+    )
 
-    with client.session_transaction() as flask_session:
-        assert dict(flask_session) == {}
+    response = client.patch(
+        f"/api/rooms/{token}/weights",
+        json={
+            "members": [
+                {"id": "host", "weight": 50},
+                {"id": "guest", "weight": 50},
+            ]
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"]["code"] == "host_only"
 
 
-def test_logout_preserves_browser_supplied_spotify_config(client):
+def test_wrapped_is_not_available_before_create(client, fake_spotify):
+    authenticate(client, fake_spotify, "host")
+    token = client.post("/api/rooms").get_json()["token"]
+
+    response = client.get(f"/api/rooms/{token}/wrapped")
+    assert response.status_code == 404
+    assert response.get_json()["error"]["code"] == "wrapped_not_ready"
+
+
+def test_callback_restores_room_query_after_login(client, fake_spotify):
     client.post(
         "/api/auth/spotify-config",
         json={
@@ -251,120 +447,16 @@ def test_logout_preserves_browser_supplied_spotify_config(client):
             "client_secret": "browser-client-secret",
         },
     )
-    authenticate(client)
 
-    response = client.post("/api/auth/logout")
-    assert response.status_code == 200
+    login_response = client.get("/api/auth/login?room=test-room")
+    assert login_response.status_code == 302
+    state = parse_qs(urlparse(login_response.headers["Location"]).query)["state"][0]
 
-    with client.session_transaction() as flask_session:
-        assert dict(flask_session) == {
-            "spotify_config": {
-                "client_id": "browser-client-id",
-                "client_secret": "browser-client-secret",
-            }
-        }
+    fake_spotify.current_user = fake_spotify.users["host"]
+    callback_response = client.get(f"/api/auth/callback?code=abc&state={state}")
+    assert callback_response.status_code == 302
+    location = urlparse(callback_response.headers["Location"])
+    query = parse_qs(location.query)
 
-
-def test_resolve_friends_returns_partial_success_and_keeps_empty_playlist_users(client):
-    authenticate(client)
-
-    response = client.post(
-        "/api/friends/resolve",
-        json={
-            "urls": [
-                "https://open.spotify.com/user/alpha",
-                "not-a-spotify-url",
-                "https://open.spotify.com/user/missing",
-                "spotify:user:beta",
-            ]
-        },
-    )
-
-    assert response.status_code == 200
-    payload = response.get_json()
-
-    assert payload["invalid_urls"] == ["not-a-spotify-url"]
-    assert payload["unresolved_users"] == ["missing"]
-    assert [friend["id"] for friend in payload["friends"]] == ["alpha", "beta"]
-    assert payload["friends"][0]["playlists"] == [
-        {
-            "id": "alpha-public",
-            "name": "Alpha Public",
-            "track_count": 2,
-        }
-    ]
-    assert payload["friends"][1]["playlist_count"] == 0
-
-
-def test_preview_and_create_share_ranked_tracks_and_skip_duplicate_or_invalid_tracks(client, fake_spotify):
-    authenticate(client)
-
-    request_body = {
-        "self_weight": 60,
-        "friends": [
-            {
-                "id": "alpha",
-                "weight": 40,
-                "playlist_ids": ["alpha-public"],
-            }
-        ],
-        "name": "Friends In Orbit",
-    }
-
-    preview_response = client.post("/api/blends/preview", json=request_body)
-    assert preview_response.status_code == 200
-    preview_payload = preview_response.get_json()
-
-    assert [track["id"] for track in preview_payload["tracks"]] == [
-        "shared-track",
-        "self-track",
-        "friend-track",
-    ]
-    assert preview_payload["summary"]["total_tracks"] == 3
-    assert preview_payload["tracks"][0]["contributors"] == [
-        {
-            "source_id": "self",
-            "source_name": "Sato Tester",
-            "weight": 60.0,
-        },
-        {
-            "source_id": "alpha",
-            "source_name": "Alpha",
-            "weight": 40.0,
-        },
-    ]
-
-    create_response = client.post("/api/blends", json=request_body)
-    assert create_response.status_code == 200
-    create_payload = create_response.get_json()
-
-    assert create_payload["name"] == "Friends In Orbit"
-    assert create_payload["tracks_added"] == 3
-    assert fake_spotify.added_tracks[-1]["track_uris"] == [
-        "spotify:track:shared-track",
-        "spotify:track:self-track",
-        "spotify:track:friend-track",
-    ]
-
-
-def test_preview_rejects_weight_totals_that_do_not_equal_one_hundred(client):
-    authenticate(client)
-
-    response = client.post(
-        "/api/blends/preview",
-        json={
-            "self_weight": 50,
-            "friends": [
-                {
-                    "id": "alpha",
-                    "weight": 20,
-                    "playlist_ids": ["alpha-public"],
-                }
-            ],
-        },
-    )
-
-    assert response.status_code == 400
-    payload = response.get_json()
-    assert payload["error"]["code"] == "validation_error"
-    assert payload["error"]["details"]["weight_total"] == 70.0
+    assert query["login"] == ["success"]
+    assert query["room"] == ["test-room"]

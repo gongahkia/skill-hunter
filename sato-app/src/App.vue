@@ -47,7 +47,7 @@
       </div>
     </header>
 
-    <div class="workspace">
+    <div class="workspace" :class="{ 'workspace--logged-out': !user }">
       <aside class="sidebar-column">
         <section class="surface session-surface">
           <p class="eyebrow">Session</p>
@@ -55,8 +55,8 @@
           <p class="section-copy">
             {{
               user
-                ? 'Your account is live. Resolve public friend profiles, tune the percentages, preview the ranking, then create the playlist.'
-                : 'Connect your Spotify account before Sato can read public friend profiles or publish playlists.'
+                ? 'Your account is live. Create or join a blend room, save your contribution snapshot, then build the final mix with the room.'
+                : 'Connect your Spotify account before you can join a blend room or contribute your own Spotify sources.'
             }}
           </p>
 
@@ -68,7 +68,7 @@
             <div>
               <p class="config-form__title">Spotify App Credentials</p>
               <p class="config-form__copy">
-                Enter the Client ID and Client Secret from your Spotify Developer app. Sato keeps them in this browser session instead of requiring a `.env` file.
+                Enter the Client ID and Client Secret from your Spotify Developer app to connect your account and start building blends.
               </p>
             </div>
 
@@ -104,7 +104,7 @@
                 </li>
               </ol>
               <p class="config-note">
-                Use your own Spotify app credentials. The Client Secret is sensitive and should not be shared.
+                Use your own Spotify app credentials. The Client Secret is sensitive and should not be shared. If Spotify says <code class="config-inline-code">INVALID_CLIENT</code>, the Client ID is usually wrong.
               </p>
             </div>
 
@@ -180,15 +180,15 @@
 
         <section class="surface guide-surface">
           <p class="eyebrow">Workflow</p>
-          <h2>Only real controls remain</h2>
+          <h2>Build your blend</h2>
           <ol class="workflow-list">
-            <li>Connect Spotify and load your session.</li>
-            <li>Paste public friend profile URLs and resolve what is available.</li>
-            <li>Set your own share, choose friend playlists, and keep the total at 100%.</li>
-            <li>Preview the ranked tracks before you create the final playlist.</li>
+            <li>Connect Spotify and open a room link or create a new room.</li>
+            <li>Each member signs in and saves a snapshot from their own top tracks, saved tracks, recent plays, or owned playlists.</li>
+            <li>The host sets room weights, previews the ranking, and creates the final playlist.</li>
+            <li>Sato generates a Blend Wrapped story deck after the playlist is created.</li>
           </ol>
           <p class="section-copy">
-            The visual language still leans on Spotify’s dark chrome and green accents, but the layout no longer includes fake queue, player, or navigation controls.
+            Sato combines room members’ own Spotify sources into one weighted playlist, then turns the finished mix into a Blend Wrapped story deck.
           </p>
         </section>
       </aside>
@@ -200,14 +200,14 @@
             {{
               user
                 ? 'Build a weighted blend that feels native to Spotify.'
-                : 'Configure Spotify once, then start building blends.'
+                : 'Configure Spotify once, then start building collaborative blend rooms.'
             }}
           </h2>
           <p class="hero-description">
             {{
               user
-                ? 'Same dark theme, same green action language, but the interface now focuses only on the parts of Sato that actually work: login, resolve, weight, preview, and create.'
-                : 'Use the Session panel to add your Spotify app credentials, sign in, and unlock the live blend builder.'
+                ? 'Shape the room mix, compare contributor weights, preview the ranking, and generate a Wrapped story after the playlist is published.'
+                : 'Add your Spotify app credentials, sign in, and build a room where every member brings their own top tracks, saved tracks, recent plays, or playlists.'
             }}
           </p>
         </section>
@@ -224,12 +224,14 @@
 import BlendView from './components/BlendView.vue'
 import satoLogo from './assets/sato.png'
 import { apiRequest } from './lib/api'
+import { logClientEvent } from './lib/debug'
 
 const AUTH_ERRORS = {
   invalid_state: 'Spotify returned to Sato with an invalid login state. Start the login flow again.',
   missing_code: 'Spotify did not return an authorization code.',
   access_denied: 'Spotify login was cancelled before Sato received permission.',
   spotify_config_missing: 'Spotify credentials are not configured yet. Add your Client ID and Client Secret in the app before signing in.',
+  spotify_config_invalid_credentials: 'Spotify rejected the saved Client ID or Client Secret. Double-check them in the Spotify Developer Dashboard and save again.',
 }
 
 export default {
@@ -278,9 +280,21 @@ export default {
       if (!this.canLogin) {
         this.authMessage = AUTH_ERRORS.spotify_config_missing
         this.noticeTone = 'notice-banner--error'
+        logClientEvent('auth.login.blocked', {
+          reason: 'spotify_config_missing',
+        })
         return
       }
-      window.location.assign('/api/auth/login')
+      const currentUrl = new URL(window.location.href)
+      const roomToken = currentUrl.searchParams.get('room')
+      const loginUrl = roomToken
+        ? `/api/auth/login?room=${encodeURIComponent(roomToken)}`
+        : '/api/auth/login'
+      logClientEvent('auth.login.redirect', {
+        roomToken,
+        loginUrl,
+      })
+      window.location.assign(loginUrl)
     },
     async logout() {
       try {
@@ -290,10 +304,15 @@ export default {
         this.user = null
         this.authMessage = 'Your Spotify session has been cleared.'
         this.noticeTone = 'notice-banner--neutral'
+        logClientEvent('auth.logout.completed')
         await this.loadSpotifyConfig()
       } catch (error) {
         this.authMessage = error.message
         this.noticeTone = 'notice-banner--error'
+        logClientEvent('auth.logout.failed', {
+          message: error.message,
+          status: error.status,
+        })
       }
     },
     async loadSpotifyConfig() {
@@ -306,9 +325,17 @@ export default {
         if (!this.spotifyConfig.clientId) {
           this.spotifyConfig.clientId = config.client_id || ''
         }
+        logClientEvent('auth.spotify_config.loaded', {
+          configured: this.spotifyConfig.configured,
+          source: this.spotifyConfig.source,
+        })
       } catch (error) {
         this.authMessage = error.message
         this.noticeTone = 'notice-banner--error'
+        logClientEvent('auth.spotify_config.load_failed', {
+          message: error.message,
+          status: error.status,
+        })
       } finally {
         this.loadingSpotifyConfig = false
       }
@@ -337,9 +364,16 @@ export default {
         this.user = null
         this.authMessage = 'Spotify app credentials saved for this browser session.'
         this.noticeTone = 'notice-banner--success'
+        logClientEvent('auth.spotify_config.saved', {
+          source: this.spotifyConfig.source,
+        })
       } catch (error) {
         this.authMessage = error.message
         this.noticeTone = 'notice-banner--error'
+        logClientEvent('auth.spotify_config.save_failed', {
+          message: error.message,
+          status: error.status,
+        })
       } finally {
         this.savingSpotifyConfig = false
       }
@@ -350,15 +384,22 @@ export default {
         const user = await apiRequest('/api/me')
         this.user = user
         if (!this.authMessage) {
-          this.authMessage = 'Spotify is connected. Resolve friends to start building a blend.'
+          this.authMessage = 'Spotify is connected. Create or join a room to start building a blend.'
           this.noticeTone = 'notice-banner--success'
         }
+        logClientEvent('auth.session.loaded', {
+          userId: user.id,
+        })
       } catch (error) {
         this.user = null
         if (error.status !== 401) {
           this.authMessage = error.message
           this.noticeTone = 'notice-banner--error'
         }
+        logClientEvent('auth.session.load_failed', {
+          message: error.message,
+          status: error.status,
+        })
       } finally {
         this.loadingSession = false
       }
@@ -371,21 +412,29 @@ export default {
       if (loginState === 'success') {
         this.authMessage = 'Spotify login completed. Your session is ready.'
         this.noticeTone = 'notice-banner--success'
+        logClientEvent('auth.query_state.hydrated', {
+          loginState,
+        })
       }
 
       if (loginState === 'error') {
         this.authMessage = AUTH_ERRORS[reason] || 'Spotify login did not complete successfully.'
         this.noticeTone = 'notice-banner--error'
+        logClientEvent('auth.query_state.hydrated', {
+          loginState,
+          reason,
+        })
       }
 
       if (loginState) {
         currentUrl.searchParams.delete('login')
         currentUrl.searchParams.delete('reason')
-        window.history.replaceState({}, document.title, currentUrl.pathname || '/')
+        window.history.replaceState({}, document.title, `${currentUrl.pathname || '/'}${currentUrl.search}`)
       }
     },
   },
   mounted() {
+    logClientEvent('app.mounted')
     this.hydrateAuthMessageFromQuery()
     this.loadSpotifyConfig()
     this.loadSession()
@@ -506,11 +555,16 @@ export default {
   gap: 0.5rem;
 }
 
+.workspace--logged-out {
+  grid-template-columns: minmax(26rem, 34rem) minmax(0, 1fr);
+}
+
 .sidebar-column,
 .main-column {
   min-width: 0;
   display: grid;
   gap: 0.5rem;
+  align-content: start;
 }
 
 .surface {

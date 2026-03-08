@@ -3,7 +3,7 @@
 
 # `Sato`
 
-Web App that provides fine-grained, percentage-based control for making Spotify Blends with your friends.
+Web app for building collaborative Spotify blends in shared rooms, with host-managed weights and a post-create Blend Wrapped recap.
 
 ## Stack
 
@@ -22,13 +22,13 @@ Web App that provides fine-grained, percentage-based control for making Spotify 
   <img src="./asset/reference/2.png" width="49%">
 </div>
 
-### Paste Spotify Profile URLs
+### Create or Join a Room
 
 <div style="display: flex; justify-content: center;">
   <img src="./asset/reference/3.png" width="85%">
 </div>
 
-### Create Custom Blends
+### Build and Wrap the Final Blend
 
 <div style="display: flex; justify-content: center;">
   <img src="./asset/reference/4.png" width="85%">
@@ -42,18 +42,11 @@ Web App that provides fine-grained, percentage-based control for making Spotify 
 
 First [register](https://developer.spotify.com/) as a Spotify Developer.
 
-Then *Create app* on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/api/auth/callback** under *Redirect URIs*.
+Then create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add **http://127.0.0.1:5000/api/auth/callback** under *Redirect URIs*.
 
-Create an `.env` file from `.env.example` with the *Client ID* and *Client secret*.
+The app credentials can now be pasted directly into the web UI, so a local `.env` file is optional. Server-side env vars still work as a fallback if you prefer them.
 
-```env
-SPOTIFY_CLIENT_ID=XXX
-SPOTIFY_CLIENT_SECRET=XXX
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:5000/api/auth/callback
-CLIENT_APP_URL=http://127.0.0.1:5173
-```
-
-Then run the below.
+Run the below.
 
 ```console
 $ git clone https://github.com/gongahkia/sato
@@ -65,6 +58,27 @@ $ ./dev.sh
 
 * See the frontend at [127.0.0.1:5173](http://127.0.0.1:5173/).  
 * The frontend proxies API requests to the backend at [127.0.0.1:5000](http://127.0.0.1:5000/).
+* Paste your Spotify app credentials into the Session panel, sign in, create a room, invite other members, save contributions, then let the host preview, create, and open the Blend Wrapped deck.
+
+## Testing
+
+Run the frontend unit suite from `sato-app/`.
+
+```console
+$ npm test -- --run
+```
+
+Run the backend API/client suite from the repo root with the repo-local virtualenv.
+
+```console
+$ backend/.venv/bin/pytest backend/tests/test_api.py backend/tests/test_spotify_client.py
+```
+
+Run the browser end-to-end suite from `sato-app/`. It starts an isolated Flask E2E backend on `127.0.0.1:5001` and a Vite frontend on `127.0.0.1:41731`, using a fake Spotify service and debug routes so the suite does not depend on real Spotify OAuth.
+
+```console
+$ npm run test:e2e
+```
 
 ## Other notes
 

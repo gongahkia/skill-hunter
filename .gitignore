@@ -12,6 +12,8 @@ node_modules
 .flask_session
 dist
 dist-ssr
+playwright-report
+test-results
 *.local
 .vscode/*
 !.vscode/extensions.json

@@ -2,33 +2,23 @@ function roundToTwo(value) {
   return Number(Number(value).toFixed(2))
 }
 
-export function createFriendState(friend) {
-  return {
-    ...friend,
-    selected: true,
-    weight: 0,
-    selectedPlaylistIds: (friend.playlists || []).map((playlist) => playlist.id),
-  }
-}
-
-export function distributeFriendWeights(friends, selfWeight) {
-  const selectedFriends = friends.filter((friend) => friend.selected)
-  const remainingWeight = Math.max(0, Math.round((100 - Number(selfWeight)) * 100))
-
-  if (!selectedFriends.length) {
-    return friends.map((friend) => ({
-      ...friend,
+export function distributeMemberWeights(members) {
+  const activeMembers = members.filter((member) => member.hasContribution)
+  if (!activeMembers.length) {
+    return members.map((member) => ({
+      ...member,
       weight: 0,
     }))
   }
 
-  const baseWeight = Math.floor(remainingWeight / selectedFriends.length)
-  let extraWeight = remainingWeight - (baseWeight * selectedFriends.length)
+  const remainingBasisPoints = 10000
+  const baseWeight = Math.floor(remainingBasisPoints / activeMembers.length)
+  let extraWeight = remainingBasisPoints - (baseWeight * activeMembers.length)
 
-  return friends.map((friend) => {
-    if (!friend.selected) {
+  return members.map((member) => {
+    if (!member.hasContribution) {
       return {
-        ...friend,
+        ...member,
         weight: 0,
       }
     }
@@ -39,40 +29,27 @@ export function distributeFriendWeights(friends, selfWeight) {
     }
 
     return {
-      ...friend,
+      ...member,
       weight: roundToTwo(nextWeight / 100),
-      selectedPlaylistIds: friend.selectedPlaylistIds?.length
-        ? friend.selectedPlaylistIds
-        : (friend.playlists || []).map((playlist) => playlist.id),
     }
   })
 }
 
-export function totalBlendWeight(selfWeight, friends) {
-  const friendWeight = friends
-    .filter((friend) => friend.selected)
-    .reduce((total, friend) => total + Number(friend.weight || 0), 0)
-  return roundToTwo(Number(selfWeight || 0) + friendWeight)
+export function totalAssignedWeight(members) {
+  return roundToTwo(
+    members
+      .filter((member) => member.hasContribution)
+      .reduce((total, member) => total + Number(member.weight || 0), 0),
+  )
 }
 
-export function buildBlendPayload(selfWeight, friends, name = '') {
-  const payload = {
-    self_weight: roundToTwo(selfWeight),
-    friends: friends
-      .filter((friend) => friend.selected)
-      .map((friend) => ({
-        id: friend.id,
-        weight: roundToTwo(friend.weight),
-        playlist_ids: friend.selectedPlaylistIds?.length
-          ? [...friend.selectedPlaylistIds]
-          : (friend.playlists || []).map((playlist) => playlist.id),
+export function buildWeightsPayload(members) {
+  return {
+    members: members
+      .filter((member) => member.hasContribution)
+      .map((member) => ({
+        id: member.id,
+        weight: roundToTwo(member.weight || 0),
       })),
   }
-
-  const trimmedName = name.trim()
-  if (trimmedName) {
-    payload.name = trimmedName
-  }
-
-  return payload
 }

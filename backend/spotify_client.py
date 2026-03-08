@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import time
 from urllib.parse import urlencode
 
@@ -26,8 +25,16 @@ class SpotifyClient:
     API_BASE = "https://api.spotify.com/v1"
     AUTH_URL = "https://accounts.spotify.com/authorize"
     TOKEN_URL = "https://accounts.spotify.com/api/token"
-    USER_ID_PATTERN = re.compile(r"(?:spotify\.com/user/|spotify:user:)([^/?#:]+)")
-    RAW_USER_ID_PATTERN = re.compile(r"^[A-Za-z0-9_]+$")
+    AUTH_SCOPES = [
+        "user-read-private",
+        "user-read-email",
+        "user-top-read",
+        "user-library-read",
+        "user-read-recently-played",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-private",
+    ]
 
     def __init__(
         self,
@@ -51,52 +58,27 @@ class SpotifyClient:
         self.timeout = timeout
         self.http_session = http_session or requests.Session()
 
-    @classmethod
-    def extract_user_id(cls, raw_value):
-        if not raw_value:
-            return None
-
-        raw_value = str(raw_value).strip()
-        if not raw_value:
-            return None
-
-        pattern_match = cls.USER_ID_PATTERN.search(raw_value)
-        if pattern_match:
-            return pattern_match.group(1)
-
-        if cls.RAW_USER_ID_PATTERN.fullmatch(raw_value):
-            return raw_value
-
-        return None
-
     def authorization_url(self, state):
         params = {
             "client_id": self.client_id,
             "response_type": "code",
             "redirect_uri": self.redirect_uri,
-            "scope": " ".join(
-                [
-                    "user-read-private",
-                    "user-read-email",
-                    "user-top-read",
-                    "playlist-modify-public",
-                    "playlist-modify-private",
-                ]
-            ),
+            "scope": " ".join(self.AUTH_SCOPES),
             "show_dialog": "true",
             "state": state,
         }
         return f"{self.AUTH_URL}?{urlencode(params)}"
 
     def exchange_code(self, code):
-        token_payload = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": self.redirect_uri,
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-        }
-        return self._request_token(token_payload)
+        return self._request_token(
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": self.redirect_uri,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            }
+        )
 
     def refresh_access_token(self):
         if not self.refresh_token:
@@ -105,13 +87,32 @@ class SpotifyClient:
                 status_code=401,
             )
 
-        token_payload = {
-            "grant_type": "refresh_token",
-            "refresh_token": self.refresh_token,
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-        }
-        return self._request_token(token_payload)
+        return self._request_token(
+            {
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_token,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            }
+        )
+
+    def verify_client_credentials(self):
+        response = self.http_session.post(
+            self.TOKEN_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            },
+            timeout=self.timeout,
+        )
+        if response.status_code != 200:
+            raise SpotifyAPIError(
+                "Spotify rejected the supplied client credentials.",
+                status_code=response.status_code,
+                payload=_safe_json(response),
+            )
+        return response.json()
 
     def _request_token(self, token_payload):
         response = self.http_session.post(
@@ -186,12 +187,21 @@ class SpotifyClient:
 
         return response.json()
 
-    def _paginate(self, path):
+    def _paginate(self, path, *, item_limit=None):
         items = []
         next_path = path
         while next_path:
             payload = self._request("GET", next_path)
-            items.extend(payload.get("items", []))
+            page_items = payload.get("items", [])
+            if item_limit is not None:
+                remaining_items = item_limit - len(items)
+                if remaining_items <= 0:
+                    break
+                items.extend(page_items[:remaining_items])
+                if len(items) >= item_limit:
+                    break
+            else:
+                items.extend(page_items)
             next_path = payload.get("next")
         return items
 
@@ -201,14 +211,22 @@ class SpotifyClient:
     def get_current_user_top_tracks(self, limit=50):
         return self._request("GET", f"/me/top/tracks?limit={limit}").get("items", [])
 
-    def get_user(self, user_id):
-        return self._request("GET", f"/users/{user_id}")
+    def get_saved_tracks(self, limit=500):
+        return self._paginate("/me/tracks?limit=50", item_limit=limit)
 
-    def get_user_playlists(self, user_id):
-        return self._paginate(f"/users/{user_id}/playlists?limit=50")
+    def get_recently_played(self, limit=50):
+        return self._request("GET", f"/me/player/recently-played?limit={limit}").get(
+            "items", []
+        )
 
-    def get_playlist_tracks(self, playlist_id):
-        return self._paginate(f"/playlists/{playlist_id}/tracks?limit=100")
+    def get_current_user_playlists(self, limit=200):
+        return self._paginate("/me/playlists?limit=50", item_limit=limit)
+
+    def get_playlist_tracks(self, playlist_id, limit=500):
+        return self._paginate(
+            f"/playlists/{playlist_id}/tracks?limit=100",
+            item_limit=limit,
+        )
 
     def create_playlist(self, user_id, name, description, is_public=False):
         return self._request(
@@ -225,8 +243,11 @@ class SpotifyClient:
         if not track_uris:
             return None
 
-        return self._request(
-            "POST",
-            f"/playlists/{playlist_id}/tracks",
-            json={"uris": track_uris},
-        )
+        for start in range(0, len(track_uris), 100):
+            self._request(
+                "POST",
+                f"/playlists/{playlist_id}/tracks",
+                json={"uris": track_uris[start : start + 100]},
+            )
+
+        return {"snapshot_id": "snapshot"}

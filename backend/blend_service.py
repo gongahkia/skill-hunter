@@ -8,98 +8,40 @@ class BlendValidationError(Exception):
         self.details = details or {}
 
 
-def _as_weight(value, field_name):
-    try:
-        weight = float(value)
-    except (TypeError, ValueError) as error:
-        raise BlendValidationError(
-            f"{field_name} must be a number between 0 and 100.",
-            details={"field": field_name},
-        ) from error
-
-    if weight < 0 or weight > 100:
-        raise BlendValidationError(
-            f"{field_name} must be between 0 and 100.",
-            details={"field": field_name},
-        )
-    return round(weight, 2)
-
-
-def validate_blend_request(payload):
-    if not isinstance(payload, dict):
-        raise BlendValidationError("Blend requests must be valid JSON objects.")
-
-    self_weight = _as_weight(payload.get("self_weight"), "self_weight")
-    friend_entries = payload.get("friends")
-    if not isinstance(friend_entries, list) or not friend_entries:
-        raise BlendValidationError("Select at least one friend before previewing a blend.")
-
-    normalized_friends = []
-    total_weight = self_weight
-    seen_friend_ids = set()
-
-    for entry in friend_entries:
-        if not isinstance(entry, dict):
-            raise BlendValidationError("Each friend entry must be an object.")
-
-        friend_id = str(entry.get("id", "")).strip()
-        if not friend_id:
-            raise BlendValidationError("Each friend entry must include an id.")
-        if friend_id in seen_friend_ids:
-            raise BlendValidationError(
-                f"Friend '{friend_id}' was provided more than once.",
-                details={"friend_id": friend_id},
-            )
-
-        seen_friend_ids.add(friend_id)
-        weight = _as_weight(entry.get("weight"), f"{friend_id}.weight")
-        playlist_ids = entry.get("playlist_ids")
-        if playlist_ids is None:
-            playlist_ids = []
-        if not isinstance(playlist_ids, list):
-            raise BlendValidationError(
-                f"{friend_id}.playlist_ids must be an array of playlist ids.",
-                details={"friend_id": friend_id},
-            )
-
-        normalized_friends.append(
-            {
-                "id": friend_id,
-                "weight": weight,
-                "playlist_ids": [
-                    str(playlist_id).strip()
-                    for playlist_id in playlist_ids
-                    if str(playlist_id).strip()
-                ],
-            }
-        )
-        total_weight += weight
-
-    if abs(total_weight - 100) > 0.01:
-        raise BlendValidationError(
-            "Blend weights must total exactly 100.",
-            details={"weight_total": round(total_weight, 2)},
-        )
-
-    return {
-        "self_weight": self_weight,
-        "friends": normalized_friends,
-    }
+def round_to_two(value):
+    return round(float(value), 2)
 
 
 def _extract_track(track_or_item):
-    track = track_or_item.get("track") if isinstance(track_or_item, dict) and "track" in track_or_item else track_or_item
+    track = (
+        track_or_item.get("track")
+        if isinstance(track_or_item, dict) and "track" in track_or_item
+        else track_or_item
+    )
     if not isinstance(track, dict):
         return None
     if track.get("is_local"):
         return None
+
     track_id = track.get("id")
     if not track_id:
         return None
 
+    if track.get("artists") and isinstance(track.get("artists")[0], str):
+        return {
+            "id": track_id,
+            "name": track.get("name") or "Unknown track",
+            "artists": track.get("artists") or [],
+            "image": track.get("image"),
+        }
+
     album = track.get("album") or {}
     images = album.get("images") or []
-    artists = [artist.get("name") for artist in track.get("artists") or [] if artist.get("name")]
+    artists = [
+        artist.get("name")
+        for artist in track.get("artists") or []
+        if isinstance(artist, dict) and artist.get("name")
+    ]
 
     return {
         "id": track_id,
@@ -109,10 +51,83 @@ def _extract_track(track_or_item):
     }
 
 
-def _add_track_scores(track_scores, source_id, source_name, weight, tracks):
+def normalize_track_snapshot(raw_tracks):
+    deduped_tracks = {}
+    for raw_track in raw_tracks:
+        track = _extract_track(raw_track)
+        if not track:
+            continue
+        deduped_tracks.setdefault(track["id"], track)
+
+    return sorted(
+        deduped_tracks.values(),
+        key=lambda track: (track["name"].lower(), track["id"]),
+    )
+
+
+def build_contribution_snapshot(
+    *,
+    use_top_tracks,
+    use_saved_tracks,
+    use_recent_tracks,
+    playlist_ids,
+    selected_playlists,
+    top_tracks,
+    saved_tracks,
+    recent_tracks,
+    playlist_tracks,
+):
+    if (
+        not use_top_tracks
+        and not use_saved_tracks
+        and not use_recent_tracks
+        and not playlist_ids
+    ):
+        raise BlendValidationError(
+            "Choose at least one Spotify source before saving your contribution."
+        )
+
+    snapshot_tracks = []
+    if use_top_tracks:
+        snapshot_tracks.extend(top_tracks)
+    if use_saved_tracks:
+        snapshot_tracks.extend(saved_tracks)
+    if use_recent_tracks:
+        snapshot_tracks.extend(recent_tracks)
+    snapshot_tracks.extend(playlist_tracks)
+
+    normalized_tracks = normalize_track_snapshot(snapshot_tracks)
+    if not normalized_tracks:
+        raise BlendValidationError(
+            "The selected Spotify sources did not contain any usable tracks."
+        )
+
+    return {
+        "use_top_tracks": bool(use_top_tracks),
+        "use_saved_tracks": bool(use_saved_tracks),
+        "use_recent_tracks": bool(use_recent_tracks),
+        "playlist_ids": playlist_ids,
+        "playlists": selected_playlists,
+        "source_summary": {
+            "top_tracks_count": len(normalize_track_snapshot(top_tracks)) if use_top_tracks else 0,
+            "saved_tracks_count": len(normalize_track_snapshot(saved_tracks)) if use_saved_tracks else 0,
+            "recent_tracks_count": len(normalize_track_snapshot(recent_tracks)) if use_recent_tracks else 0,
+            "playlist_count": len(selected_playlists),
+            "playlist_track_count": len(normalize_track_snapshot(playlist_tracks)),
+        },
+        "track_count": len(normalized_tracks),
+        "tracks": normalized_tracks,
+    }
+
+
+def _add_track_scores(track_scores, contributor, tracks):
+    weight = contributor["weight"]
+    if weight <= 0:
+        return
+
     seen_track_ids = set()
     for raw_track in tracks:
-        track = _extract_track(raw_track)
+        track = _extract_track(raw_track) if isinstance(raw_track, dict) else raw_track
         if not track or track["id"] in seen_track_ids:
             continue
 
@@ -128,38 +143,22 @@ def _add_track_scores(track_scores, source_id, source_name, weight, tracks):
         existing_track["score"] += weight
         existing_track["contributors"].append(
             {
-                "source_id": source_id,
-                "source_name": source_name,
-                "weight": round(weight, 2),
+                "source_id": contributor["id"],
+                "source_name": contributor["name"],
+                "weight": round_to_two(weight),
             }
         )
 
 
-def build_blend_preview(self_tracks, self_weight, friend_sources, user_label="You", limit=50):
+def build_room_blend_preview(contributors, limit=50):
     track_scores = {}
-    _add_track_scores(
-        track_scores=track_scores,
-        source_id="self",
-        source_name=user_label,
-        weight=self_weight,
-        tracks=self_tracks,
-    )
+    active_contributors = [contributor for contributor in contributors if contributor["weight"] > 0]
 
-    selected_friends = []
-    for friend in friend_sources:
+    for contributor in active_contributors:
         _add_track_scores(
             track_scores=track_scores,
-            source_id=friend["id"],
-            source_name=friend["name"],
-            weight=friend["weight"],
-            tracks=friend["tracks"],
-        )
-        selected_friends.append(
-            {
-                "id": friend["id"],
-                "name": friend["name"],
-                "playlist_ids": friend["playlist_ids"],
-            }
+            contributor=contributor,
+            tracks=contributor["tracks"],
         )
 
     ranked_tracks = sorted(
@@ -168,26 +167,131 @@ def build_blend_preview(self_tracks, self_weight, friend_sources, user_label="Yo
     )[:limit]
 
     for track in ranked_tracks:
-        track["score"] = round(track["score"], 2)
+        track["score"] = round_to_two(track["score"])
         track["contributors"] = sorted(
             track["contributors"],
-            key=lambda contributor: (-contributor["weight"], contributor["source_name"]),
+            key=lambda contributor: (
+                -contributor["weight"],
+                contributor["source_name"].lower(),
+            ),
         )
 
     return {
         "tracks": ranked_tracks,
         "summary": {
-            "normalized_weights": {
-                "self_weight": round(self_weight, 2),
-                "friends": [
+            "total_tracks": len(track_scores),
+            "total_contributors": len(active_contributors),
+            "contributors": [
+                {
+                    "id": contributor["id"],
+                    "name": contributor["name"],
+                    "weight": round_to_two(contributor["weight"]),
+                    "track_count": len(contributor["tracks"]),
+                }
+                for contributor in active_contributors
+            ],
+        },
+    }
+
+
+def _contribution_counts(preview_tracks, contributors):
+    surviving_counts = {contributor["id"]: 0 for contributor in contributors}
+    unique_counts = {contributor["id"]: 0 for contributor in contributors}
+    shared_favorites = 0
+
+    for track in preview_tracks:
+        contributor_ids = [contributor["source_id"] for contributor in track["contributors"]]
+        for contributor_id in contributor_ids:
+            surviving_counts[contributor_id] = surviving_counts.get(contributor_id, 0) + 1
+
+        if len(contributor_ids) >= 2:
+            shared_favorites += 1
+        if len(contributor_ids) == 1:
+            unique_counts[contributor_ids[0]] = unique_counts.get(contributor_ids[0], 0) + 1
+
+    return surviving_counts, unique_counts, shared_favorites
+
+
+def _pick_member(metric_counts, contributors):
+    ranked = sorted(
+        contributors,
+        key=lambda contributor: (
+            -metric_counts.get(contributor["id"], 0),
+            -round_to_two(contributor["weight"]),
+            contributor["name"].lower(),
+        ),
+    )
+    winner = ranked[0]
+    return {
+        "id": winner["id"],
+        "name": winner["name"],
+        "value": metric_counts.get(winner["id"], 0),
+    }
+
+
+def build_wrapped_artifact(room, playlist, preview, contributors):
+    surviving_counts, unique_counts, shared_favorites = _contribution_counts(
+        preview["tracks"], contributors
+    )
+    influential_member = _pick_member(surviving_counts, contributors)
+    unique_member = _pick_member(unique_counts, contributors)
+
+    return {
+        "playlist_id": playlist["id"],
+        "playlist_name": playlist["name"],
+        "generated_at": playlist["created_at"],
+        "cards": [
+            {
+                "type": "cover",
+                "playlist_name": playlist["name"],
+                "room_token": room["token"],
+                "generated_at": playlist["created_at"],
+                "contributor_count": len(contributors),
+            },
+            {
+                "type": "summary",
+                "total_ranked_tracks": preview["summary"]["total_tracks"],
+                "tracks_added": playlist["tracks_added"],
+                "total_contributors": len(contributors),
+                "weights": [
                     {
-                        "id": friend["id"],
-                        "weight": round(friend["weight"], 2),
+                        "id": contributor["id"],
+                        "name": contributor["name"],
+                        "weight": round_to_two(contributor["weight"]),
                     }
-                    for friend in friend_sources
+                    for contributor in contributors
                 ],
             },
-            "selected_friends": selected_friends,
-            "total_tracks": len(track_scores),
-        },
+            {
+                "type": "contributors",
+                "members": [
+                    {
+                        "id": contributor["id"],
+                        "name": contributor["name"],
+                        "weight": round_to_two(contributor["weight"]),
+                        "surviving_tracks": surviving_counts.get(contributor["id"], 0),
+                    }
+                    for contributor in contributors
+                ],
+            },
+            {
+                "type": "top_tracks",
+                "tracks": [
+                    {
+                        "id": track["id"],
+                        "name": track["name"],
+                        "artists": track["artists"],
+                        "score": track["score"],
+                        "contributors": track["contributors"],
+                    }
+                    for track in preview["tracks"][:5]
+                ],
+            },
+            {
+                "type": "blend_character",
+                "shared_favorites": shared_favorites,
+                "most_influential_member": influential_member,
+                "most_unique_member": unique_member,
+            },
+        ],
     }
