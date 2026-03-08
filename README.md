@@ -4,7 +4,7 @@
 
 # `Sato`
 
-Web app for building collaborative Spotify blends in shared rooms, with host-managed weights and a post-create Blend Wrapped recap.
+Web app for building collaborative [Spotify Blends](https://community.spotify.com/t5/FAQs/Blend-playlists-Overview/ta-p/5246498) with [host-managed weights](#architecture) and [custom Blend Wrapped recaps](#architecture).
 
 ## Stack
 
