@@ -8,12 +8,6 @@ FRONTEND_DIR="$ROOT_DIR/sato-app"
 
 BACKEND_PID=""
 
-env_file_has_var() {
-  local file="$1"
-  local var_name="$2"
-  [[ -f "$file" ]] && grep -Eq "^[[:space:]]*${var_name}=" "$file"
-}
-
 cleanup() {
   if [[ -n "${BACKEND_PID}" ]] && kill -0 "${BACKEND_PID}" 2>/dev/null; then
     kill "${BACKEND_PID}" 2>/dev/null || true
@@ -46,20 +40,6 @@ else
   BACKEND_PYTHON="${PYTHON:-python3}"
 fi
 
-if [[ -z "${SPOTIFY_CLIENT_ID:-}" ]] \
-  && ! env_file_has_var "$ROOT_DIR/.env" "SPOTIFY_CLIENT_ID" \
-  && ! env_file_has_var "$BACKEND_DIR/.env" "SPOTIFY_CLIENT_ID"; then
-  echo "Missing SPOTIFY_CLIENT_ID. Add it to .env or backend/.env before starting Sato." >&2
-  exit 1
-fi
-
-if [[ -z "${SPOTIFY_CLIENT_SECRET:-}" ]] \
-  && ! env_file_has_var "$ROOT_DIR/.env" "SPOTIFY_CLIENT_SECRET" \
-  && ! env_file_has_var "$BACKEND_DIR/.env" "SPOTIFY_CLIENT_SECRET"; then
-  echo "Missing SPOTIFY_CLIENT_SECRET. Add it to .env or backend/.env before starting Sato." >&2
-  exit 1
-fi
-
 echo "Starting backend with $BACKEND_PYTHON"
 (
   cd "$BACKEND_DIR"
@@ -74,7 +54,10 @@ if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
   wait "$BACKEND_PID"
 fi
 
-echo "Spotify redirect URI should be http://127.0.0.1:5000/api/auth/callback for local development."
+echo "Backend: http://127.0.0.1:5000"
+echo "Frontend: http://127.0.0.1:5173"
+echo "Spotify redirect URI for local development: http://127.0.0.1:5000/api/auth/callback"
+echo "Spotify app credentials can be pasted into the web UI, or supplied via env vars if you prefer."
 echo "Starting frontend with npm run dev"
 cd "$FRONTEND_DIR"
 exec npm run dev

@@ -1,5 +1,6 @@
 [![](https://img.shields.io/badge/sato_1.0.0-passing-light_green)](https://github.com/gongahkia/sato/releases/tag/1.0.0)
 [![](https://img.shields.io/badge/sato_2.0.0-passing-green)](https://github.com/gongahkia/sato/releases/tag/2.0.0)
+![](https://github.com/gongahkia/sato/actions/workflows/ci.yml/badge.svg)
 
 # `Sato`
 
@@ -15,28 +16,14 @@ Web app for building collaborative Spotify blends in shared rooms, with host-man
 
 ## Screenshots
 
-### Login with Spotify
-
-<div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/1.png" width="49%">
-  <img src="./asset/reference/2.png" width="49%">
-</div>
-
-### Create or Join a Room
-
-<div style="display: flex; justify-content: center;">
-  <img src="./asset/reference/3.png" width="85%">
-</div>
-
-### Build and Wrap the Final Blend
-
-<div style="display: flex; justify-content: center;">
-  <img src="./asset/reference/4.png" width="85%">
-</div>
+![](./asset/reference/v2/1.png)
+![](./asset/reference/v2/2.png)
+![](./asset/reference/v2/3.png)
+![](./asset/reference/v2/4.png)
 
 ## Architecture
 
-![](./asset/reference/sato_architecture.png)
+![](./asset/reference/v2/architecture.png)
 
 ## Usage
 
@@ -61,6 +48,14 @@ $ ./dev.sh
 * Paste your Spotify app credentials into the Session panel, sign in, create a room, invite other members, save contributions, then let the host preview, create, and open the Blend Wrapped deck.
 
 ## Testing
+
+Run the full verification pass from the repo root.
+
+```console
+$ ./verify.sh
+```
+
+That script runs the backend syntax check, backend pytest suite, frontend unit tests, frontend build, and the browser end-to-end suite.
 
 Run the frontend unit suite from `sato-app/`.
 
