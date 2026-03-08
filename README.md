@@ -79,6 +79,8 @@ $ npm run test:e2e
 
 I probably spent 75% of my time wrangling with [Spotify's](https://developer.spotify.com/documentation/web-api/concepts/authorization) janky [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) implementation and 25% of the time actually developing `Sato`.
 
+*(**Update for Sato v2.0.0**: Spotify's OAuth 2.0 Docs have not improved one bit in the past year. Shit's still ass.)*
+
 ## Reference
 
 The name `Sato` is in reference to [Satō](https://ajin.fandom.com/wiki/Sat%C5%8D) (佐藤), the chief antagonist who opposes [Kei Nagai](https://ajin.fandom.com/wiki/Kei_Nagai) in the completed manga series [Ajin](https://ajin.fandom.com/wiki/Ajin_Wiki).
