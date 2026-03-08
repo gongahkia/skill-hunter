@@ -43,6 +43,44 @@ test('shows a clear error when Spotify app credentials are invalid', async ({ pa
   ).toBeTruthy()
 })
 
+test('blocks the host from leaving a populated room and cleans up when the room empties', async ({ page, browser }) => {
+  await seedSession(page.context(), 'host')
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Create Room' }).click()
+
+  const inviteUrl = await page.locator('.inline-code').textContent()
+  const roomToken = new URL(inviteUrl).searchParams.get('room')
+  expect(roomToken).toBeTruthy()
+
+  const guestContext = await browser.newContext()
+  const guestPage = await guestContext.newPage()
+
+  await e2eLoginRedirect(guestPage, 'guest', roomToken)
+  await guestPage.getByRole('button', { name: 'Join This Room' }).click()
+  await expect(guestPage.getByRole('button', { name: 'Leave Room' })).toBeVisible()
+
+  await page.reload()
+  await expect(page.locator('.member-card').filter({ hasText: 'Guest User' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Leave Room' }).click()
+  await expect(page.getByText(/host cannot leave while other members are still in the room/i)).toBeVisible()
+
+  await guestPage.getByRole('button', { name: 'Leave Room' }).click()
+  await expect(guestPage.getByRole('button', { name: 'Create Room' })).toBeVisible()
+
+  await page.reload()
+  await page.getByRole('button', { name: 'Leave Room' }).click()
+  await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible()
+
+  const response = await page.context().request.get('/api/debug/events')
+  const events = await response.json()
+
+  expect(events.some((event) => event.kind === 'room.left' && event.user_id === 'guest')).toBeTruthy()
+  expect(events.some((event) => event.kind === 'room.deleted' && event.room_token === roomToken)).toBeTruthy()
+
+  await guestContext.close()
+})
+
 test('host and guest can build a room blend and reopen Wrapped', async ({ page, browser }) => {
   await seedSession(page.context(), 'host')
   await page.goto('/')
