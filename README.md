@@ -21,10 +21,6 @@ Web app for building collaborative [Spotify Blends](https://community.spotify.co
 ![](./asset/reference/v2/3.png)
 ![](./asset/reference/v2/4.png)
 
-## Architecture
-
-![](./asset/reference/v2/architecture.png)
-
 ## Usage
 
 First [register](https://developer.spotify.com/) as a Spotify Developer.
@@ -47,33 +43,9 @@ $ ./dev.sh
 * The frontend proxies API requests to the backend at [127.0.0.1:5000](http://127.0.0.1:5000/).
 * Paste your Spotify app credentials into the Session panel, sign in, create a room, invite other members, save contributions, then let the host preview, create, and open the Blend Wrapped deck.
 
-## Testing
+## Architecture
 
-Run the full verification pass from the repo root.
-
-```console
-$ ./verify.sh
-```
-
-That script runs the backend syntax check, backend pytest suite, frontend unit tests, frontend build, and the browser end-to-end suite.
-
-Run the frontend unit suite from `sato-app/`.
-
-```console
-$ npm test -- --run
-```
-
-Run the backend API/client suite from the repo root with the repo-local virtualenv.
-
-```console
-$ backend/.venv/bin/pytest backend/tests/test_api.py backend/tests/test_spotify_client.py
-```
-
-Run the browser end-to-end suite from `sato-app/`. It starts an isolated Flask E2E backend on `127.0.0.1:5001` and a Vite frontend on `127.0.0.1:41731`, using a fake Spotify service and debug routes so the suite does not depend on real Spotify OAuth.
-
-```console
-$ npm run test:e2e
-```
+![](./asset/reference/v2/architecture.png)
 
 ## Other notes
 
