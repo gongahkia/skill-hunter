@@ -21,6 +21,28 @@ test('saves Spotify credentials in the browser and records debug events', async 
   expect(events.some((event) => event.kind === 'request.completed' && event.client_request_id)).toBeTruthy()
 })
 
+test('shows a clear error when Spotify app credentials are invalid', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByLabel('Client ID').fill('bad-client-id')
+  await page.getByLabel('Client Secret').fill('bad-client-secret')
+  await page.getByRole('button', { name: 'Save Credentials' }).click()
+
+  await expect(page.getByText(/Spotify rejected these credentials/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continue with Spotify' })).toBeDisabled()
+
+  const response = await page.context().request.get('/api/debug/events')
+  const events = await response.json()
+
+  expect(
+    events.some(
+      (event) => event.kind === 'request.completed'
+        && event.path === '/api/auth/spotify-config'
+        && event.status === 400,
+    ),
+  ).toBeTruthy()
+})
+
 test('host and guest can build a room blend and reopen Wrapped', async ({ page, browser }) => {
   await seedSession(page.context(), 'host')
   await page.goto('/')
