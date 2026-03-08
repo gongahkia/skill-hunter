@@ -214,6 +214,10 @@ class SpotifyClient:
     def get_saved_tracks(self, limit=500):
         return self._paginate("/me/tracks?limit=50", item_limit=limit)
 
+    def get_saved_tracks_total(self, limit_cap=500):
+        payload = self._request("GET", "/me/tracks?limit=1")
+        return min(int(payload.get("total", 0)), limit_cap)
+
     def get_recently_played(self, limit=50):
         return self._request("GET", f"/me/player/recently-played?limit={limit}").get(
             "items", []
