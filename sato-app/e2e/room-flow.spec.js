@@ -123,6 +123,29 @@ test('keeps host-only weight and create controls locked for guests', async ({ pa
   await guestContext.close()
 })
 
+test('recovers cleanly when a room token is missing or expired', async ({ page }) => {
+  await seedSession(page.context(), 'host')
+  await page.goto('/?room=missing-room')
+
+  await expect(page.getByText(/That blend room was not found or has expired/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible()
+  await expect.poll(() => new URL(page.url()).searchParams.get('room')).toBeNull()
+
+  const clientEvents = await page.evaluate(() => window.__SATO_DEBUG__?.getEvents?.() || [])
+  expect(clientEvents.some((event) => event.type === 'room.cleared')).toBeTruthy()
+
+  const response = await page.context().request.get('/api/debug/events')
+  const events = await response.json()
+
+  expect(
+    events.some(
+      (event) => event.kind === 'request.completed'
+        && event.path === '/api/rooms/missing-room'
+        && event.status === 404,
+    ),
+  ).toBeTruthy()
+})
+
 test('host and guest can build a room blend and reopen Wrapped', async ({ page, browser }) => {
   await seedSession(page.context(), 'host')
   await page.goto('/')
