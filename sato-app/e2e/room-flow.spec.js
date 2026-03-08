@@ -81,6 +81,48 @@ test('blocks the host from leaving a populated room and cleans up when the room 
   await guestContext.close()
 })
 
+test('keeps host-only weight and create controls locked for guests', async ({ page, browser }) => {
+  await seedSession(page.context(), 'host')
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Create Room' }).click()
+
+  const inviteUrl = await page.locator('.inline-code').textContent()
+  const roomToken = new URL(inviteUrl).searchParams.get('room')
+  expect(roomToken).toBeTruthy()
+
+  await page.getByLabel('Top Tracks').check()
+  await page.getByRole('button', { name: 'Save Contribution' }).click()
+  await expect(page.getByText(/usable tracks saved/i)).toBeVisible()
+
+  const guestContext = await browser.newContext()
+  const guestPage = await guestContext.newPage()
+
+  await e2eLoginRedirect(guestPage, 'guest', roomToken)
+  await guestPage.getByRole('button', { name: 'Join This Room' }).click()
+  await guestPage.getByLabel('Saved Tracks').check()
+  await guestPage.getByRole('button', { name: 'Save Contribution' }).click()
+
+  await expect(guestPage.locator('.weight-input')).toHaveCount(2)
+  await expect(guestPage.getByRole('button', { name: 'Preview Blend' })).toBeDisabled()
+  await expect(guestPage.getByRole('button', { name: 'Create Playlist' })).toBeDisabled()
+  await expect(guestPage.getByRole('button', { name: 'Save Weights' })).toHaveCount(0)
+  await expect(guestPage.locator('.weight-input').nth(0)).toBeDisabled()
+  await expect(guestPage.locator('.weight-input').nth(1)).toBeDisabled()
+
+  const weightsResponse = await guestPage.context().request.patch(`/api/rooms/${roomToken}/weights`, {
+    data: {
+      members: [
+        { id: 'host', weight: 50 },
+        { id: 'guest', weight: 50 },
+      ],
+    },
+  })
+  expect(weightsResponse.status()).toBe(403)
+  await expect((await weightsResponse.json()).error.message).toMatch(/Only the room host can perform that action/i)
+
+  await guestContext.close()
+})
+
 test('host and guest can build a room blend and reopen Wrapped', async ({ page, browser }) => {
   await seedSession(page.context(), 'host')
   await page.goto('/')
