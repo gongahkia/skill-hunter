@@ -22,10 +22,10 @@ LANDSCAPE_RATIO = 16 / 9
 
 
 GRAPH_ATTR = {
-    "bgcolor": "#0B1220",
+    "bgcolor": "#FFFFFF",
     "fontname": "Helvetica",
-    "fontcolor": "#E2E8F0",
-    "fontsize": "24",
+    "fontcolor": "#0F172A",
+    "fontsize": "26",
     "pad": "0.7",
     "nodesep": "0.7",
     "ranksep": "1.2",
@@ -40,18 +40,18 @@ GRAPH_ATTR = {
 
 NODE_ATTR = {
     "fontname": "Helvetica",
-    "fontcolor": "#E5E7EB",
-    "fontsize": "15",
-    "color": "#94A3B8",
-    "penwidth": "1.4",
+    "fontcolor": "#0F172A",
+    "fontsize": "17",
+    "color": "#475569",
+    "penwidth": "1.5",
 }
 
 EDGE_ATTR = {
     "fontname": "Helvetica",
-    "fontcolor": "#CBD5E1",
-    "fontsize": "12",
-    "color": "#64748B",
-    "penwidth": "1.3",
+    "fontcolor": "#334155",
+    "fontsize": "13",
+    "color": "#475569",
+    "penwidth": "1.5",
 }
 
 
@@ -62,12 +62,13 @@ def icon(name: str) -> str:
 def cluster_attr(bgcolor: str, pencolor: str) -> dict[str, str]:
     return {
         "bgcolor": bgcolor,
-        "color": pencolor,
-        "fontcolor": "#F8FAFC",
-        "fontsize": "18",
+        "fillcolor": bgcolor,
+        "pencolor": pencolor,
+        "fontcolor": "#0F172A",
+        "fontsize": "19",
         "fontname": "Helvetica",
         "style": "rounded,filled",
-        "penwidth": "1.6",
+        "penwidth": "1.8",
         "margin": "20",
     }
 
@@ -146,7 +147,7 @@ def build_diagram() -> None:
         with Cluster(
             "Users & Browser\nSpotify users and the web runtime",
             direction="TB",
-            graph_attr=cluster_attr("#111827", "#1F2937"),
+            graph_attr=cluster_attr("#F8FAFC", "#94A3B8"),
         ):
             users = User("Host + invited members\nSpotify accounts")
             browser = Client(
@@ -157,7 +158,7 @@ def build_diagram() -> None:
         with Cluster(
             "Frontend Workspace\nVue 3 + JavaScript + Vite",
             direction="TB",
-            graph_attr=cluster_attr("#172554", "#2563EB"),
+            graph_attr=cluster_attr("#DBEAFE", "#3B82F6"),
         ):
             vite = Custom(
                 "Vite dev server + /api proxy\nvite.config.js + npm scripts",
@@ -177,7 +178,7 @@ def build_diagram() -> None:
         with Cluster(
             "Backend Runtime\nFlask + Flask-Session + Python",
             direction="TB",
-            graph_attr=cluster_attr("#1F2937", "#475569"),
+            graph_attr=cluster_attr("#E2E8F0", "#64748B"),
         ):
             api = Flask(
                 "Flask API + SPA fallback\napp.py routes\n/auth, /me, /rooms, /debug"
@@ -233,7 +234,7 @@ def build_diagram() -> None:
         with Cluster(
             "Spotify External Services\nOAuth 2.0 + Web API",
             direction="TB",
-            graph_attr=cluster_attr("#052E16", "#16A34A"),
+            graph_attr=cluster_attr("#DCFCE7", "#16A34A"),
         ):
             spotify_accounts = Custom(
                 "Spotify Accounts\nOAuth 2.0 authorize + callback",
@@ -256,7 +257,7 @@ def build_diagram() -> None:
         with Cluster(
             "Verification & Tooling\nlocal scripts, CI, unit tests, browser E2E",
             direction="TB",
-            graph_attr=cluster_attr("#2E1065", "#7C3AED"),
+            graph_attr=cluster_attr("#F3E8FF", "#8B5CF6"),
         ):
             scripts = Bash(
                 "Local orchestration\nscripts/dev.sh\nscripts/verify.sh\nport-aware startup + verify"
