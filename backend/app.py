@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - optional in tests/runtime
 from blend_service import (
     BlendValidationError,
     build_contribution_snapshot,
+    build_generated_cover_art,
     build_room_blend_preview,
     build_wrapped_artifact,
     round_to_two,
@@ -40,6 +41,7 @@ SAVED_TRACK_CAP = 500
 RECENT_TRACK_CAP = 50
 PLAYLIST_TRACK_CAP = 500
 ROOM_TTL_SECONDS = 7 * 24 * 60 * 60
+SOURCE_CATALOG_CACHE_SECONDS = 5 * 60
 
 
 class ApiError(Exception):
@@ -86,6 +88,7 @@ def build_config():
         "SPOTIFY_REDIRECT_URI": redirect_uri,
         "FRONTEND_DIST_DIR": frontend_dist,
         "ROOM_TTL_SECONDS": ROOM_TTL_SECONDS,
+        "SOURCE_CATALOG_CACHE_SECONDS": SOURCE_CATALOG_CACHE_SECONDS,
         "E2E_MODE": env_flag("SATO_E2E"),
         "DEBUG_LOGGING_ENABLED": env_flag("SATO_DEBUG_LOGGING", env_flag("SATO_E2E")),
         "DEBUG_LOG_FILE": os.getenv("SATO_DEBUG_LOG_PATH"),
@@ -297,6 +300,7 @@ def register_routes(app):
         session.pop("oauth_state", None)
         session.pop("spotify_tokens", None)
         session.pop("spotify_user", None)
+        session.pop("source_catalog_cache", None)
         session.modified = True
 
     def build_spotify_client(
@@ -496,9 +500,39 @@ def register_routes(app):
             "owner_name": owner.get("display_name") or owner.get("id") or "",
         }
 
-    def build_source_catalog(client, current_user):
+    def get_cached_source_catalog(user_id):
+        cache_bucket = session.get("source_catalog_cache") or {}
+        cache_entry = cache_bucket.get(str(user_id))
+        if not cache_entry:
+            return None
+
+        cached_at = float(cache_entry.get("cached_at", 0))
+        if (time.time() - cached_at) > app.config["SOURCE_CATALOG_CACHE_SECONDS"]:
+            cache_bucket.pop(str(user_id), None)
+            session["source_catalog_cache"] = cache_bucket
+            session.modified = True
+            return None
+
+        return cache_entry.get("payload")
+
+    def store_source_catalog(user_id, payload):
+        cache_bucket = session.get("source_catalog_cache") or {}
+        cache_bucket[str(user_id)] = {
+            "cached_at": time.time(),
+            "payload": payload,
+        }
+        session["source_catalog_cache"] = cache_bucket
+        session.modified = True
+        return payload
+
+    def build_source_catalog(client, current_user, *, force_refresh=False):
+        if not force_refresh:
+            cached_payload = get_cached_source_catalog(current_user["id"])
+            if cached_payload is not None:
+                return cached_payload
+
         top_tracks = client.get_current_user_top_tracks(limit=TOP_TRACK_CAP)
-        saved_tracks = client.get_saved_tracks(limit=SAVED_TRACK_CAP)
+        saved_tracks_count = client.get_saved_tracks_total(limit_cap=SAVED_TRACK_CAP)
         recent_tracks = client.get_recently_played(limit=RECENT_TRACK_CAP)
         playlist_items = client.get_current_user_playlists(limit=200)
 
@@ -517,15 +551,15 @@ def register_routes(app):
             allowed_playlists.append(serialize_playlist_option(playlist))
 
         allowed_playlists.sort(key=lambda playlist: playlist["name"].lower())
-        return {
+        payload = {
             "top_tracks": {
                 "available": bool(top_tracks),
                 "count": len(top_tracks),
                 "cap": TOP_TRACK_CAP,
             },
             "saved_tracks": {
-                "available": bool(saved_tracks),
-                "count": len(saved_tracks),
+                "available": bool(saved_tracks_count),
+                "count": saved_tracks_count,
                 "cap": SAVED_TRACK_CAP,
             },
             "recent_tracks": {
@@ -539,6 +573,7 @@ def register_routes(app):
                 "per_playlist_track_cap": PLAYLIST_TRACK_CAP,
             },
         }
+        return store_source_catalog(current_user["id"], payload)
 
     def contributing_member_ids(room):
         return [
@@ -615,6 +650,7 @@ def register_routes(app):
             "role": "host" if room["host_user_id"] == current_user_id else "member",
             "host_id": room["host_user_id"],
             "playlist_name": room["playlist_name"],
+            "updated_at": room["updated_at"],
             "expires_at": room["expires_at"],
             "created_playlist": room["final_playlist"],
             "has_wrapped": bool(room["wrapped"]),
@@ -842,7 +878,8 @@ def register_routes(app):
     def source_catalog():
         client = require_spotify_session()
         user = fetch_or_get_cached_user(client)
-        return jsonify(build_source_catalog(client, user))
+        refresh = str(request.args.get("refresh") or "").lower() in {"1", "true", "yes"}
+        return jsonify(build_source_catalog(client, user, force_refresh=refresh))
 
     @app.post("/api/rooms")
     def create_room():
@@ -1079,6 +1116,12 @@ def register_routes(app):
         require_room_host(room, user["id"])
         contributors = build_room_contributors(room)
         preview = build_room_blend_preview(contributors)
+        preview["cover_art"] = build_generated_cover_art(
+            room=room,
+            playlist_name=room["playlist_name"],
+            preview=preview,
+            contributors=contributors,
+        )
         debug_event(
             "room.preview.created",
             room_token=token,
@@ -1120,6 +1163,7 @@ def register_routes(app):
             preview=preview,
             contributors=contributors,
         )
+        room["final_playlist"]["cover_art"] = room["wrapped"]["cover_art"]
         save_room(room)
         debug_event(
             "room.playlist.created",

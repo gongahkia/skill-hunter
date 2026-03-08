@@ -175,6 +175,36 @@ def test_verify_client_credentials_raises_on_invalid_client():
     assert error.value.payload["error"] == "invalid_client"
 
 
+def test_saved_track_totals_use_a_single_metadata_request_and_respect_the_cap():
+    http_session = FakeHTTPSession(
+        request_responses=[
+            FakeResponse(
+                200,
+                {
+                    "items": [{"track": {"id": "first"}}],
+                    "total": 999,
+                },
+            ),
+        ],
+        token_responses=[],
+    )
+
+    client = SpotifyClient(
+        client_id="client-id",
+        client_secret="client-secret",
+        redirect_uri="http://localhost:5000/api/auth/callback",
+        access_token="token",
+        refresh_token="refresh-token",
+        expires_at=time.time() + 3600,
+        http_session=http_session,
+    )
+
+    total = client.get_saved_tracks_total(limit_cap=500)
+
+    assert total == 500
+    assert http_session.request_calls[0]["url"].endswith("/me/tracks?limit=1")
+
+
 def test_add_tracks_to_playlist_batches_requests_in_chunks_of_one_hundred():
     http_session = FakeHTTPSession(
         request_responses=[

@@ -179,6 +179,9 @@ class FakeSpotifyService:
     def get_saved_tracks(self, limit=500):
         return self.saved_tracks[self.current_user["id"]][:limit]
 
+    def get_saved_tracks_total(self, limit_cap=500):
+        return min(len(self.saved_tracks[self.current_user["id"]]), limit_cap)
+
     def get_recently_played(self, limit=50):
         return self.recent_tracks[self.current_user["id"]][:limit]
 

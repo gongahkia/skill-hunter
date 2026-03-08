@@ -169,7 +169,7 @@ describe('BlendView', () => {
     expect(new URL(window.location.href).searchParams.get('room')).toBe('room-123')
   })
 
-  it('shows a join prompt when the current room exists but the user is not a member yet', async () => {
+  it('auto-joins a room token when the current room exists but the user is not a member yet', async () => {
     window.history.replaceState({}, '', '/?room=room-join')
     const accessDenied = Object.assign(new Error('Join this room before accessing it.'), {
       payload: {
@@ -227,11 +227,6 @@ describe('BlendView', () => {
         },
       },
     })
-    await flushPromises()
-
-    expect(wrapper.text()).toContain('you are not a member yet')
-
-    await clickButton(wrapper, 'Join This Room')
     await flushPromises()
 
     expect(apiRequest).toHaveBeenNthCalledWith(1, '/api/rooms/room-join')

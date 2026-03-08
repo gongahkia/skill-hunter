@@ -1,6 +1,8 @@
 import {
   buildWeightsPayload,
   distributeMemberWeights,
+  emphasizeMemberWeights,
+  normalizeMemberWeights,
   totalAssignedWeight,
 } from './blend'
 
@@ -29,5 +31,31 @@ describe('room blend helpers', () => {
         { id: 'gamma', weight: 40 },
       ],
     })
+  })
+
+  it('auto-normalizes the remaining members when one weight changes', () => {
+    const members = normalizeMemberWeights([
+      { id: 'alpha', hasContribution: true, weight: 50 },
+      { id: 'beta', hasContribution: true, weight: 30 },
+      { id: 'gamma', hasContribution: true, weight: 20 },
+    ], 'alpha', 70)
+
+    expect(totalAssignedWeight(members)).toBe(100)
+    expect(members.find((member) => member.id === 'alpha').weight).toBe(70)
+    expect(members.find((member) => member.id === 'beta').weight).toBe(18)
+    expect(members.find((member) => member.id === 'gamma').weight).toBe(12)
+  })
+
+  it('can apply a lead preset to one member while keeping the total at 100', () => {
+    const members = emphasizeMemberWeights([
+      { id: 'host', hasContribution: true, weight: 33.34 },
+      { id: 'guest', hasContribution: true, weight: 33.33 },
+      { id: 'ally', hasContribution: true, weight: 33.33 },
+    ], 'host', 60)
+
+    expect(totalAssignedWeight(members)).toBe(100)
+    expect(members.find((member) => member.id === 'host').weight).toBe(60)
+    expect(members.find((member) => member.id === 'guest').weight).toBe(20)
+    expect(members.find((member) => member.id === 'ally').weight).toBe(20)
   })
 })

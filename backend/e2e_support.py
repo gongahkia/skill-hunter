@@ -263,6 +263,9 @@ class E2EFakeSpotifyClient:
     def get_saved_tracks(self, limit=500):
         return deepcopy(self.factory.saved_tracks[self._current_user_id()][:limit])
 
+    def get_saved_tracks_total(self, limit_cap=500):
+        return min(len(self.factory.saved_tracks[self._current_user_id()]), limit_cap)
+
     def get_recently_played(self, limit=50):
         return deepcopy(self.factory.recent_tracks[self._current_user_id()][:limit])
 

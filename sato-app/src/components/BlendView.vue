@@ -13,7 +13,7 @@
             <h2>Create or Join a Room</h2>
           </div>
         </div>
-        <span class="panel-caption">Each member signs in and adds their own top tracks, saved tracks, recent plays, or playlists.</span>
+        <span class="panel-caption">Room links auto-join now, and the member list stays fresh with lightweight polling.</span>
       </div>
 
       <div v-if="!roomToken" class="room-actions">
@@ -61,7 +61,7 @@
 
         <div v-if="roomNeedsJoin" class="feedback-card feedback-card--warning">
           <p class="field-label field-label--compact">Room access</p>
-          <p>This room exists, but you are not a member yet.</p>
+          <p>This room exists. Sato will try to auto-join on load, but you can still retry manually here.</p>
           <button class="primary-button" type="button" :disabled="joiningRoom" @click="joinRoom(roomToken)">
             {{ joiningRoom ? 'Joining…' : 'Join This Room' }}
           </button>
@@ -81,6 +81,10 @@
               <span>Expires</span>
               <strong>{{ formatDate(room.expires_at) }}</strong>
             </div>
+            <div class="budget-chip">
+              <span>Updated</span>
+              <strong>{{ formatDate(room.updated_at) }}</strong>
+            </div>
           </div>
 
           <div class="source-editor">
@@ -88,67 +92,74 @@
               <div>
                 <p class="field-label field-label--compact">Your contribution</p>
                 <p class="helper-copy helper-copy--subtle">
-                  Save a snapshot of your own Spotify sources so the host can mix the room from what each member chose.
+                  Source counts and playlists load lazily and stay cached for the rest of your session unless you refresh them.
                 </p>
               </div>
-              <button class="ghost-button" type="button" :disabled="loadingCatalog" @click="loadSourceCatalog">
+              <button class="ghost-button" type="button" :disabled="loadingCatalog" @click="loadSourceCatalog({ force: true })">
                 {{ loadingCatalog ? 'Refreshing…' : 'Refresh Sources' }}
               </button>
             </div>
 
-            <div v-if="sourceCatalog" class="source-grid">
-              <label class="source-option">
-                <input v-model="contributionForm.useTopTracks" type="checkbox" />
-                <span>
-                  <strong>Top Tracks</strong>
-                  <small>{{ sourceCatalog.top_tracks.count }} available, capped at {{ sourceCatalog.top_tracks.cap }}</small>
-                </span>
-              </label>
-
-              <label class="source-option">
-                <input v-model="contributionForm.useSavedTracks" type="checkbox" />
-                <span>
-                  <strong>Saved Tracks</strong>
-                  <small>{{ sourceCatalog.saved_tracks.count }} available, capped at {{ sourceCatalog.saved_tracks.cap }}</small>
-                </span>
-              </label>
-
-              <label class="source-option">
-                <input v-model="contributionForm.useRecentTracks" type="checkbox" />
-                <span>
-                  <strong>Recently Played</strong>
-                  <small>{{ sourceCatalog.recent_tracks.count }} available, capped at {{ sourceCatalog.recent_tracks.cap }}</small>
-                </span>
-              </label>
+            <div v-if="loadingCatalog && !sourceCatalog" class="feedback-card feedback-card--neutral">
+              Loading your Spotify source counts and playlists…
             </div>
 
-            <div v-if="sourceCatalog" class="playlist-picker">
-              <div class="playlist-picker__top">
-                <span class="field-label field-label--compact">Owned or collaborative playlists</span>
-                <small class="helper-copy">
-                  Select up to {{ sourceCatalog.playlist_limits.max_selected }} playlists.
-                </small>
+            <template v-if="sourceCatalog">
+              <div class="source-grid">
+                <label class="source-option">
+                  <input v-model="contributionForm.useTopTracks" type="checkbox" @change="markContributionDirty" />
+                  <span>
+                    <strong>Top Tracks</strong>
+                    <small>{{ sourceCatalog.top_tracks.count }} available, capped at {{ sourceCatalog.top_tracks.cap }}</small>
+                  </span>
+                </label>
+
+                <label class="source-option">
+                  <input v-model="contributionForm.useSavedTracks" type="checkbox" @change="markContributionDirty" />
+                  <span>
+                    <strong>Saved Tracks</strong>
+                    <small>{{ sourceCatalog.saved_tracks.count }} available, capped at {{ sourceCatalog.saved_tracks.cap }}</small>
+                  </span>
+                </label>
+
+                <label class="source-option">
+                  <input v-model="contributionForm.useRecentTracks" type="checkbox" @change="markContributionDirty" />
+                  <span>
+                    <strong>Recently Played</strong>
+                    <small>{{ sourceCatalog.recent_tracks.count }} available, capped at {{ sourceCatalog.recent_tracks.cap }}</small>
+                  </span>
+                </label>
               </div>
 
-              <label
-                v-for="playlist in sourceCatalog.playlists"
-                :key="playlist.id"
-                class="playlist-option"
-              >
-                <input
-                  v-model="contributionForm.playlistIds"
-                  type="checkbox"
-                  :value="playlist.id"
-                  :disabled="playlistDisabled(playlist.id)"
-                />
-                <span>{{ playlist.name }}</span>
-                <small>{{ playlist.track_count }} tracks</small>
-              </label>
+              <div class="playlist-picker">
+                <div class="playlist-picker__top">
+                  <span class="field-label field-label--compact">Owned or collaborative playlists</span>
+                  <small class="helper-copy">
+                    Select up to {{ sourceCatalog.playlist_limits.max_selected }} playlists.
+                  </small>
+                </div>
 
-              <p v-if="!sourceCatalog.playlists.length" class="helper-copy helper-copy--subtle">
-                No owned or collaborative playlists are available in this account.
-              </p>
-            </div>
+                <label
+                  v-for="playlist in sourceCatalog.playlists"
+                  :key="playlist.id"
+                  class="playlist-option"
+                >
+                  <input
+                    v-model="contributionForm.playlistIds"
+                    type="checkbox"
+                    :value="playlist.id"
+                    :disabled="playlistDisabled(playlist.id)"
+                    @change="markContributionDirty"
+                  />
+                  <span>{{ playlist.name }}</span>
+                  <small>{{ playlist.track_count }} tracks</small>
+                </label>
+
+                <p v-if="!sourceCatalog.playlists.length" class="helper-copy helper-copy--subtle">
+                  No owned or collaborative playlists are available in this account.
+                </p>
+              </div>
+            </template>
 
             <div class="action-row">
               <button class="primary-button" type="button" :disabled="savingContribution || !canSaveContribution" @click="saveContribution">
@@ -180,7 +191,7 @@
             <h2>Members and Weights</h2>
           </div>
         </div>
-        <span class="panel-caption">The host assigns room weights after members save their contribution snapshots.</span>
+        <span class="panel-caption">Weights stay auto-normalized to 100%, and hosts can use equalize or host-lead presets instead of hand-balancing raw numbers.</span>
       </div>
 
       <label class="field-label" for="playlist-name">Playlist name</label>
@@ -192,6 +203,7 @@
         type="text"
         placeholder="Sato Blend"
         :disabled="!isHost"
+        @input="settingsDirty = true"
       />
       <div v-if="isHost" class="action-row action-row--dense">
         <button class="ghost-button" type="button" :disabled="savingSettings" @click="saveSettings">
@@ -221,17 +233,32 @@
           </div>
 
           <div class="member-weight">
-            <span class="field-label field-label--compact">Weight</span>
-            <input
-              class="text-input weight-input"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              :value="weightDraft(member.id)"
-              :disabled="!isHost || !member.has_contribution"
-              @input="updateWeight(member.id, $event)"
-            />
+            <div class="member-weight__header">
+              <span class="field-label field-label--compact">Weight</span>
+              <strong>{{ weightDraft(member.id).toFixed(2) }}%</strong>
+            </div>
+            <div class="weight-control">
+              <input
+                class="weight-slider"
+                type="range"
+                min="0"
+                max="100"
+                step="0.5"
+                :value="weightDraft(member.id)"
+                :disabled="!isHost || !member.has_contribution"
+                @input="updateWeight(member.id, $event)"
+              />
+              <input
+                class="text-input weight-input"
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                :value="weightDraft(member.id)"
+                :disabled="!isHost || !member.has_contribution"
+                @input="updateWeight(member.id, $event)"
+              />
+            </div>
           </div>
         </article>
       </div>
@@ -249,9 +276,14 @@
           <span>Positive Weights</span>
           <strong>{{ positiveWeightMembers }}</strong>
         </div>
-        <button v-if="isHost" class="inline-button" type="button" @click="balanceWeights">
-          Balance
-        </button>
+        <div v-if="isHost" class="budget-summary__actions">
+          <button class="inline-button" type="button" @click="balanceWeights">
+            Equalize
+          </button>
+          <button v-if="canBoostHost" class="inline-button" type="button" @click="boostHostWeights">
+            Boost Host
+          </button>
+        </div>
       </div>
 
       <div v-if="isHost" class="action-row action-row--dense">
@@ -277,7 +309,7 @@
             <h2>Preview, Create, and Wrapped</h2>
           </div>
         </div>
-        <span class="panel-caption">Preview and create always use the same room snapshot and scorer.</span>
+        <span class="panel-caption">Preview and create use the same weighted scorer, plus a generated cover and overlap analysis.</span>
       </div>
 
       <div class="action-row action-row--dense">
@@ -308,27 +340,43 @@
         </button>
       </div>
 
-      <p class="helper-copy">
-        {{
-          isHost
-            ? 'Hosts can preview once at least two members have saved contributions and the room weights total 100.'
-            : 'Waiting for the host to preview and create the room blend.'
-        }}
-      </p>
+      <p class="helper-copy">{{ previewReadinessMessage }}</p>
 
       <div v-if="preview" class="preview-shell">
-        <div class="preview-summary">
-          <div class="budget-chip">
-            <span>Unique ranked tracks</span>
-            <strong>{{ preview.summary.total_tracks }}</strong>
-          </div>
-          <div class="budget-chip">
-            <span>Previewed tracks</span>
-            <strong>{{ preview.tracks.length }}</strong>
-          </div>
-          <div class="budget-chip">
-            <span>Contributors</span>
-            <strong>{{ preview.summary.total_contributors }}</strong>
+        <div class="preview-hero">
+          <img
+            v-if="preview.cover_art"
+            :src="preview.cover_art"
+            alt="Generated blend cover art"
+            class="preview-cover"
+          />
+          <div class="preview-insights">
+            <div class="preview-summary">
+              <div class="budget-chip">
+                <span>Unique ranked tracks</span>
+                <strong>{{ preview.summary.total_tracks }}</strong>
+              </div>
+              <div class="budget-chip">
+                <span>Previewed tracks</span>
+                <strong>{{ preview.tracks.length }}</strong>
+              </div>
+              <div class="budget-chip">
+                <span>Contributors</span>
+                <strong>{{ preview.summary.total_contributors }}</strong>
+              </div>
+            </div>
+
+            <div v-if="preview.summary.overlap_stats" class="overlap-card">
+              <p class="eyebrow">Overlap</p>
+              <h3>Why this blend feels cohesive</h3>
+              <p>{{ preview.summary.overlap_stats.shared_tracks }} tracks were shared picks.</p>
+              <p>{{ preview.summary.overlap_stats.unique_tracks }} tracks are single-member standouts.</p>
+              <p>{{ preview.summary.overlap_stats.average_contributors_per_track.toFixed(2) }} contributors appeared on each preview track on average.</p>
+              <p v-if="preview.summary.overlap_stats.strongest_pair">
+                Strongest overlap: {{ preview.summary.overlap_stats.strongest_pair.label }}
+                with {{ preview.summary.overlap_stats.strongest_pair.shared_tracks }} shared tracks.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -358,6 +406,8 @@
                 </div>
                 <span class="score-pill">{{ track.score.toFixed(2) }}</span>
               </div>
+              <p class="track-reason">{{ track.why_it_ranked }}</p>
+              <small class="helper-copy track-breakdown">{{ track.score_breakdown }}</small>
               <div class="contributor-row">
                 <span
                   v-for="contributor in track.contributors"
@@ -373,17 +423,27 @@
       </div>
 
       <div v-if="createdPlaylist" class="feedback-card feedback-card--success">
-        <h3>Your room blend is live</h3>
-        <p><strong>{{ createdPlaylist.name }}</strong> now exists in Spotify.</p>
-        <a
-          v-if="createdPlaylist.external_urls?.spotify"
-          class="playlist-link"
-          :href="createdPlaylist.external_urls.spotify"
-          rel="noreferrer"
-          target="_blank"
-        >
-          Open in Spotify
-        </a>
+        <div class="playlist-success">
+          <img
+            v-if="createdPlaylist.cover_art"
+            :src="createdPlaylist.cover_art"
+            alt="Generated playlist cover art"
+            class="playlist-success__cover"
+          />
+          <div>
+            <h3>Your room blend is live</h3>
+            <p><strong>{{ createdPlaylist.name }}</strong> now exists in Spotify.</p>
+            <a
+              v-if="createdPlaylist.external_urls?.spotify"
+              class="playlist-link"
+              :href="createdPlaylist.external_urls.spotify"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Open in Spotify
+            </a>
+          </div>
+        </div>
       </div>
 
       <div v-if="wrapped" class="wrapped-shell">
@@ -391,6 +451,17 @@
           <div>
             <p class="eyebrow">Step 4</p>
             <h3>Blend Wrapped</h3>
+          </div>
+          <div class="wrapped-actions">
+            <button class="inline-button" type="button" @click="shareWrapped">
+              {{ shareStatus || 'Share Recap' }}
+            </button>
+            <button class="inline-button" type="button" @click="downloadWrapped">
+              {{ exportStatus || 'Export JSON' }}
+            </button>
+            <button class="inline-button" type="button" @click="downloadCoverArt">
+              Download Cover
+            </button>
           </div>
           <div class="wrapped-controls">
             <button class="inline-button" type="button" :disabled="wrappedIndex === 0" @click="previousWrappedCard">
@@ -406,6 +477,12 @@
         <article class="wrapped-card">
           <template v-if="currentWrappedCard?.type === 'cover'">
             <p class="eyebrow">Cover</p>
+            <img
+              v-if="currentWrappedCard.cover_art"
+              :src="currentWrappedCard.cover_art"
+              alt="Generated wrapped cover art"
+              class="wrapped-cover"
+            />
             <h4>{{ currentWrappedCard.playlist_name }}</h4>
             <p>Room {{ currentWrappedCard.room_token }}</p>
             <p>{{ currentWrappedCard.contributor_count }} contributors</p>
@@ -417,6 +494,7 @@
             <h4>{{ wrapped.playlist_name }}</h4>
             <p>{{ currentWrappedCard.total_ranked_tracks }} unique ranked tracks fed the final mix.</p>
             <p>{{ currentWrappedCard.tracks_added }} tracks were added to Spotify.</p>
+            <p>{{ currentWrappedCard.overlap_stats?.shared_tracks ?? wrapped.overlap_stats?.shared_tracks ?? 0 }} of those ranked tracks were shared picks.</p>
             <div class="wrapped-chip-row">
               <span
                 v-for="weight in currentWrappedCard.weights"
@@ -426,6 +504,18 @@
                 {{ weight.name }} · {{ weight.weight.toFixed(2) }}%
               </span>
             </div>
+          </template>
+
+          <template v-else-if="currentWrappedCard?.type === 'overlap'">
+            <p class="eyebrow">Overlap</p>
+            <h4>Shared taste vs wild cards</h4>
+            <p>{{ currentWrappedCard.shared_tracks }} shared picks made the final ranking.</p>
+            <p>{{ currentWrappedCard.unique_tracks }} tracks were one-person curveballs.</p>
+            <p>{{ currentWrappedCard.average_contributors_per_track.toFixed(2) }} contributors appeared on each top track on average.</p>
+            <p v-if="currentWrappedCard.strongest_pair">
+              Strongest overlap: {{ currentWrappedCard.strongest_pair.label }}
+              with {{ currentWrappedCard.strongest_pair.shared_tracks }} shared tracks.
+            </p>
           </template>
 
           <template v-else-if="currentWrappedCard?.type === 'contributors'">
@@ -451,11 +541,11 @@
               <div
                 v-for="track in currentWrappedCard.tracks"
                 :key="track.id"
-                class="wrapped-list__row"
+                class="wrapped-list__row wrapped-list__row--stacked"
               >
                 <strong>{{ track.name }}</strong>
                 <span>{{ track.artists.join(', ') || 'Unknown artist' }}</span>
-                <small>{{ track.score.toFixed(2) }}</small>
+                <small>{{ track.score.toFixed(2) }} · {{ track.why_it_ranked }}</small>
               </div>
             </div>
           </template>
@@ -479,8 +569,23 @@ import { logClientEvent } from '../lib/debug'
 import {
   buildWeightsPayload,
   distributeMemberWeights,
+  emphasizeMemberWeights,
+  normalizeMemberWeights,
   totalAssignedWeight,
 } from '../lib/blend'
+
+const ROOM_POLL_INTERVAL_MS = 8000
+
+function dataUrlToBlob(dataUrl) {
+  const [metadata, encoded] = dataUrl.split(',', 2)
+  const mimeType = metadata.match(/data:(.*?);base64/)?.[1] || 'application/octet-stream'
+  const binary = window.atob(encoded)
+  const bytes = new Uint8Array(binary.length)
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index)
+  }
+  return new Blob([bytes], { type: mimeType })
+}
 
 export default {
   props: {
@@ -496,6 +601,7 @@ export default {
       room: null,
       roomNeedsJoin: false,
       sourceCatalog: null,
+      sourceCatalogPromise: null,
       contributionForm: {
         useTopTracks: false,
         useSavedTracks: false,
@@ -514,11 +620,18 @@ export default {
       previewingRoom: false,
       creatingBlend: false,
       loadingWrapped: false,
+      roomPollTimer: null,
+      roomPollInFlight: false,
+      contributionDirty: false,
+      weightsDirty: false,
+      settingsDirty: false,
       preview: null,
       createdPlaylist: null,
       wrapped: null,
       wrappedIndex: 0,
       copyStatus: '',
+      shareStatus: '',
+      exportStatus: '',
       error: '',
     }
   },
@@ -529,6 +642,12 @@ export default {
     contributingMembers() {
       return (this.room?.members || []).filter((member) => member.has_contribution)
     },
+    hostMember() {
+      return (this.room?.members || []).find((member) => member.id === this.room?.host_id) || null
+    },
+    canBoostHost() {
+      return this.isHost && this.contributingMembers.length >= 2 && Boolean(this.hostMember?.has_contribution)
+    },
     canSaveContribution() {
       return (
         this.contributionForm.useTopTracks
@@ -538,9 +657,9 @@ export default {
       )
     },
     weightPayloadMembers() {
-      return this.contributingMembers.map((member) => ({
+      return (this.room?.members || []).map((member) => ({
         ...member,
-        hasContribution: true,
+        hasContribution: member.has_contribution,
         weight: Number(this.weightDraft(member.id)),
       }))
     },
@@ -548,7 +667,7 @@ export default {
       return totalAssignedWeight(this.weightPayloadMembers)
     },
     positiveWeightMembers() {
-      return this.weightPayloadMembers.filter((member) => Number(member.weight) > 0).length
+      return this.weightPayloadMembers.filter((member) => member.hasContribution && Number(member.weight) > 0).length
     },
     canSaveWeights() {
       return (
@@ -558,8 +677,11 @@ export default {
         && this.positiveWeightMembers >= 2
       )
     },
+    hasUnsavedChanges() {
+      return this.contributionDirty || this.weightsDirty || this.settingsDirty
+    },
     canPreviewRoom() {
-      return this.canSaveWeights && !this.previewingRoom && !this.savingWeights
+      return this.canSaveWeights && !this.previewingRoom && !this.savingWeights && !this.hasUnsavedChanges
     },
     canCreateBlend() {
       return this.canPreviewRoom && Boolean(this.preview) && !this.creatingBlend
@@ -580,12 +702,24 @@ export default {
         return 'Wait for at least two members to save a contribution before weighting the room.'
       }
       if (this.positiveWeightMembers < 2) {
-        return 'At least two members need a positive weight.'
+        return 'Keep at least two contributors above 0%.'
       }
       if (this.weightsTotal !== 100) {
-        return `Room weights are off by ${Math.abs(100 - this.weightsTotal).toFixed(2)}%.`
+        return `Weights are off by ${Math.abs(100 - this.weightsTotal).toFixed(2)}%.`
       }
-      return 'Weights are ready to save.'
+      if (this.weightsDirty) {
+        return 'Weights are auto-normalized. Save them before previewing.'
+      }
+      return 'Weights are synced with the room.'
+    },
+    previewReadinessMessage() {
+      if (!this.isHost) {
+        return 'Waiting for the host to preview and create the room blend.'
+      }
+      if (this.hasUnsavedChanges) {
+        return 'Save your latest contribution, weight draft, or playlist name before previewing.'
+      }
+      return 'Hosts can preview once at least two members have saved contributions and at least two members still have a positive weight.'
     },
     currentWrappedCard() {
       return this.wrapped?.cards?.[this.wrappedIndex] || null
@@ -608,7 +742,33 @@ export default {
         roomToken: token,
       })
     },
-    syncContributionForm(room) {
+    setStatus(key, value) {
+      this[key] = value
+      window.setTimeout(() => {
+        if (this[key] === value) {
+          this[key] = ''
+        }
+      }, 1600)
+    },
+    stopRoomPolling() {
+      if (this.roomPollTimer) {
+        window.clearInterval(this.roomPollTimer)
+        this.roomPollTimer = null
+      }
+    },
+    startRoomPolling() {
+      this.stopRoomPolling()
+      if (!this.roomToken) {
+        return
+      }
+      this.roomPollTimer = window.setInterval(() => {
+        this.pollRoom()
+      }, ROOM_POLL_INTERVAL_MS)
+    },
+    syncContributionForm(room, options = {}) {
+      if (options.preserveContribution) {
+        return
+      }
       const contribution = room?.contribution || {}
       this.contributionForm = {
         useTopTracks: Boolean(contribution.use_top_tracks),
@@ -616,18 +776,31 @@ export default {
         useRecentTracks: Boolean(contribution.use_recent_tracks),
         playlistIds: [...(contribution.playlist_ids || [])],
       }
-      this.playlistNameDraft = room?.playlist_name || 'Sato Blend'
+      this.contributionDirty = false
     },
-    syncWeightDrafts(room) {
+    syncPlaylistName(room, options = {}) {
+      if (options.preserveSettings) {
+        return
+      }
+      this.playlistNameDraft = room?.playlist_name || 'Sato Blend'
+      this.settingsDirty = false
+    },
+    syncWeightDrafts(room, options = {}) {
+      if (options.preserveWeights) {
+        return
+      }
       this.weightDrafts = Object.fromEntries(
         (room?.members || []).map((member) => [member.id, Number(member.weight || 0)]),
       )
+      this.weightsDirty = false
     },
-    syncRoom(room) {
+    syncRoom(room, options = {}) {
+      const previousUpdatedAt = this.room?.updated_at
       this.room = room
       this.roomNeedsJoin = false
-      this.syncContributionForm(room)
-      this.syncWeightDrafts(room)
+      this.syncContributionForm(room, options)
+      this.syncPlaylistName(room, options)
+      this.syncWeightDrafts(room, options)
       this.createdPlaylist = room.created_playlist || this.createdPlaylist
       if (!room.has_wrapped) {
         this.wrapped = null
@@ -638,6 +811,7 @@ export default {
         role: room?.role,
         memberCount: room?.members?.length || 0,
         hasWrapped: Boolean(room?.has_wrapped),
+        changed: previousUpdatedAt !== room?.updated_at,
       })
     },
     formatDate(value) {
@@ -654,21 +828,38 @@ export default {
     weightDraft(memberId) {
       return this.weightDrafts[memberId] ?? 0
     },
-    updateWeight(memberId, event) {
-      this.weightDrafts = {
-        ...this.weightDrafts,
-        [memberId]: Number(event.target.value || 0),
-      }
+    buildEditableMembers() {
+      return (this.room?.members || []).map((member) => ({
+        ...member,
+        hasContribution: member.has_contribution,
+        weight: Number(this.weightDraft(member.id)),
+      }))
+    },
+    applyWeightMembers(nextMembers, eventType) {
+      this.weightDrafts = Object.fromEntries(
+        nextMembers.map((member) => [member.id, Number(member.weight || 0)]),
+      )
+      this.weightsDirty = true
       this.preview = null
-      this.createdPlaylist = null
-      this.wrapped = null
-      if (this.room) {
-        this.room = {
-          ...this.room,
-          has_wrapped: false,
-          created_playlist: null,
-        }
-      }
+      logClientEvent(eventType, {
+        roomToken: this.roomToken,
+        members: nextMembers.map((member) => ({
+          id: member.id,
+          weight: member.weight,
+        })),
+      })
+    },
+    markContributionDirty() {
+      this.contributionDirty = true
+      this.preview = null
+    },
+    updateWeight(memberId, event) {
+      const nextMembers = normalizeMemberWeights(
+        this.buildEditableMembers(),
+        memberId,
+        event.target.value,
+      )
+      this.applyWeightMembers(nextMembers, 'room.weights.draft_updated')
     },
     memberSummary(member) {
       if (!member.has_contribution) {
@@ -697,12 +888,11 @@ export default {
         this.joinTokenInput = room.token
         this.syncRoom(room)
         this.preview = null
-        this.createdPlaylist = null
-        this.wrapped = null
         logClientEvent('room.created', {
           roomToken: room.token,
         })
-        await this.loadSourceCatalog()
+        this.startRoomPolling()
+        this.loadSourceCatalog()
       } catch (error) {
         this.error = error.message
         logClientEvent('room.create_failed', {
@@ -713,73 +903,118 @@ export default {
         this.creatingRoom = false
       }
     },
-    async loadRoom() {
+    async loadRoom(options = {}) {
       if (!this.roomToken) {
-        return
+        return null
       }
 
-      this.error = ''
+      this.error = options.silent ? this.error : ''
       try {
         const room = await apiRequest(`/api/rooms/${this.roomToken}`)
-        this.syncRoom(room)
-        await this.loadSourceCatalog()
-        if (room.has_wrapped) {
-          await this.loadWrapped()
+        this.syncRoom(room, {
+          preserveContribution: options.preserveDirty && this.contributionDirty,
+          preserveWeights: options.preserveDirty && this.weightsDirty,
+          preserveSettings: options.preserveDirty && this.settingsDirty,
+        })
+        if (!options.fromPoll) {
+          this.startRoomPolling()
         }
+        if (!options.fromPoll || !this.sourceCatalog) {
+          this.loadSourceCatalog()
+        }
+        if (room.has_wrapped && !this.wrapped) {
+          await this.loadWrapped({ silent: true })
+        }
+        return room
       } catch (error) {
         if (error.payload?.error?.code === 'room_access_denied') {
+          if (options.allowAutoJoin !== false) {
+            const joinedRoom = await this.joinRoom(this.roomToken, { auto: true })
+            if (joinedRoom) {
+              return joinedRoom
+            }
+          }
           this.room = null
           this.roomNeedsJoin = true
           logClientEvent('room.join_required', {
             roomToken: this.roomToken,
           })
-          return
+          return null
         }
         if (error.payload?.error?.code === 'room_not_found') {
           this.clearRoomState()
         }
-        this.error = error.message
+        if (!options.silent) {
+          this.error = error.message
+        }
         logClientEvent('room.load_failed', {
           roomToken: this.roomToken,
           message: error.message,
           status: error.status,
         })
+        return null
+      }
+    },
+    async pollRoom() {
+      if (!this.roomToken || this.roomPollInFlight || this.joiningRoom || this.leavingRoom) {
+        return
+      }
+
+      this.roomPollInFlight = true
+      try {
+        const room = await this.loadRoom({ silent: true, preserveDirty: true, fromPoll: true })
+        if (room?.has_wrapped && !this.wrapped) {
+          await this.loadWrapped({ silent: true })
+        }
+      } finally {
+        this.roomPollInFlight = false
       }
     },
     clearRoomState() {
+      this.stopRoomPolling()
       this.room = null
-      this.sourceCatalog = null
+      this.joinTokenInput = ''
       this.preview = null
       this.createdPlaylist = null
       this.wrapped = null
       this.roomNeedsJoin = false
+      this.contributionDirty = false
+      this.weightsDirty = false
+      this.settingsDirty = false
+      this.copyStatus = ''
+      this.shareStatus = ''
+      this.exportStatus = ''
+      this.error = ''
       this.replaceRoomToken('')
       logClientEvent('room.cleared')
     },
-    async joinRoom(token) {
+    async joinRoom(token, options = {}) {
       const nextToken = String(token || '').trim()
       if (!nextToken) {
-        return
+        return null
       }
 
-      this.error = ''
+      this.error = options.auto ? this.error : ''
       this.joiningRoom = true
       try {
         const room = await apiRequest(`/api/rooms/${nextToken}/join`, { method: 'POST' })
         this.replaceRoomToken(room.token)
         this.joinTokenInput = room.token
         this.syncRoom(room)
-        logClientEvent('room.joined', {
+        this.startRoomPolling()
+        this.loadSourceCatalog()
+        logClientEvent(options.auto ? 'room.auto_joined' : 'room.joined', {
           roomToken: room.token,
         })
-        await this.loadSourceCatalog()
+        return room
       } catch (error) {
         this.error = error.message
-        logClientEvent('room.join_failed', {
+        logClientEvent(options.auto ? 'room.auto_join_failed' : 'room.join_failed', {
           roomToken: nextToken,
           message: error.message,
           status: error.status,
         })
+        return null
       } finally {
         this.joiningRoom = false
       }
@@ -806,20 +1041,35 @@ export default {
         this.leavingRoom = false
       }
     },
-    async loadSourceCatalog() {
+    async loadSourceCatalog({ force = false } = {}) {
+      if (this.sourceCatalog && !force) {
+        return this.sourceCatalog
+      }
+      if (this.sourceCatalogPromise && !force) {
+        return this.sourceCatalogPromise
+      }
+
       this.loadingCatalog = true
+      const request = apiRequest(`/api/me/source-catalog${force ? '?refresh=1' : ''}`)
+      this.sourceCatalogPromise = request
       try {
-        this.sourceCatalog = await apiRequest('/api/me/source-catalog')
+        this.sourceCatalog = await request
         logClientEvent('room.sources.loaded', {
           playlistCount: this.sourceCatalog?.playlists?.length || 0,
+          cached: !force,
         })
+        return this.sourceCatalog
       } catch (error) {
         this.error = error.message
         logClientEvent('room.sources.load_failed', {
           message: error.message,
           status: error.status,
         })
+        return null
       } finally {
+        if (this.sourceCatalogPromise === request) {
+          this.sourceCatalogPromise = null
+        }
         this.loadingCatalog = false
       }
     },
@@ -842,8 +1092,7 @@ export default {
         })
         this.syncRoom(response.room)
         this.preview = null
-        this.createdPlaylist = null
-        this.wrapped = null
+        this.contributionDirty = false
         logClientEvent('room.contribution.saved', {
           roomToken: this.roomToken,
           trackCount: response.contribution?.track_count || 0,
@@ -860,17 +1109,16 @@ export default {
       }
     },
     balanceWeights() {
-      this.weightDrafts = Object.fromEntries(
-        distributeMemberWeights(
-          (this.room?.members || []).map((member) => ({
-            id: member.id,
-            hasContribution: member.has_contribution,
-          })),
-        ).map((member) => [member.id, member.weight]),
+      this.applyWeightMembers(distributeMemberWeights(this.buildEditableMembers()), 'room.weights.balanced')
+    },
+    boostHostWeights() {
+      if (!this.hostMember) {
+        return
+      }
+      this.applyWeightMembers(
+        emphasizeMemberWeights(this.buildEditableMembers(), this.hostMember.id, 60),
+        'room.weights.host_boosted',
       )
-      logClientEvent('room.weights.balanced', {
-        roomToken: this.roomToken,
-      })
     },
     async saveWeights() {
       if (!this.roomToken) {
@@ -886,8 +1134,7 @@ export default {
         })
         this.syncRoom(room)
         this.preview = null
-        this.createdPlaylist = null
-        this.wrapped = null
+        this.weightsDirty = false
         logClientEvent('room.weights.saved', {
           roomToken: this.roomToken,
         })
@@ -917,6 +1164,7 @@ export default {
           }),
         })
         this.syncRoom(room)
+        this.settingsDirty = false
         logClientEvent('room.settings.saved', {
           roomToken: this.roomToken,
           playlistName: this.playlistNameDraft,
@@ -994,12 +1242,14 @@ export default {
         this.creatingBlend = false
       }
     },
-    async loadWrapped() {
+    async loadWrapped(options = {}) {
       if (!this.roomToken) {
-        return
+        return null
       }
 
-      this.loadingWrapped = true
+      if (!options.silent) {
+        this.loadingWrapped = true
+      }
       try {
         this.wrapped = await apiRequest(`/api/rooms/${this.roomToken}/wrapped`)
         this.wrappedIndex = 0
@@ -1007,13 +1257,17 @@ export default {
           roomToken: this.roomToken,
           cards: this.wrapped?.cards?.length || 0,
         })
+        return this.wrapped
       } catch (error) {
-        this.error = error.message
+        if (!options.silent) {
+          this.error = error.message
+        }
         logClientEvent('room.wrapped.load_failed', {
           roomToken: this.roomToken,
           message: error.message,
           status: error.status,
         })
+        return null
       } finally {
         this.loadingWrapped = false
       }
@@ -1034,13 +1288,76 @@ export default {
       }
 
       await navigator.clipboard.writeText(this.room.invite_url)
-      this.copyStatus = 'Copied'
+      this.setStatus('copyStatus', 'Copied')
       logClientEvent('room.invite.copied', {
         roomToken: this.roomToken,
       })
-      window.setTimeout(() => {
-        this.copyStatus = ''
-      }, 1200)
+    },
+    wrappedShareText() {
+      return this.wrapped?.share_text
+        || `${this.wrapped?.playlist_name || 'Sato Blend'} by ${this.room?.members?.length || 0} room members`
+    },
+    async shareWrapped() {
+      if (!this.wrapped) {
+        return
+      }
+
+      const sharePayload = {
+        title: this.wrapped.playlist_name,
+        text: this.wrappedShareText(),
+        url: this.createdPlaylist?.external_urls?.spotify || window.location.href,
+      }
+
+      try {
+        if (navigator.share) {
+          await navigator.share(sharePayload)
+          this.setStatus('shareStatus', 'Shared')
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(`${sharePayload.text}\n${sharePayload.url}`)
+          this.setStatus('shareStatus', 'Copied')
+        } else {
+          this.setStatus('shareStatus', 'Share Unavailable')
+        }
+        logClientEvent('room.wrapped.shared', {
+          roomToken: this.roomToken,
+        })
+      } catch (error) {
+        this.error = error?.message || 'Could not share this recap.'
+      }
+    },
+    downloadWrapped() {
+      if (!this.wrapped) {
+        return
+      }
+
+      const blob = new Blob([JSON.stringify(this.wrapped, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `sato-wrapped-${this.roomToken}.json`
+      anchor.click()
+      URL.revokeObjectURL(url)
+      this.setStatus('exportStatus', 'Exported')
+      logClientEvent('room.wrapped.exported', {
+        roomToken: this.roomToken,
+      })
+    },
+    downloadCoverArt() {
+      const coverArt = this.wrapped?.cover_art || this.preview?.cover_art || this.createdPlaylist?.cover_art
+      if (!coverArt) {
+        return
+      }
+
+      const blob = dataUrlToBlob(coverArt)
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `sato-cover-${this.roomToken}.svg`
+      anchor.click()
+      URL.revokeObjectURL(url)
+      logClientEvent('room.cover.downloaded', {
+        roomToken: this.roomToken,
+      })
     },
   },
   mounted() {
@@ -1051,6 +1368,9 @@ export default {
       this.joinTokenInput = token
       this.loadRoom()
     }
+  },
+  beforeUnmount() {
+    this.stopRoomPolling()
   },
 }
 </script>
@@ -1214,7 +1534,8 @@ export default {
 .source-grid,
 .budget-summary,
 .preview-summary,
-.wrapped-controls {
+.wrapped-controls,
+.wrapped-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -1249,6 +1570,7 @@ export default {
 .playlist-picker__top,
 .wrapped-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
@@ -1286,6 +1608,30 @@ export default {
   gap: 0.75rem;
 }
 
+.member-weight {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.member-weight__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.weight-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.weight-slider {
+  width: 100%;
+  accent-color: var(--spotify-accent);
+}
+
 .member-card__top,
 .track-copy__top,
 .wrapped-list__row {
@@ -1303,6 +1649,7 @@ export default {
 
 .weight-input {
   max-width: 7rem;
+  text-align: right;
 }
 
 .budget-chip,
@@ -1337,6 +1684,42 @@ export default {
 
 .action-row--dense {
   margin-top: 0.4rem;
+}
+
+.budget-summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.preview-hero {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.preview-cover,
+.wrapped-cover,
+.playlist-success__cover {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-strong);
+}
+
+.preview-insights {
+  display: grid;
+  gap: 1rem;
+}
+
+.overlap-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(91, 65, 214, 0.16), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: grid;
+  gap: 0.45rem;
 }
 
 .track-list {
@@ -1374,6 +1757,14 @@ export default {
   gap: 0.55rem;
 }
 
+.track-reason {
+  color: #f5f5f5;
+}
+
+.track-breakdown {
+  display: block;
+}
+
 .contributor-row,
 .wrapped-chip-row {
   display: flex;
@@ -1385,6 +1776,11 @@ export default {
   margin-top: 1rem;
   border-radius: 0.95rem;
   padding: 1rem 1.05rem;
+}
+
+.feedback-card--neutral {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f3f3f3;
 }
 
 .feedback-card--warning {
@@ -1407,6 +1803,12 @@ export default {
   margin-top: 0.8rem;
 }
 
+.playlist-success {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .wrapped-card {
   min-height: 17rem;
   display: grid;
@@ -1417,9 +1819,35 @@ export default {
   align-items: baseline;
 }
 
+.wrapped-list__row--stacked {
+  display: grid;
+  gap: 0.2rem;
+}
+
 @media (max-width: 1100px) {
   .blend-shell {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .preview-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .weight-control {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .playlist-success {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .preview-cover,
+  .wrapped-cover,
+  .playlist-success__cover {
+    max-width: 100%;
   }
 }
 </style>

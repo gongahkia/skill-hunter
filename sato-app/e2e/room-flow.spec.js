@@ -56,7 +56,6 @@ test('blocks the host from leaving a populated room and cleans up when the room 
   const guestPage = await guestContext.newPage()
 
   await e2eLoginRedirect(guestPage, 'guest', roomToken)
-  await guestPage.getByRole('button', { name: 'Join This Room' }).click()
   await expect(guestPage.getByRole('button', { name: 'Leave Room' })).toBeVisible()
 
   await page.reload()
@@ -98,7 +97,6 @@ test('keeps host-only weight and create controls locked for guests', async ({ pa
   const guestPage = await guestContext.newPage()
 
   await e2eLoginRedirect(guestPage, 'guest', roomToken)
-  await guestPage.getByRole('button', { name: 'Join This Room' }).click()
   await guestPage.getByLabel('Saved Tracks').check()
   await guestPage.getByRole('button', { name: 'Save Contribution' }).click()
 
@@ -168,8 +166,7 @@ test('host and guest can build a room blend and reopen Wrapped', async ({ page, 
 
   await e2eLoginRedirect(guestPage, 'guest', roomToken)
   await expect(guestPage.getByText('Spotify login completed. Your session is ready.')).toBeVisible()
-  await expect(guestPage.getByRole('button', { name: 'Join This Room' })).toBeVisible()
-  await guestPage.getByRole('button', { name: 'Join This Room' }).click()
+  await expect(guestPage.getByText('Your contribution', { exact: true })).toBeVisible()
 
   await guestPage.getByLabel('Saved Tracks').check()
   await guestPage.getByRole('button', { name: 'Save Contribution' }).click()
@@ -190,7 +187,7 @@ test('host and guest can build a room blend and reopen Wrapped', async ({ page, 
   await expect(page.getByText('Your room blend is live')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Blend Wrapped' })).toBeVisible()
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 5; index += 1) {
     await page.getByRole('button', { name: 'Next' }).click()
   }
   await expect(page.getByText(/Most influential: Host User/i)).toBeVisible()
