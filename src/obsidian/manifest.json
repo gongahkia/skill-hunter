@@ -1,0 +1,10 @@
+{
+  "id": "owl-tags",
+  "name": "Owl Tags",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Scan and navigate tag annotations (TODO, FIXME, REV, TEMP, REF) across your vault",
+  "author": "gongahkia",
+  "authorUrl": "https://github.com/gongahkia",
+  "isDesktopOnly": false
+}

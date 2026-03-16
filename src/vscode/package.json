@@ -1,0 +1,67 @@
+{
+  "name": "owl-tags",
+  "displayName": "Owl Tags",
+  "description": "Tag annotation scanner for TODO, FIXME, REV, TEMP, REF comments",
+  "version": "1.0.0",
+  "publisher": "gongahkia",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {"command": "owl-tags.scan", "title": "Owl: Scan Current File"},
+      {"command": "owl-tags.scanWorkspace", "title": "Owl: Scan Workspace"},
+      {"command": "owl-tags.highlight", "title": "Owl: Toggle Highlights"},
+      {"command": "owl-tags.exportJson", "title": "Owl: Export Tags as JSON"},
+      {"command": "owl-tags.exportMd", "title": "Owl: Export Tags as Markdown"}
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {"id": "owl-tags-container", "title": "Owl Tags", "icon": "$(eye)"}
+      ]
+    },
+    "views": {
+      "owl-tags-container": [
+        {"id": "owl-tags-view", "name": "Tags"}
+      ]
+    },
+    "configuration": {
+      "title": "Owl Tags",
+      "properties": {
+        "owl-tags.colorscheme": {
+          "type": "string",
+          "default": "gruvbox",
+          "enum": ["gruvbox", "everforest", "tokyoNight", "atomDark", "monokai", "github", "ayu", "dracula", "rosePine", "spacemacs"],
+          "description": "Color scheme for tag highlights"
+        },
+        "owl-tags.customPrefixes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "default": [],
+          "description": "Additional tag prefixes to scan for"
+        },
+        "owl-tags.scanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan file on save"
+        }
+      }
+    },
+    "keybindings": [
+      {"command": "owl-tags.scan", "key": "cmd+shift+o", "mac": "cmd+shift+o", "when": "editorTextFocus"}
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

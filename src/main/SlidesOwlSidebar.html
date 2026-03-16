@@ -1,35 +1,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
+<base target="_top">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;font-size:12px;padding:8px}
+h1{font-size:16px;margin-bottom:8px}
+#controls{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+#controls select,#controls button{font-size:11px;padding:2px 6px;cursor:pointer}
+#customPanel{display:none;margin-bottom:6px;padding:6px;border:1px solid #555;border-radius:4px}
+#customPanel input{width:120px;font-size:11px;padding:2px 4px}
+#customPanel button{font-size:11px;padding:2px 6px;margin-left:4px;cursor:pointer}
+.custom-tag{display:inline-block;margin:2px;padding:1px 6px;border-radius:3px;font-size:11px}
+.custom-tag button{font-size:10px;margin-left:4px;cursor:pointer;border:none;background:none;color:inherit}
+#stats{margin-bottom:6px;font-size:11px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.stat-badge{padding:1px 6px;border-radius:3px;font-weight:bold}
+#filterInput{width:100%;padding:4px 6px;font-size:12px;margin-bottom:6px;font-family:monospace}
+#batchBar{display:none;margin-bottom:6px}
+#batchBar button{font-size:11px;padding:2px 8px;margin-right:4px;cursor:pointer}
+.prefix-group{margin-bottom:8px}
+.prefix-header{font-weight:bold;margin-bottom:2px}
+.tag-item{display:flex;align-items:flex-start;gap:4px;padding:2px 0;cursor:pointer}
+.tag-item:hover{opacity:0.8}
+.tag-item input[type="checkbox"]{margin-top:2px;flex-shrink:0}
+.tag-text{flex:1;word-break:break-word}
+.tag-loc{font-size:10px;opacity:0.7;flex-shrink:0}
+#exportBar{margin-top:8px;display:flex;gap:4px}
+#exportBar button{font-size:11px;padding:2px 8px;cursor:pointer}
+.copied{opacity:0.5}
+.empty-msg{font-style:italic;opacity:0.7}
+</style>
 </head>
 <body>
-  <h1><code>Tags</code></h1>
-  <div id="tagContainer">
-    <p><b><i>Owl is searching for your tags</i></b>...</p>
-  </div>
-  <script>
-    function displayTags(data) {
-      const container = document.getElementById('tagContainer');
-      const tags = data.tags;
-      const prefixes = data.prefixes;
-      const colors = data.colorschemeGruvbox;
-      container.innerHTML = "";
-      container.style.backgroundColor = colors["BACKGROUND"];
-      for (const [prefix, lines] of Object.entries(tags)) {
-        if (lines.length > 0) {
-          const tagInfo = document.createElement('div');
-          const prefixList = lines.map(line => `<li style="color:${colors[prefix]}">${line}</li>`).join('');
-          tagInfo.innerHTML = `<strong style="color:${colors[prefix]}">${prefix}:</strong><ul>${prefixList}</ul>`;
-          container.appendChild(tagInfo);
-        }
-      }
-      if (container.innerHTML === '') {
-        container.style.backgroundColor = "";
-        container.innerHTML = `<p><b><i>Owl found no tagged lines</i></b>.</br></br>Specified tags are <code>${prefixes.join(", ")}</code>.</p>`;
-      }
-    }
-    google.script.run.withSuccessHandler(displayTags).slidesGetTaggedLines();
-  </script>
+<h1><code>Tags</code></h1>
+<div id="controls">
+  <select id="schemeSelect" onchange="changeScheme(this.value)"></select>
+  <button id="darkToggle" onclick="toggleDark()">Light</button>
+  <button onclick="toggleCustomPanel()">Manage Tags</button>
+  <button onclick="rescan()">Refresh</button>
+</div>
+<div id="customPanel">
+  <input id="newPrefix" placeholder="NEW_PREFIX" onkeydown="if(event.key==='Enter')addCustom()">
+  <button onclick="addCustom()">Add</button>
+  <div id="customList" style="margin-top:4px"></div>
+</div>
+<div id="stats"></div>
+<input id="filterInput" placeholder="Filter tags (/ to focus)" oninput="filterTags(this.value)">
+<div id="batchBar">
+  <button onclick="markSelectedDone()">Mark Done</button>
+  <button onclick="archiveSelected()">Archive</button>
+</div>
+<div id="tagContainer"><p><b><i>Owl is searching for your tags</i></b>...</p></div>
+<div id="exportBar">
+  <button onclick="exportAs('json')">JSON</button>
+  <button onclick="exportAs('md')">MD</button>
+  <button onclick="exportAs('txt')">TXT</button>
+</div>
+<script>
+var C={scanFn:'slidesGetTaggedLines',platform:'slides',itemLabel:'lines',navFn:null,markDoneFn:'slidesMarkTagDone',archiveFn:'slidesArchiveTags'};
+var allTagData=null,currentFilter='';
+function rescan(){document.getElementById('tagContainer').innerHTML='<p><b><i>Scanning...</i></b></p>';google.script.run.withSuccessHandler(displayTags).withFailureHandler(onError)[C.scanFn]();}
+rescan();
+function displayTags(data){allTagData=data;applyTheme(data);renderSchemeDropdown(data);renderStats(data);renderCustomList();renderTags(data,currentFilter);}
+function applyTheme(data){var bg=data.darkMode?data.colorscheme['BACKGROUND']:'#ffffff';var fg=data.darkMode?'#e0e0e0':'#1a1a1a';document.body.style.backgroundColor=bg;document.body.style.color=fg;document.getElementById('darkToggle').textContent=data.darkMode?'Light':'Dark';var inp=document.getElementById('filterInput');inp.style.backgroundColor=data.darkMode?'#333':'#f5f5f5';inp.style.color=fg;inp.style.border='1px solid '+(data.darkMode?'#555':'#ccc');}
+function renderSchemeDropdown(data){var sel=document.getElementById('schemeSelect');sel.innerHTML='';for(var i=0;i<data.availableSchemes.length;i++){var opt=document.createElement('option');opt.value=data.availableSchemes[i];opt.textContent=data.availableSchemes[i];if(data.availableSchemes[i]===data.activeScheme)opt.selected=true;sel.appendChild(opt);}}
+function renderStats(data){var el=document.getElementById('stats');var total=0,parts=[];var sorted=Object.keys(data.tags).sort(function(a,b){return(data.priority[a]||99)-(data.priority[b]||99);});for(var i=0;i<sorted.length;i++){var c=data.tags[sorted[i]].length;total+=c;parts.push('<span class="stat-badge" style="background:'+data.colorscheme[sorted[i]]+';color:#000">'+sorted[i]+': '+c+'</span>');}el.innerHTML='<strong>'+total+' tags</strong> '+parts.join(' ');}
+function renderTags(data,filter){var container=document.getElementById('tagContainer');container.innerHTML='';var sorted=Object.keys(data.tags).sort(function(a,b){return(data.priority[a]||99)-(data.priority[b]||99);});var hasAny=false;for(var i=0;i<sorted.length;i++){var prefix=sorted[i];var entries=data.tags[prefix];var filtered=filter?entries.filter(function(e){var q=filter.toLowerCase();return prefix.toLowerCase().indexOf(q)>=0||e.text.toLowerCase().indexOf(q)>=0;}):entries;if(filtered.length===0)continue;hasAny=true;var group=document.createElement('div');group.className='prefix-group';group.innerHTML='<div class="prefix-header" style="color:'+data.colorscheme[prefix]+'">'+prefix+' ('+filtered.length+')</div>';for(var j=0;j<filtered.length;j++){var entry=filtered[j];var item=document.createElement('div');item.className='tag-item';var cb=document.createElement('input');cb.type='checkbox';cb.onchange=updateBatchBar;var textSpan=document.createElement('span');textSpan.className='tag-text';textSpan.style.color=data.colorscheme[prefix];textSpan.textContent=entry.text;textSpan.onclick=(function(e){return function(){navigateTo(e);};})(entry);var locSpan=document.createElement('span');locSpan.className='tag-loc';locSpan.textContent=locationLabel(entry);item.appendChild(cb);item.appendChild(textSpan);item.appendChild(locSpan);item._entry=entry;item._prefix=prefix;group.appendChild(item);}container.appendChild(group);}if(!hasAny){container.innerHTML='<p class="empty-msg">Owl found no tagged '+C.itemLabel+'.</p>';}}
+function navigateTo(entry){if(C.platform==='docs')google.script.run[C.navFn](entry.paragraphIndex);else if(C.platform==='sheets')google.script.run[C.navFn](entry.row,entry.col);}
+function locationLabel(entry){if(C.platform==='docs')return'Para '+(entry.paragraphIndex+1);if(C.platform==='sheets')return colLetter(entry.col)+entry.row;if(C.platform==='slides')return'Slide '+(entry.slideIndex+1);return'';}
+function colLetter(n){var s='';while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26);}return s;}
+function changeScheme(name){google.script.run.withSuccessHandler(rescan).setActiveColorscheme(name);}
+function toggleDark(){if(!allTagData)return;var v=!allTagData.darkMode;google.script.run.setDarkMode(v);allTagData.darkMode=v;applyTheme(allTagData);}
+function toggleCustomPanel(){var p=document.getElementById('customPanel');p.style.display=p.style.display==='none'?'block':'none';}
+function getCustomFromPrefixes(){if(!allTagData)return[];var b=['TODO','FIXME','TEMP','REF','REV'];return allTagData.prefixes.filter(function(p){return b.indexOf(p)<0;});}
+function addCustom(){var input=document.getElementById('newPrefix');var val=input.value.trim().toUpperCase();if(!val)return;var cur=getCustomFromPrefixes();if(cur.indexOf(val)>=0||['TODO','FIXME','TEMP','REF','REV'].indexOf(val)>=0)return;cur.push(val);google.script.run.withSuccessHandler(function(){input.value='';rescan();}).setCustomPrefixes(cur);}
+function removeCustom(prefix){var cur=getCustomFromPrefixes();google.script.run.withSuccessHandler(rescan).setCustomPrefixes(cur.filter(function(p){return p!==prefix;}));}
+function renderCustomList(){var el=document.getElementById('customList');if(!allTagData){el.innerHTML='';return;}var builtIn=['TODO','FIXME','TEMP','REF','REV'];var custom=allTagData.prefixes.filter(function(p){return builtIn.indexOf(p)<0;});if(custom.length===0){el.innerHTML='<span style="opacity:0.5">No custom tags</span>';return;}el.innerHTML=custom.map(function(p){return'<span class="custom-tag" style="background:'+(allTagData.colorscheme[p]||'#555')+';color:#000">'+p+'<button onclick="removeCustom(\''+p+'\')">&times;</button></span>';}).join('');}
+function filterTags(val){currentFilter=val;if(allTagData)renderTags(allTagData,val);}
+function updateBatchBar(){var checked=document.querySelectorAll('.tag-item input[type="checkbox"]:checked');document.getElementById('batchBar').style.display=checked.length>0?'block':'none';}
+function getSelectedEntries(){var items=document.querySelectorAll('.tag-item input[type="checkbox"]:checked');var entries=[];for(var i=0;i<items.length;i++){var item=items[i].parentElement;var e={};for(var k in item._entry)e[k]=item._entry[k];e.prefix=item._prefix;entries.push(e);}return entries;}
+function markSelectedDone(){var entries=getSelectedEntries();for(var i=0;i<entries.length;i++){var e=entries[i];var handler=(i===entries.length-1)?rescan:function(){};if(C.platform==='docs')google.script.run.withSuccessHandler(handler)[C.markDoneFn](e.paragraphIndex,e.prefix);else if(C.platform==='sheets')google.script.run.withSuccessHandler(handler)[C.markDoneFn](e.row,e.col,e.prefix);else if(C.platform==='slides')google.script.run.withSuccessHandler(handler)[C.markDoneFn](e.slideIndex,e.shapeId,e.prefix);}}
+function archiveSelected(){var entries=getSelectedEntries();if(entries.length>0)google.script.run.withSuccessHandler(rescan)[C.archiveFn](entries);}
+function exportAs(fmt){if(!allTagData)return;var text='';var sorted=Object.keys(allTagData.tags).sort(function(a,b){return(allTagData.priority[a]||99)-(allTagData.priority[b]||99);});if(fmt==='json'){text=JSON.stringify(allTagData.tags,null,2);}else if(fmt==='md'){for(var i=0;i<sorted.length;i++){text+='## '+sorted[i]+'\n';for(var j=0;j<allTagData.tags[sorted[i]].length;j++)text+='- '+allTagData.tags[sorted[i]][j].text+' ('+locationLabel(allTagData.tags[sorted[i]][j])+')\n';text+='\n';}}else{for(var i=0;i<sorted.length;i++){text+=sorted[i]+':\n';for(var j=0;j<allTagData.tags[sorted[i]].length;j++)text+='  '+allTagData.tags[sorted[i]][j].text+' ['+locationLabel(allTagData.tags[sorted[i]][j])+']\n';text+='\n';}}navigator.clipboard.writeText(text).then(function(){var btn=document.querySelector('#exportBar button[onclick*="'+fmt+'"]');if(btn){btn.classList.add('copied');btn.textContent='Copied!';setTimeout(function(){btn.classList.remove('copied');btn.textContent=fmt.toUpperCase();},1500);}});}
+document.addEventListener('keydown',function(e){if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('filterInput').focus();}else if(e.key==='Escape'){document.getElementById('filterInput').value='';document.getElementById('filterInput').blur();filterTags('');}else if(e.ctrlKey&&e.key==='e'){e.preventDefault();exportAs('json');}else if(e.ctrlKey&&e.key==='r'){e.preventDefault();rescan();}});
+function onError(err){document.getElementById('tagContainer').innerHTML='<p style="color:red">Error: '+err.message+'</p>';}
+</script>
 </body>
 </html>
