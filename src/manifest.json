@@ -1,14 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Rakuzaichi",
-  "version": "1.0",
-  "permissions": ["activeTab", "scripting", "downloads"],
+  "version": "2.0",
+  "description": "Export LLM chat conversations in multiple formats",
+  "permissions": ["activeTab", "scripting", "downloads", "storage", "alarms"],
   "host_permissions": [
     "*://chat.openai.com/*",
+    "*://chatgpt.com/*",
     "*://claude.ai/*",
     "*://gemini.google.com/*",
     "*://perplexity.ai/*",
-    "*://chat.deepseek.com/*"
+    "*://www.perplexity.ai/*",
+    "*://chat.deepseek.com/*",
+    "*://grok.com/*",
+    "*://copilot.microsoft.com/*",
+    "*://chat.mistral.ai/*",
+    "*://huggingface.co/chat/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -25,12 +32,43 @@
   "content_scripts": [{
     "matches": [
       "*://chat.openai.com/*",
+      "*://chatgpt.com/*",
       "*://claude.ai/*",
       "*://gemini.google.com/*",
       "*://perplexity.ai/*",
-      "*://chat.deepseek.com/*"
+      "*://www.perplexity.ai/*",
+      "*://chat.deepseek.com/*",
+      "*://grok.com/*",
+      "*://copilot.microsoft.com/*",
+      "*://chat.mistral.ai/*",
+      "*://huggingface.co/chat/*"
     ],
-    "js": ["content-script.js"],
+    "js": [
+      "compat.js",
+      "dom-utils.js",
+      "schema.js",
+      "platforms/chatgpt.js",
+      "platforms/claude.js",
+      "platforms/gemini.js",
+      "platforms/perplexity.js",
+      "platforms/deepseek.js",
+      "platforms/grok.js",
+      "platforms/copilot.js",
+      "platforms/mistral.js",
+      "platforms/huggingchat.js",
+      "platforms/registry.js",
+      "content-script.js"
+    ],
     "run_at": "document_idle"
-  }]
+  }],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "rakuzaichi@gabrielongzm.com",
+      "strict_min_version": "109.0"
+    }
+  }
 }

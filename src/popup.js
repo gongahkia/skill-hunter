@@ -1,31 +1,71 @@
-document.querySelectorAll('button[data-format]').forEach(button => {
-  button.addEventListener('click', async () => {
-    const format = button.dataset.format;
-    try {
-      const [tab] = await chrome.tabs.query({ 
-        active: true, 
-        currentWindow: true 
-      });
-      const response = await chrome.tabs.sendMessage(tab.id, { 
-        action: "extractChat" 
-      });
-      if (!response) {
-        throw new Error('No response from content script');
-      } else {
-        if (response.error) {
-          throw new Error(response.error);
-        } else {
-          console.log(response);
-          chrome.runtime.sendMessage({
-            action: "download",
-            format,
-            data: response.data
-          });
-        }
-      }
-    } catch (error) {
-      alert(`Export failed: ${error.message}`);
-      console.error('Export error:', error);
-    }
+(async function() {
+  var settings = await api.storage.sync.get({
+    defaultFormat: 'json',
+    filenameTemplate: '{platform}_{title}_{date}.{ext}',
+    darkMode: 'system',
+    showPreview: true
   });
-});
+  function applyTheme(mode) {
+    if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else if (mode === 'light') document.documentElement.removeAttribute('data-theme');
+    else {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
+    }
+  }
+  applyTheme(settings.darkMode);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() { applyTheme(settings.darkMode); });
+  var previewEl = document.getElementById('export-preview');
+  var previewInfo = document.getElementById('preview-info');
+  var confirmBtn = document.getElementById('preview-confirm');
+  var cancelBtn = document.getElementById('preview-cancel');
+  var pendingExport = null;
+  document.querySelectorAll('button[data-format]').forEach(function(button) {
+    button.addEventListener('click', async function() {
+      var format = button.dataset.format;
+      try {
+        var tabs = await api.tabs.query({ active: true, currentWindow: true });
+        var response = await api.tabs.sendMessage(tabs[0].id, { action: 'extractChat' });
+        if (!response) throw new Error('No response from content script');
+        if (response.error) throw new Error(response.error);
+        var data = response.data;
+        if (settings.showPreview && previewEl) {
+          pendingExport = { format: format, data: data };
+          previewInfo.textContent = data.messageCount + ' messages from ' + data.platform +
+            (data.model ? ' (' + data.model + ')' : '') + ' → ' + format.toUpperCase();
+          previewEl.classList.remove('hidden');
+        } else {
+          await doDownload(format, data);
+        }
+      } catch(e) {
+        showStatus('Export failed: ' + e.message, true);
+      }
+    });
+  });
+  if (confirmBtn) confirmBtn.addEventListener('click', async function() {
+    if (!pendingExport) return;
+    previewEl.classList.add('hidden');
+    await doDownload(pendingExport.format, pendingExport.data);
+    pendingExport = null;
+  });
+  if (cancelBtn) cancelBtn.addEventListener('click', function() {
+    previewEl.classList.add('hidden');
+    pendingExport = null;
+  });
+  async function doDownload(format, data) {
+    try {
+      await api.runtime.sendMessage({ action: 'download', format: format, data: data });
+      showStatus('Exported!', false);
+    } catch(e) {
+      showStatus('Download failed: ' + e.message, true);
+    }
+  }
+  function showStatus(msg, isError) {
+    var el = document.getElementById('status');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'status ' + (isError ? 'error' : 'success');
+    el.classList.remove('hidden');
+    setTimeout(function() { el.classList.add('hidden'); }, 3000);
+  }
+})();

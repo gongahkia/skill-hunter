@@ -20,14 +20,26 @@
         <button data-format="ndjson">NDJSON</button>
         <button data-format="xml">XML</button>
         <button data-format="yaml">YAML</button>
-        <button data-format="parquet">Parquet</button>
-        <button data-format="avro">Avro</button>
+        <button data-format="parquet" disabled title="Coming soon — requires WASM runtime">Parquet</button>
+        <button data-format="avro" disabled title="Coming soon — requires WASM runtime">Avro</button>
       </div>
     </section>
+    <div id="export-preview" class="hidden">
+      <div class="preview-box">
+        <p id="preview-info"></p>
+        <div class="preview-actions">
+          <button id="preview-confirm" class="btn-confirm">Download</button>
+          <button id="preview-cancel" class="btn-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="status" class="status hidden"></div>
     <footer>
       <div class="made-by">Made with ❤️ by <span><a href="https://gabrielongzm.com/" target="_blank">Gabriel Ong</a></span>.</div>
     </footer>
   </div>
+  <script src="compat.js"></script>
+  <script src="storage.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

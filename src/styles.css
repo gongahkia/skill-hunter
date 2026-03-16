@@ -1,103 +1,173 @@
+:root {
+  --bg: #f5f6fa;
+  --surface: #fff;
+  --text: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --border: #e2e8f0;
+  --hover: #e2e8f0;
+  --btn-bg: #f7fafc;
+  --shadow: rgba(44, 62, 80, 0.12);
+  --shadow-sm: rgba(44, 62, 80, 0.03);
+  --shadow-hover: rgba(44, 62, 80, 0.08);
+  --success: #38a169;
+  --error: #e53e3e;
+}
+[data-theme="dark"] {
+  --bg: #1a202c;
+  --surface: #2d3748;
+  --text: #e2e8f0;
+  --text-secondary: #cbd5e0;
+  --text-muted: #a0aec0;
+  --border: #4a5568;
+  --hover: #4a5568;
+  --btn-bg: #2d3748;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-sm: rgba(0, 0, 0, 0.1);
+  --shadow-hover: rgba(0, 0, 0, 0.2);
+  --success: #68d391;
+  --error: #fc8181;
+}
 body {
   margin: 0;
   padding: 0;
-  background: #f5f6fa;
+  background: var(--bg);
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   min-width: 320px;
   min-height: 370px;
+  color: var(--text);
 }
-
 .popup-container {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   padding: 24px 20px 16px 20px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.12);
+  box-shadow: 0 8px 32px var(--shadow);
   min-width: 320px;
   min-height: 370px;
 }
-
 header {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-bottom: 18px;
 }
-
 .logo {
   width: 36px;
   height: 36px;
   border-radius: 8px;
   object-fit: cover;
-  background: #f5f6fa;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--border);
 }
-
 header h2 {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #2d3748;
+  color: var(--text);
   margin: 0;
 }
-
 section h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--text-secondary);
   margin: 0 0 18px 0;
   letter-spacing: 0.01em;
 }
-
 .format-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
 }
-
 .format-grid button {
   padding: 12px 0;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--btn-bg);
+  border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
-  color: #2d3748;
+  color: var(--text);
   font-weight: 500;
   letter-spacing: 0.04em;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
-  box-shadow: 0 1px 2px rgba(44, 62, 80, 0.03);
+  box-shadow: 0 1px 2px var(--shadow-sm);
 }
-
 .format-grid button:hover, .format-grid button:focus {
-  background: #e2e8f0;
-  color: #1a202c;
+  background: var(--hover);
+  color: var(--text);
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 3px 8px rgba(44, 62, 80, 0.08);
+  box-shadow: 0 3px 8px var(--shadow-hover);
   outline: none;
 }
-
+.format-grid button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.format-grid button:disabled:hover {
+  background: var(--btn-bg);
+  transform: none;
+  box-shadow: none;
+}
+.hidden { display: none !important; }
+.preview-box {
+  margin: 14px 0;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.preview-box p {
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+.preview-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-confirm, .btn-cancel {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.btn-confirm {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.btn-cancel {
+  background: var(--btn-bg);
+  color: var(--text);
+}
+.status {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.status.success { background: var(--success); color: #fff; }
+.status.error { background: var(--error); color: #fff; }
 footer {
   margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
   text-align: center;
 }
-
 .made-by {
   font-size: 0.97rem;
-  color: #718096;
-  margin-top: 0;
+  color: var(--text-muted);
 }
-
 .made-by span {
   font-weight: 700;
   text-decoration: underline;
-  color: #2d3748;
+  color: var(--text);
 }
-
-a {
-  text-decoration: none;
-  color: #2d3748;
-}
+a { text-decoration: none; color: var(--text); }

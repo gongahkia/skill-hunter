@@ -1,0 +1,93 @@
+:root {
+  --bg: #f5f6fa;
+  --surface: #fff;
+  --text: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --border: #e2e8f0;
+  --btn-bg: #4299e1;
+  --input-bg: #fff;
+}
+[data-theme="dark"] {
+  --bg: #1a202c;
+  --surface: #2d3748;
+  --text: #e2e8f0;
+  --text-secondary: #cbd5e0;
+  --text-muted: #a0aec0;
+  --border: #4a5568;
+  --btn-bg: #63b3ed;
+  --input-bg: #1a202c;
+}
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--bg);
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  color: var(--text);
+}
+.options-container {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+h1 {
+  font-size: 1.3rem;
+  margin: 0 0 20px 0;
+  color: var(--text);
+}
+label {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+label select, label input[type="text"], label input[type="number"] {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+label small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.checkbox-label input { width: auto; margin: 0; }
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+button[type="submit"] {
+  padding: 10px 24px;
+  background: var(--btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+#save-status {
+  color: #38a169;
+  font-weight: 600;
+  font-size: 0.9rem;
+}

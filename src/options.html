@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rakuzaichi Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <h1>Rakuzaichi Settings</h1>
+    <form id="options-form">
+      <label>
+        Default Format
+        <select id="defaultFormat">
+          <option value="csv">CSV</option>
+          <option value="tsv">TSV</option>
+          <option value="json" selected>JSON</option>
+          <option value="ndjson">NDJSON</option>
+          <option value="xml">XML</option>
+          <option value="yaml">YAML</option>
+        </select>
+      </label>
+      <label>
+        Filename Template
+        <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
+        <small>Variables: {platform}, {title}, {date}, {time}, {format}, {ext}</small>
+      </label>
+      <label>
+        Theme
+        <select id="darkMode">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="showPreview" checked>
+        Show export preview before download
+      </label>
+      <label>
+        Auto-export interval (minutes, 0 = disabled)
+        <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
+      </label>
+      <div class="form-actions">
+        <button type="submit">Save</button>
+        <span id="save-status"></span>
+      </div>
+    </form>
+  </div>
+  <script src="compat.js"></script>
+  <script src="storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
