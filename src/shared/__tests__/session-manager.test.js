@@ -3,7 +3,7 @@
  */
 
 import { SessionManager } from '../core/session-manager.js';
-import { SESSION_DURATION_MS } from '../core/constants.js';
+import { SESSION_DURATION_MS, STORAGE_KEYS } from '../core/constants.js';
 
 // Mock storage adapter
 class MockStorageAdapter {
@@ -45,15 +45,15 @@ describe('SessionManager', () => {
 
     test('should return true when recent session exists', async () => {
       const now = Date.now();
-      await mockStorage.set('lastSolvedTime', now);
+      await mockStorage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, now + SESSION_DURATION_MS);
 
       const hasActive = await sessionManager.hasActiveSession('test-id');
       expect(hasActive).toBe(true);
     });
 
     test('should return false when session has expired', async () => {
-      const pastTime = Date.now() - SESSION_DURATION_MS - 1000;
-      await mockStorage.set('lastSolvedTime', pastTime);
+      const pastTime = Date.now() - 1000;
+      await mockStorage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, pastTime);
 
       const hasActive = await sessionManager.hasActiveSession('test-id');
       expect(hasActive).toBe(false);
@@ -68,7 +68,7 @@ describe('SessionManager', () => {
 
     test('should return positive time for active session', async () => {
       const now = Date.now();
-      await mockStorage.set('lastSolvedTime', now);
+      await mockStorage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, now + SESSION_DURATION_MS);
 
       const remaining = await sessionManager.getTimeRemaining();
       expect(remaining).toBeGreaterThan(0);
@@ -86,19 +86,24 @@ describe('SessionManager', () => {
 
       await sessionManager.startSession('test-id', problemData);
 
-      const lastSolved = await mockStorage.get('lastSolvedTime');
+      const lastSolved = await mockStorage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
+      const sessionExpiresAt = await mockStorage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
       expect(lastSolved).toBeTruthy();
+      expect(sessionExpiresAt).toBeGreaterThan(lastSolved);
       expect(typeof lastSolved).toBe('number');
     });
   });
 
   describe('endSession', () => {
     test('should remove session data', async () => {
-      await mockStorage.set('lastSolvedTime', Date.now());
+      await mockStorage.set(STORAGE_KEYS.LAST_SOLVED_TIME, Date.now());
+      await mockStorage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, Date.now() + SESSION_DURATION_MS);
       await sessionManager.endSession();
 
-      const lastSolved = await mockStorage.get('lastSolvedTime');
+      const lastSolved = await mockStorage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
+      const sessionExpiresAt = await mockStorage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
       expect(lastSolved).toBeNull();
+      expect(sessionExpiresAt).toBeNull();
     });
   });
 
@@ -112,7 +117,8 @@ describe('SessionManager', () => {
 
     test('should return active session info', async () => {
       const now = Date.now();
-      await mockStorage.set('lastSolvedTime', now);
+      await mockStorage.set(STORAGE_KEYS.LAST_SOLVED_TIME, now);
+      await mockStorage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, now + SESSION_DURATION_MS);
 
       const info = await sessionManager.getSessionInfo();
 

@@ -22,6 +22,18 @@ class ChromeStorageAdapter extends StorageInterface {
         });
     }
 
+    async getMany(keys) {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(keys, (result) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                    return;
+                }
+                resolve(result);
+            });
+        });
+    }
+
     async set(key, value) {
         return new Promise((resolve, reject) => {
             chrome.storage.local.set({ [key]: value }, () => {
@@ -34,6 +46,18 @@ class ChromeStorageAdapter extends StorageInterface {
                 } else {
                     resolve();
                 }
+            });
+        });
+    }
+
+    async setMany(entries) {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.set(entries, () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                    return;
+                }
+                resolve();
             });
         });
     }

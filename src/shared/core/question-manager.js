@@ -2,7 +2,11 @@
  * Question Manager - Handles fetching and caching LeetCode problems.
  */
 
-import { LEETCODE_GRAPHQL_ENDPOINT, QUESTION_QUERY } from './constants.js';
+import {
+    LEETCODE_GRAPHQL_ENDPOINT,
+    QUESTION_QUERY,
+    SOURCE_LABELS,
+} from './constants.js';
 import logger from '../utils/logger.js';
 import { validateProblemData } from '../utils/validator.js';
 import backendClient from '../api/backend-client.js';
@@ -82,10 +86,10 @@ class QuestionManager {
      * Get a random problem from backend (preferred method).
      * Falls back to LeetCode if backend is unavailable.
      */
-    async getRandomProblem() {
+    async getRandomProblem(extensionId = null) {
         try {
             // Try to get from backend first (uses Redis cache and problem queue)
-            const problem = await backendClient.getRandomProblem();
+            const problem = await backendClient.getRandomProblem(extensionId);
 
             logger.info('Random problem fetched from backend', {
                 slug: problem.slug,
@@ -119,12 +123,18 @@ class QuestionManager {
 
             // Convert to backend format
             return {
-                id: problem.questionId,
+                source: 'leetcode',
+                source_label: SOURCE_LABELS.leetcode,
+                challenge_id: problem.questionId,
                 title: problem.title,
                 slug: problem.titleSlug,
+                url: `https://leetcode.com/problems/${problem.titleSlug}/description/`,
                 content: problem.content,
                 difficulty: problem.difficulty,
-                exampleTestcases: problem.exampleTestcases || '',
+                topic_tags: (problem.topicTags || []).map((tag) => tag.name),
+                selection_mode: 'fully_relaxed',
+                supports_verification: true,
+                example_testcases: problem.exampleTestcases || '',
             };
         }
     }

@@ -8,8 +8,16 @@ class StorageInterface {
         throw new Error('get() must be implemented');
     }
 
+    async getMany(keys) {
+        throw new Error('getMany() must be implemented');
+    }
+
     async set(key, value) {
         throw new Error('set() must be implemented');
+    }
+
+    async setMany(entries) {
+        throw new Error('setMany() must be implemented');
     }
 
     async remove(key) {

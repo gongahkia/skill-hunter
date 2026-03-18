@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorso Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="compact">
+    <main class="shell">
+        <section class="hero">
+            <div class="brand">
+                <img src="../assets/duck.png" alt="Dorso duck">
+                <div>
+                    <p class="brand-kicker">Hostile Middleware</p>
+                    <h1 class="brand-title">Dorso</h1>
+                    <p class="brand-copy">The chatbot tollbooth that assumes your next prompt can wait until your frontal lobe clocks in.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="messagePanel"></div>
+
+        <section class="panel" id="statusPanel"></section>
+        <section class="panel" id="challengePanel"></section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Preferences</h2>
+                    <p>Bias the challenge pool without turning Dorso into a vending machine.</p>
+                </div>
+            </div>
+            <form id="preferencesForm" class="form-grid"></form>
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Linked Handles</h2>
+                    <p>Optional identity links for verified external sources.</p>
+                </div>
+            </div>
+            <form id="identitiesForm" class="form-grid"></form>
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Recent Activity</h2>
+                    <p>Your latest attempts and chatbot relapses.</p>
+                </div>
+            </div>
+            <div class="panel-grid">
+                <div id="attemptsPanel" class="list"></div>
+                <div id="accessPanel" class="list"></div>
+            </div>
+        </section>
+    </main>
+    <script type="module" src="./popup.js"></script>
+</body>
+</html>
+

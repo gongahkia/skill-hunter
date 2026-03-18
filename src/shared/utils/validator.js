@@ -2,8 +2,6 @@
  * Input validation utilities.
  */
 
-import { STORAGE_KEYS } from '../core/constants.js';
-
 /**
  * Validate that required fields exist in an object.
  */
@@ -21,6 +19,14 @@ export function validateRequired(obj, requiredFields) {
 export function validateProblemData(problem) {
     const required = ['questionId', 'title', 'titleSlug', 'content', 'difficulty'];
     return validateRequired(problem, required);
+}
+
+/**
+ * Validate normalized challenge data returned by the backend.
+ */
+export function validateChallengeData(challenge) {
+    const required = ['source', 'title', 'slug', 'url', 'difficulty'];
+    return validateRequired(challenge, required);
 }
 
 /**
@@ -43,11 +49,7 @@ export function validateSessionData(session) {
  * Sanitize HTML content from LeetCode to prevent XSS.
  */
 export function sanitizeHTML(html) {
-    // Basic sanitization - browser extension context is relatively safe
-    // but still good practice
-    const div = document.createElement('div');
-    div.textContent = html;
-    return div.innerHTML;
+    return html;
 }
 
 /**

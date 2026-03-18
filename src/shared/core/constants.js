@@ -23,6 +23,7 @@ export const CHATBOT_MAP = {
 
 // Session duration (15 minutes in milliseconds)
 export const SESSION_DURATION_MS = 15 * 60 * 1000;
+export const SESSION_DURATION_MINUTES = 15;
 
 // LeetCode API configuration
 export const LEETCODE_GRAPHQL_ENDPOINT = 'https://leetcode.com/graphql';
@@ -35,6 +36,10 @@ query questionData($titleSlug: String!) {
     content
     difficulty
     exampleTestcases
+    topicTags {
+      name
+      slug
+    }
   }
 }
 `;
@@ -42,23 +47,48 @@ query questionData($titleSlug: String!) {
 // Backend API configuration
 export const BACKEND_API_URL = 'http://localhost:8000/api/v1';
 
+export const VERIFIED_SOURCES = ['leetcode', 'codeforces'];
+export const PRACTICE_SOURCES = ['codewars', 'exercism'];
+
+export const SOURCE_LABELS = {
+    leetcode: 'LeetCode',
+    codeforces: 'Codeforces',
+    codewars: 'Codewars',
+    exercism: 'Exercism',
+};
+
 // Storage keys
 export const STORAGE_KEYS = {
+    SESSION_EXPIRES_AT: 'sessionExpiresAt',
     LAST_SOLVED_TIME: 'lastSolvedTime',
-    ORIGINAL_URL: 'originalUrl',
+    PENDING_REDIRECT_URL: 'pendingRedirectUrl',
+    PENDING_TAB_ID: 'pendingTabId',
+    CURRENT_CHALLENGE: 'currentChallenge',
+    CHALLENGE_STARTED_AT: 'challengeStartedAt',
+    CHALLENGE_SOURCE: 'challengeSource',
     LAST_SUBMITTED_SOLUTION: 'lastSubmittedSolution',
     LAST_QUESTION_SLUG: 'lastQuestionSlug',
     EXTENSION_ID: 'extensionId',
     USER_STATS: 'userStats',
+    USER_PREFERENCES: 'userPreferences',
+    USER_IDENTITIES: 'userIdentities',
+    PRACTICE_DECK: 'practiceDeck',
+    LAST_ACCESS_URL: 'lastAccessUrl',
+    LAST_ACCESS_LOGGED_AT: 'lastAccessLoggedAt',
+    UI_MESSAGE: 'uiMessage',
 };
 
 // Message actions
 export const MESSAGE_ACTIONS = {
-    GET_RANDOM_QUESTION: 'getRandomQuestion',
-    OPEN_LEETCODE_QUESTION: 'openLeetCodeQuestion',
-    REDIRECT_TO_ORIGINAL: 'redirectToOriginal',
-    UPDATE_POPUP: 'updatePopup',
+    REQUEST_STATE: 'requestState',
+    REFRESH_STATE: 'refreshState',
+    START_CHALLENGE: 'startChallenge',
+    OPEN_CURRENT_CHALLENGE: 'openCurrentChallenge',
+    RESTORE_PENDING_TAB: 'restorePendingTab',
+    SAVE_PREFERENCES: 'savePreferences',
+    SAVE_IDENTITIES: 'saveIdentities',
+    VERIFY_CODEFORCES: 'verifyCodeforces',
+    LOG_CHATBOT_ACCESS: 'logChatbotAccess',
     SUBMISSION_RESULT: 'submissionResult',
-    SUBMISSION_SUCCESS: 'submissionSuccess',
-    CHECK_SESSION: 'checkSession',
+    UPDATE_UI_MESSAGE: 'updateUiMessage',
 };

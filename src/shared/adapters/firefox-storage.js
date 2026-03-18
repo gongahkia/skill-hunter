@@ -19,12 +19,35 @@ class FirefoxStorageAdapter extends StorageInterface {
         }
     }
 
+    async getMany(keys) {
+        try {
+            return await browser.storage.local.get(keys);
+        } catch (error) {
+            logger.error('Firefox storage bulk get error', {
+                keys,
+                error: error.message,
+            });
+            throw error;
+        }
+    }
+
     async set(key, value) {
         try {
             await browser.storage.local.set({ [key]: value });
         } catch (error) {
             logger.error('Firefox storage set error', {
                 key,
+                error: error.message,
+            });
+            throw error;
+        }
+    }
+
+    async setMany(entries) {
+        try {
+            await browser.storage.local.set(entries);
+        } catch (error) {
+            logger.error('Firefox storage bulk set error', {
                 error: error.message,
             });
             throw error;

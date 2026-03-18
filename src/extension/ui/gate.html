@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorso Gate</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div class="brand">
+                <img src="../assets/duck.png" alt="Dorso duck">
+                <div>
+                    <p class="brand-kicker">Access Denied</p>
+                    <h1 class="brand-title">Prompting Privileges Suspended</h1>
+                    <p class="brand-copy">Dorso intercepted your AI tab. Solve the assigned problem and the tab goes back. Fail to do that and the machine stays condescending.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="gateMessage"></div>
+
+        <section class="panel-grid two-up">
+            <article class="panel" id="gateStatusPanel"></article>
+            <article class="panel" id="gateControlPanel"></article>
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Assigned Challenge</h2>
+                    <p id="challengeMeta"></p>
+                </div>
+            </div>
+            <div id="challengeTags" class="chip-row"></div>
+            <div id="challengeBody" class="challenge-body"></div>
+        </section>
+    </main>
+    <script type="module" src="./gate.js"></script>
+</body>
+</html>
+

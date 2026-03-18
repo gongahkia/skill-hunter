@@ -62,8 +62,9 @@ class BackendClient {
     /**
      * Get random LeetCode problem.
      */
-    async getRandomProblem() {
-        return this._fetch('/problems/random/', {
+    async getRandomProblem(extensionId) {
+        const query = extensionId ? `?extension_id=${encodeURIComponent(extensionId)}` : '';
+        return this._fetch(`/problems/random/${query}`, {
             method: 'GET',
         });
     }
@@ -95,7 +96,7 @@ class BackendClient {
         return this._fetch('/users/log-access/', {
             method: 'POST',
             body: JSON.stringify({
-                user: extensionId,
+                extension_id: extensionId,
                 chatbot_url: chatbotUrl,
                 chatbot_name: chatbotName,
                 problem_solved_for_access: problemAttemptId,
@@ -109,6 +110,38 @@ class BackendClient {
     async getUserStats(extensionId) {
         return this._fetch(`/users/${extensionId}/stats/`, {
             method: 'GET',
+        });
+    }
+
+    /**
+     * Get and update saved user preferences.
+     */
+    async getPreferences(extensionId) {
+        return this._fetch(`/users/${extensionId}/preferences/`, {
+            method: 'GET',
+        });
+    }
+
+    async updatePreferences(extensionId, data) {
+        return this._fetch(`/users/${extensionId}/preferences/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    }
+
+    /**
+     * Get and update linked external identities.
+     */
+    async getIdentities(extensionId) {
+        return this._fetch(`/users/${extensionId}/identities/`, {
+            method: 'GET',
+        });
+    }
+
+    async updateIdentities(extensionId, data) {
+        return this._fetch(`/users/${extensionId}/identities/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
         });
     }
 }

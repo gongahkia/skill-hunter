@@ -26,15 +26,14 @@ class SessionManager {
     async hasActiveSession(extensionId) {
         try {
             // First check local storage for quick response
-            const lastSolvedTime = await this.storage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
+            const sessionExpiresAt = await this.storage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
 
-            if (lastSolvedTime) {
-                const timeSinceLastSolve = Date.now() - lastSolvedTime;
-                const isActiveLocally = timeSinceLastSolve < this.sessionDuration;
+            if (sessionExpiresAt) {
+                const isActiveLocally = Date.now() < sessionExpiresAt;
 
                 if (isActiveLocally) {
                     logger.debug('Active session found locally', {
-                        lastSolved: new Date(lastSolvedTime).toISOString(),
+                        expiresAt: new Date(sessionExpiresAt).toISOString(),
                     });
                     return true;
                 }
@@ -45,13 +44,15 @@ class SessionManager {
                 const sessionData = await backendClient.checkSession(extensionId);
 
                 if (sessionData.has_active_session) {
+                    const expiresAt = new Date(sessionData.session_expires).getTime();
+
                     logger.info('Active session confirmed by backend', {
                         extensionId,
                         expires: sessionData.session_expires,
                     });
 
                     // Sync local storage with backend
-                    await this.storage.set(STORAGE_KEYS.LAST_SOLVED_TIME, Date.now());
+                    await this.storage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, expiresAt);
                     return true;
                 }
             }
@@ -64,10 +65,9 @@ class SessionManager {
             });
 
             // Fallback to local storage only
-            const lastSolvedTime = await this.storage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
-            if (lastSolvedTime) {
-                const timeSinceLastSolve = Date.now() - lastSolvedTime;
-                return timeSinceLastSolve < this.sessionDuration;
+            const sessionExpiresAt = await this.storage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
+            if (sessionExpiresAt) {
+                return Date.now() < sessionExpiresAt;
             }
 
             return false;
@@ -78,16 +78,13 @@ class SessionManager {
      * Get time remaining in current session (in milliseconds).
      */
     async getTimeRemaining() {
-        const lastSolvedTime = await this.storage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
+        const sessionExpiresAt = await this.storage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
 
-        if (!lastSolvedTime) {
+        if (!sessionExpiresAt) {
             return 0;
         }
 
-        const timeSinceLastSolve = Date.now() - lastSolvedTime;
-        const remaining = this.sessionDuration - timeSinceLastSolve;
-
-        return Math.max(0, remaining);
+        return Math.max(0, sessionExpiresAt - Date.now());
     }
 
     /**
@@ -95,25 +92,35 @@ class SessionManager {
      */
     async startSession(extensionId, problemData) {
         const now = Date.now();
+        let sessionExpiresAt = now + this.sessionDuration;
 
         // Store locally
         await this.storage.set(STORAGE_KEYS.LAST_SOLVED_TIME, now);
+        await this.storage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, sessionExpiresAt);
 
         logger.info('Session started', {
             extensionId,
             problemSlug: problemData.slug,
-            expiresAt: new Date(now + this.sessionDuration).toISOString(),
+            expiresAt: new Date(sessionExpiresAt).toISOString(),
         });
 
         // Sync with backend
         try {
-            await backendClient.submitSolution({
+            const response = await backendClient.submitSolution({
                 extension_id: extensionId,
                 problem_slug: problemData.slug,
                 problem_title: problemData.title,
                 difficulty: problemData.difficulty,
+                source: problemData.source || 'leetcode',
+                challenge_id: problemData.challenge_id || '',
+                topic_tags: problemData.topic_tags || [],
                 time_taken_seconds: problemData.timeTaken || null,
             });
+
+            if (response.session_expires) {
+                sessionExpiresAt = new Date(response.session_expires).getTime();
+                await this.storage.set(STORAGE_KEYS.SESSION_EXPIRES_AT, sessionExpiresAt);
+            }
 
             logger.info('Session synced with backend', { extensionId });
 
@@ -131,6 +138,7 @@ class SessionManager {
      */
     async endSession() {
         await this.storage.remove(STORAGE_KEYS.LAST_SOLVED_TIME);
+        await this.storage.remove(STORAGE_KEYS.SESSION_EXPIRES_AT);
         logger.info('Session ended');
     }
 
@@ -139,8 +147,9 @@ class SessionManager {
      */
     async getSessionInfo() {
         const lastSolvedTime = await this.storage.get(STORAGE_KEYS.LAST_SOLVED_TIME);
+        const sessionExpiresAt = await this.storage.get(STORAGE_KEYS.SESSION_EXPIRES_AT);
 
-        if (!lastSolvedTime) {
+        if (!lastSolvedTime || !sessionExpiresAt) {
             return {
                 isActive: false,
                 timeRemaining: 0,
@@ -154,7 +163,7 @@ class SessionManager {
             isActive,
             lastSolvedTime: new Date(lastSolvedTime).toISOString(),
             timeRemaining,
-            expiresAt: new Date(lastSolvedTime + this.sessionDuration).toISOString(),
+            expiresAt: new Date(sessionExpiresAt).toISOString(),
         };
     }
 }
