@@ -1,4 +1,5 @@
-[![](https://img.shields.io/badge/rakuzaichi_1.0.0-passing-green)](https://github.com/gongahkia/rakuzaichi/releases/tag/1.0.0) 
+[![](https://img.shields.io/badge/rakuzaichi_1.0.0-passing-light_green)](https://github.com/gongahkia/rakuzaichi/releases/tag/1.0.0) 
+[![](https://img.shields.io/badge/rakuzaichi_2.0.0-passing-green)](https://github.com/gongahkia/rakuzaichi/releases/tag/2.0.0) 
 
 # `Rakuzaichi`
 
@@ -30,26 +31,13 @@ Unfortunately, current chatbots only support exporting chat history as `.pdf`, `
 
 See the supported chatbots [here](#chatbot-coverage).
 
+## Screenshot
+
+![](./asset/reference/5.png)
+
 ## Architecture
 
 ![](./asset/reference/architecture.png)
-
-## Screenshots
-
-### Browser Extension
-
-<img src="./asset/reference/1.png" width="49%">
-
-### Exporting a chat
-
-<img src="./asset/reference/3.png" width="100%">
-
-<br>
-
-<div style="display: flex; justify-content: space-between;">
-  <img src="./asset/reference/2.png" width="49%">
-  <img src="./asset/reference/4.png" width="49%">
-</div>
 
 ## Usage
 
