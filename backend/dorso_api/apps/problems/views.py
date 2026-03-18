@@ -9,8 +9,17 @@ from rest_framework.views import APIView
 from prometheus_client import Counter
 import structlog
 
-from .services import LeetCodeService, ProblemQueueService
-from .serializers import ProblemSubmissionSerializer, ProblemAttemptSerializer
+from .services import (
+    LeetCodeService,
+    ProblemQueueService,
+    ChallengeSelectionService,
+    CodeforcesService,
+)
+from .serializers import (
+    ProblemSubmissionSerializer,
+    ProblemAttemptSerializer,
+    CodeforcesVerificationSerializer,
+)
 from dorso_api.apps.tracking.models import ExtensionUser
 
 logger = structlog.get_logger(__name__)
@@ -39,24 +48,14 @@ class RandomProblemView(APIView):
     """
 
     def get(self, request):
-        service = LeetCodeService()
+        service = ChallengeSelectionService()
         extension_id = request.query_params.get('extension_id')
         user = None
 
         if extension_id:
             user = ExtensionUser.objects.filter(extension_id=extension_id).first()
 
-        if user:
-            recent_slugs = list(
-                user.attempts.values_list('problem_slug', flat=True)[:20]
-            )
-            problem = service.get_filtered_problem(
-                difficulty_filters=user.preferred_difficulties,
-                topic_filters=user.preferred_topics,
-                excluded_slugs=recent_slugs,
-            )
-        else:
-            problem = service.get_filtered_problem()
+        problem = service.get_random_problem(user=user)
 
         if problem:
             problems_fetched.inc()
@@ -142,6 +141,35 @@ class LogAttemptView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyCodeforcesView(APIView):
+    """
+    Verify that the linked Codeforces handle solved the assigned problem.
+    POST /api/v1/problems/verify-codeforces/
+    """
+
+    def post(self, request):
+        serializer = CodeforcesVerificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = ExtensionUser.objects.get(
+            extension_id=serializer.validated_data['extension_id']
+        )
+        service = CodeforcesService()
+        verified = service.verify_submission(
+            handle=user.codeforces_handle,
+            challenge_id=serializer.validated_data['challenge_id'],
+            assigned_at_seconds=serializer.validated_data.get('assigned_at'),
+        )
+
+        return Response({
+            'verified': verified,
+            'handle': user.codeforces_handle,
+            'challenge_id': serializer.validated_data['challenge_id'],
+            'message': 'Accepted submission found.' if verified else 'No accepted submission matched the assigned challenge yet.',
+        })
 
 
 @api_view(['GET'])

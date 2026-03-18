@@ -121,3 +121,25 @@ class ProblemAttemptSerializer(serializers.Serializer):
         )
 
         return attempt
+
+
+class CodeforcesVerificationSerializer(serializers.Serializer):
+    """Serializer for verifying a Codeforces solve."""
+
+    extension_id = serializers.CharField(max_length=255)
+    challenge_id = serializers.CharField(max_length=255)
+    assigned_at = serializers.IntegerField(required=False, min_value=0)
+
+    def validate_extension_id(self, value):
+        try:
+            user = ExtensionUser.objects.get(extension_id=value)
+        except ExtensionUser.DoesNotExist as exc:
+            raise serializers.ValidationError(
+                "Extension user not found. Please register first."
+            ) from exc
+
+        if not user.codeforces_handle:
+            raise serializers.ValidationError(
+                "A Codeforces handle must be linked before verification can run."
+            )
+        return value

@@ -172,6 +172,42 @@ async function grantAccess(source, message) {
     };
 }
 
+async function verifyCodeforcesChallenge() {
+    const extensionId = await ensureExtensionIdentity();
+    const stored = await getStoredState();
+    const currentChallenge = stored[STORAGE_KEYS.CURRENT_CHALLENGE];
+
+    if (!currentChallenge || currentChallenge.source !== 'codeforces') {
+        return {
+            success: false,
+            error: 'No Codeforces challenge is waiting for verification.',
+        };
+    }
+
+    const assignedAt = stored[STORAGE_KEYS.CHALLENGE_STARTED_AT]
+        ? Math.floor(stored[STORAGE_KEYS.CHALLENGE_STARTED_AT] / 1000)
+        : undefined;
+
+    const verification = await backendClient.verifyCodeforces(
+        extensionId,
+        currentChallenge.challenge_id,
+        assignedAt,
+    );
+
+    if (!verification.verified) {
+        await storage.set(STORAGE_KEYS.UI_MESSAGE, verification.message);
+        return {
+            success: false,
+            verification,
+        };
+    }
+
+    return grantAccess(
+        'codeforces',
+        'Codeforces accepted. Dorso has no further excuse to keep the tab blocked.',
+    );
+}
+
 async function getDashboardState() {
     const extensionId = await ensureExtensionIdentity();
     const hasActiveSession = await sessionManager.hasActiveSession(extensionId);
@@ -294,6 +330,8 @@ addAsyncMessageListener(async (message) => {
         await storage.set(STORAGE_KEYS.USER_IDENTITIES, identities);
         return { success: true, identities };
     }
+    case MESSAGE_ACTIONS.VERIFY_CODEFORCES:
+        return verifyCodeforcesChallenge();
     case MESSAGE_ACTIONS.SUBMISSION_RESULT:
         if (message.success && message.source === 'leetcode') {
             return grantAccess('leetcode', 'Access granted. Your AI ration has been restored for fifteen minutes.');
@@ -325,4 +363,3 @@ browserApi.runtime.onStartup?.addListener(() => {
 });
 
 bindNavigationGuard();
-

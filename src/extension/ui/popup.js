@@ -62,6 +62,7 @@ function renderStatus(state) {
 function renderChallenge(state) {
     const panel = document.getElementById('challengePanel');
     const challenge = state.currentChallenge;
+    const codeforcesReady = Boolean(state.identities?.codeforces_handle);
 
     if (!challenge) {
         panel.innerHTML = `
@@ -83,9 +84,11 @@ function renderChallenge(state) {
             </div>
         </div>
         <div class="chip-row">${renderTagList(challenge.topic_tags || [])}</div>
+        ${challenge.source === 'codeforces' && !codeforcesReady ? '<p class="small">Link a Codeforces handle below before Dorso can verify this unlock.</p>' : ''}
         <div class="button-row">
             <button class="button-primary" id="openChallengeButton" type="button">Open Challenge</button>
             <button class="button-secondary" id="refreshChallengeButton" type="button">Get Another</button>
+            ${challenge.source === 'codeforces' && codeforcesReady ? '<button class="button-secondary" id="verifyCodeforcesButton" type="button">Verify Solve</button>' : ''}
             ${state.pendingRedirectUrl ? '<button class="button-quiet" id="returnButton" type="button">Return To Blocked Tab</button>' : ''}
         </div>
     `;
@@ -94,6 +97,19 @@ function renderChallenge(state) {
         await sendRuntimeMessage({ action: MESSAGE_ACTIONS.OPEN_CURRENT_CHALLENGE });
     });
     document.getElementById('refreshChallengeButton').addEventListener('click', () => startChallenge(true));
+
+    if (challenge.source === 'codeforces' && codeforcesReady) {
+        document.getElementById('verifyCodeforcesButton').addEventListener('click', async () => {
+            const result = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.VERIFY_CODEFORCES });
+            setMessage(
+                result.success
+                    ? 'Codeforces verification passed. The blocked tab should be live again.'
+                    : (result.verification?.message || result.error || 'Verification failed.'),
+                Boolean(result.success),
+            );
+            await loadState();
+        });
+    }
 
     if (state.pendingRedirectUrl) {
         document.getElementById('returnButton').addEventListener('click', async () => {

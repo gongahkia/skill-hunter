@@ -35,13 +35,16 @@ function renderGateStatus(state) {
 function renderGateControls(state) {
     const panel = document.getElementById('gateControlPanel');
     const challenge = state.currentChallenge;
+    const codeforcesReady = Boolean(state.identities?.codeforces_handle);
 
     panel.innerHTML = `
         <h2>Control Panel</h2>
         <p>${challenge ? `Current source: ${escapeHtml(SOURCE_LABELS[challenge.source] || challenge.source)}.` : 'No challenge is loaded yet.'}</p>
+        ${challenge?.source === 'codeforces' && !codeforcesReady ? '<p class="small">A linked Codeforces handle is required before Dorso can verify this one.</p>' : ''}
         <div class="button-row">
             <button class="button-primary" id="openChallengeButton" type="button">${challenge ? 'Open Challenge' : 'Fetch Challenge'}</button>
             <button class="button-secondary" id="refreshChallengeButton" type="button">Swap Challenge</button>
+            ${challenge?.source === 'codeforces' && codeforcesReady ? '<button class="button-secondary" id="verifyCodeforcesButton" type="button">Verify Solve</button>' : ''}
             ${state.pendingRedirectUrl ? '<button class="button-quiet" id="restoreTabButton" type="button">Restore AI Tab</button>' : ''}
         </div>
     `;
@@ -57,6 +60,19 @@ function renderGateControls(state) {
         await sendRuntimeMessage({ action: MESSAGE_ACTIONS.START_CHALLENGE, force: true });
         await loadState();
     });
+
+    if (challenge?.source === 'codeforces' && codeforcesReady) {
+        document.getElementById('verifyCodeforcesButton').addEventListener('click', async () => {
+            const result = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.VERIFY_CODEFORCES });
+            setGateMessage(
+                result.success
+                    ? 'Codeforces verification passed. Dorso is restoring the blocked tab.'
+                    : (result.verification?.message || result.error || 'Verification failed.'),
+                Boolean(result.success),
+            );
+            await loadState();
+        });
+    }
 
     if (state.pendingRedirectUrl) {
         document.getElementById('restoreTabButton').addEventListener('click', async () => {

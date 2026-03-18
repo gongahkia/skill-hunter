@@ -144,6 +144,20 @@ class BackendClient {
             body: JSON.stringify(data),
         });
     }
+
+    /**
+     * Verify that a linked Codeforces account solved the assigned problem.
+     */
+    async verifyCodeforces(extensionId, challengeId, assignedAt) {
+        return this._fetch('/problems/verify-codeforces/', {
+            method: 'POST',
+            body: JSON.stringify({
+                extension_id: extensionId,
+                challenge_id: challengeId,
+                assigned_at: assignedAt,
+            }),
+        });
+    }
 }
 
 export default new BackendClient();

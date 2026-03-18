@@ -165,7 +165,7 @@ class TestRandomProblemAPI:
         }
 
         mocker.patch(
-            'dorso_api.apps.problems.views.LeetCodeService.get_filtered_problem',
+            'dorso_api.apps.problems.views.ChallengeSelectionService.get_random_problem',
             return_value=mock_problem
         )
 
@@ -234,3 +234,29 @@ class TestPreferencesAndIdentitiesAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['codeforces_handle'] == 'tourist'
         assert response.data['codewars_username'] == 'kata-grinder'
+
+
+@pytest.mark.django_db
+class TestCodeforcesVerificationAPI:
+    """Test Codeforces verification endpoint."""
+
+    def test_verify_codeforces_solution(self, api_client, extension_user, mocker):
+        """Test verifying an accepted Codeforces submission."""
+        extension_user.codeforces_handle = 'tourist'
+        extension_user.save(update_fields=['codeforces_handle'])
+
+        mocker.patch(
+            'dorso_api.apps.problems.views.CodeforcesService.verify_submission',
+            return_value=True,
+        )
+
+        url = reverse('verify-codeforces')
+        response = api_client.post(url, {
+            'extension_id': extension_user.extension_id,
+            'challenge_id': '1-A',
+            'assigned_at': 1710000000,
+        }, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['verified'] is True
+        assert response.data['challenge_id'] == '1-A'
