@@ -14,6 +14,7 @@ from .services import (
     ProblemQueueService,
     ChallengeSelectionService,
     CodeforcesService,
+    PracticeCatalogService,
 )
 from .serializers import (
     ProblemSubmissionSerializer,
@@ -169,6 +170,19 @@ class VerifyCodeforcesView(APIView):
             'handle': user.codeforces_handle,
             'challenge_id': serializer.validated_data['challenge_id'],
             'message': 'Accepted submission found.' if verified else 'No accepted submission matched the assigned challenge yet.',
+        })
+
+
+class PracticeDeckView(APIView):
+    """
+    Return a curated practice deck from catalog-only sources.
+    GET /api/v1/problems/practice-deck/
+    """
+
+    def get(self, request):
+        service = PracticeCatalogService()
+        return Response({
+            'items': service.get_practice_deck(),
         })
 
 

@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
                 ('total_solves', models.IntegerField(default=0, validators=[django.core.validators.MinValueValidator(0)])),
                 ('current_streak', models.IntegerField(default=0, validators=[django.core.validators.MinValueValidator(0)])),
                 ('longest_streak', models.IntegerField(default=0, validators=[django.core.validators.MinValueValidator(0)])),
+                ('last_solved_at', models.DateTimeField(blank=True, null=True)),
                 ('total_attempts', models.IntegerField(default=0, validators=[django.core.validators.MinValueValidator(0)])),
                 ('is_active', models.BooleanField(default=True)),
                 ('preferred_difficulties', models.JSONField(blank=True, default=list)),

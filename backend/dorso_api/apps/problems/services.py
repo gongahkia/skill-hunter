@@ -3,6 +3,7 @@ Service layer for fetching and caching challenge sources.
 """
 
 import random
+import json
 import requests
 from typing import Dict, List, Optional
 from django.core.cache import cache
@@ -542,3 +543,30 @@ class ProblemQueueService:
         # Queue was empty, fetch directly
         logger.warning("problem_queue_empty_fetching_directly")
         return self.leetcode_service.get_random_problem()
+
+
+class PracticeCatalogService:
+    """
+    Load curated catalog-only challenges from static sources.
+    """
+
+    def __init__(self):
+        self.cache_key = 'practice_catalog'
+        self.catalog_ttl = 86400
+
+    def get_catalog(self) -> List[Dict]:
+        cached_catalog = cache.get(self.cache_key)
+        if cached_catalog:
+            return cached_catalog
+
+        catalog_path = settings.BASE_DIR.parent / 'data' / 'practice_sources.json'
+        with open(catalog_path, 'r', encoding='utf-8') as practice_file:
+            catalog = json.load(practice_file)
+
+        cache.set(self.cache_key, catalog, timeout=self.catalog_ttl)
+        return catalog
+
+    def get_practice_deck(self, limit: int = 6) -> List[Dict]:
+        catalog = list(self.get_catalog())
+        random.shuffle(catalog)
+        return catalog[:limit]

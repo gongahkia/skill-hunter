@@ -150,11 +150,15 @@ a {
 button,
 .button-link {
     appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 0;
     border-radius: 999px;
     padding: 12px 18px;
     font: inherit;
     cursor: pointer;
+    text-decoration: none;
     transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
 }
 
@@ -332,4 +336,3 @@ input[type="text"] {
         flex-direction: column;
     }
 }
-

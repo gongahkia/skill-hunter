@@ -12,6 +12,8 @@ load_dotenv()
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv(
@@ -89,24 +91,34 @@ DATABASES = {
 
 # Cache configuration (Redis)
 REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PARSER_CLASS': 'redis.connection.HiredisParser',
-            'CONNECTION_POOL_CLASS_KWARGS': {
-                'max_connections': 50,
-                'retry_on_timeout': True,
-            },
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT': 5,
-        },
-        'KEY_PREFIX': 'dorso',
-        'TIMEOUT': 900,  # 15 minutes default
+CACHES = (
+    {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'dorso-local-cache',
+            'TIMEOUT': 900,
+        }
     }
-}
+    if REDIS_URL.startswith('locmem://')
+    else {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'PARSER_CLASS': 'redis.connection.HiredisParser',
+                'CONNECTION_POOL_CLASS_KWARGS': {
+                    'max_connections': 50,
+                    'retry_on_timeout': True,
+                },
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+            },
+            'KEY_PREFIX': 'dorso',
+            'TIMEOUT': 900,  # 15 minutes default
+        }
+    }
+)
 
 # Session configuration
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
@@ -204,7 +216,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'dorso.log',
+            'filename': LOG_DIR / 'dorso.log',
             'formatter': 'json',
         },
     },

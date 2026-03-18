@@ -51,6 +51,7 @@ class ExtensionUser(models.Model):
         default=0,
         validators=[MinValueValidator(0)]
     )
+    last_solved_at = models.DateTimeField(null=True, blank=True)
     total_attempts = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)]
@@ -93,16 +94,9 @@ class ExtensionUser(models.Model):
 
         self.total_solves += 1
 
-        # Update streak logic
-        last_solve = ProblemAttempt.objects.filter(
-            user=self,
-            solved=True
-        ).exclude(
-            attempted_at=solved_at
-        ).order_by('-attempted_at').first()
-
-        if last_solve:
-            time_diff = solved_at - last_solve.attempted_at
+        # Update streak logic using the most recent recorded solve timestamp.
+        if self.last_solved_at:
+            time_diff = solved_at - self.last_solved_at
             # If last solve was within 24 hours, increment streak
             if time_diff <= timedelta(hours=24):
                 self.current_streak += 1
@@ -115,6 +109,7 @@ class ExtensionUser(models.Model):
         if self.current_streak > self.longest_streak:
             self.longest_streak = self.current_streak
 
+        self.last_solved_at = solved_at
         self.save()
 
     def get_active_session(self):

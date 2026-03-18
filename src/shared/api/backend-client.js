@@ -158,6 +158,15 @@ class BackendClient {
             }),
         });
     }
+
+    /**
+     * Fetch curated practice-only problems from catalog sources.
+     */
+    async getPracticeDeck() {
+        return this._fetch('/problems/practice-deck/', {
+            method: 'GET',
+        });
+    }
 }
 
 export default new BackendClient();

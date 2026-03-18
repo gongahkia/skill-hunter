@@ -1,0 +1,80 @@
+[
+  {
+    "source": "codewars",
+    "source_label": "Codewars",
+    "challenge_id": "54ba84be607a92aa900000f1",
+    "title": "Isograms",
+    "slug": "isograms",
+    "url": "https://www.codewars.com/kata/54ba84be607a92aa900000f1",
+    "difficulty": "Easy",
+    "topic_tags": ["String", "Hash Table"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Codewars. Determine whether a string is an isogram.</p>"
+  },
+  {
+    "source": "codewars",
+    "source_label": "Codewars",
+    "challenge_id": "514b92a657cdc65150000006",
+    "title": "Multiples of 3 or 5",
+    "slug": "multiples-of-3-or-5",
+    "url": "https://www.codewars.com/kata/514b92a657cdc65150000006",
+    "difficulty": "Easy",
+    "topic_tags": ["Math", "Loop"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Codewars. Sum the natural numbers below a limit that are divisible by 3 or 5.</p>"
+  },
+  {
+    "source": "codewars",
+    "source_label": "Codewars",
+    "challenge_id": "52597aa56021e91c93000cb0",
+    "title": "Moving Zeros To The End",
+    "slug": "moving-zeros-to-the-end",
+    "url": "https://www.codewars.com/kata/52597aa56021e91c93000cb0",
+    "difficulty": "Medium",
+    "topic_tags": ["Array", "Two Pointers"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Codewars. Rearrange an array so that all zeros move to the end while preserving order.</p>"
+  },
+  {
+    "source": "exercism",
+    "source_label": "Exercism",
+    "challenge_id": "javascript-two-fer",
+    "title": "Two Fer",
+    "slug": "two-fer",
+    "url": "https://exercism.org/tracks/javascript/exercises/two-fer",
+    "difficulty": "Easy",
+    "topic_tags": ["String"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Exercism. Return the classic ‘One for X, one for me’ phrase with a sensible default.</p>"
+  },
+  {
+    "source": "exercism",
+    "source_label": "Exercism",
+    "challenge_id": "javascript-robot-name",
+    "title": "Robot Name",
+    "slug": "robot-name",
+    "url": "https://exercism.org/tracks/javascript/exercises/robot-name",
+    "difficulty": "Medium",
+    "topic_tags": ["Class Design", "Hash Table"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Exercism. Generate unique robot names and reset them without collisions.</p>"
+  },
+  {
+    "source": "exercism",
+    "source_label": "Exercism",
+    "challenge_id": "javascript-dnd-character",
+    "title": "D&D Character",
+    "slug": "dnd-character",
+    "url": "https://exercism.org/tracks/javascript/exercises/dnd-character",
+    "difficulty": "Medium",
+    "topic_tags": ["Math", "Object Modeling"],
+    "selection_mode": "catalog",
+    "supports_verification": false,
+    "content": "<p>Practice-only prompt from Exercism. Roll ability scores, derive modifiers, and model a tabletop character.</p>"
+  }
+]

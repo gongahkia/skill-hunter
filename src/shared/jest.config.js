@@ -1,5 +1,5 @@
 export default {
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   moduleFileExtensions: ['js'],
   testMatch: ['**/__tests__/**/*.test.js'],
   collectCoverageFrom: [

@@ -2,6 +2,7 @@
  * Tests for logger utility.
  */
 
+import { jest } from '@jest/globals';
 import { Logger } from '../utils/logger.js';
 
 describe('Logger', () => {

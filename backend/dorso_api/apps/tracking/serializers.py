@@ -167,6 +167,10 @@ class ProblemAttemptSerializer(serializers.ModelSerializer):
 class AccessLogSerializer(serializers.ModelSerializer):
     """Serializer for AccessLog model."""
 
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=ExtensionUser.objects.all(),
+        required=False,
+    )
     extension_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:

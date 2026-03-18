@@ -217,16 +217,19 @@ async function getDashboardState() {
     let stats = stored[STORAGE_KEYS.USER_STATS] || null;
     let preferences = stored[STORAGE_KEYS.USER_PREFERENCES] || null;
     let identities = stored[STORAGE_KEYS.USER_IDENTITIES] || null;
+    let practiceDeck = stored[STORAGE_KEYS.PRACTICE_DECK] || [];
 
     try {
         stats = await backendClient.getUserStats(extensionId);
         preferences = stats.preferences || await backendClient.getPreferences(extensionId);
         identities = stats.identities || await backendClient.getIdentities(extensionId);
+        practiceDeck = (await backendClient.getPracticeDeck()).items || [];
 
         await storage.setMany({
             [STORAGE_KEYS.USER_STATS]: stats,
             [STORAGE_KEYS.USER_PREFERENCES]: preferences,
             [STORAGE_KEYS.USER_IDENTITIES]: identities,
+            [STORAGE_KEYS.PRACTICE_DECK]: practiceDeck,
         });
     } catch (error) {
         logger.warn('Unable to fetch backend dashboard state', {
@@ -245,7 +248,7 @@ async function getDashboardState() {
         stats,
         preferences,
         identities,
-        practiceDeck: stored[STORAGE_KEYS.PRACTICE_DECK] || [],
+        practiceDeck,
         uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
     };
 }

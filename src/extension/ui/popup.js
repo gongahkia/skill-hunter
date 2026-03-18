@@ -244,6 +244,22 @@ function renderHistory(state) {
         : '<div class="list-item"><strong>No chatbot access logged yet.</strong><span class="small">Dorso is either winning or nobody has started playing.</span></div>';
 }
 
+function renderPracticeDeck(state) {
+    const panel = document.getElementById('practicePanel');
+    const practiceDeck = state.practiceDeck || [];
+
+    panel.innerHTML = practiceDeck.length
+        ? practiceDeck.map((entry) => `
+            <div class="list-item">
+                <strong>${escapeHtml(entry.title)}</strong>
+                <span class="small">${escapeHtml(entry.source_label)} • ${escapeHtml(entry.difficulty)}</span>
+                <div class="chip-row" style="margin: 10px 0;">${renderTagList(entry.topic_tags || [])}</div>
+                <a class="button-link button-secondary" href="${escapeHtml(entry.url)}" target="_blank" rel="noreferrer">Open Practice Prompt</a>
+            </div>
+        `).join('')
+        : '<div class="list-item"><strong>No practice deck available.</strong><span class="small">The catalog fetch did not return any entries.</span></div>';
+}
+
 function renderMetrics(state) {
     const panel = document.getElementById('statusPanel');
     const stats = state.stats;
@@ -294,6 +310,7 @@ async function loadState() {
     renderPreferences(latestState);
     renderIdentities(latestState);
     renderHistory(latestState);
+    renderPracticeDeck(latestState);
 }
 
 loadState().catch((error) => {
