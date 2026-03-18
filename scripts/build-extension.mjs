@@ -1,137 +1,63 @@
-import fs from "node:fs";
-import path from "node:path";
+import { cp, mkdir, rm, stat } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
-const SOURCE_DIR = path.join(ROOT, "judgeman_v4", "src");
-const ICONS_DIR = path.join(SOURCE_DIR, "icons");
-const DIST_DIR = path.join(ROOT, "dist");
-const CONFIG_DIR = path.join(ROOT, "judgeman_v4", "config");
-const FIREFOX_ADDON_ID =
-  process.env.JUDGEMAN_FIREFOX_ADDON_ID || "judgeman@gongahkia.github.io";
-const FIREFOX_STRICT_MIN_VERSION =
-  process.env.JUDGEMAN_FIREFOX_STRICT_MIN_VERSION || "140.0";
-const FIREFOX_ANDROID_STRICT_MIN_VERSION =
-  process.env.JUDGEMAN_FIREFOX_ANDROID_STRICT_MIN_VERSION || "142.0";
-const COPY_FILES = [
-  "browserApi.js",
-  "logger.js",
-  "citationAdapters.js",
-  "citationLinker.js",
-  "inlineCitations.js",
-  "inlineStatutes.js",
-  "fieldOverlay.js",
-  "annotations.js",
-  "caseToolkit.js",
-  "contentApp.js",
-  "contentScript.js",
-  "extractor.js",
-  "panel.css",
-  "popup.css",
-  "popup.html",
-  "popup.js"
-];
-const TARGETS = new Set(["chrome", "firefox", "safari"]);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, '..');
+const srcRoot = path.join(repoRoot, 'src');
+const distRoot = path.join(repoRoot, 'dist');
 
-function loadBaseManifest() {
-  const manifestPath = path.join(CONFIG_DIR, "manifest.base.json");
-  return JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-}
+const browserConfigs = {
+  chrome: {
+    sourceDir: path.join(srcRoot, 'chrome'),
+    outputDir: path.join(distRoot, 'chrome'),
+  },
+  firefox: {
+    sourceDir: path.join(srcRoot, 'firefox'),
+    outputDir: path.join(distRoot, 'firefox'),
+  },
+};
 
-function ensureIcons() {
-  const required = [
-    "judgeman-16.png",
-    "judgeman-32.png",
-    "judgeman-48.png",
-    "judgeman-128.png",
-    "judgeman-512.png",
-    "judgeman-1024.png"
-  ];
-
-  for (const fileName of required) {
-    const iconPath = path.join(ICONS_DIR, fileName);
-    if (!fs.existsSync(iconPath)) {
-      throw new Error(`Missing icon asset: ${iconPath}. Run "npm run icons" first.`);
-    }
+async function exists(targetPath) {
+  try {
+    await stat(targetPath);
+    return true;
+  } catch {
+    return false;
   }
 }
 
-function cleanTargetDir(targetDir) {
-  fs.rmSync(targetDir, { recursive: true, force: true });
-  fs.mkdirSync(targetDir, { recursive: true });
-}
+async function buildBrowser(browser) {
+  const config = browserConfigs[browser];
 
-function copySourceFiles(targetDir) {
-  for (const fileName of COPY_FILES) {
-    fs.copyFileSync(path.join(SOURCE_DIR, fileName), path.join(targetDir, fileName));
+  if (!config) {
+    throw new Error(`Unsupported browser target: ${browser}`);
   }
 
-  fs.cpSync(ICONS_DIR, path.join(targetDir, "icons"), { recursive: true });
-}
-
-function createChromeManifest() {
-  return loadBaseManifest();
-}
-
-function createFirefoxManifest() {
-  const manifest = loadBaseManifest();
-  manifest.browser_specific_settings = {
-    gecko: {
-      id: FIREFOX_ADDON_ID,
-      strict_min_version: FIREFOX_STRICT_MIN_VERSION,
-      data_collection_permissions: {
-        required: ["none"]
-      }
-    },
-    gecko_android: {
-      strict_min_version: FIREFOX_ANDROID_STRICT_MIN_VERSION
-    }
-  };
-  return manifest;
-}
-
-function createSafariManifest() {
-  return loadBaseManifest();
-}
-
-function writeManifest(targetDir, manifest) {
-  fs.writeFileSync(
-    path.join(targetDir, "manifest.json"),
-    `${JSON.stringify(manifest, null, 2)}\n`,
-    "utf8"
-  );
-}
-
-function buildTarget(target) {
-  const targetDir = path.join(DIST_DIR, target);
-  cleanTargetDir(targetDir);
-  copySourceFiles(targetDir);
-
-  if (target === "chrome") {
-    writeManifest(targetDir, createChromeManifest());
-  } else if (target === "firefox") {
-    writeManifest(targetDir, createFirefoxManifest());
-  } else if (target === "safari") {
-    writeManifest(targetDir, createSafariManifest());
-  } else {
-    throw new Error(`Unknown build target: ${target}`);
+  if (!(await exists(config.sourceDir))) {
+    throw new Error(`Missing source directory: ${config.sourceDir}`);
   }
 
-  return targetDir;
+  await rm(config.outputDir, { recursive: true, force: true });
+  await mkdir(config.outputDir, { recursive: true });
+  await cp(config.sourceDir, config.outputDir, { recursive: true });
+
+  console.log(`Built ${browser} extension into ${path.relative(repoRoot, config.outputDir)}`);
 }
 
-function main() {
-  ensureIcons();
+async function main() {
+  const target = process.argv[2] || 'all';
+  const browsers = target === 'all' ? Object.keys(browserConfigs) : [target];
 
-  const arg = process.argv[2] || "all";
-  const requested = arg === "all" ? [...TARGETS] : [arg];
+  await mkdir(distRoot, { recursive: true });
 
-  for (const target of requested) {
-    if (!TARGETS.has(target)) {
-      throw new Error(`Unsupported target "${target}". Expected one of: all, chrome, firefox, safari.`);
-    }
-    const targetDir = buildTarget(target);
-    console.log(`Built ${target} artifact at ${targetDir}`);
+  for (const browser of browsers) {
+    await buildBrowser(browser);
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

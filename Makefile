@@ -1,18 +1,13 @@
-.PHONY: chrome firefox clean
+.PHONY: build chrome firefox clean
+
+build:
+	@node scripts/build-extension.mjs all
 
 chrome:
-	@echo "Preparing Chrome extension..."
-	@rm -rf .git .gitignore README.md asset src/firefox
-	@mv src/chrome/* .
-	@rm -rf src
+	@node scripts/build-extension.mjs chrome
 
 firefox:
-	@echo "Preparing Firefox extension..."
-	@rm -rf .git .gitignore README.md asset src/chrome
-	@mv src/firefox/* .
-	@rm -rf src
+	@node scripts/build-extension.mjs firefox
 
 clean:
-	@echo "Cleaning up..."
-	@git reset --hard HEAD
-	@git clean -fd
+	@rm -rf dist
