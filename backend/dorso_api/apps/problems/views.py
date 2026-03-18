@@ -11,6 +11,7 @@ import structlog
 
 from .services import LeetCodeService, ProblemQueueService
 from .serializers import ProblemSubmissionSerializer, ProblemAttemptSerializer
+from dorso_api.apps.tracking.models import ExtensionUser
 
 logger = structlog.get_logger(__name__)
 
@@ -39,25 +40,34 @@ class RandomProblemView(APIView):
 
     def get(self, request):
         service = LeetCodeService()
-        problem = service.get_random_problem()
+        extension_id = request.query_params.get('extension_id')
+        user = None
+
+        if extension_id:
+            user = ExtensionUser.objects.filter(extension_id=extension_id).first()
+
+        if user:
+            recent_slugs = list(
+                user.attempts.values_list('problem_slug', flat=True)[:20]
+            )
+            problem = service.get_filtered_problem(
+                difficulty_filters=user.preferred_difficulties,
+                topic_filters=user.preferred_topics,
+                excluded_slugs=recent_slugs,
+            )
+        else:
+            problem = service.get_filtered_problem()
 
         if problem:
             problems_fetched.inc()
 
             logger.info(
                 "random_problem_fetched",
-                slug=problem['titleSlug'],
+                slug=problem['slug'],
                 difficulty=problem.get('difficulty')
             )
 
-            return Response({
-                'id': problem['questionId'],
-                'title': problem['title'],
-                'slug': problem['titleSlug'],
-                'content': problem['content'],
-                'difficulty': problem['difficulty'],
-                'exampleTestcases': problem.get('exampleTestcases', ''),
-            })
+            return Response(problem)
 
         logger.error("failed_to_fetch_random_problem")
         return Response(
@@ -85,6 +95,7 @@ class SubmitSolutionView(APIView):
                 "problem_submitted",
                 extension_id=attempt.user.extension_id,
                 problem_slug=attempt.problem_slug,
+                source=attempt.source,
                 difficulty=attempt.difficulty,
                 time_taken=attempt.time_taken_seconds,
             )
@@ -121,6 +132,7 @@ class LogAttemptView(APIView):
                 "problem_attempted",
                 extension_id=attempt.user.extension_id,
                 problem_slug=attempt.problem_slug,
+                source=attempt.source,
                 difficulty=attempt.difficulty,
             )
 
@@ -142,14 +154,7 @@ def fetch_problem_by_slug(request, slug):
     problem = service.fetch_problem(slug)
 
     if problem:
-        return Response({
-            'id': problem['questionId'],
-            'title': problem['title'],
-            'slug': problem['titleSlug'],
-            'content': problem['content'],
-            'difficulty': problem['difficulty'],
-            'exampleTestcases': problem.get('exampleTestcases', ''),
-        })
+        return Response(service._normalize_problem(problem, 'matched'))
 
     return Response(
         {'error': f'Problem "{slug}" not found.'},

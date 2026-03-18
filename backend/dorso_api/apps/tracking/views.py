@@ -20,6 +20,8 @@ from .serializers import (
     UserSessionSerializer,
     RegisterUserSerializer,
     CheckSessionSerializer,
+    ExtensionUserPreferencesSerializer,
+    ExtensionUserIdentitySerializer,
 )
 
 logger = structlog.get_logger(__name__)
@@ -77,6 +79,10 @@ class ExtensionUserViewSet(viewsets.ModelViewSet):
         difficulty = request.query_params.get('difficulty')
         if difficulty:
             attempts = attempts.filter(difficulty__iexact=difficulty)
+
+        source = request.query_params.get('source')
+        if source:
+            attempts = attempts.filter(source=source)
 
         serializer = ProblemAttemptSerializer(attempts, many=True)
         return Response(serializer.data)
@@ -179,3 +185,55 @@ class LogAccessView(APIView):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserPreferencesView(APIView):
+    """
+    Get and update user challenge preferences.
+    GET/PATCH /api/v1/users/{extension_id}/preferences/
+    """
+
+    def get_object(self, extension_id):
+        return get_object_or_404(ExtensionUser, extension_id=extension_id)
+
+    def get(self, request, extension_id):
+        user = self.get_object(extension_id)
+        serializer = ExtensionUserPreferencesSerializer(user)
+        return Response(serializer.data)
+
+    def patch(self, request, extension_id):
+        user = self.get_object(extension_id)
+        serializer = ExtensionUserPreferencesSerializer(
+            user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class UserIdentityView(APIView):
+    """
+    Get and update linked external identities.
+    GET/PATCH /api/v1/users/{extension_id}/identities/
+    """
+
+    def get_object(self, extension_id):
+        return get_object_or_404(ExtensionUser, extension_id=extension_id)
+
+    def get(self, request, extension_id):
+        user = self.get_object(extension_id)
+        serializer = ExtensionUserIdentitySerializer(user)
+        return Response(serializer.data)
+
+    def patch(self, request, extension_id):
+        user = self.get_object(extension_id)
+        serializer = ExtensionUserIdentitySerializer(
+            user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

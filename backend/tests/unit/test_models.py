@@ -28,6 +28,7 @@ class TestExtensionUserModel:
         assert user.total_solves == 0
         assert user.current_streak == 0
         assert user.is_active is True
+        assert user.enabled_verified_sources == ['leetcode']
 
     def test_record_solve_increments_stats(self, extension_user):
         """Test that record_solve updates user statistics."""
@@ -75,16 +76,22 @@ class TestProblemAttemptModel:
             problem_slug='two-sum',
             problem_title='Two Sum',
             difficulty='Easy',
+            source='leetcode',
+            challenge_id='1',
+            topic_tags=['Array', 'Hash Table'],
             solved=False
         )
         assert attempt.problem_slug == 'two-sum'
         assert attempt.solved is False
         assert attempt.user == extension_user
+        assert attempt.source == 'leetcode'
+        assert attempt.challenge_id == '1'
 
     def test_solved_attempt(self, problem_attempt):
         """Test a solved problem attempt."""
         assert problem_attempt.solved is True
         assert problem_attempt.time_taken_seconds == 300
+        assert problem_attempt.source == 'leetcode'
 
     def test_str_representation(self, problem_attempt):
         """Test string representation."""

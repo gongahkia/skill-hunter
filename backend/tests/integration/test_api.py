@@ -126,6 +126,7 @@ class TestProblemSubmissionAPI:
         # Verify user stats were updated
         extension_user.refresh_from_db()
         assert extension_user.total_solves == 1
+        assert extension_user.total_attempts == 1
 
     def test_submit_problem_invalid_user(self, api_client):
         """Test submitting problem with invalid user."""
@@ -149,16 +150,22 @@ class TestRandomProblemAPI:
         """Test getting a random problem."""
         # Mock LeetCode service to avoid actual API calls
         mock_problem = {
-            'id': '1',
+            'source': 'leetcode',
+            'source_label': 'LeetCode',
+            'challenge_id': '1',
             'title': 'Two Sum',
             'slug': 'two-sum',
+            'url': 'https://leetcode.com/problems/two-sum/description/',
             'content': '<p>Test problem</p>',
             'difficulty': 'Easy',
-            'exampleTestcases': '[]'
+            'topic_tags': ['Array', 'Hash Table'],
+            'selection_mode': 'matched',
+            'supports_verification': True,
+            'example_testcases': '[]'
         }
 
         mocker.patch(
-            'dorso_api.apps.problems.views.LeetCodeService.get_random_problem',
+            'dorso_api.apps.problems.views.LeetCodeService.get_filtered_problem',
             return_value=mock_problem
         )
 
@@ -168,6 +175,8 @@ class TestRandomProblemAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['title'] == 'Two Sum'
         assert response.data['difficulty'] == 'Easy'
+        assert response.data['source'] == 'leetcode'
+        assert response.data['selection_mode'] == 'matched'
 
 
 @pytest.mark.django_db
@@ -187,3 +196,41 @@ class TestUserStatsAPI:
         assert response.data['current_streak'] == 2
         assert response.data['longest_streak'] == 3
         assert 'solve_rate' in response.data
+        assert 'preferences' in response.data
+        assert 'source_mix' in response.data
+
+
+@pytest.mark.django_db
+class TestPreferencesAndIdentitiesAPI:
+    """Test preference and identity endpoints."""
+
+    def test_update_preferences(self, api_client, extension_user):
+        """Test updating source and difficulty preferences."""
+        url = reverse(
+            'user-preferences',
+            kwargs={'extension_id': extension_user.extension_id}
+        )
+        response = api_client.patch(url, {
+            'preferred_difficulties': ['Easy', 'Medium'],
+            'preferred_topics': ['Array', 'Graph'],
+            'enabled_verified_sources': ['leetcode'],
+        }, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['preferred_difficulties'] == ['Easy', 'Medium']
+        assert response.data['preferred_topics'] == ['Array', 'Graph']
+
+    def test_update_identities(self, api_client, extension_user):
+        """Test linking a Codeforces handle."""
+        url = reverse(
+            'user-identities',
+            kwargs={'extension_id': extension_user.extension_id}
+        )
+        response = api_client.patch(url, {
+            'codeforces_handle': 'tourist',
+            'codewars_username': 'kata-grinder',
+        }, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['codeforces_handle'] == 'tourist'
+        assert response.data['codewars_username'] == 'kata-grinder'

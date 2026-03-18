@@ -3,7 +3,9 @@ Serializers for tracking app.
 """
 
 from rest_framework import serializers
+from django.db.models import Count
 from .models import ExtensionUser, ProblemAttempt, AccessLog, UserSession
+from dorso_api.apps.problems.constants import DIFFICULTY_CHOICES, SOURCE_LABELS, VERIFIED_SOURCES
 
 
 class ExtensionUserSerializer(serializers.ModelSerializer):
@@ -54,6 +56,11 @@ class ExtensionUserStatsSerializer(serializers.ModelSerializer):
     recent_attempts = serializers.SerializerMethodField()
     solve_rate = serializers.SerializerMethodField()
     favorite_difficulty = serializers.SerializerMethodField()
+    recent_accesses = serializers.SerializerMethodField()
+    active_session = serializers.SerializerMethodField()
+    source_mix = serializers.SerializerMethodField()
+    preferences = serializers.SerializerMethodField()
+    identities = serializers.SerializerMethodField()
 
     class Meta:
         model = ExtensionUser
@@ -65,6 +72,11 @@ class ExtensionUserStatsSerializer(serializers.ModelSerializer):
             'longest_streak',
             'solve_rate',
             'favorite_difficulty',
+            'recent_accesses',
+            'active_session',
+            'source_mix',
+            'preferences',
+            'identities',
             'recent_attempts',
         ]
 
@@ -81,11 +93,54 @@ class ExtensionUserStatsSerializer(serializers.ModelSerializer):
 
     def get_favorite_difficulty(self, obj):
         """Get most frequently solved difficulty."""
-        from django.db.models import Count
         result = obj.attempts.filter(solved=True).values('difficulty').annotate(
             count=Count('difficulty')
         ).order_by('-count').first()
         return result['difficulty'] if result else None
+
+    def get_recent_accesses(self, obj):
+        """Get the most recent chatbot accesses."""
+        accesses = obj.access_logs.all()[:10]
+        return RecentAccessLogSerializer(accesses, many=True).data
+
+    def get_active_session(self, obj):
+        """Return active session summary."""
+        session = obj.get_active_session()
+        if not session:
+            return None
+
+        return {
+            'session_id': session.id,
+            'session_start': session.session_start,
+            'session_end': session.session_end,
+            'problem_source': session.problem_attempt.source if session.problem_attempt else None,
+        }
+
+    def get_source_mix(self, obj):
+        """Return counts of attempts grouped by source."""
+        source_rows = obj.attempts.values('source').annotate(count=Count('source'))
+        return {
+            row['source']: {
+                'label': SOURCE_LABELS.get(row['source'], row['source'].title()),
+                'count': row['count'],
+            }
+            for row in source_rows
+        }
+
+    def get_preferences(self, obj):
+        """Expose current challenge preferences."""
+        return {
+            'preferred_difficulties': obj.preferred_difficulties,
+            'preferred_topics': obj.preferred_topics,
+            'enabled_verified_sources': obj.enabled_verified_sources,
+        }
+
+    def get_identities(self, obj):
+        """Expose linked external identities."""
+        return {
+            'codeforces_handle': obj.codeforces_handle,
+            'codewars_username': obj.codewars_username,
+        }
 
 
 class ProblemAttemptSerializer(serializers.ModelSerializer):
@@ -99,6 +154,9 @@ class ProblemAttemptSerializer(serializers.ModelSerializer):
             'problem_slug',
             'problem_title',
             'difficulty',
+            'source',
+            'challenge_id',
+            'topic_tags',
             'attempted_at',
             'solved',
             'time_taken_seconds',
@@ -109,17 +167,32 @@ class ProblemAttemptSerializer(serializers.ModelSerializer):
 class AccessLogSerializer(serializers.ModelSerializer):
     """Serializer for AccessLog model."""
 
+    extension_id = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = AccessLog
         fields = [
             'id',
             'user',
+            'extension_id',
             'chatbot_url',
             'chatbot_name',
             'accessed_at',
             'problem_solved_for_access',
         ]
         read_only_fields = ['id', 'accessed_at']
+
+    def validate(self, attrs):
+        """Accept either a user primary key or an extension identifier."""
+        extension_id = attrs.pop('extension_id', None)
+        if extension_id and 'user' not in attrs:
+            try:
+                attrs['user'] = ExtensionUser.objects.get(extension_id=extension_id)
+            except ExtensionUser.DoesNotExist as exc:
+                raise serializers.ValidationError({
+                    'extension_id': 'Extension user not found. Please register first.'
+                }) from exc
+        return attrs
 
 
 class UserSessionSerializer(serializers.ModelSerializer):
@@ -178,3 +251,54 @@ class CheckSessionSerializer(serializers.Serializer):
                 "Extension user not found. Please register first."
             )
         return value
+
+
+class ExtensionUserPreferencesSerializer(serializers.ModelSerializer):
+    """Serializer for user preference updates."""
+
+    preferred_difficulties = serializers.ListField(
+        child=serializers.ChoiceField(choices=DIFFICULTY_CHOICES),
+        allow_empty=True,
+        required=False,
+    )
+    preferred_topics = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        allow_empty=True,
+        required=False,
+    )
+    enabled_verified_sources = serializers.ListField(
+        child=serializers.ChoiceField(choices=VERIFIED_SOURCES),
+        allow_empty=True,
+        required=False,
+    )
+
+    class Meta:
+        model = ExtensionUser
+        fields = [
+            'preferred_difficulties',
+            'preferred_topics',
+            'enabled_verified_sources',
+        ]
+
+
+class ExtensionUserIdentitySerializer(serializers.ModelSerializer):
+    """Serializer for linked external identities."""
+
+    class Meta:
+        model = ExtensionUser
+        fields = [
+            'codeforces_handle',
+            'codewars_username',
+        ]
+
+
+class RecentAccessLogSerializer(serializers.ModelSerializer):
+    """Compact serializer for recent access rows."""
+
+    class Meta:
+        model = AccessLog
+        fields = [
+            'chatbot_name',
+            'chatbot_url',
+            'accessed_at',
+        ]

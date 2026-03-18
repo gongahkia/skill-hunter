@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 from django.core.cache import cache
 from django.conf import settings
 import structlog
+from .constants import SOURCE_LABELS
 
 logger = structlog.get_logger(__name__)
 
@@ -20,6 +21,10 @@ query questionData($titleSlug: String!) {
     content
     difficulty
     exampleTestcases
+    topicTags {
+      name
+      slug
+    }
   }
 }
 """
@@ -157,6 +162,68 @@ class LeetCodeService:
 
         logger.error("failed_to_get_random_problem_after_retries")
         return None
+
+    def get_filtered_problem(self, difficulty_filters=None, topic_filters=None, excluded_slugs=None):
+        """
+        Select a LeetCode problem while respecting user filters when possible.
+        """
+        difficulty_filters = set(difficulty_filters or [])
+        topic_filters = {topic.lower() for topic in (topic_filters or [])}
+        excluded_slugs = set(excluded_slugs or [])
+        selection_steps = [
+            ("matched", True, True),
+            ("topic_relaxed", True, False),
+            ("fully_relaxed", False, False),
+        ]
+
+        for selection_mode, apply_difficulty, apply_topics in selection_steps:
+            for _ in range(20):
+                slug = self.get_random_problem_slug()
+                if slug in excluded_slugs:
+                    continue
+
+                problem = self.fetch_problem(slug)
+                if not problem:
+                    continue
+
+                if apply_difficulty and difficulty_filters:
+                    if problem.get('difficulty') not in difficulty_filters:
+                        continue
+
+                if apply_topics and topic_filters:
+                    problem_topics = {
+                        topic.get('name', '').lower()
+                        for topic in problem.get('topicTags', [])
+                    }
+                    if not problem_topics.intersection(topic_filters):
+                        continue
+
+                return self._normalize_problem(problem, selection_mode)
+
+        fallback = self.get_random_problem()
+        return self._normalize_problem(fallback, "fully_relaxed") if fallback else None
+
+    def _normalize_problem(self, problem: Optional[Dict], selection_mode: str) -> Optional[Dict]:
+        if not problem:
+            return None
+
+        topic_tags = [topic.get('name') for topic in problem.get('topicTags', []) if topic.get('name')]
+        slug = problem['titleSlug']
+
+        return {
+            'source': 'leetcode',
+            'source_label': SOURCE_LABELS['leetcode'],
+            'challenge_id': problem['questionId'],
+            'title': problem['title'],
+            'slug': slug,
+            'url': f'https://leetcode.com/problems/{slug}/description/',
+            'content': problem['content'],
+            'difficulty': problem['difficulty'],
+            'topic_tags': topic_tags,
+            'selection_mode': selection_mode,
+            'supports_verification': True,
+            'example_testcases': problem.get('exampleTestcases', ''),
+        }
 
 
 class ProblemQueueService:

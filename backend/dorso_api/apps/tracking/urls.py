@@ -9,6 +9,8 @@ from .views import (
     RegisterUserView,
     CheckSessionView,
     LogAccessView,
+    UserPreferencesView,
+    UserIdentityView,
 )
 
 router = DefaultRouter()
@@ -19,6 +21,8 @@ urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path('check-session/', CheckSessionView.as_view(), name='check-session'),
     path('log-access/', LogAccessView.as_view(), name='log-access'),
+    path('<str:extension_id>/preferences/', UserPreferencesView.as_view(), name='user-preferences'),
+    path('<str:extension_id>/identities/', UserIdentityView.as_view(), name='user-identities'),
 
     # User viewset routes
     path('', include(router.urls)),

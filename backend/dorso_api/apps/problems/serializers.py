@@ -4,6 +4,7 @@ Serializers for problem submission and responses.
 
 from rest_framework import serializers
 from dorso_api.apps.tracking.models import ExtensionUser, ProblemAttempt
+from .constants import DIFFICULTY_CHOICES, SOURCE_LABELS
 
 
 class ProblemSubmissionSerializer(serializers.Serializer):
@@ -13,7 +14,17 @@ class ProblemSubmissionSerializer(serializers.Serializer):
     problem_slug = serializers.CharField(max_length=255)
     problem_title = serializers.CharField(max_length=500)
     difficulty = serializers.ChoiceField(
-        choices=['Easy', 'Medium', 'Hard']
+        choices=DIFFICULTY_CHOICES
+    )
+    source = serializers.ChoiceField(
+        choices=list(SOURCE_LABELS.keys()),
+        default='leetcode'
+    )
+    challenge_id = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    topic_tags = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        required=False,
+        allow_empty=True,
     )
     time_taken_seconds = serializers.IntegerField(
         min_value=0,
@@ -43,9 +54,15 @@ class ProblemSubmissionSerializer(serializers.Serializer):
             problem_slug=validated_data['problem_slug'],
             problem_title=validated_data['problem_title'],
             difficulty=validated_data['difficulty'],
+            source=validated_data.get('source', 'leetcode'),
+            challenge_id=validated_data.get('challenge_id', ''),
+            topic_tags=validated_data.get('topic_tags', []),
             solved=True,
             time_taken_seconds=validated_data.get('time_taken_seconds')
         )
+
+        user.total_attempts += 1
+        user.save(update_fields=['total_attempts', 'updated_at', 'last_active'])
 
         # Signal handler will automatically create session and update stats
         return attempt
@@ -58,7 +75,17 @@ class ProblemAttemptSerializer(serializers.Serializer):
     problem_slug = serializers.CharField(max_length=255)
     problem_title = serializers.CharField(max_length=500)
     difficulty = serializers.ChoiceField(
-        choices=['Easy', 'Medium', 'Hard']
+        choices=DIFFICULTY_CHOICES
+    )
+    source = serializers.ChoiceField(
+        choices=list(SOURCE_LABELS.keys()),
+        default='leetcode'
+    )
+    challenge_id = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    topic_tags = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        required=False,
+        allow_empty=True,
     )
 
     def validate_extension_id(self, value):
@@ -87,6 +114,9 @@ class ProblemAttemptSerializer(serializers.Serializer):
             problem_slug=validated_data['problem_slug'],
             problem_title=validated_data['problem_title'],
             difficulty=validated_data['difficulty'],
+            source=validated_data.get('source', 'leetcode'),
+            challenge_id=validated_data.get('challenge_id', ''),
+            topic_tags=validated_data.get('topic_tags', []),
             solved=False
         )
 
