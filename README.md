@@ -3,22 +3,30 @@
 
 # `Rakuzaichi`
 
-Browser extension that stores your chats with [LLMs](https://cloud.google.com/ai/llms) locally, for the future.
+Browser extension that [stores](#architecture) your [LLM](#chatbot-coverage) chat history [locally](#export-formats) *(for the future)*.
+
+## Rationale
+
+As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyday tool, being able to [store local copies](https://www.reddit.com/r/cybersecurity_help/comments/1ae6vzk/cloud_vs_local_storage/) of your past chat logs becomes increasingly important.
+
+`Rakuzaichi` puts you ***back in control*** of your data by [exporting your chat history](#screenshots) *(and other useful metadata)* at the click of a button in the following formats, with a focus on serialisation, transfer and storage.
 
 ## Stack
 
 * *Frontend*: HTML, CSS
 * *Backend*: JavaScript
 
-## Rationale
+## Screenshot
 
-As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyday tool, being able to [store local copies](https://www.reddit.com/r/cybersecurity_help/comments/1ae6vzk/cloud_vs_local_storage/) of your past chat logs becomes increasingly important.
+![](./asset/reference/5.png)
 
-Unfortunately, current chatbots only support exporting chat history as `.pdf`, `.md` or `.docx` *(if at all)*.
+## Architecture
 
-`Rakuzaichi` puts you ***back in control*** of your data by [exporting your chat history](#screenshots) *(and other useful metadata)* at the click of a button in the following formats, with a focus on serialisation, transfer and storage.
+![](./asset/reference/architecture.png)
 
-| Export Format | Purpose |
+## Export formats
+
+| File type | Purpose |
 | :--- | :--- |
 | [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | Wide support for tabular data and spreadsheet operations|
 | [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) | Tab-delimited CSV alternative for ease of parsing and storage|
@@ -29,15 +37,17 @@ Unfortunately, current chatbots only support exporting chat history as `.pdf`, `
 | [Parquet](https://parquet.apache.org/) *(Apache)* | Columnar storage for big data analytics |
 | [Avro](https://avro.apache.org/) *(Apache)* | Compact binary format with native serialization capabilities |
 
-See the supported chatbots [here](#chatbot-coverage).
+## Chatbot Coverage
 
-## Screenshot
-
-![](./asset/reference/5.png)
-
-## Architecture
-
-![](./asset/reference/architecture.png)
+| Chatbot | Status |
+| :--- | :--- |
+| [ChatGPT](https://chatgpt.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Gemini](https://gemini.google.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Claude](https://claude.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Perplexity](https://www.perplexity.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [DeepSeek](https://chat.deepseek.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Grok](https://grok.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
+| [Copilot](https://copilot.microsoft.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
 
 ## Usage
 
@@ -68,18 +78,6 @@ Then follow the below instructions for your browser.
 5. Click the toggle button to open the `Rakuzaichi` browser extension.
 
 Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
-
-## Chatbot Coverage
-
-| Chatbot | Status |
-| :--- | :--- |
-| [ChatGPT](https://chatgpt.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [Gemini](https://gemini.google.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [Claude](https://claude.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [Perplexity](https://www.perplexity.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [DeepSeek](https://chat.deepseek.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [Grok](https://grok.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
-| [Copilot](https://copilot.microsoft.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
 
 ## Reference
 
