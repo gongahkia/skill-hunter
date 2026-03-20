@@ -75,12 +75,6 @@ Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Fi
 
 The below instructions are for locally running `Dorso`.
 
-| Browser | Status |
-| :--- | :--- |
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) |
-| Google Chrome | ![](https://img.shields.io/badge/Status-Up-brightgreen) |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) |
-
 ### Firefox
 
 1. Run the below commands.
