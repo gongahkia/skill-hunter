@@ -1,0 +1,20 @@
+{
+  "name": "owl-webext",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser extension package for Owl across Chrome, Firefox, and Safari-macOS.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "prepare:firefox-submission": "node scripts/package-firefox.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "esbuild": "^0.25.3",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9",
+    "web-ext": "^8.9.0"
+  }
+}

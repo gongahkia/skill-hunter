@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Owl Browser Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <h1>Owl Browser Settings</h1>
+      <p id="status">Configure Google OAuth client IDs and extension behavior.</p>
+
+      <label class="field">
+        <span>Color scheme</span>
+        <select id="colorscheme"></select>
+      </label>
+
+      <label class="field">
+        <span>Custom prefixes</span>
+        <input id="custom-prefixes" type="text" placeholder="HACK,NOTE" />
+      </label>
+
+      <label class="checkbox">
+        <input id="enable-google-hosts" type="checkbox" />
+        <span>Request persistent host access for Google editors</span>
+      </label>
+
+      <label class="field">
+        <span>Chrome OAuth client ID</span>
+        <input id="chrome-client-id" type="text" />
+      </label>
+
+      <label class="field">
+        <span>Firefox OAuth client ID</span>
+        <input id="firefox-client-id" type="text" />
+      </label>
+
+      <label class="field">
+        <span>Safari OAuth client ID</span>
+        <input id="safari-client-id" type="text" />
+      </label>
+
+      <p class="note">
+        Safari packaging still requires a containing macOS app bridge before OAuth can be completed.
+      </p>
+
+      <button id="save-button" type="button">Save Settings</button>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>

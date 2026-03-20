@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Owl Tags</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div>
+          <h1>Owl Tags</h1>
+          <p id="context"></p>
+        </div>
+        <span class="pill" id="browser-name"></span>
+      </header>
+
+      <p id="status" class="status">Ready.</p>
+
+      <section class="actions">
+        <button id="scan-button" type="button">Scan Current File</button>
+        <button id="highlight-button" type="button">Highlight</button>
+        <button id="markdone-button" type="button">Mark Done</button>
+        <button id="archive-button" type="button">Archive</button>
+      </section>
+
+      <section class="actions">
+        <button id="export-json-button" type="button">Export JSON</button>
+        <button id="export-md-button" type="button">Export MD</button>
+        <button id="export-txt-button" type="button">Export TXT</button>
+      </section>
+
+      <section class="actions">
+        <button id="options-button" type="button">Settings</button>
+        <button id="signout-button" type="button">Sign Out</button>
+      </section>
+
+      <section id="entries" class="entries"></section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
