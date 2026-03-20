@@ -40,7 +40,7 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 
 | Browser | Status | Link |
 | :--- | :--- | :--- |
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
 | Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | NIL |
 | Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
 
