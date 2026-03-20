@@ -40,7 +40,12 @@
       <label>
         Auto-export interval (minutes, 0 = disabled)
         <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
+        <small>When enabled, Rakuzaichi periodically exports the active supported tab and opens the browser save flow. It never runs silently in the background.</small>
       </label>
+      <div class="status-card">
+        <strong>Last auto-export result</strong>
+        <p id="autoExportStatus">Auto-export has not run yet.</p>
+      </div>
       <div class="form-actions">
         <button type="submit">Save</button>
         <span id="save-status"></span>

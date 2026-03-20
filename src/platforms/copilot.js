@@ -29,9 +29,10 @@ _platforms.push({
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       messages.push(MessageSchema.create({
-        role: i % 2 === 0 ? 'user' : 'assistant',
-        content: (el.innerText || el.textContent || '').trim(),
-        id: el.id || 'msg-' + i,
+        role: DomUtils.inferRole(el, i % 2 === 0 ? 'user' : 'assistant'),
+        content: DomUtils.readText(el),
+        id: DomUtils.buildMessageId('copilot', el, i),
+        timestamp: DomUtils.readTimestamp(el),
         platform: 'copilot',
         index: i
       }));

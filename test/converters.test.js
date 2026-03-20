@@ -88,14 +88,6 @@ describe('FormatConverter', () => {
     expect(result).toContain('  - role: user');
   });
 
-  it('toParquet throws not-available error', () => {
-    expect(() => FormatConverter.toParquet(envelope)).toThrow('WASM');
-  });
-
-  it('toAvro throws not-available error', () => {
-    expect(() => FormatConverter.toAvro(envelope)).toThrow('WASM');
-  });
-
   it('convert dispatches to correct method', () => {
     const json = FormatConverter.convert('json', envelope);
     expect(JSON.parse(json).platform).toBe('chatgpt');

@@ -24,11 +24,12 @@ _platforms.push({
     ]);
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
-      var role = el.getAttribute('data-role') || (i % 2 === 0 ? 'user' : 'assistant');
+      var role = DomUtils.normalizeRole(el.getAttribute('data-role'), DomUtils.inferRole(el, i % 2 === 0 ? 'user' : 'assistant'));
       messages.push(MessageSchema.create({
-        role: role === 'assistant' ? 'assistant' : role === 'user' ? 'user' : 'unknown',
-        content: (el.innerText || '').trim(),
-        id: el.id || 'msg-' + i,
+        role: role,
+        content: DomUtils.readText(el),
+        id: DomUtils.buildMessageId('mistral', el, i),
+        timestamp: DomUtils.readTimestamp(el),
         platform: 'mistral',
         model: 'mistral',
         index: i

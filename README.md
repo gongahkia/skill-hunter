@@ -13,8 +13,8 @@ As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyd
 
 ## Stack
 
-* *Frontend*: HTML, CSS
-* *Backend*: JavaScript
+* *Frontend*: [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
+* *Backend*: [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
 ## Screenshot
 
@@ -34,8 +34,6 @@ As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyd
 | [NDJSON](https://en.wikipedia.org/wiki/JSON_streaming#Compatibility) | JSON optimised for streaming and large datasets |
 | [XML](https://en.wikipedia.org/wiki/XML) | Extensible and hierarchy-capable for legacy and enterprise |
 | [YAML](https://en.wikipedia.org/wiki/YAML) | Human-readable storage for configuration files |
-| [Parquet](https://parquet.apache.org/) *(Apache)* | Columnar storage for big data analytics |
-| [Avro](https://avro.apache.org/) *(Apache)* | Compact binary format with native serialization capabilities |
 
 ## Chatbot Coverage
 
@@ -46,8 +44,10 @@ As [AI chatbots](https://cloud.google.com/use-cases/ai-chatbot) become an everyd
 | [Claude](https://claude.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
 | [Perplexity](https://www.perplexity.ai/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
 | [DeepSeek](https://chat.deepseek.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
-| [Grok](https://grok.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
-| [Copilot](https://copilot.microsoft.com/) | ![](https://img.shields.io/badge/Status-Unsupported-red) |
+| [Grok](https://grok.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Copilot](https://copilot.microsoft.com/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [Le Chat Mistral](https://chat.mistral.ai/chat) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
+| [HuggingChat](https://huggingface.co/chat/) | ![](https://img.shields.io/badge/Status-Supported-brightgreen) |
 
 ## Usage
 

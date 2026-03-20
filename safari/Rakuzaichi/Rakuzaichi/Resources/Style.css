@@ -1,0 +1,93 @@
+* {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    cursor: default;
+}
+
+:root {
+    color-scheme: light dark;
+    --spacing: 20px;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100%;
+    font: -apple-system-short-body;
+    background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+}
+
+.shell {
+    box-sizing: border-box;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    font: -apple-system-title2;
+}
+
+h2 {
+    margin: 0 0 8px;
+    font: -apple-system-headline;
+}
+
+.lede {
+    margin: 0 0 8px;
+    max-width: 560px;
+}
+
+.card {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: color-mix(in srgb, Canvas 96%, CanvasText 4%);
+    border: 1px solid color-mix(in srgb, CanvasText 14%, Canvas 86%);
+    text-align: left;
+}
+
+.card p {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.status-card {
+    text-align: center;
+}
+
+img {
+    border-radius: 24px;
+}
+
+body:not(.state-on, .state-off) :is(.state-on, .state-off) {
+    display: none;
+}
+
+body.state-on :is(.state-off, .state-unknown) {
+    display: none;
+}
+
+body.state-off :is(.state-on, .state-unknown) {
+    display: none;
+}
+
+button {
+    font-size: 1em;
+    margin-top: 14px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 0;
+    background: #0a84ff;
+    color: white;
+}

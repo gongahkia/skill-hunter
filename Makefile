@@ -1,29 +1,32 @@
-SRC = src
 DIST = dist
-CHROME_DIR = $(DIST)/chrome
-FIREFOX_DIR = $(DIST)/firefox
 
-.PHONY: all chrome firefox safari clean zip test
+.PHONY: all chrome firefox safari clean zip test lint validate safari-app
 
 all: chrome firefox
 
 chrome:
-	mkdir -p $(CHROME_DIR)
-	cp -r $(SRC)/* $(CHROME_DIR)/
+	npm run build:chrome
 
 firefox:
-	mkdir -p $(FIREFOX_DIR)
-	cp -r $(SRC)/* $(FIREFOX_DIR)/
+	npm run build:firefox
 
 safari:
-	@echo "Safari requires Xcode. Run: xcrun safari-web-extension-converter $(SRC)"
+	npm run build:safari
+
+safari-app:
+	npm run safari:convert
 
 clean:
 	rm -rf $(DIST) *.zip *.xpi
 
 zip: chrome firefox
-	cd $(CHROME_DIR) && zip -r ../../rakuzaichi-chrome.zip .
-	cd $(FIREFOX_DIR) && zip -r ../../rakuzaichi-firefox.xpi .
+	npm run package
 
 test:
 	npm test
+
+lint:
+	npm run lint
+
+validate:
+	npm run validate

@@ -1,10 +1,5 @@
 (async function() {
-  var settings = await api.storage.sync.get({
-    defaultFormat: 'json',
-    filenameTemplate: '{platform}_{title}_{date}.{ext}',
-    darkMode: 'system',
-    showPreview: true
-  });
+  var settings = await StorageManager.getAll();
   function applyTheme(mode) {
     if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     else if (mode === 'light') document.documentElement.removeAttribute('data-theme');
@@ -54,10 +49,45 @@
   });
   async function doDownload(format, data) {
     try {
-      await api.runtime.sendMessage({ action: 'download', format: format, data: data });
-      showStatus('Exported!', false);
+      var response = await api.runtime.sendMessage({ action: 'download', format: format, data: data });
+      if (response && response.error) throw new Error(response.error);
+      showStatus('Export opened the browser save flow.', false);
     } catch(e) {
+      if (e.message && /download/i.test(e.message)) {
+        await fallbackDownload(format, data);
+        return;
+      }
       showStatus('Download failed: ' + e.message, true);
+    }
+  }
+  async function fallbackDownload(format, data) {
+    var formatInfo = FormatConverter.formats[format];
+    if (!formatInfo) throw new Error('Unsupported format: ' + format);
+    var settings = await StorageManager.getAll();
+    var filename = FilenameBuilder.build(settings.filenameTemplate, {
+      platform: data.platform,
+      title: data.chatTitle,
+      format: format,
+      ext: formatInfo.ext
+    });
+    var converted = FormatConverter.convert(format, data);
+    var blob = new Blob([converted], { type: formatInfo.mime + ';charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    try {
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      await ExportHistory.add({
+        platform: data.platform,
+        format: format,
+        messageCount: data.messageCount,
+        chatTitle: data.chatTitle,
+        filename: filename
+      });
+      showStatus('Export downloaded from the popup fallback.', false);
+    } finally {
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
     }
   }
   function showStatus(msg, isError) {

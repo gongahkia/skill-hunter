@@ -1,21 +1,27 @@
 {
   "manifest_version": 3,
   "name": "Rakuzaichi",
-  "version": "2.0",
+  "version": "2.0.0",
   "description": "Export LLM chat conversations in multiple formats",
-  "permissions": ["activeTab", "scripting", "downloads", "storage", "alarms"],
+  "icons": {
+    "16": "icon/16.png",
+    "32": "icon/32.png",
+    "48": "icon/48.png",
+    "128": "icon/128.png"
+  },
+  "permissions": ["downloads", "storage", "alarms"],
   "host_permissions": [
-    "*://chat.openai.com/*",
-    "*://chatgpt.com/*",
-    "*://claude.ai/*",
-    "*://gemini.google.com/*",
-    "*://perplexity.ai/*",
-    "*://www.perplexity.ai/*",
-    "*://chat.deepseek.com/*",
-    "*://grok.com/*",
-    "*://copilot.microsoft.com/*",
-    "*://chat.mistral.ai/*",
-    "*://huggingface.co/chat/*"
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://perplexity.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://grok.com/*",
+    "https://copilot.microsoft.com/*",
+    "https://chat.mistral.ai/*",
+    "https://huggingface.co/chat/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -27,21 +33,21 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background-sw.js"
   },
   "content_scripts": [{
     "matches": [
-      "*://chat.openai.com/*",
-      "*://chatgpt.com/*",
-      "*://claude.ai/*",
-      "*://gemini.google.com/*",
-      "*://perplexity.ai/*",
-      "*://www.perplexity.ai/*",
-      "*://chat.deepseek.com/*",
-      "*://grok.com/*",
-      "*://copilot.microsoft.com/*",
-      "*://chat.mistral.ai/*",
-      "*://huggingface.co/chat/*"
+      "https://chat.openai.com/*",
+      "https://chatgpt.com/*",
+      "https://claude.ai/*",
+      "https://gemini.google.com/*",
+      "https://perplexity.ai/*",
+      "https://www.perplexity.ai/*",
+      "https://chat.deepseek.com/*",
+      "https://grok.com/*",
+      "https://copilot.microsoft.com/*",
+      "https://chat.mistral.ai/*",
+      "https://huggingface.co/chat/*"
     ],
     "js": [
       "compat.js",

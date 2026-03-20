@@ -29,11 +29,12 @@ _platforms.push({
     var model = modelEl ? modelEl.textContent.trim() : '';
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
-      var role = el.getAttribute('data-message-author-role');
+      var role = DomUtils.normalizeRole(el.getAttribute('data-message-author-role'), DomUtils.inferRole(el, i % 2 === 0 ? 'user' : 'assistant'));
       messages.push(MessageSchema.create({
-        role: role === 'assistant' ? 'assistant' : role === 'user' ? 'user' : 'unknown',
-        content: el.innerText.trim(),
-        id: el.getAttribute('data-message-id') || '',
+        role: role,
+        content: DomUtils.readText(el),
+        id: DomUtils.buildMessageId('chatgpt', el, i),
+        timestamp: DomUtils.readTimestamp(el),
         platform: 'chatgpt',
         model: model,
         index: i

@@ -1,0 +1,90 @@
+{
+  "manifest_version": 3,
+  "name": "Rakuzaichi",
+  "version": "2.0.0",
+  "description": "Export LLM chat conversations in multiple formats",
+  "icons": {
+    "16": "icon/16.png",
+    "32": "icon/32.png",
+    "48": "icon/48.png",
+    "128": "icon/128.png"
+  },
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://perplexity.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://grok.com/*",
+    "https://copilot.microsoft.com/*",
+    "https://chat.mistral.ai/*",
+    "https://huggingface.co/chat/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon/16.png",
+      "32": "icon/32.png",
+      "48": "icon/48.png",
+      "128": "icon/128.png"
+    }
+  },
+  "background": {
+    "scripts": [
+      "compat.js",
+      "converters.js",
+      "filename.js",
+      "storage.js",
+      "history.js",
+      "background-core.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://grok.com/*",
+        "https://copilot.microsoft.com/*",
+        "https://chat.mistral.ai/*",
+        "https://huggingface.co/chat/*"
+      ],
+      "js": [
+        "compat.js",
+        "dom-utils.js",
+        "schema.js",
+        "platforms/chatgpt.js",
+        "platforms/claude.js",
+        "platforms/gemini.js",
+        "platforms/perplexity.js",
+        "platforms/deepseek.js",
+        "platforms/grok.js",
+        "platforms/copilot.js",
+        "platforms/mistral.js",
+        "platforms/huggingchat.js",
+        "platforms/registry.js",
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html"
+  },
+  "browser_specific_settings": {
+    "safari": {
+      "strict_min_version": "17.0"
+    }
+  }
+}

@@ -21,9 +21,10 @@ _platforms.push({
     ]);
     for (var i = 0; i < els.length; i++) {
       messages.push(MessageSchema.create({
-        role: i % 2 === 0 ? 'user' : 'assistant',
-        content: (els[i].innerText || '').trim(),
-        id: els[i].id || 'msg-' + i,
+        role: DomUtils.inferRole(els[i], i % 2 === 0 ? 'user' : 'assistant'),
+        content: DomUtils.readText(els[i]),
+        id: DomUtils.buildMessageId('perplexity', els[i], i),
+        timestamp: DomUtils.readTimestamp(els[i]),
         platform: 'perplexity',
         index: i
       }));

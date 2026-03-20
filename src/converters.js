@@ -87,22 +87,18 @@ var FormatConverter = {
     }
     return y;
   },
-  toParquet() { throw new Error('Parquet export requires WASM runtime — coming soon'); },
-  toAvro() { throw new Error('Avro export requires WASM runtime — coming soon'); },
   formats: {
     csv:     { mime: 'text/csv',                  ext: 'csv' },
     tsv:     { mime: 'text/tab-separated-values', ext: 'tsv' },
     json:    { mime: 'application/json',           ext: 'json' },
     ndjson:  { mime: 'application/x-ndjson',       ext: 'ndjson' },
     xml:     { mime: 'application/xml',            ext: 'xml' },
-    yaml:    { mime: 'text/yaml',                  ext: 'yaml' },
-    parquet: { mime: 'application/octet-stream',   ext: 'parquet' },
-    avro:    { mime: 'application/octet-stream',   ext: 'avro' }
+    yaml:    { mime: 'text/yaml',                  ext: 'yaml' }
   },
   convert(format, envelope) {
     var methodMap = {
       csv: 'toCSV', tsv: 'toTSV', json: 'toJSON', ndjson: 'toNDJSON',
-      xml: 'toXML', yaml: 'toYAML', parquet: 'toParquet', avro: 'toAvro'
+      xml: 'toXML', yaml: 'toYAML'
     };
     var method = methodMap[format];
     if (!method || !this[method]) throw new Error('Unsupported format: ' + format);

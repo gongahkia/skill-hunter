@@ -1,0 +1,50 @@
+{
+  "chrome": {
+    "permissions": ["alarms", "downloads", "storage"],
+    "host_permissions": [
+      "https://chat.deepseek.com/*",
+      "https://chat.mistral.ai/*",
+      "https://chat.openai.com/*",
+      "https://chatgpt.com/*",
+      "https://claude.ai/*",
+      "https://copilot.microsoft.com/*",
+      "https://gemini.google.com/*",
+      "https://grok.com/*",
+      "https://huggingface.co/chat/*",
+      "https://perplexity.ai/*",
+      "https://www.perplexity.ai/*"
+    ]
+  },
+  "firefox": {
+    "permissions": ["alarms", "downloads", "storage"],
+    "host_permissions": [
+      "https://chat.deepseek.com/*",
+      "https://chat.mistral.ai/*",
+      "https://chat.openai.com/*",
+      "https://chatgpt.com/*",
+      "https://claude.ai/*",
+      "https://copilot.microsoft.com/*",
+      "https://gemini.google.com/*",
+      "https://grok.com/*",
+      "https://huggingface.co/chat/*",
+      "https://perplexity.ai/*",
+      "https://www.perplexity.ai/*"
+    ]
+  },
+  "safari": {
+    "permissions": ["alarms", "storage"],
+    "host_permissions": [
+      "https://chat.deepseek.com/*",
+      "https://chat.mistral.ai/*",
+      "https://chat.openai.com/*",
+      "https://chatgpt.com/*",
+      "https://claude.ai/*",
+      "https://copilot.microsoft.com/*",
+      "https://gemini.google.com/*",
+      "https://grok.com/*",
+      "https://huggingface.co/chat/*",
+      "https://perplexity.ai/*",
+      "https://www.perplexity.ai/*"
+    ]
+  }
+}

@@ -29,10 +29,12 @@ _platforms.push({
     var model = modelEl ? modelEl.textContent.trim() : '';
     var chatId = window.location.href.replace('https://claude.ai/chat/', '');
     for (var i = 0; i < els.length; i++) {
+      var role = DomUtils.inferRole(els[i], i % 2 === 0 ? 'user' : 'assistant');
       messages.push(MessageSchema.create({
-        role: i % 2 === 0 ? 'user' : 'assistant',
-        content: els[i].innerText.trim(),
-        id: chatId,
+        role: role,
+        content: DomUtils.readText(els[i]),
+        id: DomUtils.buildMessageId('claude', els[i], i, chatId || 'claude'),
+        timestamp: DomUtils.readTimestamp(els[i]),
         platform: 'claude',
         model: model,
         index: i

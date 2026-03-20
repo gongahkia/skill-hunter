@@ -1,0 +1,669 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C7F53462F6D1F4400CFEE64 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7F53452F6D1F4400CFEE64 /* AppDelegate.swift */; };
+		3C7F534A2F6D1F4400CFEE64 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53482F6D1F4400CFEE64 /* Main.html */; };
+		3C7F534C2F6D1F4400CFEE64 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F534B2F6D1F4400CFEE64 /* Icon.png */; };
+		3C7F534E2F6D1F4400CFEE64 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F534D2F6D1F4400CFEE64 /* Style.css */; };
+		3C7F53502F6D1F4400CFEE64 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F534F2F6D1F4400CFEE64 /* Script.js */; };
+		3C7F53522F6D1F4400CFEE64 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7F53512F6D1F4400CFEE64 /* ViewController.swift */; };
+		3C7F53552F6D1F4400CFEE64 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53532F6D1F4400CFEE64 /* Main.storyboard */; };
+		3C7F53572F6D1F4500CFEE64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53562F6D1F4500CFEE64 /* Assets.xcassets */; };
+		3C7F535E2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C7F535D2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3C7F53632F6D1F4500CFEE64 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7F53622F6D1F4500CFEE64 /* SafariWebExtensionHandler.swift */; };
+		3C7F53822F6D1F4500CFEE64 /* background-core.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F536F2F6D1F4500CFEE64 /* background-core.js */; };
+		3C7F53832F6D1F4500CFEE64 /* platforms in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53702F6D1F4500CFEE64 /* platforms */; };
+		3C7F53842F6D1F4500CFEE64 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53712F6D1F4500CFEE64 /* popup.js */; };
+		3C7F53852F6D1F4500CFEE64 /* styles.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53722F6D1F4500CFEE64 /* styles.css */; };
+		3C7F53862F6D1F4500CFEE64 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53732F6D1F4500CFEE64 /* popup.html */; };
+		3C7F53872F6D1F4500CFEE64 /* options.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53742F6D1F4500CFEE64 /* options.js */; };
+		3C7F53882F6D1F4500CFEE64 /* compat.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53752F6D1F4500CFEE64 /* compat.js */; };
+		3C7F53892F6D1F4500CFEE64 /* converters.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53762F6D1F4500CFEE64 /* converters.js */; };
+		3C7F538A2F6D1F4500CFEE64 /* schema.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53772F6D1F4500CFEE64 /* schema.js */; };
+		3C7F538B2F6D1F4500CFEE64 /* history.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53782F6D1F4500CFEE64 /* history.js */; };
+		3C7F538C2F6D1F4500CFEE64 /* filename.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53792F6D1F4500CFEE64 /* filename.js */; };
+		3C7F538D2F6D1F4500CFEE64 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537A2F6D1F4500CFEE64 /* manifest.json */; };
+		3C7F538E2F6D1F4500CFEE64 /* dom-utils.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537B2F6D1F4500CFEE64 /* dom-utils.js */; };
+		3C7F538F2F6D1F4500CFEE64 /* content-script.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537C2F6D1F4500CFEE64 /* content-script.js */; };
+		3C7F53902F6D1F4500CFEE64 /* options.html in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537D2F6D1F4500CFEE64 /* options.html */; };
+		3C7F53912F6D1F4500CFEE64 /* icon in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537E2F6D1F4500CFEE64 /* icon */; };
+		3C7F53922F6D1F4500CFEE64 /* options.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F537F2F6D1F4500CFEE64 /* options.css */; };
+		3C7F53932F6D1F4500CFEE64 /* background-sw.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53802F6D1F4500CFEE64 /* background-sw.js */; };
+		3C7F53942F6D1F4500CFEE64 /* storage.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C7F53812F6D1F4500CFEE64 /* storage.js */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3C7F535F2F6D1F4500CFEE64 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C7F533A2F6D1F4400CFEE64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C7F535C2F6D1F4500CFEE64;
+			remoteInfo = "Rakuzaichi Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3C7F536A2F6D1F4500CFEE64 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3C7F535E2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3C7F53422F6D1F4400CFEE64 /* Rakuzaichi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rakuzaichi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C7F53452F6D1F4400CFEE64 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3C7F53492F6D1F4400CFEE64 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		3C7F534B2F6D1F4400CFEE64 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		3C7F534D2F6D1F4400CFEE64 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		3C7F534F2F6D1F4400CFEE64 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		3C7F53512F6D1F4400CFEE64 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3C7F53542F6D1F4400CFEE64 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3C7F53562F6D1F4500CFEE64 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3C7F53582F6D1F4500CFEE64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C7F535D2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Rakuzaichi Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C7F53622F6D1F4500CFEE64 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		3C7F53642F6D1F4500CFEE64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C7F536F2F6D1F4500CFEE64 /* background-core.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "background-core.js"; path = "Resources/background-core.js"; sourceTree = "<group>"; };
+		3C7F53702F6D1F4500CFEE64 /* platforms */ = {isa = PBXFileReference; lastKnownFileType = folder; name = platforms; path = Resources/platforms; sourceTree = "<group>"; };
+		3C7F53712F6D1F4500CFEE64 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = Resources/popup.js; sourceTree = "<group>"; };
+		3C7F53722F6D1F4500CFEE64 /* styles.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = styles.css; path = Resources/styles.css; sourceTree = "<group>"; };
+		3C7F53732F6D1F4500CFEE64 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = Resources/popup.html; sourceTree = "<group>"; };
+		3C7F53742F6D1F4500CFEE64 /* options.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = options.js; path = Resources/options.js; sourceTree = "<group>"; };
+		3C7F53752F6D1F4500CFEE64 /* compat.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = compat.js; path = Resources/compat.js; sourceTree = "<group>"; };
+		3C7F53762F6D1F4500CFEE64 /* converters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = converters.js; path = Resources/converters.js; sourceTree = "<group>"; };
+		3C7F53772F6D1F4500CFEE64 /* schema.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = schema.js; path = Resources/schema.js; sourceTree = "<group>"; };
+		3C7F53782F6D1F4500CFEE64 /* history.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = history.js; path = Resources/history.js; sourceTree = "<group>"; };
+		3C7F53792F6D1F4500CFEE64 /* filename.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = filename.js; path = Resources/filename.js; sourceTree = "<group>"; };
+		3C7F537A2F6D1F4500CFEE64 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+		3C7F537B2F6D1F4500CFEE64 /* dom-utils.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "dom-utils.js"; path = "Resources/dom-utils.js"; sourceTree = "<group>"; };
+		3C7F537C2F6D1F4500CFEE64 /* content-script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "content-script.js"; path = "Resources/content-script.js"; sourceTree = "<group>"; };
+		3C7F537D2F6D1F4500CFEE64 /* options.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = options.html; path = Resources/options.html; sourceTree = "<group>"; };
+		3C7F537E2F6D1F4500CFEE64 /* icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icon; path = Resources/icon; sourceTree = "<group>"; };
+		3C7F537F2F6D1F4500CFEE64 /* options.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = options.css; path = Resources/options.css; sourceTree = "<group>"; };
+		3C7F53802F6D1F4500CFEE64 /* background-sw.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "background-sw.js"; path = "Resources/background-sw.js"; sourceTree = "<group>"; };
+		3C7F53812F6D1F4500CFEE64 /* storage.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = storage.js; path = Resources/storage.js; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3C7F533F2F6D1F4400CFEE64 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C7F535A2F6D1F4500CFEE64 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3C7F53392F6D1F4400CFEE64 = {
+			isa = PBXGroup;
+			children = (
+				3C7F53442F6D1F4400CFEE64 /* Rakuzaichi */,
+				3C7F53612F6D1F4500CFEE64 /* Rakuzaichi Extension */,
+				3C7F53432F6D1F4400CFEE64 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3C7F53432F6D1F4400CFEE64 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C7F53422F6D1F4400CFEE64 /* Rakuzaichi.app */,
+				3C7F535D2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3C7F53442F6D1F4400CFEE64 /* Rakuzaichi */ = {
+			isa = PBXGroup;
+			children = (
+				3C7F53452F6D1F4400CFEE64 /* AppDelegate.swift */,
+				3C7F53512F6D1F4400CFEE64 /* ViewController.swift */,
+				3C7F53532F6D1F4400CFEE64 /* Main.storyboard */,
+				3C7F53562F6D1F4500CFEE64 /* Assets.xcassets */,
+				3C7F53582F6D1F4500CFEE64 /* Info.plist */,
+				3C7F53472F6D1F4400CFEE64 /* Resources */,
+			);
+			path = Rakuzaichi;
+			sourceTree = "<group>";
+		};
+		3C7F53472F6D1F4400CFEE64 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C7F53482F6D1F4400CFEE64 /* Main.html */,
+				3C7F534B2F6D1F4400CFEE64 /* Icon.png */,
+				3C7F534D2F6D1F4400CFEE64 /* Style.css */,
+				3C7F534F2F6D1F4400CFEE64 /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3C7F53612F6D1F4500CFEE64 /* Rakuzaichi Extension */ = {
+			isa = PBXGroup;
+			children = (
+				3C7F536E2F6D1F4500CFEE64 /* Resources */,
+				3C7F53622F6D1F4500CFEE64 /* SafariWebExtensionHandler.swift */,
+				3C7F53642F6D1F4500CFEE64 /* Info.plist */,
+			);
+			path = "Rakuzaichi Extension";
+			sourceTree = "<group>";
+		};
+		3C7F536E2F6D1F4500CFEE64 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C7F536F2F6D1F4500CFEE64 /* background-core.js */,
+				3C7F53702F6D1F4500CFEE64 /* platforms */,
+				3C7F53712F6D1F4500CFEE64 /* popup.js */,
+				3C7F53722F6D1F4500CFEE64 /* styles.css */,
+				3C7F53732F6D1F4500CFEE64 /* popup.html */,
+				3C7F53742F6D1F4500CFEE64 /* options.js */,
+				3C7F53752F6D1F4500CFEE64 /* compat.js */,
+				3C7F53762F6D1F4500CFEE64 /* converters.js */,
+				3C7F53772F6D1F4500CFEE64 /* schema.js */,
+				3C7F53782F6D1F4500CFEE64 /* history.js */,
+				3C7F53792F6D1F4500CFEE64 /* filename.js */,
+				3C7F537A2F6D1F4500CFEE64 /* manifest.json */,
+				3C7F537B2F6D1F4500CFEE64 /* dom-utils.js */,
+				3C7F537C2F6D1F4500CFEE64 /* content-script.js */,
+				3C7F537D2F6D1F4500CFEE64 /* options.html */,
+				3C7F537E2F6D1F4500CFEE64 /* icon */,
+				3C7F537F2F6D1F4500CFEE64 /* options.css */,
+				3C7F53802F6D1F4500CFEE64 /* background-sw.js */,
+				3C7F53812F6D1F4500CFEE64 /* storage.js */,
+			);
+			name = Resources;
+			path = "Rakuzaichi Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C7F53412F6D1F4400CFEE64 /* Rakuzaichi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C7F536B2F6D1F4500CFEE64 /* Build configuration list for PBXNativeTarget "Rakuzaichi" */;
+			buildPhases = (
+				3C7F533E2F6D1F4400CFEE64 /* Sources */,
+				3C7F533F2F6D1F4400CFEE64 /* Frameworks */,
+				3C7F53402F6D1F4400CFEE64 /* Resources */,
+				3C7F536A2F6D1F4500CFEE64 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3C7F53602F6D1F4500CFEE64 /* PBXTargetDependency */,
+			);
+			name = Rakuzaichi;
+			packageProductDependencies = (
+			);
+			productName = Rakuzaichi;
+			productReference = 3C7F53422F6D1F4400CFEE64 /* Rakuzaichi.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3C7F535C2F6D1F4500CFEE64 /* Rakuzaichi Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C7F53672F6D1F4500CFEE64 /* Build configuration list for PBXNativeTarget "Rakuzaichi Extension" */;
+			buildPhases = (
+				3C7F53592F6D1F4500CFEE64 /* Sources */,
+				3C7F535A2F6D1F4500CFEE64 /* Frameworks */,
+				3C7F535B2F6D1F4500CFEE64 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Rakuzaichi Extension";
+			packageProductDependencies = (
+			);
+			productName = "Rakuzaichi Extension";
+			productReference = 3C7F535D2F6D1F4500CFEE64 /* Rakuzaichi Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3C7F533A2F6D1F4400CFEE64 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					3C7F53412F6D1F4400CFEE64 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					3C7F535C2F6D1F4500CFEE64 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+				};
+			};
+			buildConfigurationList = 3C7F533D2F6D1F4400CFEE64 /* Build configuration list for PBXProject "Rakuzaichi" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3C7F53392F6D1F4400CFEE64;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3C7F53432F6D1F4400CFEE64 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C7F53412F6D1F4400CFEE64 /* Rakuzaichi */,
+				3C7F535C2F6D1F4500CFEE64 /* Rakuzaichi Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3C7F53402F6D1F4400CFEE64 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C7F534C2F6D1F4400CFEE64 /* Icon.png in Resources */,
+				3C7F53552F6D1F4400CFEE64 /* Main.storyboard in Resources */,
+				3C7F53502F6D1F4400CFEE64 /* Script.js in Resources */,
+				3C7F534A2F6D1F4400CFEE64 /* Main.html in Resources */,
+				3C7F53572F6D1F4500CFEE64 /* Assets.xcassets in Resources */,
+				3C7F534E2F6D1F4400CFEE64 /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C7F535B2F6D1F4500CFEE64 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C7F53822F6D1F4500CFEE64 /* background-core.js in Resources */,
+				3C7F538C2F6D1F4500CFEE64 /* filename.js in Resources */,
+				3C7F53942F6D1F4500CFEE64 /* storage.js in Resources */,
+				3C7F53902F6D1F4500CFEE64 /* options.html in Resources */,
+				3C7F538E2F6D1F4500CFEE64 /* dom-utils.js in Resources */,
+				3C7F538B2F6D1F4500CFEE64 /* history.js in Resources */,
+				3C7F538A2F6D1F4500CFEE64 /* schema.js in Resources */,
+				3C7F538D2F6D1F4500CFEE64 /* manifest.json in Resources */,
+				3C7F53872F6D1F4500CFEE64 /* options.js in Resources */,
+				3C7F538F2F6D1F4500CFEE64 /* content-script.js in Resources */,
+				3C7F53862F6D1F4500CFEE64 /* popup.html in Resources */,
+				3C7F53892F6D1F4500CFEE64 /* converters.js in Resources */,
+				3C7F53922F6D1F4500CFEE64 /* options.css in Resources */,
+				3C7F53882F6D1F4500CFEE64 /* compat.js in Resources */,
+				3C7F53852F6D1F4500CFEE64 /* styles.css in Resources */,
+				3C7F53912F6D1F4500CFEE64 /* icon in Resources */,
+				3C7F53842F6D1F4500CFEE64 /* popup.js in Resources */,
+				3C7F53932F6D1F4500CFEE64 /* background-sw.js in Resources */,
+				3C7F53832F6D1F4500CFEE64 /* platforms in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3C7F533E2F6D1F4400CFEE64 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C7F53522F6D1F4400CFEE64 /* ViewController.swift in Sources */,
+				3C7F53462F6D1F4400CFEE64 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C7F53592F6D1F4500CFEE64 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C7F53632F6D1F4500CFEE64 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3C7F53602F6D1F4500CFEE64 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C7F535C2F6D1F4500CFEE64 /* Rakuzaichi Extension */;
+			targetProxy = 3C7F535F2F6D1F4500CFEE64 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3C7F53482F6D1F4400CFEE64 /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C7F53492F6D1F4400CFEE64 /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		3C7F53532F6D1F4400CFEE64 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C7F53542F6D1F4400CFEE64 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3C7F53652F6D1F4500CFEE64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3C7F53662F6D1F4500CFEE64 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		3C7F53682F6D1F4500CFEE64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Rakuzaichi Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Rakuzaichi Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gabrielongzm.rakuzaichi.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3C7F53692F6D1F4500CFEE64 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Rakuzaichi Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Rakuzaichi Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gabrielongzm.rakuzaichi.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3C7F536C2F6D1F4500CFEE64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Rakuzaichi/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rakuzaichi;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gabrielongzm.rakuzaichi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3C7F536D2F6D1F4500CFEE64 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Rakuzaichi/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rakuzaichi;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gabrielongzm.rakuzaichi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3C7F533D2F6D1F4400CFEE64 /* Build configuration list for PBXProject "Rakuzaichi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C7F53652F6D1F4500CFEE64 /* Debug */,
+				3C7F53662F6D1F4500CFEE64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C7F53672F6D1F4500CFEE64 /* Build configuration list for PBXNativeTarget "Rakuzaichi Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C7F53682F6D1F4500CFEE64 /* Debug */,
+				3C7F53692F6D1F4500CFEE64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C7F536B2F6D1F4500CFEE64 /* Build configuration list for PBXNativeTarget "Rakuzaichi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C7F536C2F6D1F4500CFEE64 /* Debug */,
+				3C7F536D2F6D1F4500CFEE64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3C7F533A2F6D1F4400CFEE64 /* Project object */;
+}
