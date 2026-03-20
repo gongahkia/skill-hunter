@@ -3,7 +3,7 @@
 
 # `Dorso`
 
-CAPTCHA but to catch braindead programmers instead of bots.
+[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) but to catch braindead programmers instead of bots.
 
 <div align="center">
     <img src="./asset/logo/think.jpg" width="65%">
