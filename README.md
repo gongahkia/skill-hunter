@@ -39,10 +39,15 @@ Time is often spent poring over definitions and navigating between interpretatio
 Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
 
 | Browser | Status | Link |
-| :--- | :--- | :--- | 
-| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... | 
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL | 
+| :--- | :--- | :--- |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
+| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | NIL |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
+
+## Versions
+
+* `Skill Hunter v2.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/).
+* `Skill Hunter v3.0.0` is available as an Add-on for Firefox [here]().
 
 ## [Presentation](./asset/presentation/class_part.pdf)
 
