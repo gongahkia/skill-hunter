@@ -50,7 +50,7 @@ class Logger {
     }
   }
 
-  error(message: string, error?: Error | unknown, ...args: unknown[]): void {
+  error(message: string, error?: unknown, ...args: unknown[]): void {
     if (this.logLevel <= LogLevel.ERROR) {
       console.error(`${this.prefix} [ERROR]`, message, error, ...args);
     }
@@ -59,4 +59,3 @@ class Logger {
 
 export const logger = Logger.getInstance();
 export { LogLevel };
-

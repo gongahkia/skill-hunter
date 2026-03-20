@@ -2,33 +2,45 @@
  * Content script - Main entry point for the browser extension
  */
 
-import type { ChromeMessage, ChromeMessageResponse, HTMLContent, BackupContent } from '@/types';
+import type { ChromeMessage, ChromeMessageResponse, HTMLContent } from '@/types';
 import {
   getPageBasicData,
   getLegislationDefinitions,
   getLegislationContent,
 } from '@/core/domParser';
 import {
-  integrateDefinitions,
-  generateTableOfContentsHTML,
   generateContentHTML,
+  generateTableOfContentsHTML,
+  integrateDefinitions,
   PerformanceMonitor,
 } from '@/core/contentProcessor';
-import { logger } from '@/utils/logger';
+import { SKILL_HUNTER_IDS } from '@/utils/constants';
 import { handleError } from '@/utils/errorHandler';
+import { logger } from '@/utils/logger';
+import mainStyles from '@/styles/main.css?inline';
 
-// State management
 let isSimplified = false;
-let backupContent: BackupContent | null = null;
+let overlayHost: HTMLDivElement | null = null;
+let originalDocumentTitle = document.title;
+let originalDocumentOverflow = '';
 
-/**
- * Create the complete HTML content for the simplified view
- */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isWholeDocumentView(): boolean {
+  return new URL(window.location.href).searchParams.get('WholeDoc') === '1';
+}
+
 function createSimplifiedContent(): HTMLContent {
   const monitor = new PerformanceMonitor();
   monitor.start();
 
-  // Extract data from DOM
   const { pageBasicData } = getPageBasicData();
   monitor.mark('Page data extracted');
 
@@ -38,16 +50,13 @@ function createSimplifiedContent(): HTMLContent {
   const legislationDefinitions = getLegislationDefinitions();
   monitor.mark('Definitions extracted');
 
-  // Process content
   integrateDefinitions(legislationContent, legislationDefinitions);
   monitor.mark('Definitions integrated');
 
-  // Generate HTML
   const tocHTML = generateTableOfContentsHTML(
     pageBasicData.legislationTitle,
     pageBasicData.tableOfContents
   );
-
   const contentHTML = generateContentHTML(legislationContent);
   monitor.mark('HTML generated');
 
@@ -56,86 +65,129 @@ function createSimplifiedContent(): HTMLContent {
 
   return {
     title: `Skill Hunter: ${pageBasicData.legislationTitle}`,
-    style: '', // Styles are injected via CSS import
     content: `
-      <div class="skill-hunter-container">
-        ${tocHTML}
-        <div class="main-content">
-          <h1 class="page-title">${pageBasicData.legislationTitle}</h1>
-          ${contentHTML}
+      <div class="skill-hunter-root">
+        <div class="skill-hunter-toolbar">
+          <div class="skill-hunter-toolbar-copy">
+            <span class="skill-hunter-badge">Skill Hunter</span>
+            <p class="skill-hunter-subtitle">Simplified reading view for Singapore legislation</p>
+          </div>
+          <button type="button" class="skill-hunter-close" ${SKILL_HUNTER_IDS.ACTION_ATTR}="close">
+            Close simplified view
+          </button>
+        </div>
+        <div class="skill-hunter-layout">
+          ${tocHTML}
+          <main class="main-content" aria-label="Simplified legislation">
+            <h1 class="page-title">${escapeHtml(pageBasicData.legislationTitle)}</h1>
+            ${contentHTML}
+          </main>
         </div>
       </div>
     `,
   };
 }
 
-/**
- * Simplify the current page
- */
+function handleOverlayClick(event: Event): void {
+  const target = event.target;
+  if (!(target instanceof Element) || !overlayHost?.shadowRoot) {
+    return;
+  }
+
+  const actionElement = target.closest<HTMLElement>(`[${SKILL_HUNTER_IDS.ACTION_ATTR}]`);
+  if (actionElement?.dataset.skillHunterAction === 'close') {
+    revertPage();
+    return;
+  }
+
+  const tocElement = target.closest<HTMLElement>(`[${SKILL_HUNTER_IDS.TOC_TARGET_ATTR}]`);
+  const targetId = tocElement?.dataset.skillHunterScrollTarget;
+  if (!targetId) {
+    return;
+  }
+
+  const targetNode = overlayHost.shadowRoot.getElementById(targetId);
+  targetNode?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function createMarkupFragment(markup: string): DocumentFragment {
+  const range = document.createRange();
+  range.selectNode(document.body);
+  return range.createContextualFragment(markup);
+}
+
 function simplifyPage(): void {
-  try {
-    logger.info('Simplifying page...');
-
-    // Backup current state
-    backupContent = {
-      title: document.title,
-      style: document.querySelector('style')?.innerHTML ?? null,
-      content: document.body.innerHTML,
-    };
-
-    // Generate simplified content
-    const simplifiedContent = createSimplifiedContent();
-
-    // Apply changes
-    document.title = simplifiedContent.title;
-    document.body.innerHTML = simplifiedContent.content;
-
-    // Add class to body for styling
-    document.body.classList.add('skill-hunter-active');
-
-    isSimplified = true;
-    logger.info('Page simplified successfully');
-  } catch (error) {
-    handleError(error, 'simplifyPage');
+  if (isSimplified) {
+    return;
   }
+
+  logger.info('Simplifying page...');
+
+  originalDocumentTitle = document.title;
+  originalDocumentOverflow = document.documentElement.style.overflow;
+
+  const simplifiedContent = createSimplifiedContent();
+  const host = document.createElement('div');
+  host.id = SKILL_HUNTER_IDS.ROOT_HOST;
+
+  const shadowRoot = host.attachShadow({ mode: 'open' });
+  const styleEl = document.createElement('style');
+  styleEl.textContent = mainStyles;
+
+  const mountEl = document.createElement('div');
+  mountEl.appendChild(createMarkupFragment(simplifiedContent.content));
+  mountEl.addEventListener('click', handleOverlayClick);
+
+  shadowRoot.append(styleEl, mountEl);
+
+  document.body.appendChild(host);
+  document.documentElement.style.overflow = 'hidden';
+  document.title = simplifiedContent.title;
+
+  overlayHost = host;
+  isSimplified = true;
+
+  logger.info('Page simplified successfully');
 }
 
-/**
- * Revert to original page
- */
 function revertPage(): void {
+  if (!isSimplified || !overlayHost) {
+    return;
+  }
+
+  logger.info('Reverting page...');
+
+  overlayHost.remove();
+  overlayHost = null;
+  document.documentElement.style.overflow = originalDocumentOverflow;
+  document.title = originalDocumentTitle;
+  isSimplified = false;
+
+  logger.info('Page reverted successfully');
+}
+
+function toggleSimplifiedView(): ChromeMessageResponse {
   try {
-    if (!backupContent) {
-      logger.warn('No backup content available to revert');
-      return;
+    if (isSimplified) {
+      revertPage();
+      return { status: 'success', isSimplified: false };
     }
 
-    logger.info('Reverting page...');
-
-    document.title = backupContent.title;
-    document.body.innerHTML = backupContent.content;
-
-    if (backupContent.style) {
-      const styleEl = document.querySelector('style') || document.createElement('style');
-      styleEl.innerHTML = backupContent.style;
-      if (!styleEl.parentElement) {
-        document.head.appendChild(styleEl);
-      }
+    if (!isWholeDocumentView()) {
+      return {
+        status: 'unsupported_page',
+        error: 'Open the SSO Whole Document view before using Skill Hunter.',
+      };
     }
 
-    document.body.classList.remove('skill-hunter-active');
-
-    isSimplified = false;
-    backupContent = null;
-    logger.info('Page reverted successfully');
+    simplifyPage();
+    return { status: 'success', isSimplified: true };
   } catch (error) {
-    handleError(error, 'revertPage');
+    handleError(error, 'toggleSimplifiedView');
+    return { status: 'error', error: 'Skill Hunter could not simplify this page.' };
   }
 }
 
-/**
- * Handle messages from popup
- */
 function handleMessage(
   message: ChromeMessage,
   _sender: chrome.runtime.MessageSender,
@@ -143,61 +195,18 @@ function handleMessage(
 ): boolean {
   logger.debug('Message received:', message);
 
-  try {
-    switch (message.action) {
-      case 'simplify':
-        if (message.toggle) {
-          if (isSimplified) {
-            revertPage();
-          } else {
-            simplifyPage();
-          }
-        } else {
-          simplifyPage();
-        }
-        sendResponse({ status: 'success' });
-        break;
-
-      case 'cancel':
-        logger.info('Cancel action received');
-        sendResponse({ status: 'success' });
-        break;
-
-      default:
-        logger.warn(`Unknown action: ${message.action}`);
-        sendResponse({ status: 'error', error: 'Unknown action' });
-    }
-  } catch (error) {
-    handleError(error, 'handleMessage');
-    sendResponse({ status: 'error', error: String(error) });
+  if (message.action !== 'toggle_simplified_view') {
+    sendResponse({ status: 'error', error: 'Unknown action' });
+    return false;
   }
 
-  return true; // Keep message channel open for async response
+  sendResponse(toggleSimplifiedView());
+  return false;
 }
 
-/**
- * Initialize content script
- */
 function initialize(): void {
   logger.info('Skill Hunter content script initialized');
-
-  // Set up message listener
   chrome.runtime.onMessage.addListener(handleMessage);
-
-  // Navigate to bottom of page if on WholeDoc view
-  // This ensures the full document is loaded
-  if (window.location.href.endsWith('?WholeDoc=1')) {
-    const { pageBasicData } = getPageBasicData();
-    const toc = pageBasicData.tableOfContents;
-
-    if (toc.length > 0) {
-      const lastSection = toc[toc.length - 1];
-      logger.debug('Navigating to last section to ensure full document load');
-      window.location.href = lastSection.referenceUrl;
-    }
-  }
 }
 
-// Start the extension
 initialize();
-

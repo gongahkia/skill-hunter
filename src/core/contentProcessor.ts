@@ -3,7 +3,7 @@
  */
 
 import type { ContentToken, Definition } from '@/types';
-import { LOGICAL_CONNECTORS } from '@/utils/constants';
+import { LOGICAL_CONNECTORS, SKILL_HUNTER_IDS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
 /**
@@ -22,7 +22,6 @@ export function formatLogicalConnectors(sentence: string): string {
   return sentence.replace(regexPattern, (match) => `<b><i>${match}</i></b>`);
 }
 
-
 /**
  * Sort definitions by term length (longest first) to avoid partial matches
  */
@@ -38,9 +37,31 @@ export function sortDefinitionsByLength(definitions: Definition[]): Definition[]
  * Escape HTML to prevent XSS and HTML injection
  */
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttribute(text: string): string {
+  return escapeHtml(text);
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unknown content token type: ${String(value)}`);
+}
+
+export function extractReferenceTargetId(referenceUrl: string): string | null {
+  try {
+    const parsedUrl = new URL(referenceUrl, window.location.href);
+    const target = parsedUrl.hash.replace(/^#/, '').trim();
+    return target || null;
+  } catch {
+    logger.warn(`Unable to parse TOC reference URL: ${referenceUrl}`);
+    return null;
+  }
 }
 
 /**
@@ -99,14 +120,16 @@ export function integrateDefinitions(
   // Only process section body tokens
   const sectionBodyTokens = contentTokens.filter((token) => token.type === 'sectionBody');
 
-  logger.debug(`Processing ${sectionBodyTokens.length} section body tokens with ${sortedDefinitions.length} definitions`);
+  logger.debug(
+    `Processing ${sectionBodyTokens.length} section body tokens with ${sortedDefinitions.length} definitions`
+  );
 
   sectionBodyTokens.forEach((token) => {
     const lines = token.content.split('\n');
 
     const processedLines = lines.map((line) => {
-      // First, format logical connectors (this adds HTML tags)
-      let modifiedLine = formatLogicalConnectors(line);
+      // Escape source text before injecting Skill Hunter markup.
+      const modifiedLine = formatLogicalConnectors(escapeHtml(line));
 
       // Then, split the line into segments (text and HTML tags)
       const segments = splitPreservingTags(modifiedLine);
@@ -200,16 +223,23 @@ export function generateTableOfContentsHTML(
   const tocItemsHTML = tocItems
     .map((item) => {
       const text = item.referenceText;
+      const targetId = extractReferenceTargetId(item.referenceUrl);
       const match = text.match(/^(\d+)/);
       const formattedText = match
-        ? `<span class="toc-section-number">${match[0]}.</span> ${text.slice(match[0].length).trim()}`
-        : text;
+        ? `<span class="toc-section-number">${escapeHtml(match[0])}.</span> ${escapeHtml(
+            text.slice(match[0].length).trim()
+          )}`
+        : escapeHtml(text);
+
+      const targetAttribute = targetId
+        ? ` ${SKILL_HUNTER_IDS.TOC_TARGET_ATTR}="${escapeAttribute(targetId)}"`
+        : ' disabled aria-disabled="true"';
 
       return `
         <li class="toc-item">
-          <a href="${item.referenceUrl}" target="_blank" class="toc-link">
+          <button type="button" class="toc-link"${targetAttribute}>
             ${formattedText}
-          </a>
+          </button>
         </li>`;
     })
     .join('');
@@ -217,7 +247,7 @@ export function generateTableOfContentsHTML(
   return `
     <div class="toc-container">
       <div class="toc-header">
-        <h2 class="toc-title">${legislationTitle}</h2>
+        <h2 class="toc-title">${escapeHtml(legislationTitle)}</h2>
       </div>
       <div class="toc-content">
         <ul class="toc-list">
@@ -232,28 +262,29 @@ export function generateTableOfContentsHTML(
  */
 export function generateContentHTML(contentTokens: ContentToken[]): string {
   const contentParts = contentTokens.map((token) => {
+    const escapedId = token.ID ? escapeAttribute(token.ID) : null;
+
     switch (token.type) {
       case 'sectionHeader':
-        return `<h2 class="section-header" ${token.ID ? `id="${token.ID}"` : ''}>${token.content}</h2>`;
+        return `<h2 class="section-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h2>`;
 
       case 'sectionBody':
         return `<div class="section-body">${processContentLines(token.content)}</div>`;
 
       case 'provisionHeader':
-        return `<h3 class="provision-header" ${token.ID ? `id="${token.ID}"` : ''}>${token.content}</h3>`;
+        return `<h3 class="provision-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h3>`;
 
       case 'provisionNumber':
-        return `<div class="provision-number" ${token.ID ? `id="${token.ID}"` : ''}>${token.content}</div>`;
+        return `<div class="provision-number" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</div>`;
 
       case 'illustrationHeader':
-        return `<div class="illustration-header">${token.content}</div>`;
+        return `<div class="illustration-header">${escapeHtml(token.content)}</div>`;
 
       case 'illustrationBody':
-        return `<div class="illustration-body">${token.content}</div>`;
+        return `<div class="illustration-body">${escapeHtml(token.content)}</div>`;
 
       default:
-        logger.warn(`Unknown content token type: ${token.type}`);
-        return '';
+        return assertNever(token.type);
     }
   });
 
@@ -288,4 +319,3 @@ export class PerformanceMonitor {
     return new Map(this.marks);
   }
 }
-

@@ -14,7 +14,7 @@ describe('Error Handlers', () => {
   describe('SkillHunterError', () => {
     it('should create error with code', () => {
       const error = new SkillHunterError('Test error', 'TEST_CODE');
-      
+
       expect(error.message).toBe('Test error');
       expect(error.code).toBe('TEST_CODE');
       expect(error.name).toBe('SkillHunterError');
@@ -23,7 +23,7 @@ describe('Error Handlers', () => {
     it('should wrap original error', () => {
       const originalError = new Error('Original');
       const error = new SkillHunterError('Wrapped', 'CODE', originalError);
-      
+
       expect(error.originalError).toBe(originalError);
     });
   });
@@ -31,7 +31,7 @@ describe('Error Handlers', () => {
   describe('DOMParsingError', () => {
     it('should create DOM parsing error', () => {
       const error = new DOMParsingError('Parse failed');
-      
+
       expect(error.message).toBe('Parse failed');
       expect(error.code).toBe('DOM_PARSING_ERROR');
       expect(error.name).toBe('DOMParsingError');
@@ -41,7 +41,7 @@ describe('Error Handlers', () => {
   describe('ContentProcessingError', () => {
     it('should create content processing error', () => {
       const error = new ContentProcessingError('Processing failed');
-      
+
       expect(error.message).toBe('Processing failed');
       expect(error.code).toBe('CONTENT_PROCESSING_ERROR');
       expect(error.name).toBe('ContentProcessingError');
@@ -58,7 +58,7 @@ describe('Error Handlers', () => {
       const result = safeExecute(() => {
         throw new Error('Test error');
       }, 'fallback');
-      
+
       expect(result).toBe('fallback');
     });
 
@@ -66,33 +66,30 @@ describe('Error Handlers', () => {
       const result = safeExecute(() => {
         throw 'string error';
       }, 'fallback');
-      
+
       expect(result).toBe('fallback');
     });
   });
 
   describe('safeExecuteAsync', () => {
     it('should return result on success', async () => {
-      const result = await safeExecuteAsync(async () => 42, 0);
+      const result = await safeExecuteAsync(() => Promise.resolve(42), 0);
       expect(result).toBe(42);
     });
 
     it('should return fallback on error', async () => {
-      const result = await safeExecuteAsync(async () => {
-        throw new Error('Test error');
-      }, 'fallback');
-      
+      const result = await safeExecuteAsync(
+        () => Promise.reject(new Error('Test error')),
+        'fallback'
+      );
+
       expect(result).toBe('fallback');
     });
 
     it('should handle promise rejection', async () => {
-      const result = await safeExecuteAsync(
-        async () => Promise.reject('rejection'),
-        'fallback'
-      );
-      
+      const result = await safeExecuteAsync(() => Promise.reject('rejection'), 'fallback');
+
       expect(result).toBe('fallback');
     });
   });
 });
-

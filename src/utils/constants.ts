@@ -36,11 +36,7 @@ export const SELECTORS = {
   ILLUSTRATION_CELL: 'td.fs',
 } as const;
 
-export const LEGISLATION_URLS = {
-  ACTS: 'https://sso.agc.gov.sg/Act/*?WholeDoc=1',
-  SUBSIDIARY: 'https://sso.agc.gov.sg/SL/*WholeDoc=1',
-  BILLS: 'https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1',
-} as const;
+export const SUPPORTED_SSO_PATH_PREFIXES = ['/Act/', '/SL/', '/Bills-Supp/'] as const;
 
 export const LOGICAL_CONNECTORS = [
   'and',
@@ -117,16 +113,8 @@ export const LOGICAL_CONNECTORS = [
   'otherwise',
 ] as const;
 
-export const STORAGE_KEYS = {
-  COLOR_SCHEME: 'skillhunter_color_scheme',
-  FONT_FAMILY: 'skillhunter_font_family',
-  SIMPLIFIED_STATE: 'skillhunter_simplified_state',
-  USER_PREFERENCES: 'skillhunter_preferences',
+export const SKILL_HUNTER_IDS = {
+  ROOT_HOST: 'skill-hunter-root',
+  TOC_TARGET_ATTR: 'data-skill-hunter-scroll-target',
+  ACTION_ATTR: 'data-skill-hunter-action',
 } as const;
-
-export const EVENTS = {
-  SIMPLIFY: 'simplify',
-  REVERT: 'revert',
-  SETTINGS_UPDATED: 'settings_updated',
-} as const;
-

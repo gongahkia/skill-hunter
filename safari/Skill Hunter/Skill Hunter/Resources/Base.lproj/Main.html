@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Skill Hunter</title>
+    <link rel="stylesheet" href="../Style.css">
+    <script src="../Script.js" defer></script>
+</head>
+<body data-extension-state="unknown">
+    <main class="shell">
+        <section class="hero">
+            <img src="../Icon.png" width="96" height="96" alt="Skill Hunter icon">
+            <div class="hero-copy">
+                <p class="eyebrow">Safari Container App</p>
+                <h1>Skill Hunter</h1>
+                <p class="lede">
+                    Browser extension that reformats supported Singapore legislation pages from
+                    <code>sso.agc.gov.sg</code> into a cleaner, reversible reading view.
+                </p>
+                <div class="hero-actions">
+                    <button class="primary open-preferences">Open Safari Extension Settings</button>
+                    <span class="status-pill" data-role="state-title">Status unavailable</span>
+                </div>
+                <p class="status-copy" data-role="state-copy">
+                    Open Safari’s extension settings to enable Skill Hunter for supported SSO pages.
+                </p>
+            </div>
+        </section>
+
+        <nav class="tab-bar" aria-label="Skill Hunter container app sections">
+            <button class="tab-button is-active" type="button" data-panel-target="overview">Overview</button>
+            <button class="tab-button" type="button" data-panel-target="help">Help</button>
+            <button class="tab-button" type="button" data-panel-target="settings">Settings</button>
+        </nav>
+
+        <section class="panel-grid">
+            <article class="panel is-active" data-panel="overview">
+                <h2>What ships in this extension</h2>
+                <ul>
+                    <li>Explicit user-triggered simplify toggle only.</li>
+                    <li>No automatic page redirects, reload loops, or content changes before click.</li>
+                    <li>No remote code, no analytics, and no off-device data transmission.</li>
+                    <li>Scoped overlay UI that leaves the original legislation page intact underneath.</li>
+                </ul>
+            </article>
+
+            <article class="panel" data-panel="help">
+                <h2>How to use it</h2>
+                <ol>
+                    <li>Open a supported legislation page on <code>sso.agc.gov.sg</code>.</li>
+                    <li>Switch the source site into <strong>Whole Document</strong> mode first.</li>
+                    <li>Click the Skill Hunter toolbar icon in Safari.</li>
+                    <li>Use <strong>Toggle simplified view</strong> to open or close the reading overlay.</li>
+                </ol>
+                <p class="note">
+                    Supported paths mirror the browser build: <code>/Act/</code>, <code>/SL/</code>, and
+                    <code>/Bills-Supp/</code>.
+                </p>
+            </article>
+
+            <article class="panel" data-panel="settings">
+                <h2>Settings</h2>
+                <p>
+                    This audited release intentionally ships without user-configurable runtime settings.
+                    The extension exposes a single reversible action so the review surface stays narrow.
+                </p>
+                <ul>
+                    <li>Permission model: active-tab interaction plus site access on supported SSO pages.</li>
+                    <li>Current data use: on-device DOM parsing only.</li>
+                    <li>Future settings must preserve the same narrow single-purpose scope.</li>
+                </ul>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

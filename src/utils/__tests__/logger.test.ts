@@ -24,7 +24,7 @@ describe('Logger', () => {
   it('should log debug messages', () => {
     logger.setLogLevel(LogLevel.DEBUG);
     logger.debug('Debug message');
-    
+
     expect(consoleDebugSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
       'Debug message'
@@ -34,7 +34,7 @@ describe('Logger', () => {
   it('should log info messages', () => {
     logger.setLogLevel(LogLevel.INFO);
     logger.info('Info message');
-    
+
     expect(consoleInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
       'Info message'
@@ -44,7 +44,7 @@ describe('Logger', () => {
   it('should log warn messages', () => {
     logger.setLogLevel(LogLevel.WARN);
     logger.warn('Warning message');
-    
+
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
       'Warning message'
@@ -55,7 +55,7 @@ describe('Logger', () => {
     logger.setLogLevel(LogLevel.ERROR);
     const error = new Error('Test error');
     logger.error('Error message', error);
-    
+
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
       'Error message',
@@ -65,16 +65,15 @@ describe('Logger', () => {
 
   it('should respect log level settings', () => {
     logger.setLogLevel(LogLevel.ERROR);
-    
+
     logger.debug('Debug');
     logger.info('Info');
     logger.warn('Warn');
     logger.error('Error');
-    
+
     expect(consoleDebugSpy).not.toHaveBeenCalled();
     expect(consoleInfoSpy).not.toHaveBeenCalled();
     expect(consoleWarnSpy).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });
-

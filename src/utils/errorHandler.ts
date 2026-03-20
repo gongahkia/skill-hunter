@@ -32,7 +32,7 @@ export class ContentProcessingError extends SkillHunterError {
 
 export function handleError(error: unknown, context?: string): void {
   const contextMsg = context ? `[${context}]` : '';
-  
+
   if (error instanceof SkillHunterError) {
     logger.error(`${contextMsg} ${error.message}`, error.originalError);
   } else if (error instanceof Error) {
@@ -42,11 +42,7 @@ export function handleError(error: unknown, context?: string): void {
   }
 }
 
-export function safeExecute<T>(
-  fn: () => T,
-  fallback: T,
-  context?: string
-): T {
+export function safeExecute<T>(fn: () => T, fallback: T, context?: string): T {
   try {
     return fn();
   } catch (error) {
@@ -67,4 +63,3 @@ export async function safeExecuteAsync<T>(
     return fallback;
   }
 }
-

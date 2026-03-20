@@ -50,45 +50,15 @@ export interface ContentToken {
 
 export interface HTMLContent {
   title: string;
-  style: string;
-  content: string;
-}
-
-export interface BackupContent {
-  title: string;
-  style: string | null;
   content: string;
 }
 
 export interface ChromeMessage {
-  action: 'simplify' | 'cancel' | 'settings';
-  toggle?: boolean;
+  action: 'toggle_simplified_view';
 }
 
 export interface ChromeMessageResponse {
-  status: 'success' | 'error';
+  status: 'success' | 'error' | 'unsupported_page';
+  isSimplified?: boolean;
   error?: string;
 }
-
-export enum ColorScheme {
-  Dark = 'dark',
-  Light = 'light',
-  Gruvbox = 'gruvbox',
-  Everforest = 'everforest',
-  SolarizedDark = 'solarized-dark',
-  SolarizedLight = 'solarized-light',
-  Dracula = 'dracula',
-  Monokai = 'monokai',
-  Nord = 'nord',
-  TokyoNight = 'tokyo-night',
-}
-
-export interface ColorSchemeConfig {
-  '--bg-color': string;
-  '--text-color': string;
-  '--accent-color'?: string;
-  '--border-color'?: string;
-}
-
-export type ColorSchemeMap = Record<ColorScheme, ColorSchemeConfig>;
-

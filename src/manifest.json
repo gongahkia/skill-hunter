@@ -25,49 +25,29 @@
     "default_title": "Simplify legislation with Skill Hunter",
     "default_popup": "popup.html"
   },
-  
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  
+
   "content_scripts": [
     {
       "matches": [
-        "https://sso.agc.gov.sg/Act/*?WholeDoc=1",
-        "https://sso.agc.gov.sg/SL/*WholeDoc=1",
-        "https://sso.agc.gov.sg/Bills-Supp/*WholeDoc=1"
+        "https://sso.agc.gov.sg/Act/*",
+        "https://sso.agc.gov.sg/SL/*",
+        "https://sso.agc.gov.sg/Bills-Supp/*"
       ],
       "js": ["content.js"],
-      "css": ["styles/main.css"],
       "run_at": "document_idle"
     }
   ],
-  
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
-  ],
-  
-  "host_permissions": [
-    "https://sso.agc.gov.sg/*"
-  ],
-  
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "local_asset/*.png",
-        "styles/*.css"
-      ],
-      "matches": ["https://sso.agc.gov.sg/*"]
-    }
-  ],
-  
+
   "browser_specific_settings": {
     "gecko": {
       "id": "skill-hunter@gongahkia.dev",
-      "strict_min_version": "109.0"
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
     }
   },
   

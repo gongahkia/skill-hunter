@@ -48,10 +48,7 @@ function safeQuerySelectorAll<T extends Element = Element>(
  * Extract basic page metadata
  */
 export function getPageMetadata(): PageMetadata {
-  const descriptionMeta = safeQuerySelector<HTMLMetaElement>(
-    document,
-    'meta[name="description"]'
-  );
+  const descriptionMeta = safeQuerySelector<HTMLMetaElement>(document, 'meta[name="description"]');
   const logoRef = safeQuerySelector<HTMLLinkElement>(
     document,
     'link[rel="icon"], link[rel="shortcut icon"]'
@@ -169,23 +166,23 @@ export function getLegislationDefinitions(): Definition[] {
   const regex = /\u201C([^\u201D]+)\u201D/g;
 
   logger.info('Starting definition extraction...');
-  
+
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
   logger.info(`Found ${provisionContainers.length} provision containers`);
-  
+
   // Also try a broader search to see what's available
   const allProvisionDivs = safeQuerySelectorAll(document, "div[class^='prov']");
   logger.info(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
-  
+
   // Check for definition cells with different selectors
   const defCells1 = safeQuerySelectorAll(document, 'td.def');
   const defCells2 = safeQuerySelectorAll(document, 'td[class*="def"]');
   const defCells3 = safeQuerySelectorAll(document, 'td[class*="Def"]');
-  
+
   logger.info(`Found ${defCells1.length} cells with class 'def'`);
   logger.info(`Found ${defCells2.length} cells with class containing 'def'`);
   logger.info(`Found ${defCells3.length} cells with class containing 'Def'`);
@@ -196,7 +193,7 @@ export function getLegislationDefinitions(): Definition[] {
 
     definitionCells.forEach((cell) => {
       const sentence = cell.textContent?.trim() ?? '';
-      
+
       if (!sentence) return;
 
       // Reset regex lastIndex for each iteration
@@ -205,7 +202,7 @@ export function getLegislationDefinitions(): Definition[] {
 
       if (match && match[1]) {
         const term = match[1].trim();
-        
+
         // Only add if we haven't seen this term before
         if (!definitionTerms.has(term)) {
           definitionTerms.add(term);
@@ -226,14 +223,14 @@ export function getLegislationContent(): ContentToken[] {
   const content: ContentToken[] = [];
 
   logger.info('Starting content extraction...');
-  
+
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
   logger.info(`Found ${provisionContainers.length} provision containers for content extraction`);
-  
+
   // Also check what we can find with broader selectors
   const legisContent = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
   const legisBody = safeQuerySelector(document, SELECTORS.LEGIS_BODY);
@@ -242,20 +239,20 @@ export function getLegislationContent(): ContentToken[] {
 
   if (provisionContainers.length === 0) {
     logger.warn('No provision containers found, trying alternative selectors...');
-    
+
     // Try alternative selectors
     const altContainers = safeQuerySelectorAll(document, "div[class^='prov']");
     logger.info(`Found ${altContainers.length} alternative provision containers`);
-    
+
     if (altContainers.length === 0) {
       throw new DOMParsingError('No provision containers found in document');
     }
-    
+
     // Use alternative containers
     altContainers.forEach((container) => {
       const rows = safeQuerySelectorAll(container, 'table tbody tr');
       logger.info(`Alternative container: found ${rows.length} rows`);
-      
+
       rows.forEach((row) => {
         // Section Header
         const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
@@ -286,7 +283,7 @@ export function getLegislationContent(): ContentToken[] {
         }
       });
     });
-    
+
     logger.info(`Extracted ${content.length} content tokens using alternative method`);
     return content;
   }
@@ -316,7 +313,10 @@ export function getLegislationContent(): ContentToken[] {
         const innerHTML = illustrationCell.innerHTML;
         const text = illustrationCell.textContent?.trim() ?? '';
 
-        if (innerHTML.includes('<em>Illustration</em>') || innerHTML.includes('<em>Illustrations</em>')) {
+        if (
+          innerHTML.includes('<em>Illustration</em>') ||
+          innerHTML.includes('<em>Illustrations</em>')
+        ) {
           content.push({
             type: 'illustrationHeader',
             ID: null,
@@ -383,4 +383,3 @@ export function getLegislationContent(): ContentToken[] {
   logger.info(`Extracted ${content.length} content tokens`);
   return content;
 }
-
