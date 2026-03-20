@@ -1,6 +1,7 @@
 target/
 .idea/
 .vscode/
+node_modules/
 *.iml
 *.ipr
 *.iws
@@ -22,3 +23,7 @@ Thumbs.db
 *.swp
 *.swo
 *.bak
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+**/xcuserdata/

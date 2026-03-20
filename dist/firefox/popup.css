@@ -1,0 +1,120 @@
+:root {
+  --bg: #09121d;
+  --panel: #0f1b29;
+  --panel2: #132435;
+  --text: #e6eef7;
+  --muted: #9db0c4;
+  --border: rgba(255, 255, 255, 0.1);
+  --primary: #67d18f;
+  --primary2: #3d9f61;
+  --secondary: #2d76db;
+  --secondary2: #2058a6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  width: 360px;
+}
+
+.header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.main {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+}
+
+.card-title {
+  font-weight: 650;
+}
+
+.muted {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 9px 11px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #071420;
+  font-weight: 650;
+}
+
+.btn-primary:hover {
+  background: var(--primary2);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  font-weight: 650;
+}
+
+.btn-secondary:hover {
+  background: var(--secondary2);
+}

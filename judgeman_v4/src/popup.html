@@ -16,43 +16,33 @@
 
     <main class="main">
       <section class="card">
+        <div class="card-title">Readable view</div>
+        <p class="muted">
+          Opens a non-destructive reader overlay on supported ELIT judgment pages.
+        </p>
         <div class="row">
-          <button id="toggleBtn" class="btn btn-primary">Toggle readable view</button>
-          <button id="refreshBtn" class="btn btn-quiet" title="Re-scan page">Refresh</button>
+          <button id="toggleBtn" class="btn btn-primary" type="button">Toggle readable view</button>
+          <button id="refreshBtn" class="btn btn-quiet" type="button">Refresh</button>
         </div>
-        <div class="muted" id="status">Ready.</div>
       </section>
 
       <section class="card">
-        <div class="card-title">Case facts rundown (BYOK)</div>
-        <div class="muted">Uses your API key from Options.</div>
+        <div class="card-title">Structured export</div>
+        <p class="muted">
+          Copies the locally extracted case JSON. No page content leaves the browser in this build.
+        </p>
         <div class="row">
-          <button id="factsBtn" class="btn btn-secondary">Generate rundown</button>
-          <button id="copyFactsBtn" class="btn btn-quiet">Copy</button>
+          <button id="copyCaseBtn" class="btn btn-secondary" type="button">Copy case JSON</button>
         </div>
-        <pre id="factsOut" class="output" aria-label="Facts rundown"></pre>
       </section>
 
       <section class="card">
-        <div class="card-title">Instant diagram</div>
-        <div class="muted">Builds a quick relationship graph from the case.</div>
-        <div class="row">
-          <button id="diagramBtn" class="btn btn-secondary">Generate diagram</button>
-          <button id="copyDiagramBtn" class="btn btn-quiet">Copy JSON</button>
-        </div>
-        <div id="diagramWrap" class="diagram" aria-label="Diagram"></div>
-        <pre id="diagramJson" class="output" aria-label="Diagram JSON"></pre>
-      </section>
-
-      <section class="card">
-        <div class="card-title">Export</div>
-        <div class="row">
-          <button id="copyCaseBtn" class="btn btn-quiet">Copy case JSON</button>
-          <a class="link" href="options.html" target="_blank" rel="noreferrer">Open Options</a>
-        </div>
+        <div class="card-title">Status</div>
+        <p class="muted" id="status">Ready.</p>
       </section>
     </main>
 
+    <script src="browserApi.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -1,21 +1,33 @@
-all:compile
+.PHONY: icons build build-chrome build-firefox package-firefox lint-firefox build-safari safari-project test verify clean
 
-run:
-	@echo "executing compiled file..."
-	java src.CaseScraper
+icons:
+	python3 scripts/generate-icons.py
 
-compile: 
-	@echo "compiling java project..."
-	mvn clean
-	mvn install
+build: icons
+	npm run build
 
-config:.pre-commit-config.yaml
-	@echo "installing precommit hooks..."
-	pip install pre-commit
-	pre-commit install
-	pre-commit autoupdate
-	pre-commit run --all-files
-	@echo "installing maven and playwright project..."
-	sudo apt install maven
-	mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install"
-	maven -v
+build-chrome: icons
+	npm run build:chrome
+
+build-firefox: icons
+	npm run build:firefox
+
+package-firefox: icons
+	npm run package:firefox
+
+lint-firefox: package-firefox
+	npm run lint:firefox
+
+build-safari: icons
+	npm run build:safari
+
+safari-project: build-safari
+	npm run safari:project
+
+test:
+	npm test
+
+verify: build test
+
+clean:
+	rm -rf dist safari

@@ -1,0 +1,16 @@
+{
+  "categories": {
+    "firefox": [
+      "other"
+    ]
+  },
+  "summary": {
+    "en-US": "Readable ELIT judgments with structured local export."
+  },
+  "homepage": {
+    "en-US": "https://github.com/gongahkia/judgeman"
+  },
+  "support_url": {
+    "en-US": "https://github.com/gongahkia/judgeman/issues"
+  }
+}
