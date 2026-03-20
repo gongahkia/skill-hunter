@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorso Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="compact">
+    <main class="shell">
+        <section class="hero">
+            <div class="brand">
+                <img src="../assets/duck.png" alt="Dorso duck">
+                <div>
+                    <p class="brand-kicker">Review-First Build</p>
+                    <h1 class="brand-title">Dorso</h1>
+                    <p class="brand-copy">A local-only extension that keeps selected chatbot sites gated until you land an accepted LeetCode submission.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="messagePanel"></div>
+
+        <section class="panel" id="statusPanel"></section>
+        <section class="panel" id="challengePanel"></section>
+        <section class="panel" id="controlPanel"></section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Supported Sites</h2>
+                    <p>Choose which supported chatbot domains Dorso should protect.</p>
+                </div>
+            </div>
+            <form id="sitesForm" class="form-grid"></form>
+        </section>
+
+        <section class="panel" id="disclosurePanel"></section>
+    </main>
+    <script type="module" src="./popup.js"></script>
+</body>
+</html>

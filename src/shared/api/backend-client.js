@@ -1,12 +1,14 @@
 /**
  * API client for communicating with Django backend.
+ * Kept for future non-store builds. The public store build does not ship this module.
  */
 
-import { BACKEND_API_URL } from '../core/constants.js';
 import logger from '../utils/logger.js';
 
+const DEFAULT_BACKEND_API_URL = 'https://api.dorso.example.invalid/api/v1';
+
 class BackendClient {
-    constructor(baseURL = BACKEND_API_URL) {
+    constructor(baseURL = DEFAULT_BACKEND_API_URL) {
         this.baseURL = baseURL;
     }
 

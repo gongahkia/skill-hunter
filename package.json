@@ -7,6 +7,9 @@
     "build": "node scripts/build-extension.mjs all",
     "build:chrome": "node scripts/build-extension.mjs chrome",
     "build:firefox": "node scripts/build-extension.mjs firefox",
+    "build:safari": "node scripts/build-extension.mjs safari",
+    "sync:safari-wrapper": "node scripts/sync-safari-wrapper.mjs",
+    "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
     "test:shared": "npm test -- --runInBand --silent --passWithNoTests",
     "test:e2e": "npm test -- --reporter=line"
   }

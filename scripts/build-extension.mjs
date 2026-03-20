@@ -2,12 +2,20 @@ import { cp, mkdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { CHATBOT_MATCH_PATTERNS } from '../src/shared/core/constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 const extensionRoot = path.join(repoRoot, 'src', 'extension');
 const sharedRoot = path.join(repoRoot, 'src', 'shared');
 const distRoot = path.join(repoRoot, 'dist');
+const leetCodePattern = 'https://leetcode.com/problems/*';
+const iconPath = 'extension/assets/icons/icon-128.png';
+const firefoxAddonId = 'dorso-public-firefox@extensions.gongahkia.com';
+const actionIcons = {
+    16: 'extension/assets/icons/icon-16.png',
+    32: 'extension/assets/icons/icon-32.png',
+};
 
 const browserConfigs = {
     chrome: {
@@ -16,15 +24,26 @@ const browserConfigs = {
     firefox: {
         outputDir: path.join(distRoot, 'firefox'),
     },
+    safari: {
+        outputDir: path.join(distRoot, 'safari'),
+    },
 };
 
 const sharedFilter = (sourcePath) => {
     return ![
         '__tests__',
+        'api',
         '.eslintrc.json',
         '.prettierrc.json',
         'jest.config.js',
         'package.json',
+        'package-lock.json',
+        'node_modules',
+        'adapters',
+        'question-manager.js',
+        'session-manager.js',
+        'logger.js',
+        'validator.js',
     ].some((needle) => sourcePath.includes(needle));
 };
 
@@ -33,33 +52,38 @@ function getManifest(browser) {
         manifest_version: 3,
         name: 'Dorso',
         version: '2.1.0',
-        description: 'Gate AI chatbot tabs behind verified programming challenges.',
-        permissions: ['storage', 'tabs', 'webNavigation'],
-        host_permissions: ['<all_urls>'],
+        description: 'Protect selected AI chatbot sites until a matching LeetCode challenge is solved.',
+        permissions: ['storage'],
+        host_permissions: [...CHATBOT_MATCH_PATTERNS, leetCodePattern],
+        icons: {
+            16: actionIcons[16],
+            32: actionIcons[32],
+            48: 'extension/assets/icons/icon-48.png',
+            128: iconPath,
+        },
         action: {
             default_popup: 'extension/ui/popup.html',
+            default_icon: actionIcons,
         },
         content_scripts: [
             {
-                matches: ['https://leetcode.com/problems/*'],
+                matches: CHATBOT_MATCH_PATTERNS,
+                js: ['extension/content/chatbot-gate.js'],
+                run_at: 'document_start',
+            },
+            {
+                matches: [leetCodePattern],
                 js: ['extension/content/leetcode.js'],
                 run_at: 'document_idle',
             },
         ],
-        web_accessible_resources: [
-            {
-                resources: ['extension/assets/*', 'extension/ui/*'],
-                matches: ['<all_urls>'],
-            },
-        ],
     };
 
-    if (browser === 'chrome') {
+    if (browser === 'chrome' || browser === 'safari') {
         return {
             ...baseManifest,
             background: {
                 service_worker: 'extension/background/index.js',
-                type: 'module',
             },
         };
     }
@@ -68,11 +92,14 @@ function getManifest(browser) {
         ...baseManifest,
         background: {
             scripts: ['extension/background/index.js'],
-            type: 'module',
         },
         browser_specific_settings: {
             gecko: {
-                id: 'dorso@gongahkia.com',
+                id: firefoxAddonId,
+                data_collection_permissions: {
+                    required: ['none'],
+                    optional: [],
+                },
             },
         },
     };

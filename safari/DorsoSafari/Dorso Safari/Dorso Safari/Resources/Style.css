@@ -1,0 +1,135 @@
+* {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    cursor: default;
+}
+
+:root {
+    color-scheme: light dark;
+
+    --spacing: 20px;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    color: #191411;
+    background:
+        radial-gradient(circle at top right, rgba(209, 119, 60, 0.18), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(115, 62, 28, 0.12), transparent 32%),
+        linear-gradient(160deg, #f8f4ec 0%, #efe3d4 100%);
+}
+
+body:not(.state-on, .state-off) :is(.state-on, .state-off) {
+    display: none;
+}
+
+body.state-on :is(.state-off, .state-unknown) {
+    display: none;
+}
+
+body.state-off :is(.state-on, .state-unknown) {
+    display: none;
+}
+
+button {
+    font-size: 1em;
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #a14419, #cb6f35);
+    color: #fff8f3;
+    cursor: pointer;
+}
+
+a {
+    color: #7f3613;
+}
+
+.app-shell {
+    max-width: 920px;
+    margin: 0 auto;
+    min-height: 100%;
+    padding: 40px 32px 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+}
+
+.eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #9a4516;
+}
+
+h1,
+h2,
+p {
+    margin: 0;
+}
+
+.lede {
+    max-width: 62ch;
+    line-height: 1.6;
+    color: #4f4339;
+}
+
+.status-card,
+.info-card {
+    background: rgba(255, 251, 243, 0.95);
+    border: 1px solid rgba(25, 20, 17, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(54, 34, 20, 0.12);
+}
+
+.status-card {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+    width: min(620px, 100%);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.info-card {
+    padding: 20px;
+    text-align: left;
+}
+
+.info-card h2 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.info-card p {
+    line-height: 1.6;
+    color: #4f4339;
+}
+
+.link-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+@media (max-width: 840px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

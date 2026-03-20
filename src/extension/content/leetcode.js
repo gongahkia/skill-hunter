@@ -1,10 +1,21 @@
 (function attachLeetCodeWatcher() {
-    const runtime = globalThis.browser ?? globalThis.chrome;
+    const browserApi = globalThis.browser ?? globalThis.chrome;
+
+    function getProblemSlug() {
+        const match = location.pathname.match(/\/problems\/([^/]+)/);
+        return match ? match[1] : null;
+    }
 
     function notifyResult(success) {
-        runtime.runtime.sendMessage({
+        const slug = getProblemSlug();
+        if (!slug) {
+            return;
+        }
+
+        browserApi.runtime.sendMessage({
             action: 'submissionResult',
             source: 'leetcode',
+            slug,
             success,
         });
     }
@@ -42,4 +53,3 @@
         subtree: true,
     });
 })();
-

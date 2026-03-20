@@ -3,7 +3,7 @@
 
 # `Dorso`
 
-[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) but to catch braindead programmers instead of bots.
+[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) but to [catch braindead programmers](#architecture) instead of bots.
 
 <div align="center">
     <img src="./asset/logo/think.jpg" width="65%">
@@ -36,15 +36,10 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 
 ## Details
 
-### Supported browsers
+### Versions
 
-Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
-
-| Browser | Status | Link |
-| :--- | :--- | :--- |
-| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | ... |
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
+* `Dorso v1.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/dorso/).
+* `Dorso v2.0.0` is available as an Add-on for Firefox [here]().
 
 ### Blacklist
 
@@ -61,6 +56,16 @@ Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Fi
 * https://writesonic.com/chat
 * https://you.com/
 * https://www.jasper.ai/
+
+### Supported browsers
+
+Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+
+| Browser | Status | Link |
+| :--- | :--- | :--- |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
+| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | NIL |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
 
 ## Architecture
 
@@ -114,3 +119,7 @@ $ uvicorn main:app --reload
 ## References
 
 The name `Dorso` is in reference to the [dorsolateral prefrontal cortex](https://en.wikipedia.org/wiki/Dorsolateral_prefrontal_cortex), the portion of the brain primarily responsible for solving programming problems.
+
+<div align="center">
+    <img src="./asset/logo/brain.gif">
+</div>

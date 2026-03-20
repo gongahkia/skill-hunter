@@ -4,11 +4,10 @@
 
 import {
   validateRequired,
-  validateProblemData,
+  validateChallengeData,
   isLeetCodeURL,
   isAIChatbotURL,
 } from '../utils/validator.js';
-import { LLM_REGEX } from '../core/constants.js';
 
 describe('Validator', () => {
   describe('validateRequired', () => {
@@ -23,24 +22,23 @@ describe('Validator', () => {
     });
   });
 
-  describe('validateProblemData', () => {
-    test('should validate valid problem data', () => {
+  describe('validateChallengeData', () => {
+    test('should validate valid challenge data', () => {
       const problem = {
-        questionId: '1',
+        source: 'leetcode',
         title: 'Two Sum',
-        titleSlug: 'two-sum',
-        content: '<p>Problem content</p>',
+        slug: 'two-sum',
+        url: 'https://leetcode.com/problems/two-sum/description/',
         difficulty: 'Easy',
       };
-      expect(() => validateProblemData(problem)).not.toThrow();
+      expect(() => validateChallengeData(problem)).not.toThrow();
     });
 
-    test('should throw error for invalid problem data', () => {
+    test('should throw error for invalid challenge data', () => {
       const problem = {
-        questionId: '1',
         title: 'Two Sum',
       };
-      expect(() => validateProblemData(problem)).toThrow();
+      expect(() => validateChallengeData(problem)).toThrow();
     });
   });
 
@@ -60,15 +58,15 @@ describe('Validator', () => {
 
   describe('isAIChatbotURL', () => {
     test('should return true for ChatGPT URL', () => {
-      expect(isAIChatbotURL('https://chatgpt.com/', LLM_REGEX)).toBe(true);
+      expect(isAIChatbotURL('https://chatgpt.com/')).toBe(true);
     });
 
     test('should return true for Claude URL', () => {
-      expect(isAIChatbotURL('https://claude.ai/', LLM_REGEX)).toBe(true);
+      expect(isAIChatbotURL('https://claude.ai/')).toBe(true);
     });
 
     test('should return false for non-chatbot URLs', () => {
-      expect(isAIChatbotURL('https://google.com/', LLM_REGEX)).toBe(false);
+      expect(isAIChatbotURL('https://google.com/')).toBe(false);
     });
   });
 });

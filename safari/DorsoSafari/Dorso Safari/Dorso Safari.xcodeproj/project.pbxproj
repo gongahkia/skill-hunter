@@ -1,0 +1,607 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C8BEFCA2F6D1EE400FB5D63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C8BEFC92F6D1EE400FB5D63 /* AppDelegate.swift */; };
+		3C8BEFCE2F6D1EE400FB5D63 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFCC2F6D1EE400FB5D63 /* Main.html */; };
+		3C8BEFD02F6D1EE400FB5D63 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFCF2F6D1EE400FB5D63 /* Icon.png */; };
+		3C8BEFD22F6D1EE400FB5D63 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFD12F6D1EE400FB5D63 /* Style.css */; };
+		3C8BEFD42F6D1EE400FB5D63 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFD32F6D1EE400FB5D63 /* Script.js */; };
+		3C8BEFD62F6D1EE400FB5D63 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C8BEFD52F6D1EE400FB5D63 /* ViewController.swift */; };
+		3C8BEFD92F6D1EE400FB5D63 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFD72F6D1EE400FB5D63 /* Main.storyboard */; };
+		3C8BEFDB2F6D1EE500FB5D63 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFDA2F6D1EE500FB5D63 /* Assets.xcassets */; };
+		3C8BEFE22F6D1EE500FB5D63 /* Dorso Safari Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C8BEFE12F6D1EE500FB5D63 /* Dorso Safari Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3C8BEFE72F6D1EE500FB5D63 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C8BEFE62F6D1EE500FB5D63 /* SafariWebExtensionHandler.swift */; };
+		3C8BEFF62F6D1EE500FB5D63 /* extension in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFF32F6D1EE500FB5D63 /* extension */; };
+		3C8BEFF72F6D1EE500FB5D63 /* shared in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFF42F6D1EE500FB5D63 /* shared */; };
+		3C8BEFF82F6D1EE500FB5D63 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 3C8BEFF52F6D1EE500FB5D63 /* manifest.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3C8BEFE32F6D1EE500FB5D63 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C8BEFBE2F6D1EE400FB5D63 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C8BEFE02F6D1EE500FB5D63;
+			remoteInfo = "Dorso Safari Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3C8BEFEE2F6D1EE500FB5D63 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3C8BEFE22F6D1EE500FB5D63 /* Dorso Safari Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3C8BEFC62F6D1EE400FB5D63 /* Dorso Safari.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Dorso Safari.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C8BEFC92F6D1EE400FB5D63 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3C8BEFCD2F6D1EE400FB5D63 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		3C8BEFCF2F6D1EE400FB5D63 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		3C8BEFD12F6D1EE400FB5D63 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		3C8BEFD32F6D1EE400FB5D63 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		3C8BEFD52F6D1EE400FB5D63 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3C8BEFD82F6D1EE400FB5D63 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3C8BEFDA2F6D1EE500FB5D63 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3C8BEFDC2F6D1EE500FB5D63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C8BEFE12F6D1EE500FB5D63 /* Dorso Safari Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Dorso Safari Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C8BEFE62F6D1EE500FB5D63 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		3C8BEFE82F6D1EE500FB5D63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C8BEFF32F6D1EE500FB5D63 /* extension */ = {isa = PBXFileReference; lastKnownFileType = folder; name = extension; path = Resources/extension; sourceTree = "<group>"; };
+		3C8BEFF42F6D1EE500FB5D63 /* shared */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shared; path = Resources/shared; sourceTree = "<group>"; };
+		3C8BEFF52F6D1EE500FB5D63 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3C8BEFC32F6D1EE400FB5D63 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C8BEFDE2F6D1EE500FB5D63 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3C8BEFBD2F6D1EE400FB5D63 = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFC82F6D1EE400FB5D63 /* Dorso Safari */,
+				3C8BEFE52F6D1EE500FB5D63 /* Dorso Safari Extension */,
+				3C8BEFC72F6D1EE400FB5D63 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3C8BEFC72F6D1EE400FB5D63 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFC62F6D1EE400FB5D63 /* Dorso Safari.app */,
+				3C8BEFE12F6D1EE500FB5D63 /* Dorso Safari Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3C8BEFC82F6D1EE400FB5D63 /* Dorso Safari */ = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFC92F6D1EE400FB5D63 /* AppDelegate.swift */,
+				3C8BEFD52F6D1EE400FB5D63 /* ViewController.swift */,
+				3C8BEFD72F6D1EE400FB5D63 /* Main.storyboard */,
+				3C8BEFDA2F6D1EE500FB5D63 /* Assets.xcassets */,
+				3C8BEFDC2F6D1EE500FB5D63 /* Info.plist */,
+				3C8BEFCB2F6D1EE400FB5D63 /* Resources */,
+			);
+			path = "Dorso Safari";
+			sourceTree = "<group>";
+		};
+		3C8BEFCB2F6D1EE400FB5D63 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFCC2F6D1EE400FB5D63 /* Main.html */,
+				3C8BEFCF2F6D1EE400FB5D63 /* Icon.png */,
+				3C8BEFD12F6D1EE400FB5D63 /* Style.css */,
+				3C8BEFD32F6D1EE400FB5D63 /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3C8BEFE52F6D1EE500FB5D63 /* Dorso Safari Extension */ = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFF22F6D1EE500FB5D63 /* Resources */,
+				3C8BEFE62F6D1EE500FB5D63 /* SafariWebExtensionHandler.swift */,
+				3C8BEFE82F6D1EE500FB5D63 /* Info.plist */,
+			);
+			path = "Dorso Safari Extension";
+			sourceTree = "<group>";
+		};
+		3C8BEFF22F6D1EE500FB5D63 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C8BEFF32F6D1EE500FB5D63 /* extension */,
+				3C8BEFF42F6D1EE500FB5D63 /* shared */,
+				3C8BEFF52F6D1EE500FB5D63 /* manifest.json */,
+			);
+			name = Resources;
+			path = "Dorso Safari Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C8BEFC52F6D1EE400FB5D63 /* Dorso Safari */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C8BEFEF2F6D1EE500FB5D63 /* Build configuration list for PBXNativeTarget "Dorso Safari" */;
+			buildPhases = (
+				3C8BEFC22F6D1EE400FB5D63 /* Sources */,
+				3C8BEFC32F6D1EE400FB5D63 /* Frameworks */,
+				3C8BEFC42F6D1EE400FB5D63 /* Resources */,
+				3C8BEFEE2F6D1EE500FB5D63 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3C8BEFE42F6D1EE500FB5D63 /* PBXTargetDependency */,
+			);
+			name = "Dorso Safari";
+			packageProductDependencies = (
+			);
+			productName = "Dorso Safari";
+			productReference = 3C8BEFC62F6D1EE400FB5D63 /* Dorso Safari.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3C8BEFE02F6D1EE500FB5D63 /* Dorso Safari Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C8BEFEB2F6D1EE500FB5D63 /* Build configuration list for PBXNativeTarget "Dorso Safari Extension" */;
+			buildPhases = (
+				3C8BEFDD2F6D1EE500FB5D63 /* Sources */,
+				3C8BEFDE2F6D1EE500FB5D63 /* Frameworks */,
+				3C8BEFDF2F6D1EE500FB5D63 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Dorso Safari Extension";
+			packageProductDependencies = (
+			);
+			productName = "Dorso Safari Extension";
+			productReference = 3C8BEFE12F6D1EE500FB5D63 /* Dorso Safari Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3C8BEFBE2F6D1EE400FB5D63 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					3C8BEFC52F6D1EE400FB5D63 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					3C8BEFE02F6D1EE500FB5D63 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+				};
+			};
+			buildConfigurationList = 3C8BEFC12F6D1EE400FB5D63 /* Build configuration list for PBXProject "Dorso Safari" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3C8BEFBD2F6D1EE400FB5D63;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3C8BEFC72F6D1EE400FB5D63 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C8BEFC52F6D1EE400FB5D63 /* Dorso Safari */,
+				3C8BEFE02F6D1EE500FB5D63 /* Dorso Safari Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3C8BEFC42F6D1EE400FB5D63 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C8BEFD02F6D1EE400FB5D63 /* Icon.png in Resources */,
+				3C8BEFD92F6D1EE400FB5D63 /* Main.storyboard in Resources */,
+				3C8BEFD42F6D1EE400FB5D63 /* Script.js in Resources */,
+				3C8BEFCE2F6D1EE400FB5D63 /* Main.html in Resources */,
+				3C8BEFDB2F6D1EE500FB5D63 /* Assets.xcassets in Resources */,
+				3C8BEFD22F6D1EE400FB5D63 /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C8BEFDF2F6D1EE500FB5D63 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C8BEFF62F6D1EE500FB5D63 /* extension in Resources */,
+				3C8BEFF82F6D1EE500FB5D63 /* manifest.json in Resources */,
+				3C8BEFF72F6D1EE500FB5D63 /* shared in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3C8BEFC22F6D1EE400FB5D63 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C8BEFD62F6D1EE400FB5D63 /* ViewController.swift in Sources */,
+				3C8BEFCA2F6D1EE400FB5D63 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C8BEFDD2F6D1EE500FB5D63 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C8BEFE72F6D1EE500FB5D63 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3C8BEFE42F6D1EE500FB5D63 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C8BEFE02F6D1EE500FB5D63 /* Dorso Safari Extension */;
+			targetProxy = 3C8BEFE32F6D1EE500FB5D63 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3C8BEFCC2F6D1EE400FB5D63 /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C8BEFCD2F6D1EE400FB5D63 /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		3C8BEFD72F6D1EE400FB5D63 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C8BEFD82F6D1EE400FB5D63 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3C8BEFE92F6D1EE500FB5D63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3C8BEFEA2F6D1EE500FB5D63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		3C8BEFEC2F6D1EE500FB5D63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Dorso Safari Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Dorso Safari Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gongahkia.dorso.safari.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3C8BEFED2F6D1EE500FB5D63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Dorso Safari Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Dorso Safari Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gongahkia.dorso.safari.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3C8BEFF02F6D1EE500FB5D63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Dorso Safari/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Dorso Safari";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gongahkia.dorso.safari;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3C8BEFF12F6D1EE500FB5D63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Dorso Safari/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Dorso Safari";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gongahkia.dorso.safari;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3C8BEFC12F6D1EE400FB5D63 /* Build configuration list for PBXProject "Dorso Safari" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C8BEFE92F6D1EE500FB5D63 /* Debug */,
+				3C8BEFEA2F6D1EE500FB5D63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C8BEFEB2F6D1EE500FB5D63 /* Build configuration list for PBXNativeTarget "Dorso Safari Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C8BEFEC2F6D1EE500FB5D63 /* Debug */,
+				3C8BEFED2F6D1EE500FB5D63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C8BEFEF2F6D1EE500FB5D63 /* Build configuration list for PBXNativeTarget "Dorso Safari" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C8BEFF02F6D1EE500FB5D63 /* Debug */,
+				3C8BEFF12F6D1EE500FB5D63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3C8BEFBE2F6D1EE400FB5D63 /* Project object */;
+}

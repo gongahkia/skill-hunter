@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <link rel="stylesheet" href="../Style.css">
+    <script src="../Script.js" defer></script>
+</head>
+<body>
+    <main class="app-shell">
+        <img src="../Icon.png" width="96" height="96" alt="Dorso Safari Icon">
+        <p class="eyebrow">macOS Safari Wrapper</p>
+        <h1>Dorso Safari</h1>
+        <p class="lede">Dorso is a local-only productivity extension. It protects selected AI chatbot sites and unlocks them after an accepted LeetCode submission on the assigned challenge.</p>
+
+        <section class="status-card">
+            <p class="state-unknown">You can turn on Dorso Safari’s extension in Safari Settings.</p>
+            <p class="state-on">Dorso Safari’s extension is currently on. You can turn it off in Safari Settings.</p>
+            <p class="state-off">Dorso Safari’s extension is currently off. You can turn it on in Safari Settings.</p>
+            <button class="open-preferences">Quit and Open Safari Settings…</button>
+        </section>
+
+        <section class="info-grid">
+            <article class="info-card">
+                <h2>What It Does</h2>
+                <p>Dorso injects a full-screen gate only on the supported chatbot domains you keep enabled. Unsupported websites are left alone.</p>
+            </article>
+            <article class="info-card">
+                <h2>What It Stores</h2>
+                <p>This public-store build stores timer state, the staged challenge, and your selected supported-site list in extension storage. It does not send chatbot URLs or user handles to a backend.</p>
+            </article>
+            <article class="info-card">
+                <h2>Supported Sites</h2>
+                <p>ChatGPT, Claude, Gemini, Perplexity, DeepSeek, Copilot, Socrat, Hugging Face Chat, WriteSonic, You.com, and Jasper.</p>
+            </article>
+        </section>
+
+        <section class="link-row">
+            <a href="https://github.com/gongahkia/dorso" target="_blank" rel="noreferrer">Support</a>
+            <a href="https://github.com/gongahkia/dorso/blob/main/README2.md#privacy-summary" target="_blank" rel="noreferrer">Privacy</a>
+            <a href="https://github.com/gongahkia/dorso/blob/main/AUDIT.md" target="_blank" rel="noreferrer">Audit Notes</a>
+            <a href="https://github.com/gongahkia/dorso/blob/main/README2.md" target="_blank" rel="noreferrer">Release Guide</a>
+        </section>
+    </main>
+</body>
+</html>
