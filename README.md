@@ -26,7 +26,7 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 * *Cache*: [Redis](https://redis.io/)
 * *Observability*: [Prometheus](https://github.com/prometheus/client_python), [Grafana](https://grafana.com/) 
 * *Logs*: [structlog](https://www.structlog.org/)
-* *Test*: [Pytest](https://docs.pytest.org/), [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/) 
+* *CI/CD*: [GitHub Actions](https://github.com/features/actions), [Pytest](https://docs.pytest.org/), [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/) 
 * *Package*: [Docker](https://www.docker.com/) 
 
 ## Screenshot
