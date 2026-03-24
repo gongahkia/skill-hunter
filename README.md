@@ -47,7 +47,7 @@ Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com)
 ## Versions
 
 * `Skill Hunter v2.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/).
-* `Skill Hunter v3.0.0` is available as an Add-on for Firefox [here]().
+* `Skill Hunter v3.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter-2/).
 
 ## [Presentation](./asset/presentation/class_part.pdf)
 
