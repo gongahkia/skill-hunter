@@ -39,7 +39,7 @@ Worried that the convenience and availability of web-based AI chatbots were [mak
 ### Versions
 
 * `Dorso v1.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/dorso/).
-* `Dorso v2.0.0` is available as an Add-on for Firefox [here]().
+* `Dorso v2.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-GB/firefox/addon/dorso-2/).
 
 ### Blacklist
 
