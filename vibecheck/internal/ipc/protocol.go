@@ -12,9 +12,18 @@ const (
 	TypeEmotionResult  = "emotion_result"
 	TypeSearchRequest  = "search_request"
 	TypeSearchResult   = "search_result"
-	TypeShutdown       = "shutdown"
-	TypeShutdownAck    = "shutdown_ack"
-	TypeError          = "error"
+	TypeShutdown              = "shutdown"
+	TypeShutdownAck           = "shutdown_ack"
+	TypeError                 = "error"
+	TypeSpotifySearchRequest  = "spotify_search_request"
+	TypeSpotifySearchResult   = "spotify_search_result"
+	TypeSpotifyPlayRequest    = "spotify_play_request"
+	TypeSpotifyPlayResult     = "spotify_play_result"
+	TypeSpotifyStateRequest   = "spotify_state_request"
+	TypeSpotifyStateResult    = "spotify_state_result"
+	TypeSpotifyPauseRequest   = "spotify_pause_request"
+	TypeSpotifyResumeRequest  = "spotify_resume_request"
+	TypeSpotifyControlResult  = "spotify_control_result"
 )
 
 type Message struct {
@@ -106,6 +115,52 @@ type ErrorMsg struct {
 	Message
 	ErrorType    string `json:"error_type"`
 	ErrorMessage string `json:"message"`
+}
+
+type SpotifySearchRequest struct {
+	Message
+	Query string `json:"query"`
+	Limit int    `json:"limit"`
+}
+
+type SpotifyTrack struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Artist   string `json:"artist"`
+	Album    string `json:"album"`
+	Duration int    `json:"duration_ms"`
+	URI      string `json:"uri"`
+	ImageURL string `json:"image_url"`
+}
+
+type SpotifySearchResult struct {
+	Message
+	Tracks []SpotifyTrack `json:"tracks"`
+}
+
+type SpotifyPlayRequest struct {
+	Message
+	TrackURI string `json:"track_uri"`
+}
+
+type SpotifyPlayResult struct {
+	Message
+	Playing bool `json:"playing"`
+}
+
+type SpotifyStateResult struct {
+	Message
+	Title    string  `json:"title"`
+	Artist   string  `json:"artist"`
+	Position float64 `json:"position_ms"`
+	Duration float64 `json:"duration_ms"`
+	Paused   bool    `json:"paused"`
+	Playing  bool    `json:"playing"`
+}
+
+type SpotifyControlResult struct {
+	Message
+	OK bool `json:"ok"`
 }
 
 func NewMessage(msgType, id string) Message {
