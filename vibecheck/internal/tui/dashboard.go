@@ -159,11 +159,15 @@ func (m Model) renderBottomBar() string {
 		box = focusBorderStyle
 	}
 
+	providerLabel := m.statusProvider
+	if providerLabel == "" {
+		providerLabel = "ytmusic"
+	}
 	status := fmt.Sprintf(
-		"cam:%s  play:%s  yt:%s  py:%s  backend:%s",
+		"cam:%s  play:%s  src:%s  py:%s  backend:%s",
 		m.statusCamera,
 		m.statusPlayback,
-		m.statusYTMusic,
+		providerLabel,
 		m.statusPython,
 		m.statusBackend,
 	)

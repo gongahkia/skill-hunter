@@ -53,6 +53,7 @@ type Model struct {
 	statusPlayback         string
 	statusBackend          string
 	statusAuthFile         string
+	statusProvider         string
 	lastRuntimeError       string
 	frameBase64            string
 
@@ -99,6 +100,7 @@ func NewModel(
 		statusPlayback:   "checking...",
 		statusBackend:    cfg.Emotion.ModelBackend,
 		statusAuthFile:   "checking...",
+		statusProvider:   cfg.Playback.Source,
 		lastRuntimeError: "none",
 	}
 }
