@@ -243,6 +243,38 @@ class SpotifyClient:
             },
         )
 
+    def get_current_user_top_artists(self, limit=50):
+        return self._request("GET", f"/me/top/artists?limit={limit}").get("items", [])
+
+    def search_tracks(self, query, limit=20):
+        from urllib.parse import quote
+        return self._request("GET", f"/search?q={quote(query)}&type=track&limit={limit}").get(
+            "tracks", {}
+        ).get("items", [])
+
+    def get_recommendations(self, seed_tracks=None, seed_artists=None, seed_genres=None, **audio_features):
+        params = {}
+        if seed_tracks:
+            params["seed_tracks"] = ",".join(seed_tracks[:5])
+        if seed_artists:
+            params["seed_artists"] = ",".join(seed_artists[:5])
+        if seed_genres:
+            params["seed_genres"] = ",".join(seed_genres[:5])
+        for key, val in audio_features.items():
+            params[key] = val
+        qs = urlencode(params)
+        return self._request("GET", f"/recommendations?{qs}").get("tracks", [])
+
+    def get_audio_features(self, track_ids):
+        if not track_ids:
+            return []
+        features = []
+        for start in range(0, len(track_ids), 100):
+            batch = track_ids[start:start + 100]
+            result = self._request("GET", f"/audio-features?ids={','.join(batch)}")
+            features.extend(result.get("audio_features", []))
+        return features
+
     def add_tracks_to_playlist(self, playlist_id, track_uris):
         if not track_uris:
             return None
