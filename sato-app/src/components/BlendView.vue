@@ -131,6 +131,29 @@
                 </label>
               </div>
 
+              <div class="mood-picker" v-if="moodProfiles">
+                <label class="source-option">
+                  <input v-model="contributionForm.useMoodTracks" type="checkbox" @change="markContributionDirty" />
+                  <span>
+                    <strong>Mood-Based Tracks</strong>
+                    <small>Spotify recommendations tuned to your current mood</small>
+                  </span>
+                </label>
+                <div v-if="contributionForm.useMoodTracks" class="mood-selector">
+                  <button
+                    v-for="(profile, key) in moodProfiles"
+                    :key="key"
+                    type="button"
+                    class="mood-chip"
+                    :class="{ 'mood-chip--active': contributionForm.moodState === key }"
+                    :style="contributionForm.moodState === key ? { background: profile.color, color: '#fff' } : { borderColor: profile.color, color: profile.color }"
+                    @click="contributionForm.moodState = key; markContributionDirty()"
+                  >
+                    {{ profile.label }}
+                  </button>
+                </div>
+              </div>
+
               <div class="playlist-picker">
                 <div class="playlist-picker__top">
                   <span class="field-label field-label--compact">Owned or collaborative playlists</span>
@@ -564,7 +587,7 @@
 </template>
 
 <script>
-import { apiRequest } from '../lib/api'
+import { apiRequest, fetchMoodProfiles } from '../lib/api'
 import { logClientEvent } from '../lib/debug'
 import {
   buildWeightsPayload,
@@ -606,8 +629,11 @@ export default {
         useTopTracks: false,
         useSavedTracks: false,
         useRecentTracks: false,
+        useMoodTracks: false,
+        moodState: null,
         playlistIds: [],
       },
+      moodProfiles: null,
       playlistNameDraft: '',
       weightDrafts: {},
       creatingRoom: false,
@@ -774,6 +800,8 @@ export default {
         useTopTracks: Boolean(contribution.use_top_tracks),
         useSavedTracks: Boolean(contribution.use_saved_tracks),
         useRecentTracks: Boolean(contribution.use_recent_tracks),
+        useMoodTracks: Boolean(contribution.use_mood_tracks),
+        moodState: contribution.mood_state || null,
         playlistIds: [...(contribution.playlist_ids || [])],
       }
       this.contributionDirty = false
@@ -1087,6 +1115,8 @@ export default {
             use_top_tracks: this.contributionForm.useTopTracks,
             use_saved_tracks: this.contributionForm.useSavedTracks,
             use_recent_tracks: this.contributionForm.useRecentTracks,
+            use_mood_tracks: this.contributionForm.useMoodTracks,
+            mood_state: this.contributionForm.moodState,
             playlist_ids: this.contributionForm.playlistIds,
           }),
         })
@@ -1362,6 +1392,7 @@ export default {
   },
   mounted() {
     logClientEvent('room.view.mounted')
+    fetchMoodProfiles().then(data => { this.moodProfiles = data?.moods || null }).catch(() => {})
     const token = this.readRoomTokenFromUrl()
     if (token) {
       this.roomToken = token
@@ -1849,5 +1880,27 @@ export default {
   .playlist-success__cover {
     max-width: 100%;
   }
+}
+.mood-picker {
+  margin-top: 0.5rem;
+}
+.mood-selector {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+.mood-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+.mood-chip--active {
+  border-color: transparent;
 }
 </style>
