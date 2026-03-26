@@ -15,6 +15,13 @@ from mood_engine.exceptions import CaptureError, DetectionError, SearchError, Au
 from mood_engine.ipc import IPCHandler
 from mood_engine.music_client import YTMusicClient
 from mood_engine.smoother import EmotionSmoother
+from mood_engine.spotify_handler import (
+    handle_spotify_search,
+    handle_spotify_play,
+    handle_spotify_pause,
+    handle_spotify_resume,
+    handle_spotify_state,
+)
 
 logger = logging.getLogger("mood_engine")
 
@@ -180,10 +187,20 @@ def main() -> None:
     setup_logging()
     logger.info("mood-engine starting")
 
+    def _spotify_ipc(fn):
+        def wrapper(msg, ipc_h):
+            ipc_h.send(fn(msg))
+        return wrapper
+
     handler = IPCHandler()
     handler.register("health_check", handle_health_check)
     handler.register("capture_request", handle_capture_request)
     handler.register("search_request", handle_search_request)
+    handler.register("spotify_search_request", _spotify_ipc(handle_spotify_search))
+    handler.register("spotify_play_request", _spotify_ipc(handle_spotify_play))
+    handler.register("spotify_pause_request", _spotify_ipc(handle_spotify_pause))
+    handler.register("spotify_resume_request", _spotify_ipc(handle_spotify_resume))
+    handler.register("spotify_state_request", _spotify_ipc(handle_spotify_state))
     handler.run()
 
     logger.info("mood-engine shutting down")
