@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -35,12 +36,13 @@ type MappingConfig struct {
 }
 
 type Config struct {
-	Capture     CaptureConfig       `toml:"capture"`
-	Emotion     EmotionConfig       `toml:"emotion"`
-	YTMusic     YTMusicConfig       `toml:"ytmusic"`
-	Mpv         MpvConfig           `toml:"mpv"`
-	Mapping     MappingConfig       `toml:"mapping"`
-	MoodQueries map[string][]string `toml:"mood_queries"`
+	Capture            CaptureConfig       `toml:"capture"`
+	Emotion            EmotionConfig       `toml:"emotion"`
+	YTMusic            YTMusicConfig       `toml:"ytmusic"`
+	Mpv                MpvConfig           `toml:"mpv"`
+	Mapping            MappingConfig       `toml:"mapping"`
+	MoodQueries        map[string][]string `toml:"mood_queries"`
+	SharedProfilesPath string              `toml:"shared_profiles_path"`
 }
 
 func DefaultConfig() Config {
@@ -107,7 +109,50 @@ func Load(path string) (Config, error) {
 		return cfg, fmt.Errorf("config: parse %s: %w", cfgPath, err)
 	}
 
+	mergeSharedProfiles(&cfg)
 	return cfg, nil
+}
+
+type sharedMoodProfile struct {
+	Queries []string `json:"queries"`
+}
+type sharedProfilesFile struct {
+	Moods map[string]sharedMoodProfile `json:"moods"`
+}
+
+func mergeSharedProfiles(cfg *Config) {
+	profilePath := cfg.SharedProfilesPath
+	if profilePath == "" {
+		candidates := []string{
+			filepath.Join("..", "shared", "mood_profiles.json"),  // from vibecheck/
+			filepath.Join("shared", "mood_profiles.json"),        // from repo root
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				profilePath = c
+				break
+			}
+		}
+	}
+	if profilePath == "" {
+		return
+	}
+	data, err := os.ReadFile(profilePath)
+	if err != nil {
+		return
+	}
+	var sp sharedProfilesFile
+	if err := json.Unmarshal(data, &sp); err != nil {
+		return
+	}
+	for mood, profile := range sp.Moods {
+		if _, exists := cfg.MoodQueries[mood]; exists {
+			continue // toml override takes precedence
+		}
+		if len(profile.Queries) > 0 {
+			cfg.MoodQueries[mood] = profile.Queries
+		}
+	}
 }
 
 func Save(cfg Config, path string) error {
