@@ -178,7 +178,7 @@ def build_diagram() -> None:
         ):
             vite = Custom(
                 "Vite dev server + /api proxy\nvite.config.js + npm scripts",
-                icon("vite.svg"),
+                icon("vite.png"),
             )
             spa = Vue(
                 "Sato SPA\nApp.vue + BlendView.vue\nrooms, weights, preview,\nmood selector, Wrapped"
@@ -290,11 +290,11 @@ def build_diagram() -> None:
         ):
             spotify_accounts = Custom(
                 "Spotify Accounts\nOAuth 2.0 authorize + callback",
-                icon("spotify.svg"),
+                icon("spotify.png"),
             )
             spotify_web_api = Custom(
                 "Spotify Web API\n/me, tracks, playlists,\nrecommendations, audio-features,\nplayback control",
-                icon("spotify.svg"),
+                icon("spotify.png"),
             )
 
             spotify_adapter >> Edge(
@@ -405,7 +405,7 @@ def build_diagram() -> None:
             )
             spotify_device = Custom(
                 "Spotify Active Device\nphone/desktop/web player\ncontrolled via Web API",
-                icon("spotify.svg"),
+                icon("spotify.png"),
             )
 
             provider_iface >> Edge(
@@ -450,11 +450,11 @@ def build_diagram() -> None:
             )
             vitest_suite = Custom(
                 "Vitest + jsdom\nunit tests for SPA,\nBlendView, mood-classifier",
-                icon("vitest.svg"),
+                icon("vitest.png"),
             )
             playwright_suite = Custom(
                 "Playwright + Chromium\ne2e/room-flow.spec.js\nbrowser room flow coverage",
-                icon("playwright.svg"),
+                icon("playwright.png"),
             )
             go_tests = Custom(
                 "Go tests\nvibecheck/**/*_test.go\nIPC, bridge, config tests",
