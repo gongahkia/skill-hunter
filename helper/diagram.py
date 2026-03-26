@@ -188,7 +188,7 @@ def build_diagram() -> None:
             )
             mood_detector = Custom(
                 "MoodDetector.vue\nface-api.js webcam\nbrowser-side emotion\ndetection (7 emotions)",
-                icon("faceapi.svg"),
+                icon("faceapi.png"),
             )
             mood_classifier_js = JavaScript(
                 "Mood Classifier JS\nmood-classifier.js\n5-mood classification +\ndebounce (port of Python)"
@@ -319,27 +319,27 @@ def build_diagram() -> None:
             ):
                 go_cli = Custom(
                     "CLI + TUI\nmain.go + tui/\nCobra commands,\nBubble Tea dashboard",
-                    icon("go.svg"),
+                    icon("go.png"),
                 )
                 bridge = Custom(
                     "MoodMusic Bridge\nbridge/mood_music.go\nmood->music routing,\ndebounce, DND, blacklist",
-                    icon("go.svg"),
+                    icon("go.png"),
                 )
                 provider_iface = Custom(
                     "PlaybackProvider\nprovider.go\nYTMusicProvider |\nSpotifyProvider",
-                    icon("go.svg"),
+                    icon("go.png"),
                 )
                 queue_mgr = Custom(
                     "Queue Manager\nqueue/\nauto-refill, blacklist",
-                    icon("go.svg"),
+                    icon("go.png"),
                 )
                 ipc_mgr = Custom(
                     "IPC Manager\nipc/\nJSON-over-stdin/stdout\nPython subprocess lifecycle",
-                    icon("go.svg"),
+                    icon("go.png"),
                 )
                 analytics = Custom(
                     "Analytics\nanalytics/aggregator.go\nSQLite mood + track history",
-                    icon("sqlite.svg"),
+                    icon("sqlite.png"),
                 )
 
                 go_cli >> Edge(color="#DB2777", label="mood change events") >> bridge
@@ -358,7 +358,7 @@ def build_diagram() -> None:
                 )
                 capture = Custom(
                     "Webcam Capture\ncapture.py\nOpenCV, AVFoundation/V4L2",
-                    icon("webcam.svg"),
+                    icon("webcam.png"),
                 )
                 detection = Python(
                     "Detection + DeepFace\ndetection.py + backends.py\n7 emotions, face detection"
@@ -401,7 +401,7 @@ def build_diagram() -> None:
         ):
             mpv_player = Custom(
                 "mpv\nJSON IPC over Unix socket\nyt-dlp backend",
-                icon("mpv.svg"),
+                icon("mpv.png"),
             )
             spotify_device = Custom(
                 "Spotify Active Device\nphone/desktop/web player\ncontrolled via Web API",
@@ -458,7 +458,7 @@ def build_diagram() -> None:
             )
             go_tests = Custom(
                 "Go tests\nvibecheck/**/*_test.go\nIPC, bridge, config tests",
-                icon("go.svg"),
+                icon("go.png"),
             )
             py_mood_tests = Python(
                 "mood-engine pytest\nmotion pipeline tests\nsmoother, classifier"
