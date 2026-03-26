@@ -29,6 +29,7 @@ from blend_service import (
 from debug_tools import DebugRecorder, configure_app_logger
 from e2e_support import E2EFakeSpotifyFactory
 from room_store import RoomStore, utc_now_iso
+from mood_history import get_mood_summary
 from mood_service import get_mood_tracks, load_mood_profiles, VALID_MOODS
 from spotify_client import SpotifyAPIError, SpotifyClient
 
@@ -884,6 +885,11 @@ def register_routes(app):
     def mood_profiles():
         profiles = load_mood_profiles()
         return jsonify({"moods": profiles})
+
+    @app.get("/api/me/mood-summary")
+    def mood_summary():
+        summary = get_mood_summary()
+        return jsonify(summary)
 
     @app.get("/api/me/source-catalog")
     def source_catalog():
