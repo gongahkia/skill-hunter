@@ -8,10 +8,12 @@ Web app for building collaborative [Spotify Blends](https://community.spotify.co
 
 ## Stack
 
-* *Frontend*: [Vue.js](https://vuejs.org/), [Vite](https://vite.dev/), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Frontend*: [Vue.js](https://vuejs.org/), [Vite](https://vite.dev/), [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript), [face-api.js](https://github.com/justadudewhohacks/face-api.js)
 * *Backend*: [Python](https://www.python.org/), [Flask](https://flask.palletsprojects.com/en/stable/), [Flask-Session](https://flask-session.readthedocs.io/en/latest/), [cachelib FileSystemCache](https://cachelib.readthedocs.io/en/stable/), [Redis](https://redis.io/)
-* *Auth*: [OAuth 2.0](https://oauth.net/2/)
-* *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api)
+* *Desktop*: [Go](https://go.dev/), [Bubble Tea](https://github.com/charmbracelet/bubbletea), [Cobra](https://github.com/spf13/cobra), [OpenCV](https://opencv.org/), [DeepFace](https://github.com/serengil/deepface), [mpv](https://mpv.io/)
+* *Auth*: [OAuth 2.0](https://oauth.net/2/), [PKCE](https://oauth.net/2/pkce/)
+* *API*: [Spotify Developer Web API](https://developer.spotify.com/documentation/web-api), [ytmusicapi](https://github.com/sigma67/ytmusicapi)
+* *Data*: [SQLite](https://www.sqlite.org/)
 * *Testing*: [pytest](https://pytest.org/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/)
 * *CI/CD*: [GitHub Actions](https://github.com/features/actions)
 
@@ -43,6 +45,27 @@ $ npm --prefix sato-app install
 ```console
 $ ./scripts/dev.sh # starts Sato frontend and backend
 $ ./scripts/verify.sh # runs full local verification pass
+```
+
+4. To run `Vibecheck` (mood-driven desktop music player), install the additional dependencies below.
+
+```console
+$ cd vibecheck
+$ go build -o mood-music ./cmd/mood-music
+$ cd mood-engine && pip install -e . && cd ..
+$ ./mood-music configure # interactive config setup
+$ ./mood-music setup # YouTube Music auth
+$ ./mood-music # run with TUI dashboard
+```
+
+5. To use Spotify as the playback source for `Vibecheck`, set `SPOTIFY_CLIENT_ID` and update `~/.config/mood-music/config.toml`.
+
+```toml
+[playback]
+source = "spotify"
+
+[spotify]
+client_id = "your_spotify_app_client_id"
 ```
 
 ## Architecture

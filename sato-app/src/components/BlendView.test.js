@@ -5,6 +5,7 @@ import { apiRequest } from '../lib/api'
 
 vi.mock('../lib/api', () => ({
   apiRequest: vi.fn(),
+  fetchMoodProfiles: vi.fn().mockResolvedValue({ moods: {} }),
 }))
 
 function makeRoom(overrides = {}) {
@@ -306,6 +307,8 @@ describe('BlendView', () => {
           use_top_tracks: true,
           use_saved_tracks: false,
           use_recent_tracks: false,
+          use_mood_tracks: false,
+          mood_state: null,
           playlist_ids: ['host-owned'],
         }),
       },
