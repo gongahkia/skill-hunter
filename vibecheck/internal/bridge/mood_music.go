@@ -21,6 +21,7 @@ const (
 type MoodMusicBridge struct {
 	ipcMgr      *ipc.Manager
 	mpvClient   *mpv.MpvClient
+	provider    PlaybackProvider
 	queueMgr    *queue.Manager
 	blacklist   *queue.Blacklist
 	analytics   *analytics.Aggregator
@@ -38,6 +39,7 @@ type MoodMusicBridge struct {
 func New(
 	ipcMgr *ipc.Manager,
 	mpvClient *mpv.MpvClient,
+	provider PlaybackProvider,
 	queueMgr *queue.Manager,
 	aggregator *analytics.Aggregator,
 	moodQueries map[string][]string,
@@ -47,6 +49,7 @@ func New(
 	b := &MoodMusicBridge{
 		ipcMgr:      ipcMgr,
 		mpvClient:   mpvClient,
+		provider:    provider,
 		queueMgr:    queueMgr,
 		blacklist:   queue.NewBlacklist(),
 		analytics:   aggregator,
@@ -123,19 +126,19 @@ func (b *MoodMusicBridge) switchMusic(mood string, confidence float64) (string, 
 		slog.Info("bridge: dry-run would search", "mood", mood, "query", query)
 		return "", nil
 	}
-	if b.ipcMgr == nil {
-		return "", fmt.Errorf("bridge: search unavailable")
+	if b.provider == nil {
+		return "", fmt.Errorf("bridge: playback provider unavailable")
 	}
 
-	result, err := b.ipcMgr.SendSearchRequest(query, 10)
+	tracks, err := b.provider.Search(query, 10)
 	if err != nil {
 		return "", fmt.Errorf("bridge: search failed for %q: %w", query, err)
 	}
 
-	if len(result.Tracks) == 0 {
+	if len(tracks) == 0 {
 		return "", fmt.Errorf("bridge: no tracks found for %q", query)
 	}
-	filtered := b.annotateTracks(b.filterTracks(result.Tracks), query)
+	filtered := b.annotateTracks(b.filterTracks(tracks), query)
 	if len(filtered) == 0 {
 		return "", fmt.Errorf("bridge: all tracks filtered by blacklist for %q", query)
 	}
@@ -170,16 +173,16 @@ func (b *MoodMusicBridge) fetchAndAppend(mood string) {
 	}
 
 	query := queries[rand.Intn(len(queries))]
-	if b.ipcMgr == nil || b.queueMgr == nil {
+	if b.provider == nil || b.queueMgr == nil {
 		return
 	}
-	result, err := b.ipcMgr.SendSearchRequest(query, 10)
+	tracks, err := b.provider.Search(query, 10)
 	if err != nil {
 		slog.Error("bridge: refill search failed", "err", err)
 		return
 	}
 
-	filtered := b.annotateTracks(b.filterTracks(result.Tracks), query)
+	filtered := b.annotateTracks(b.filterTracks(tracks), query)
 	if len(filtered) > 0 {
 		b.queueMgr.AppendTracks(filtered)
 		slog.Info("bridge: queue refilled", "count", len(filtered))
@@ -292,16 +295,19 @@ func (b *MoodMusicBridge) annotateTracks(tracks []ipc.Track, query string) []ipc
 }
 
 func (b *MoodMusicBridge) playTrack(track ipc.Track) error {
-	if b.mpvClient == nil {
+	if b.provider == nil {
 		return mpv.ErrNotConnected
 	}
-	if err := b.mpvClient.Play(track.PlaybackURL); err != nil {
-		slog.Error("bridge: play failed", "err", err, "url", track.PlaybackURL)
+	if err := b.provider.Play(track); err != nil {
+		slog.Error("bridge: play failed", "err", err, "title", track.Title)
 		return err
 	}
-
 	slog.Info("bridge: now playing", "title", track.Title, "artist", track.Artist)
 	return nil
+}
+
+func (b *MoodMusicBridge) Provider() PlaybackProvider {
+	return b.provider
 }
 
 func (b *MoodMusicBridge) recordTrack(mood string, moodEventID string, track ipc.Track) {
