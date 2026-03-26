@@ -1,12 +1,12 @@
-"""Read vibecheck's SQLite mood history for cross-pollination with Sato."""
+"""Read sato-pulse's SQLite mood history for cross-pollination with Sato."""
 from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-DEFAULT_DB_PATH = Path("~/.local/share/mood-music/history.db").expanduser()
+DEFAULT_DB_PATH = Path("~/.local/share/sato-pulse/history.db").expanduser()
 
 def get_mood_distribution(hours=24, db_path=None):
-    """Return mood distribution from vibecheck history as {mood: percentage}."""
+    """Return mood distribution from sato-pulse history as {mood: percentage}."""
     p = Path(db_path) if db_path else DEFAULT_DB_PATH
     if not p.exists():
         return None
@@ -28,7 +28,7 @@ def get_mood_distribution(hours=24, db_path=None):
         return None
 
 def get_dominant_mood(hours=24, db_path=None):
-    """Return the most frequent mood from recent vibecheck history."""
+    """Return the most frequent mood from recent sato-pulse history."""
     dist = get_mood_distribution(hours, db_path)
     if not dist:
         return None

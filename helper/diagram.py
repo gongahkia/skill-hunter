@@ -35,7 +35,7 @@ GRAPH_ATTR = {
     "newrank": "true",
     "labelloc": "t",
     "labeljust": "l",
-    "label": "Sato + Vibecheck Architecture\nCollaborative Spotify blending, mood-driven playback, browser emotion detection, and shared mood profiles",
+    "label": "Sato + Sato Pulse Architecture\nCollaborative Spotify blending, mood-driven playback, browser emotion detection, and shared mood profiles",
 }
 
 NODE_ATTR = {
@@ -134,7 +134,7 @@ def build_diagram() -> None:
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     with Diagram(
-        "Sato + Vibecheck Architecture",
+        "Sato + Sato Pulse Architecture",
         filename=str(OUTPUT_PATH),
         show=False,
         direction="LR",
@@ -220,7 +220,7 @@ def build_diagram() -> None:
                 "Mood Service\nmood_service.py\nSpotify recommendations\nwith audio feature targets"
             )
             mood_history = Python(
-                "Mood History\nmood_history.py\nreads vibecheck SQLite\nmood distribution"
+                "Mood History\nmood_history.py\nreads sato-pulse SQLite\nmood distribution"
             )
             spotify_adapter = Python(
                 "Spotify adapter\nspotify_client.py\nOAuth token refresh,\nrecommendations, audio features"
@@ -306,9 +306,9 @@ def build_diagram() -> None:
                 label="REST API calls via requests",
             ) >> spotify_web_api
 
-        # --- vibecheck desktop ---
+        # --- sato-pulse desktop ---
         with Cluster(
-            "Vibecheck Desktop App\nGo CLI/TUI + Python subprocess",
+            "Sato Pulse Desktop App\nGo CLI/TUI + Python subprocess",
             direction="TB",
             graph_attr=cluster_attr("#FDF2F8", "#DB2777"),
         ):
@@ -322,7 +322,7 @@ def build_diagram() -> None:
                     icon("go.png"),
                 )
                 bridge = Custom(
-                    "MoodMusic Bridge\nbridge/mood_music.go\nmood->music routing,\ndebounce, DND, blacklist",
+                    "SatoPulse Bridge\nbridge/sato_pulse.go\nmood->music routing,\ndebounce, DND, blacklist",
                     icon("go.png"),
                 )
                 provider_iface = Custom(
@@ -423,7 +423,7 @@ def build_diagram() -> None:
         mood_history >> Edge(
             color="#7C3AED",
             style="dotted",
-            label="reads ~/.local/share/\nmood-music/history.db",
+            label="reads ~/.local/share/\nsato-pulse/history.db",
         ) >> analytics
 
         # --- shared profile reads ---
@@ -457,7 +457,7 @@ def build_diagram() -> None:
                 icon("playwright.png"),
             )
             go_tests = Custom(
-                "Go tests\nvibecheck/**/*_test.go\nIPC, bridge, config tests",
+                "Go tests\nsato-pulse/**/*_test.go\nIPC, bridge, config tests",
                 icon("go.png"),
             )
             py_mood_tests = Python(

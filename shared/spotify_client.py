@@ -1,4 +1,4 @@
-"""Lightweight Spotify client with PKCE auth for desktop (vibecheck) context."""
+"""Lightweight Spotify client with PKCE auth for desktop (sato-pulse) context."""
 from __future__ import annotations
 import base64
 import hashlib
@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.parse import urlencode, urlparse, parse_qs
 import requests
 
-TOKEN_PATH = Path("~/.config/mood-music/spotify_tokens.json").expanduser()
+TOKEN_PATH = Path("~/.config/sato-pulse/spotify_tokens.json").expanduser()
 SCOPES = [
     "user-read-playback-state",
     "user-modify-playback-state",

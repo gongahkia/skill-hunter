@@ -47,18 +47,18 @@ $ ./scripts/dev.sh # starts Sato frontend and backend
 $ ./scripts/verify.sh # runs full local verification pass
 ```
 
-4. To run `Vibecheck` (mood-driven desktop music player), install the additional dependencies below.
+4. To run `Sato Pulse` (mood-driven desktop music player), install the additional dependencies below.
 
 ```console
-$ cd vibecheck
-$ go build -o mood-music ./cmd/mood-music
+$ cd sato-pulse
+$ go build -o sato-pulse ./cmd/sato-pulse
 $ cd mood-engine && pip install -e . && cd ..
-$ ./mood-music configure # interactive config setup
-$ ./mood-music setup # YouTube Music auth
-$ ./mood-music # run with TUI dashboard
+$ ./sato-pulse configure # interactive config setup
+$ ./sato-pulse setup # YouTube Music auth
+$ ./sato-pulse # run with TUI dashboard
 ```
 
-5. To use Spotify as the playback source for `Vibecheck`, set `SPOTIFY_CLIENT_ID` and update `~/.config/mood-music/config.toml`.
+5. To use Spotify as the playback source for `Sato Pulse`, set `SPOTIFY_CLIENT_ID` and update `~/.config/sato-pulse/config.toml`.
 
 ```toml
 [playback]

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mood-engine"
+version = "0.1.0"
+description = "Emotion detection and YouTube Music search engine for sato-pulse"
+requires-python = ">=3.11"
+dependencies = [
+    "opencv-python-headless>=4.8",
+    "deepface>=0.0.89",
+    "numpy>=1.24",
+    "Pillow>=10.0",
+    "ytmusicapi>=1.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.setuptools.packages.find]
+include = ["mood_engine*"]
