@@ -28,18 +28,35 @@
     >
       Use {{ detectedMood }} as mood source
     </button>
+    <div v-if="moodSummary && moodSummary.available" class="mood-detector__suggestion">
+      <small>Desktop mood (last {{ moodSummary.hours }}h):</small>
+      <strong>{{ moodSummary.dominant_mood }}</strong>
+      <span v-for="(pct, mood) in moodSummary.distribution" :key="mood" class="mood-detector__dist">
+        {{ mood }} {{ pct }}%
+      </span>
+      <button class="inline-button" type="button" @click="$emit('mood-selected', moodSummary.dominant_mood)">
+        Use {{ moodSummary.dominant_mood }}
+      </button>
+    </div>
     <p class="helper-copy helper-copy--subtle">All detection runs locally in your browser. No video is sent to the server.</p>
   </div>
 </template>
 
 <script>
 import { useMoodDetection } from '../lib/mood-detection'
+import { apiRequest } from '../lib/api'
 
 export default {
   emits: ['mood-selected'],
   setup() {
     const { detectedMood, confidence, isActive, error, start, stop } = useMoodDetection()
     return { detectedMood, confidence, isActive, error, startMood: start, stopMood: stop }
+  },
+  data() {
+    return { moodSummary: null }
+  },
+  mounted() {
+    apiRequest('/api/me/mood-summary').then(data => { this.moodSummary = data }).catch(() => {})
   },
   methods: {
     startDetection() {
@@ -90,5 +107,20 @@ export default {
 .mood-detector__last {
   font-size: 0.85rem;
   margin: 0.3rem 0;
+}
+.mood-detector__suggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  margin: 0.4rem 0;
+  padding: 0.3rem 0.5rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+}
+.mood-detector__dist {
+  opacity: 0.6;
+  font-size: 0.75rem;
 }
 </style>
