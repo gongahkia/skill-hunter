@@ -54,7 +54,7 @@ $ cd sato-pulse
 $ go build -o sato-pulse ./cmd/sato-pulse
 $ cd mood-engine && pip install -e . && cd ..
 $ ./sato-pulse configure # interactive config setup
-$ ./sato-pulse setup # YouTube Music auth
+$ ./sato-pulse setup # youtube music auth
 $ ./sato-pulse # run with TUI dashboard
 ```
 
@@ -71,6 +71,12 @@ client_id = "your_spotify_app_client_id"
 ## Architecture
 
 ![](./asset/reference/architecture.png)
+
+## API
+
+* `GET /api/mood-profiles`: Returns all mood profiles
+* `GET /api/me/mood-summary`: Returns sato-pulse desktop mood distribution *(if available)*
+* `PUT /api/rooms/<token>/contribution`: Accepts `use_mood_tracks` and `mood_state` fields
 
 ## Other notes
 
