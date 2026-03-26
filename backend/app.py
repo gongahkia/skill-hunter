@@ -29,6 +29,7 @@ from blend_service import (
 from debug_tools import DebugRecorder, configure_app_logger
 from e2e_support import E2EFakeSpotifyFactory
 from room_store import RoomStore, utc_now_iso
+from mood_service import get_mood_tracks, load_mood_profiles, VALID_MOODS
 from spotify_client import SpotifyAPIError, SpotifyClient
 
 
@@ -879,6 +880,11 @@ def register_routes(app):
         user = fetch_or_get_cached_user(client)
         return jsonify(user)
 
+    @app.get("/api/mood-profiles")
+    def mood_profiles():
+        profiles = load_mood_profiles()
+        return jsonify({"moods": profiles})
+
     @app.get("/api/me/source-catalog")
     def source_catalog():
         client = require_spotify_session()
@@ -970,6 +976,14 @@ def register_routes(app):
         use_top_tracks = bool(payload.get("use_top_tracks"))
         use_saved_tracks = bool(payload.get("use_saved_tracks"))
         use_recent_tracks = bool(payload.get("use_recent_tracks"))
+        use_mood_tracks = bool(payload.get("use_mood_tracks"))
+        mood_state = payload.get("mood_state")
+        if use_mood_tracks and mood_state not in VALID_MOODS:
+            raise ApiError(
+                f"mood_state must be one of {sorted(VALID_MOODS)}.",
+                status_code=400,
+                code="invalid_mood_state",
+            )
         playlist_ids = payload.get("playlist_ids") or []
         if not isinstance(playlist_ids, list):
             raise ApiError(
@@ -1009,6 +1023,8 @@ def register_routes(app):
         for playlist_id in playlist_ids:
             playlist_tracks.extend(client.get_playlist_tracks(playlist_id, limit=PLAYLIST_TRACK_CAP))
 
+        mood_tracks = get_mood_tracks(client, mood_state) if use_mood_tracks else []
+
         had_contribution = bool((room["contributions"].get(user["id"]) or {}).get("track_count"))
         contribution = build_contribution_snapshot(
             use_top_tracks=use_top_tracks,
@@ -1020,6 +1036,9 @@ def register_routes(app):
             saved_tracks=saved_tracks,
             recent_tracks=recent_tracks,
             playlist_tracks=playlist_tracks,
+            use_mood_tracks=use_mood_tracks,
+            mood_state=mood_state,
+            mood_tracks=mood_tracks,
         )
         contribution["updated_at"] = utc_now_iso()
         room["contributions"][user["id"]] = contribution
