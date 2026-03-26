@@ -35,12 +35,23 @@ type MappingConfig struct {
 	DebounceSec int `toml:"debounce_seconds"`
 }
 
+type SpotifyConfig struct {
+	ClientID  string `toml:"client_id"`
+	TokenPath string `toml:"token_path"`
+}
+
+type PlaybackConfig struct {
+	Source string `toml:"source"` // "ytmusic" or "spotify"
+}
+
 type Config struct {
 	Capture            CaptureConfig       `toml:"capture"`
 	Emotion            EmotionConfig       `toml:"emotion"`
 	YTMusic            YTMusicConfig       `toml:"ytmusic"`
 	Mpv                MpvConfig           `toml:"mpv"`
 	Mapping            MappingConfig       `toml:"mapping"`
+	Playback           PlaybackConfig      `toml:"playback"`
+	Spotify            SpotifyConfig       `toml:"spotify"`
 	MoodQueries        map[string][]string `toml:"mood_queries"`
 	SharedProfilesPath string              `toml:"shared_profiles_path"`
 }
@@ -70,6 +81,9 @@ func DefaultConfig() Config {
 		},
 		Mapping: MappingConfig{
 			DebounceSec: 30,
+		},
+		Playback: PlaybackConfig{
+			Source: "ytmusic",
 		},
 		MoodQueries: map[string][]string{
 			"FOCUS":     {"lo-fi beats study", "ambient focus music", "deep concentration"},
