@@ -74,3 +74,7 @@ export async function apiRequest(path, options = {}) {
 
   return payload
 }
+
+export async function fetchMoodProfiles() {
+  return apiRequest('/api/mood-profiles')
+}
