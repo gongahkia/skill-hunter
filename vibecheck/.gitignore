@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+
+/mood-music
+*.egg-info/
+build/
+dist/
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
