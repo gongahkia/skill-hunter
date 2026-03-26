@@ -152,6 +152,10 @@
                     {{ profile.label }}
                   </button>
                 </div>
+                <MoodDetector
+                  v-if="contributionForm.useMoodTracks"
+                  @mood-selected="onMoodDetected"
+                />
               </div>
 
               <div class="playlist-picker">
@@ -589,6 +593,7 @@
 <script>
 import { apiRequest, fetchMoodProfiles } from '../lib/api'
 import { logClientEvent } from '../lib/debug'
+import MoodDetector from './MoodDetector.vue'
 import {
   buildWeightsPayload,
   distributeMemberWeights,
@@ -611,6 +616,7 @@ function dataUrlToBlob(dataUrl) {
 }
 
 export default {
+  components: { MoodDetector },
   props: {
     user: {
       type: Object,
@@ -880,6 +886,10 @@ export default {
     markContributionDirty() {
       this.contributionDirty = true
       this.preview = null
+    },
+    onMoodDetected(mood) {
+      this.contributionForm.moodState = mood
+      this.markContributionDirty()
     },
     updateWeight(memberId, event) {
       const nextMembers = normalizeMemberWeights(
