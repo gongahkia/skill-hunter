@@ -35,7 +35,7 @@ GRAPH_ATTR = {
     "newrank": "true",
     "labelloc": "t",
     "labeljust": "l",
-    "label": "Sato Repository Architecture\nRuntime app, Spotify integrations, session/room storage, and verification tooling",
+    "label": "Sato + Vibecheck Architecture\nCollaborative Spotify blending, mood-driven playback, browser emotion detection, and shared mood profiles",
 }
 
 NODE_ATTR = {
@@ -134,7 +134,7 @@ def build_diagram() -> None:
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     with Diagram(
-        "Sato Repository Architecture",
+        "Sato + Vibecheck Architecture",
         filename=str(OUTPUT_PATH),
         show=False,
         direction="LR",
@@ -144,6 +144,21 @@ def build_diagram() -> None:
         node_attr=NODE_ATTR,
         edge_attr=EDGE_ATTR,
     ):
+
+        # --- shared layer ---
+        with Cluster(
+            "Shared Layer\nmood_profiles.json + spotify_client.py",
+            direction="TB",
+            graph_attr=cluster_attr("#FEF3C7", "#D97706"),
+        ):
+            mood_profiles = Python(
+                "Mood Profiles\nshared/mood_profiles.json\n5 moods, audio features,\nqueries, seed genres"
+            )
+            shared_spotify = Python(
+                "Shared Spotify Client\nshared/spotify_client.py\nPKCE auth, search,\nplayback, recommendations"
+            )
+
+        # --- users & browser ---
         with Cluster(
             "Users & Browser\nSpotify users and the web runtime",
             direction="TB",
@@ -155,8 +170,9 @@ def build_diagram() -> None:
             )
             users >> Edge(color="#38BDF8", label="open invite URL /\nuse SPA") >> browser
 
+        # --- sato frontend ---
         with Cluster(
-            "Frontend Workspace\nVue 3 + JavaScript + Vite",
+            "Sato Frontend\nVue 3 + JavaScript + Vite",
             direction="TB",
             graph_attr=cluster_attr("#DBEAFE", "#3B82F6"),
         ):
@@ -165,32 +181,49 @@ def build_diagram() -> None:
                 icon("vite.svg"),
             )
             spa = Vue(
-                "Sato SPA\nApp.vue + BlendView.vue\nSpotify config, rooms,\nweights, preview, Wrapped"
+                "Sato SPA\nApp.vue + BlendView.vue\nrooms, weights, preview,\nmood selector, Wrapped"
             )
             frontend_libs = JavaScript(
                 "Client transport + state\napi.js + debug.js + blend.js\npolling, lazy source load,\nauto-normalized weights"
+            )
+            mood_detector = Custom(
+                "MoodDetector.vue\nface-api.js webcam\nbrowser-side emotion\ndetection (7 emotions)",
+                icon("faceapi.svg"),
+            )
+            mood_classifier_js = JavaScript(
+                "Mood Classifier JS\nmood-classifier.js\n5-mood classification +\ndebounce (port of Python)"
             )
 
             browser >> Edge(color="#38BDF8", label="render UI + interact") >> spa
             vite >> Edge(style="dashed", color="#A5B4FC", label="dev server /\nproxy in local runs") >> spa
             spa >> Edge(color="#60A5FA", label="component state +\nrequest helpers") >> frontend_libs
+            spa >> Edge(color="#EC4899", label="webcam mood\ndetection") >> mood_detector
+            mood_detector >> Edge(color="#EC4899", label="emotion scores") >> mood_classifier_js
+            mood_classifier_js >> Edge(color="#EC4899", style="dashed", label="detected mood\nto contribution form") >> spa
 
+        # --- sato backend ---
         with Cluster(
-            "Backend Runtime\nFlask + Flask-Session + Python",
+            "Sato Backend\nFlask + Flask-Session + Python",
             direction="TB",
             graph_attr=cluster_attr("#E2E8F0", "#64748B"),
         ):
             api = Flask(
-                "Flask API + SPA fallback\napp.py routes\n/auth, /me, /rooms, /debug"
+                "Flask API + SPA fallback\napp.py routes\n/auth, /me, /rooms,\n/mood-profiles, /mood-summary"
             )
             room_store = Python(
                 "Room orchestration\nRoomStore\nTTL rooms, members,\nweights, contributions"
             )
             blend_engine = Python(
-                "Blend engine\nblend_service.py\nranking, overlap,\ngenerated cover art,\nWrapped artifact"
+                "Blend engine\nblend_service.py\nranking, overlap, mood source,\ngenerated cover art,\nWrapped artifact"
+            )
+            mood_service = Python(
+                "Mood Service\nmood_service.py\nSpotify recommendations\nwith audio feature targets"
+            )
+            mood_history = Python(
+                "Mood History\nmood_history.py\nreads vibecheck SQLite\nmood distribution"
             )
             spotify_adapter = Python(
-                "Spotify adapter\nspotify_client.py\nrequests, OAuth token\nrefresh, Spotify Web API"
+                "Spotify adapter\nspotify_client.py\nOAuth token refresh,\nrecommendations, audio features"
             )
             debug_recorder = Python(
                 "Observability\ndebug_tools.py\nrequest IDs + event recorder"
@@ -230,7 +263,26 @@ def build_diagram() -> None:
                 color="#F472B6",
                 label="request + debug events",
             ) >> debug_recorder
+            api >> Edge(
+                color="#D97706",
+                label="mood-aware\ntrack fetch",
+            ) >> mood_service
+            mood_service >> Edge(
+                color="#22C55E",
+                label="recommendations API\nwith audio features",
+            ) >> spotify_adapter
+            mood_service >> Edge(
+                color="#D97706",
+                style="dashed",
+                label="load mood profiles",
+            ) >> mood_profiles
+            api >> Edge(
+                color="#7C3AED",
+                style="dashed",
+                label="desktop mood summary",
+            ) >> mood_history
 
+        # --- spotify external ---
         with Cluster(
             "Spotify External Services\nOAuth 2.0 + Web API",
             direction="TB",
@@ -241,7 +293,7 @@ def build_diagram() -> None:
                 icon("spotify.svg"),
             )
             spotify_web_api = Custom(
-                "Spotify Web API\n/me, tracks, playlists,\nplaylist creation",
+                "Spotify Web API\n/me, tracks, playlists,\nrecommendations, audio-features,\nplayback control",
                 icon("spotify.svg"),
             )
 
@@ -254,6 +306,134 @@ def build_diagram() -> None:
                 label="REST API calls via requests",
             ) >> spotify_web_api
 
+        # --- vibecheck desktop ---
+        with Cluster(
+            "Vibecheck Desktop App\nGo CLI/TUI + Python subprocess",
+            direction="TB",
+            graph_attr=cluster_attr("#FDF2F8", "#DB2777"),
+        ):
+            with Cluster(
+                "Go Process\nCobra CLI + Bubble Tea TUI",
+                direction="TB",
+                graph_attr=cluster_attr("#FCE7F3", "#EC4899"),
+            ):
+                go_cli = Custom(
+                    "CLI + TUI\nmain.go + tui/\nCobra commands,\nBubble Tea dashboard",
+                    icon("go.svg"),
+                )
+                bridge = Custom(
+                    "MoodMusic Bridge\nbridge/mood_music.go\nmood->music routing,\ndebounce, DND, blacklist",
+                    icon("go.svg"),
+                )
+                provider_iface = Custom(
+                    "PlaybackProvider\nprovider.go\nYTMusicProvider |\nSpotifyProvider",
+                    icon("go.svg"),
+                )
+                queue_mgr = Custom(
+                    "Queue Manager\nqueue/\nauto-refill, blacklist",
+                    icon("go.svg"),
+                )
+                ipc_mgr = Custom(
+                    "IPC Manager\nipc/\nJSON-over-stdin/stdout\nPython subprocess lifecycle",
+                    icon("go.svg"),
+                )
+                analytics = Custom(
+                    "Analytics\nanalytics/aggregator.go\nSQLite mood + track history",
+                    icon("sqlite.svg"),
+                )
+
+                go_cli >> Edge(color="#DB2777", label="mood change events") >> bridge
+                bridge >> Edge(color="#DB2777", label="search + play\nvia interface") >> provider_iface
+                provider_iface >> Edge(color="#DB2777", label="track lifecycle") >> queue_mgr
+                bridge >> Edge(color="#DB2777", style="dashed", label="record mood\n+ track") >> analytics
+                provider_iface >> Edge(color="#DB2777", label="IPC requests") >> ipc_mgr
+
+            with Cluster(
+                "Python Subprocess\nmood-engine",
+                direction="TB",
+                graph_attr=cluster_attr("#F3E8FF", "#8B5CF6"),
+            ):
+                mood_engine = Python(
+                    "IPC Event Loop\n__main__.py\nroutes health, capture,\nsearch, spotify_*"
+                )
+                capture = Custom(
+                    "Webcam Capture\ncapture.py\nOpenCV, AVFoundation/V4L2",
+                    icon("webcam.svg"),
+                )
+                detection = Python(
+                    "Detection + DeepFace\ndetection.py + backends.py\n7 emotions, face detection"
+                )
+                smoother = Python(
+                    "Smoother + Classifier\nsmoother.py + classifier.py\nweighted avg, 5-mood\nclassification + debounce"
+                )
+                yt_client = Python(
+                    "YouTube Music Client\nmusic_client.py\nytmusicapi wrapper"
+                )
+                spotify_handler = Python(
+                    "Spotify Handler\nspotify_handler.py\nsearch, play, pause,\nresume, state"
+                )
+
+                ipc_mgr >> Edge(
+                    color="#8B5CF6",
+                    label="JSON-over-stdin/stdout",
+                ) >> mood_engine
+                mood_engine >> Edge(color="#8B5CF6", label="capture_request") >> capture
+                capture >> Edge(color="#8B5CF6") >> detection
+                detection >> Edge(color="#8B5CF6") >> smoother
+                mood_engine >> Edge(color="#22C55E", label="search_request") >> yt_client
+                mood_engine >> Edge(color="#22C55E", label="spotify_* requests") >> spotify_handler
+
+            spotify_handler >> Edge(
+                color="#22C55E",
+                label="uses shared client",
+            ) >> shared_spotify
+            shared_spotify >> Edge(
+                color="#22C55E",
+                style="dashed",
+                label="Spotify Web API\n(PKCE auth, playback)",
+            ) >> spotify_web_api
+
+        # --- external playback ---
+        with Cluster(
+            "External Playback\nmpv + yt-dlp | Spotify device",
+            direction="TB",
+            graph_attr=cluster_attr("#F0FDF4", "#22C55E"),
+        ):
+            mpv_player = Custom(
+                "mpv\nJSON IPC over Unix socket\nyt-dlp backend",
+                icon("mpv.svg"),
+            )
+            spotify_device = Custom(
+                "Spotify Active Device\nphone/desktop/web player\ncontrolled via Web API",
+                icon("spotify.svg"),
+            )
+
+            provider_iface >> Edge(
+                color="#7C3AED",
+                style="dashed",
+                label="YTMusic mode:\nmpv.Play(url)",
+            ) >> mpv_player
+            provider_iface >> Edge(
+                color="#22C55E",
+                style="dashed",
+                label="Spotify mode:\nvia IPC → Web API",
+            ) >> spotify_device
+
+        # --- mood history cross-pollination ---
+        mood_history >> Edge(
+            color="#7C3AED",
+            style="dotted",
+            label="reads ~/.local/share/\nmood-music/history.db",
+        ) >> analytics
+
+        # --- shared profile reads ---
+        bridge >> Edge(
+            color="#D97706",
+            style="dashed",
+            label="mood queries from\nshared profiles",
+        ) >> mood_profiles
+
+        # --- verification ---
         with Cluster(
             "Verification & Tooling\nlocal scripts, CI, unit tests, browser E2E",
             direction="TB",
@@ -269,15 +449,19 @@ def build_diagram() -> None:
                 "pytest\nbackend/tests\nAPI + Spotify client tests"
             )
             vitest_suite = Custom(
-                "Vitest + jsdom\nsrc/App.test.js\nBlendView/lib unit tests",
+                "Vitest + jsdom\nunit tests for SPA,\nBlendView, mood-classifier",
                 icon("vitest.svg"),
             )
             playwright_suite = Custom(
                 "Playwright + Chromium\ne2e/room-flow.spec.js\nbrowser room flow coverage",
                 icon("playwright.svg"),
             )
-            fake_spotify = Python(
-                "E2E fake Spotify\nE2EFakeSpotifyFactory\nno real OAuth in browser E2E"
+            go_tests = Custom(
+                "Go tests\nvibecheck/**/*_test.go\nIPC, bridge, config tests",
+                icon("go.svg"),
+            )
+            py_mood_tests = Python(
+                "mood-engine pytest\nmotion pipeline tests\nsmoother, classifier"
             )
 
             scripts >> Edge(
@@ -308,18 +492,23 @@ def build_diagram() -> None:
             vitest_suite >> Edge(
                 color="#FCD34D",
                 style="dotted",
-                label="unit test SPA + JS utils",
+                label="unit test SPA +\nmood-classifier.js",
             ) >> spa
             playwright_suite >> Edge(
                 color="#FCD34D",
                 style="dotted",
                 label="launch isolated\nVite + Flask webServer",
             ) >> spa
-            fake_spotify >> Edge(
+            go_tests >> Edge(
                 color="#FCD34D",
                 style="dotted",
-                label="SPOTIFY_CLIENT_FACTORY override\nwhen SATO_E2E=1",
-            ) >> api
+                label="test bridge, IPC,\nconfig, queue",
+            ) >> bridge
+            py_mood_tests >> Edge(
+                color="#FCD34D",
+                style="dotted",
+                label="test emotion pipeline",
+            ) >> mood_engine
 
     pad_to_landscape_canvas(OUTPUT_PATH.with_suffix(".png"), GRAPH_ATTR["bgcolor"])
 
