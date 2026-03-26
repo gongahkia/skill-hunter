@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "moods": {
+    "FOCUS": {
+      "label": "Focus",
+      "color": "#4A90D9",
+      "queries": ["lo-fi beats study", "ambient focus music", "deep concentration"],
+      "audio_features": {
+        "valence": [0.2, 0.5],
+        "energy": [0.2, 0.5],
+        "danceability": [0.3, 0.5],
+        "tempo": [80, 120],
+        "acousticness": [0.3, 0.8]
+      },
+      "seed_genres": ["study", "ambient", "chill"]
+    },
+    "STRESSED": {
+      "label": "Stressed",
+      "color": "#D94A4A",
+      "queries": ["calm relaxing music", "peaceful piano", "nature sounds relaxation"],
+      "audio_features": {
+        "valence": [0.5, 0.9],
+        "energy": [0.1, 0.4],
+        "danceability": [0.2, 0.5],
+        "tempo": [60, 100],
+        "acousticness": [0.4, 0.9]
+      },
+      "seed_genres": ["piano", "acoustic", "classical"]
+    },
+    "RELAXED": {
+      "label": "Relaxed",
+      "color": "#6ABF69",
+      "queries": ["chill vibes playlist", "acoustic relaxing", "soft indie"],
+      "audio_features": {
+        "valence": [0.4, 0.8],
+        "energy": [0.1, 0.5],
+        "danceability": [0.3, 0.6],
+        "tempo": [70, 110],
+        "acousticness": [0.3, 0.7]
+      },
+      "seed_genres": ["chill", "indie", "acoustic"]
+    },
+    "TIRED": {
+      "label": "Tired",
+      "color": "#D9A84A",
+      "queries": ["upbeat morning energy", "wake up playlist", "energetic pop"],
+      "audio_features": {
+        "valence": [0.5, 0.9],
+        "energy": [0.5, 0.9],
+        "danceability": [0.5, 0.8],
+        "tempo": [100, 140],
+        "acousticness": [0.0, 0.4]
+      },
+      "seed_genres": ["pop", "dance", "electronic"]
+    },
+    "ENERGIZED": {
+      "label": "Energized",
+      "color": "#9B59B6",
+      "queries": ["workout motivation", "high energy electronic", "running playlist"],
+      "audio_features": {
+        "valence": [0.6, 1.0],
+        "energy": [0.7, 1.0],
+        "danceability": [0.6, 0.9],
+        "tempo": [110, 160],
+        "acousticness": [0.0, 0.3]
+      },
+      "seed_genres": ["electronic", "workout", "edm"]
+    }
+  }
+}
