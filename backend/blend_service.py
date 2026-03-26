@@ -80,12 +80,16 @@ def build_contribution_snapshot(
     saved_tracks,
     recent_tracks,
     playlist_tracks,
+    use_mood_tracks=False,
+    mood_state=None,
+    mood_tracks=None,
 ):
     if (
         not use_top_tracks
         and not use_saved_tracks
         and not use_recent_tracks
         and not playlist_ids
+        and not use_mood_tracks
     ):
         raise BlendValidationError(
             "Choose at least one Spotify source before saving your contribution."
@@ -99,6 +103,8 @@ def build_contribution_snapshot(
     if use_recent_tracks:
         snapshot_tracks.extend(recent_tracks)
     snapshot_tracks.extend(playlist_tracks)
+    if use_mood_tracks and mood_tracks:
+        snapshot_tracks.extend(mood_tracks)
 
     normalized_tracks = normalize_track_snapshot(snapshot_tracks)
     if not normalized_tracks:
@@ -110,6 +116,8 @@ def build_contribution_snapshot(
         "use_top_tracks": bool(use_top_tracks),
         "use_saved_tracks": bool(use_saved_tracks),
         "use_recent_tracks": bool(use_recent_tracks),
+        "use_mood_tracks": bool(use_mood_tracks),
+        "mood_state": mood_state,
         "playlist_ids": playlist_ids,
         "playlists": selected_playlists,
         "source_summary": {
@@ -118,6 +126,7 @@ def build_contribution_snapshot(
             "recent_tracks_count": len(normalize_track_snapshot(recent_tracks)) if use_recent_tracks else 0,
             "playlist_count": len(selected_playlists),
             "playlist_track_count": len(normalize_track_snapshot(playlist_tracks)),
+            "mood_tracks_count": len(normalize_track_snapshot(mood_tracks or [])) if use_mood_tracks else 0,
         },
         "track_count": len(normalized_tracks),
         "tracks": normalized_tracks,
