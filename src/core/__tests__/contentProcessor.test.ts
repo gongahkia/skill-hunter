@@ -9,6 +9,7 @@ import {
   PerformanceMonitor,
   extractReferenceTargetId,
   generateTableOfContentsHTML,
+  generateMetadataSummaryHTML,
 } from '../contentProcessor';
 import type { Definition } from '@/types';
 
@@ -148,6 +149,30 @@ describe('contentProcessor', () => {
       expect(html).toContain('data-skill-hunter-scroll-target="pr1-he-"');
       expect(html).not.toContain('target="_blank"');
       expect(html).toContain('<button type="button" class="toc-link"');
+    });
+  });
+
+  describe('generateMetadataSummaryHTML', () => {
+    it('should render metadata cards when metadata is present', () => {
+      const html = generateMetadataSummaryHTML(
+        {
+          legislationTitle: 'Test Act',
+          legislationPDFDownloadLink: 'https://example.com/act.pdf',
+          legislationStatus: 'Current version as at 1 January 2026',
+          tableOfContents: [],
+        },
+        {
+          legislationName: 'Test Act',
+          legislationDescription: 'A test statute',
+          legislationDate: '1 January 2026',
+          revisedLegislationName: 'Revised Test Act',
+          revisedLegislationText: '',
+        }
+      );
+
+      expect(html).toContain('metadata-grid');
+      expect(html).toContain('Current version as at 1 January 2026');
+      expect(html).toContain('Official PDF available');
     });
   });
 });
