@@ -28,7 +28,7 @@ export function evalSrc(...files) {
   };
   let code = 'var api = this._api;\nvar module = undefined;\n';
   for (const f of files) code += loadSrc(f) + '\n';
-  code += 'this.exports = { DomUtils: typeof DomUtils !== "undefined" ? DomUtils : undefined, MessageSchema: typeof MessageSchema !== "undefined" ? MessageSchema : undefined, FormatConverter: typeof FormatConverter !== "undefined" ? FormatConverter : undefined, FilenameBuilder: typeof FilenameBuilder !== "undefined" ? FilenameBuilder : undefined, StorageManager: typeof StorageManager !== "undefined" ? StorageManager : undefined, PlatformRegistry: typeof PlatformRegistry !== "undefined" ? PlatformRegistry : undefined };';
+  code += 'this.exports = { DomUtils: typeof DomUtils !== "undefined" ? DomUtils : undefined, MessageSchema: typeof MessageSchema !== "undefined" ? MessageSchema : undefined, FormatConverter: typeof FormatConverter !== "undefined" ? FormatConverter : undefined, FilenameBuilder: typeof FilenameBuilder !== "undefined" ? FilenameBuilder : undefined, StorageManager: typeof StorageManager !== "undefined" ? StorageManager : undefined, PlatformRegistry: typeof PlatformRegistry !== "undefined" ? PlatformRegistry : undefined, AppLogger: typeof AppLogger !== "undefined" ? AppLogger : undefined };';
   const fn = new Function(code);
   const obj = { _api: apiStub, exports: {} };
   fn.call(obj);
