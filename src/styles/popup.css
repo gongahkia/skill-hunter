@@ -1,29 +1,15 @@
-/**
- * Popup styles for the extension action.
- */
+/* Popup styles for the extension action. */
 
 :root {
   --popup-bg: #ffffff;
-  --popup-text: #37352f;
-  --popup-text-secondary: #787774;
-  --popup-border: #e9e9e7;
-  --popup-surface: #f7f7f5;
-  --popup-accent: #2383e2;
-  --popup-accent-hover: #1a6cbd;
+  --popup-text: #1f2937;
+  --popup-text-secondary: #4b5563;
+  --popup-border: #d7dde6;
+  --popup-surface: #f4f7fb;
+  --popup-accent: #0056b3;
+  --popup-accent-hover: #003f84;
   --popup-error: #b42318;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --popup-bg: #191919;
-    --popup-text: #e3e3e1;
-    --popup-text-secondary: #9b9b99;
-    --popup-border: #3a3a3a;
-    --popup-surface: #252525;
-    --popup-accent: #5fa3e8;
-    --popup-accent-hover: #7db4ed;
-    --popup-error: #f97066;
-  }
+  --popup-success: #15803d;
 }
 
 * {
@@ -32,25 +18,27 @@
 
 body {
   margin: 0;
-  width: 340px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  background: var(--popup-bg);
+  width: 360px;
+  font-family: 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(0, 86, 179, 0.08), transparent 50%),
+    var(--popup-bg);
   color: var(--popup-text);
   -webkit-font-smoothing: antialiased;
 }
 
 .popup-container {
-  padding: 20px;
+  padding: 18px;
 }
 
 .popup-header {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .popup-title {
-  margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 600;
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -62,7 +50,7 @@ body {
 }
 
 .popup-status {
-  min-height: 40px;
+  min-height: 44px;
   margin: 0 0 16px;
   padding: 10px 12px;
   border: 1px solid var(--popup-border);
@@ -75,7 +63,14 @@ body {
 
 .popup-status.status-error {
   color: var(--popup-error);
-  border-color: var(--popup-error);
+  border-color: #f0a7a0;
+  background: #fff4f2;
+}
+
+.popup-status.status-success {
+  color: var(--popup-success);
+  border-color: #8bd6a9;
+  background: #f2fff6;
 }
 
 .popup-actions {
@@ -84,27 +79,29 @@ body {
 
 .btn {
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border: 1px solid var(--popup-accent);
   border-radius: 8px;
   background: var(--popup-accent);
   color: #ffffff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
-    opacity 150ms ease;
+    opacity 150ms ease,
+    transform 150ms ease;
 }
 
 .btn:hover:not(:disabled) {
   background: var(--popup-accent-hover);
   border-color: var(--popup-accent-hover);
+  transform: translateY(-1px);
 }
 
 .btn:disabled {
-  opacity: 0.7;
+  opacity: 0.65;
   cursor: progress;
 }
 
@@ -117,12 +114,18 @@ body {
   color: var(--popup-text-secondary);
 }
 
-.popup-footer a {
-  color: var(--popup-accent);
-  text-decoration: none;
-}
-
-.popup-footer a:hover {
-  color: var(--popup-accent-hover);
-  text-decoration: underline;
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--popup-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--popup-text);
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 700;
 }
