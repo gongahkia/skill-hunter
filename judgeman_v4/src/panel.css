@@ -115,6 +115,18 @@
   font-size: 12px;
 }
 
+#judgeman-panel .jm-status-success {
+  color: #67d18f;
+}
+
+#judgeman-panel .jm-status-warn {
+  color: #f5bb4f;
+}
+
+#judgeman-panel .jm-status-error {
+  color: #ff7b7b;
+}
+
 #judgeman-reader-root {
   position: fixed;
   inset: 0;
@@ -182,6 +194,18 @@
   margin-bottom: 14px;
   font-size: 18px;
   font-weight: 650;
+}
+
+#judgeman-reader-root .jm-subheading {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+#judgeman-reader-root .jm-brief-outcome {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
 }
 
 #judgeman-reader-root .jm-kv-grid {
