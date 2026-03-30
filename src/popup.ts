@@ -82,12 +82,12 @@ function registerGlobalErrorListeners(): void {
       filename: event.filename,
       line: event.lineno,
       column: event.colno,
-      error: event.error,
+      error: event.error as unknown,
     });
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    popupLogger.error('Unhandled popup promise rejection', { reason: event.reason });
+    popupLogger.error('Unhandled popup promise rejection', { reason: event.reason as unknown });
   });
 }
 
