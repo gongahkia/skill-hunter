@@ -76,7 +76,6 @@ function buildScanResult(prefixes, tags) {
     priority: CONFIG.PRIORITY, darkMode: getDarkMode(),
   };
 }
-
 // ---------- MENU ----------
 
 function onOpen() {
