@@ -10,6 +10,7 @@ const targets = requestedTarget === "all" ? ["chrome", "firefox", "safari"] : [r
 const baseManifest = JSON.parse(readFileSync(resolve(srcDir, "manifest.json"), "utf8"));
 const firefoxBackgroundScripts = [
   "compat.js",
+  "logger.js",
   "converters.js",
   "filename.js",
   "storage.js",
