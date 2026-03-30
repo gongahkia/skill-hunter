@@ -17,7 +17,13 @@
     };
   }
 
+  function safeRequire(modulePath) {
+    if (typeof require !== "function") return null;
+    try { return require(modulePath); } catch (_e) { return null; }
+  }
+
   function createContentApp({ window, document, browserApi, extractorApi, caseToolkit, loggerApi }) {
+    const citationLinker = root.JudgemanCitationLinker || safeRequire("./citationLinker.js");
     const runtimeCaseToolkit =
       caseToolkit || root.JudgemanCaseToolkit || {
         analyseCase() {
@@ -264,14 +270,32 @@
       return wrapper;
     }
 
+    function buildLinkedCitationList(citations) {
+      if (!Array.isArray(citations) || citations.length === 0) {
+        return createElement("p", { className: "jm-empty", text: "No neutral citations were pattern-matched." });
+      }
+      const links = citationLinker ? citationLinker.buildLinks(citations) : null;
+      if (!links || links.length === 0) return buildBulletList(citations, "");
+      const list = createElement("ul", { className: "jm-issues" });
+      for (const link of links) {
+        const li = createElement("li");
+        const a = createElement("a", {
+          text: link.citation,
+          attrs: { href: link.url, target: "_blank", rel: "noopener noreferrer" }
+        });
+        li.appendChild(a);
+        li.appendChild(document.createTextNode(` (${link.source})`));
+        list.appendChild(li);
+      }
+      return list;
+    }
+
     function buildAuthoritiesContent(page) {
       const analysis = page.caseAnalysis;
       const wrapper = createElement("div");
 
       wrapper.appendChild(createElement("h3", { className: "jm-subheading", text: "Neutral citations" }));
-      wrapper.appendChild(
-        buildBulletList(analysis?.citations, "No neutral citations were pattern-matched.")
-      );
+      wrapper.appendChild(buildLinkedCitationList(analysis?.citations));
 
       wrapper.appendChild(createElement("h3", { className: "jm-subheading", text: "Statutory references" }));
       wrapper.appendChild(

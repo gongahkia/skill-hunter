@@ -32,6 +32,7 @@
         "browserApi.js",
         "logger.js",
         "citationAdapters.js",
+        "citationLinker.js",
         "caseToolkit.js",
         "extractor.js",
         "contentApp.js",
