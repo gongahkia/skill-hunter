@@ -38,6 +38,8 @@
     }
   ],
 
+  "permissions": ["storage"],
+
   "browser_specific_settings": {
     "gecko": {
       "id": "skill-hunter@gongahkia.dev",
