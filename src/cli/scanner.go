@@ -10,9 +10,10 @@ import (
 )
 
 type TagEntry struct {
-	Text string `json:"text"`
-	File string `json:"file"`
-	Line int    `json:"line"`
+	Text string   `json:"text"`
+	File string   `json:"file"`
+	Line int      `json:"line"`
+	Meta *TagMeta `json:"meta,omitempty"`
 }
 
 type ScanWarning struct {
@@ -165,11 +166,18 @@ func scanFile(path string, prefixes []string, report *ScanReport) error {
 
 		for _, p := range prefixes {
 			if hasPrefixMatch(normalized, p) {
-				report.Results[p] = append(report.Results[p], TagEntry{
+				afterPrefix := normalized[len(p):]
+				afterPrefix = strings.TrimLeft(afterPrefix, ":- ")
+				meta, _ := ParseMeta(afterPrefix)
+				entry := TagEntry{
 					Text: strings.TrimSpace(rawLine),
 					File: path,
 					Line: lineNum,
-				})
+				}
+				if meta.Owner != "" || meta.Date != "" || meta.Priority != "" {
+					entry.Meta = &meta
+				}
+				report.Results[p] = append(report.Results[p], entry)
 				report.Stats.Matches++
 				break
 			}
