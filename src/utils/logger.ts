@@ -1,6 +1,7 @@
 /**
  * Centralized logging utility for the extension
  */
+/* eslint-disable no-console */
 
 import type { DiagnosticLogEntry, LogLevelName } from '@/types';
 import { UX_LIMITS } from '@/utils/constants';
@@ -130,7 +131,7 @@ class Logger {
   ): void {
     let context = 'app';
     const finalArgs = [...args];
-    const maybeContext = finalArgs.at(-1);
+    const maybeContext = finalArgs.length > 0 ? finalArgs[finalArgs.length - 1] : undefined;
 
     if (typeof maybeContext === 'string' && maybeContext.startsWith('context:')) {
       context = maybeContext.replace('context:', '');
@@ -143,12 +144,27 @@ class Logger {
       return;
     }
 
-    const consoleMethod: Console[LogMethodName] = console[method].bind(console);
     const payload = shouldCaptureData(data)
       ? { data, sessionId: this.sessionId, context }
       : { sessionId: this.sessionId, context };
+    const prefix = `${this.prefix} [${method.toUpperCase()}]`;
 
-    consoleMethod(`${this.prefix} [${method.toUpperCase()}]`, message, payload, ...finalArgs);
+    switch (method) {
+      case 'debug':
+        console.debug(prefix, message, payload, ...finalArgs);
+        break;
+      case 'info':
+        console.info(prefix, message, payload, ...finalArgs);
+        break;
+      case 'warn':
+        console.warn(prefix, message, payload, ...finalArgs);
+        break;
+      case 'error':
+        console.error(prefix, message, payload, ...finalArgs);
+        break;
+      default:
+        console.error(prefix, message, payload, ...finalArgs);
+    }
   }
 }
 
