@@ -87,18 +87,41 @@ var FormatConverter = {
     }
     return y;
   },
+  toMarkdown(envelope) {
+    var lines = [];
+    var title = envelope.chatTitle || 'Untitled Conversation';
+    lines.push('# ' + title);
+    lines.push('');
+    lines.push('- Export version: ' + (envelope.exportVersion || '2.0'));
+    lines.push('- Exported at: ' + (envelope.exportedAt || ''));
+    lines.push('- Platform: ' + (envelope.platform || 'unknown'));
+    lines.push('- Model: ' + (envelope.model || ''));
+    lines.push('- Message count: ' + (typeof envelope.messageCount === 'number' ? envelope.messageCount : (envelope.messages || []).length));
+    lines.push('');
+
+    for (var i = 0; i < envelope.messages.length; i++) {
+      var m = envelope.messages[i];
+      lines.push('## ' + String(m.role || 'unknown').toUpperCase());
+      if (m.timestamp) lines.push('`' + m.timestamp + '`');
+      lines.push('');
+      lines.push(m.content || '');
+      lines.push('');
+    }
+    return lines.join('\n').trim() + '\n';
+  },
   formats: {
     csv:     { mime: 'text/csv',                  ext: 'csv' },
     tsv:     { mime: 'text/tab-separated-values', ext: 'tsv' },
     json:    { mime: 'application/json',           ext: 'json' },
     ndjson:  { mime: 'application/x-ndjson',       ext: 'ndjson' },
     xml:     { mime: 'application/xml',            ext: 'xml' },
-    yaml:    { mime: 'text/yaml',                  ext: 'yaml' }
+    yaml:    { mime: 'text/yaml',                  ext: 'yaml' },
+    markdown:{ mime: 'text/markdown',              ext: 'md' }
   },
   convert(format, envelope) {
     var methodMap = {
       csv: 'toCSV', tsv: 'toTSV', json: 'toJSON', ndjson: 'toNDJSON',
-      xml: 'toXML', yaml: 'toYAML'
+      xml: 'toXML', yaml: 'toYAML', markdown: 'toMarkdown'
     };
     var method = methodMap[format];
     if (!method || !this[method]) throw new Error('Unsupported format: ' + format);
