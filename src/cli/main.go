@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "print debug logs and per-file warnings")
 	logFile := flag.String("log-file", "", "optional log file path")
 	strict := flag.Bool("strict", false, "exit with code 2 if scan warnings are found")
+	telemetry := flag.Bool("telemetry", false, "opt-in local-only usage telemetry (~/.owl/telemetry.json)")
 	flag.Parse()
 
 	logger, err := NewLogger(*verbose, *logFile)
@@ -39,6 +41,7 @@ func main() {
 		}
 	}
 
+	scanStart := time.Now()
 	report, err := Scan(*dir, excludeSet, customTags, logger)
 	if err != nil {
 		logger.Errorf("scan failed: %v", err)
@@ -60,6 +63,12 @@ func main() {
 		report.Stats.Matches,
 		len(report.Stats.Warnings),
 	)
+
+	if *telemetry {
+		if tErr := RecordTelemetry(report, len(customTags), time.Since(scanStart)); tErr != nil {
+			logger.Warnf("telemetry write failed: %v", tErr)
+		}
+	}
 
 	if *strict && len(report.Stats.Warnings) > 0 {
 		logger.Warnf("strict mode enabled and warnings were emitted")
