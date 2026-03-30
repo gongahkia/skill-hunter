@@ -3,8 +3,9 @@
 ## Outstanding items
 
 1. Verify CLI tests in an environment with Go installed.
-- Current blocker: `go` is not installed locally, so `cd src/cli && go test ./...` could not be executed here.
-- Required completion step: install Go and run the CLI test suite.
+- Completion (2026-03-30): Go is available locally (`go version go1.26.1 darwin/arm64`).
+- Verification command: `cd src/cli && go test ./...`
+- Result: `ok  	github.com/gongahkia/owl/src/cli	0.393s`
 
 2. Replace Safari OAuth bridge stub with a real implementation.
 - File: `src/webext/src/auth/launchers/safari.ts`
