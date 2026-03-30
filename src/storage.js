@@ -9,23 +9,51 @@ var StorageManager = {
       state: 'idle',
       message: 'Auto-export has not run yet.',
       timestamp: ''
+    },
+    runtimeDiagnostics: []
+  },
+  _ensureStorage() {
+    if (!api || !api.storage || !api.storage.local) {
+      throw new Error('Browser storage API is unavailable');
     }
   },
+  _wrapError(operation, error) {
+    throw new Error('Storage operation failed during ' + operation + ': ' + (error && error.message ? error.message : String(error)));
+  },
   async getAll() {
-    return await api.storage.local.get(this.defaults);
+    this._ensureStorage();
+    try {
+      return await api.storage.local.get(this.defaults);
+    } catch (error) {
+      this._wrapError('getAll', error);
+    }
   },
   async get(key) {
-    var all = await this.getAll();
-    return all[key];
+    try {
+      var all = await this.getAll();
+      return all[key];
+    } catch (error) {
+      this._wrapError('get(' + key + ')', error);
+    }
   },
   async set(key, value) {
-    await api.storage.local.set({ [key]: value });
+    this._ensureStorage();
+    try {
+      await api.storage.local.set({ [key]: value });
+    } catch (error) {
+      this._wrapError('set(' + key + ')', error);
+    }
   },
   async setAll(settings) {
-    await api.storage.local.set(settings);
+    this._ensureStorage();
+    try {
+      await api.storage.local.set(settings);
+    } catch (error) {
+      this._wrapError('setAll', error);
+    }
   },
   async setRuntimeValue(key, value) {
-    await api.storage.local.set({ [key]: value });
+    await this.set(key, value);
   }
 };
 if (typeof module !== 'undefined') module.exports = StorageManager;
