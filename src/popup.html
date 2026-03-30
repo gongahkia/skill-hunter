@@ -6,35 +6,103 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="popup-container">
-    <header>
-      <img src="./icon/128.png" alt="Rakuzaichi Logo" class="logo">
-      <h2>Rakuzaichi</h2>
-    </header>
-    <section>
-      <h3>Select Export Format</h3>
-      <div class="format-grid">
-        <button data-format="csv">CSV</button>
-        <button data-format="tsv">TSV</button>
-        <button data-format="json">JSON</button>
-        <button data-format="ndjson">NDJSON</button>
-        <button data-format="xml">XML</button>
-        <button data-format="yaml">YAML</button>
-      </div>
-    </section>
-    <div id="export-preview" class="hidden">
-      <div class="preview-box">
-        <p id="preview-info"></p>
-        <div class="preview-actions">
-          <button id="preview-confirm" class="btn-confirm">Download</button>
-          <button id="preview-cancel" class="btn-cancel">Cancel</button>
+  <div class="popup-app">
+    <header class="hero">
+      <div class="brand-block">
+        <img src="./icon/128.png" alt="Rakuzaichi logo" class="logo">
+        <div>
+          <h1>Rakuzaichi</h1>
+          <p class="hero-subtitle">Local-first AI chat export utility</p>
         </div>
       </div>
-    </div>
-    <div id="status" class="status hidden"></div>
-    <p class="privacy-note">Exports stay local to this browser and open the browser save flow.</p>
+      <div id="context-pill" class="context-pill loading">Scanning current tab</div>
+    </header>
+
+    <section class="context-grid" aria-label="Current chat context">
+      <article class="context-card">
+        <span class="context-label">Platform</span>
+        <strong id="context-platform">Detecting...</strong>
+      </article>
+      <article class="context-card">
+        <span class="context-label">Messages</span>
+        <strong id="context-messages">-</strong>
+      </article>
+      <article class="context-card context-card-wide">
+        <span class="context-label">Conversation</span>
+        <strong id="context-title">Waiting for page metadata...</strong>
+      </article>
+      <article class="context-card">
+        <span class="context-label">Model</span>
+        <strong id="context-model">Unknown</strong>
+      </article>
+    </section>
+
+    <section class="quick-section" aria-label="Quick actions">
+      <button id="quick-export" class="btn btn-primary">Quick export as <span id="quick-format">JSON</span></button>
+      <button id="open-options" class="btn btn-secondary">Settings &amp; diagnostics</button>
+    </section>
+
+    <section class="format-section" aria-label="Export formats">
+      <div class="section-header">
+        <h2>Format toolbox</h2>
+        <p>Choose based on where this data goes next.</p>
+      </div>
+      <div class="format-grid">
+        <button data-format="json" class="format-card">
+          <span class="format-name">JSON</span>
+          <span class="format-note">Automation and APIs</span>
+        </button>
+        <button data-format="markdown" class="format-card">
+          <span class="format-name">Markdown</span>
+          <span class="format-note">Docs and notes</span>
+        </button>
+        <button data-format="csv" class="format-card">
+          <span class="format-name">CSV</span>
+          <span class="format-note">Spreadsheet analysis</span>
+        </button>
+        <button data-format="tsv" class="format-card">
+          <span class="format-name">TSV</span>
+          <span class="format-note">Safer plain-text tables</span>
+        </button>
+        <button data-format="ndjson" class="format-card">
+          <span class="format-name">NDJSON</span>
+          <span class="format-note">Streaming pipelines</span>
+        </button>
+        <button data-format="xml" class="format-card">
+          <span class="format-name">XML</span>
+          <span class="format-note">Legacy integrations</span>
+        </button>
+        <button data-format="yaml" class="format-card">
+          <span class="format-name">YAML</span>
+          <span class="format-note">Config and readability</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="export-preview" class="preview-panel hidden" aria-live="polite">
+      <h2>Ready to export</h2>
+      <p id="preview-info"></p>
+      <div class="preview-actions">
+        <button id="preview-confirm" class="btn btn-primary">Download file</button>
+        <button id="preview-copy" class="btn btn-secondary">Copy data</button>
+        <button id="preview-cancel" class="btn btn-ghost">Cancel</button>
+      </div>
+    </section>
+
+    <section class="history-panel" aria-label="Export summary">
+      <h2>Latest export</h2>
+      <p id="last-export">No exports yet.</p>
+    </section>
+
+    <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+
+    <footer class="footer-note">
+      Chat content is processed locally in your browser context.
+    </footer>
   </div>
+
   <script src="compat.js"></script>
+  <script src="logger.js"></script>
   <script src="converters.js"></script>
   <script src="filename.js"></script>
   <script src="history.js"></script>
