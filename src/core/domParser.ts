@@ -14,6 +14,12 @@ import { SELECTORS } from '@/utils/constants';
 import { DOMParsingError } from '@/utils/errorHandler';
 import { logger } from '@/utils/logger';
 
+const parserLogger = logger.withContext('domParser');
+
+function normalizeText(value: string | null | undefined): string {
+  return (value ?? '').replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Safely query a single element
  */
@@ -24,7 +30,7 @@ function safeQuerySelector<T extends Element = Element>(
   try {
     return parent.querySelector<T>(selector);
   } catch (error) {
-    logger.warn(`Failed to query selector: ${selector}`, error);
+    parserLogger.warn('Failed to query selector', { selector, error });
     return null;
   }
 }
@@ -39,9 +45,17 @@ function safeQuerySelectorAll<T extends Element = Element>(
   try {
     return parent.querySelectorAll<T>(selector);
   } catch (error) {
-    logger.warn(`Failed to query selector all: ${selector}`, error);
+    parserLogger.warn('Failed to query selector list', { selector, error });
     return [] as unknown as NodeListOf<T>;
   }
+}
+
+function deriveTitleFallback(pageTitle: string): string {
+  if (!pageTitle.trim()) {
+    return 'Untitled Legislation';
+  }
+
+  return pageTitle.split('|')[0]?.trim() || pageTitle.trim();
 }
 
 /**
@@ -69,7 +83,7 @@ export function getPageMetadata(): PageMetadata {
 function extractTableOfContents(): TableOfContentsItem[] {
   const tocPanel = safeQuerySelector(document, SELECTORS.TOC_PANEL);
   if (!tocPanel) {
-    logger.warn('Table of contents panel not found');
+    parserLogger.warn('Table of contents panel not found');
     return [];
   }
 
@@ -77,13 +91,10 @@ function extractTableOfContents(): TableOfContentsItem[] {
   const items: TableOfContentsItem[] = [];
 
   links.forEach((link) => {
-    const text = link.innerText.trim();
-    const url = link.href.trim();
+    const text = normalizeText(link.innerText);
+    const url = normalizeText(link.href);
     if (text && url) {
-      items.push({
-        referenceText: text,
-        referenceUrl: url,
-      });
+      items.push({ referenceText: text, referenceUrl: url });
     }
   });
 
@@ -106,9 +117,12 @@ export function getPageBasicData(): { pageMetadata: PageMetadata; pageBasicData:
     const pdfEl = safeQuerySelector(header, SELECTORS.PDF_LINK);
     const statusEl = safeQuerySelector(header, SELECTORS.STATUS_VALUE);
 
-    legislationTitle = titleEl?.textContent?.trim() ?? '';
-    legislationPdfLink = pdfEl?.parentElement?.getAttribute('href')?.trim() ?? '';
-    legislationStatus = statusEl?.textContent?.trim() ?? '';
+    legislationTitle = normalizeText(titleEl?.textContent) || deriveTitleFallback(pageMetadata.title);
+    legislationPdfLink = normalizeText(pdfEl?.parentElement?.getAttribute('href'));
+    legislationStatus = normalizeText(statusEl?.textContent);
+  } else {
+    parserLogger.warn('Top panel not found, using fallback metadata');
+    legislationTitle = deriveTitleFallback(pageMetadata.title);
   }
 
   const tableOfContents = extractTableOfContents();
@@ -131,7 +145,7 @@ export function getLegislationMetadata(): LegislationMetadata {
   const legisFront = safeQuerySelector(document, SELECTORS.LEGIS_FRONT);
 
   if (!legisFront) {
-    logger.warn('Legislation front section not found');
+    parserLogger.warn('Legislation front section not found');
     return {
       legislationName: '',
       legislationDescription: '',
@@ -148,11 +162,11 @@ export function getLegislationMetadata(): LegislationMetadata {
   const revisedText = safeQuerySelector(legisFront, SELECTORS.REVISED_TEXT);
 
   return {
-    legislationName: actHeader?.textContent?.trim() ?? '',
-    legislationDescription: longTitle?.textContent?.trim() ?? '',
-    legislationDate: cDate?.textContent?.trim() ?? '',
-    revisedLegislationName: revisedHeader?.textContent?.trim() ?? '',
-    revisedLegislationText: revisedText?.textContent?.trim() ?? '',
+    legislationName: normalizeText(actHeader?.textContent),
+    legislationDescription: normalizeText(longTitle?.textContent),
+    legislationDate: normalizeText(cDate?.textContent),
+    revisedLegislationName: normalizeText(revisedHeader?.textContent),
+    revisedLegislationText: normalizeText(revisedText?.textContent),
   };
 }
 
@@ -161,59 +175,95 @@ export function getLegislationMetadata(): LegislationMetadata {
  */
 export function getLegislationDefinitions(): Definition[] {
   const definitions: Definition[] = [];
-  const definitionTerms = new Set<string>(); // Prevent duplicates
-  // Handle smart quotes used in legislation - character codes 8220 and 8221
+  const definitionTerms = new Set<string>();
   const regex = /\u201C([^\u201D]+)\u201D/g;
-
-  logger.info('Starting definition extraction...');
 
   const provisionContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  logger.info(`Found ${provisionContainers.length} provision containers`);
-
-  // Also try a broader search to see what's available
-  const allProvisionDivs = safeQuerySelectorAll(document, "div[class^='prov']");
-  logger.info(`Found ${allProvisionDivs.length} divs with class starting with 'prov'`);
-
-  // Check for definition cells with different selectors
-  const defCells1 = safeQuerySelectorAll(document, 'td.def');
-  const defCells2 = safeQuerySelectorAll(document, 'td[class*="def"]');
-  const defCells3 = safeQuerySelectorAll(document, 'td[class*="Def"]');
-
-  logger.info(`Found ${defCells1.length} cells with class 'def'`);
-  logger.info(`Found ${defCells2.length} cells with class containing 'def'`);
-  logger.info(`Found ${defCells3.length} cells with class containing 'Def'`);
-
-  provisionContainers.forEach((container, index) => {
+  provisionContainers.forEach((container) => {
     const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
-    logger.info(`Container ${index}: found ${definitionCells.length} definition cells`);
 
     definitionCells.forEach((cell) => {
-      const sentence = cell.textContent?.trim() ?? '';
+      const sentence = normalizeText(cell.textContent);
+      if (!sentence) {
+        return;
+      }
 
-      if (!sentence) return;
-
-      // Reset regex lastIndex for each iteration
       regex.lastIndex = 0;
       const match = regex.exec(sentence);
+      const term = normalizeText(match?.[1]);
 
-      if (match && match[1]) {
-        const term = match[1].trim();
-
-        // Only add if we haven't seen this term before
-        if (!definitionTerms.has(term)) {
-          definitionTerms.add(term);
-          definitions.push({ [term]: sentence });
-        }
+      if (!term || definitionTerms.has(term)) {
+        return;
       }
+
+      definitionTerms.add(term);
+      definitions.push({ [term]: sentence });
     });
   });
 
-  logger.info(`Extracted ${definitions.length} definitions`);
+  parserLogger.info('Definition extraction completed', {
+    count: definitions.length,
+    containerCount: provisionContainers.length,
+  });
+
   return definitions;
+}
+
+function pushToken(content: ContentToken[], token: ContentToken): void {
+  if (!normalizeText(token.content)) {
+    return;
+  }
+
+  content.push(token);
+}
+
+function parseRowsIntoTokens(rows: NodeListOf<Element> | [], content: ContentToken[]): void {
+  rows.forEach((row) => {
+    const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
+    pushToken(content, {
+      type: 'sectionHeader',
+      ID: normalizeText(sectionHeader?.id) || null,
+      content: normalizeText(sectionHeader?.textContent),
+    });
+
+    const illustrationCell = safeQuerySelector(row, SELECTORS.ILLUSTRATION_CELL);
+    if (illustrationCell) {
+      const innerHTML = illustrationCell.innerHTML;
+      const text = normalizeText(illustrationCell.textContent);
+
+      if (innerHTML.includes('<em>Illustration</em>') || innerHTML.includes('<em>Illustrations</em>')) {
+        pushToken(content, { type: 'illustrationHeader', ID: null, content: text });
+      } else {
+        pushToken(content, { type: 'illustrationBody', ID: null, content: text });
+      }
+    }
+
+    const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
+    pushToken(content, {
+      type: 'sectionBody',
+      ID: null,
+      content: normalizeText(sectionBody?.textContent),
+    });
+
+    const provisionHeader = safeQuerySelector(row, SELECTORS.PROVISION_HEADER);
+    pushToken(content, {
+      type: 'provisionHeader',
+      ID: normalizeText(provisionHeader?.id) || null,
+      content: normalizeText(provisionHeader?.textContent),
+    });
+
+    const provisionNumber = safeQuerySelector(row, SELECTORS.PROVISION_NUMBER);
+    const provisionNumberDiv = safeQuerySelector(provisionNumber ?? row, SELECTORS.PROVISION_NUMBER_DIV);
+    pushToken(content, {
+      type: 'provisionNumber',
+      ID: normalizeText(provisionNumber?.id) || null,
+      content: normalizeText(provisionNumberDiv?.textContent),
+    });
+  });
 }
 
 /**
@@ -222,164 +272,27 @@ export function getLegislationDefinitions(): Definition[] {
 export function getLegislationContent(): ContentToken[] {
   const content: ContentToken[] = [];
 
-  logger.info('Starting content extraction...');
-
-  const provisionContainers = safeQuerySelectorAll(
+  const primaryContainers = safeQuerySelectorAll(
     document,
     `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
   );
 
-  logger.info(`Found ${provisionContainers.length} provision containers for content extraction`);
+  const fallbackContainers =
+    primaryContainers.length > 0 ? primaryContainers : safeQuerySelectorAll(document, "div[class^='prov']");
 
-  // Also check what we can find with broader selectors
-  const legisContent = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
-  const legisBody = safeQuerySelector(document, SELECTORS.LEGIS_BODY);
-  logger.info(`Legis content element: ${legisContent ? 'found' : 'not found'}`);
-  logger.info(`Legis body element: ${legisBody ? 'found' : 'not found'}`);
-
-  if (provisionContainers.length === 0) {
-    logger.warn('No provision containers found, trying alternative selectors...');
-
-    // Try alternative selectors
-    const altContainers = safeQuerySelectorAll(document, "div[class^='prov']");
-    logger.info(`Found ${altContainers.length} alternative provision containers`);
-
-    if (altContainers.length === 0) {
-      throw new DOMParsingError('No provision containers found in document');
-    }
-
-    // Use alternative containers
-    altContainers.forEach((container) => {
-      const rows = safeQuerySelectorAll(container, 'table tbody tr');
-      logger.info(`Alternative container: found ${rows.length} rows`);
-
-      rows.forEach((row) => {
-        // Section Header
-        const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
-        if (sectionHeader) {
-          const headerText = sectionHeader.textContent?.trim() ?? '';
-          const headerId = sectionHeader.id?.trim() ?? null;
-
-          if (headerText) {
-            content.push({
-              type: 'sectionHeader',
-              ID: headerId,
-              content: headerText,
-            });
-          }
-        }
-
-        // Section Body
-        const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
-        if (sectionBody) {
-          const bodyText = sectionBody.textContent?.trim() ?? '';
-          if (bodyText) {
-            content.push({
-              type: 'sectionBody',
-              ID: null,
-              content: bodyText,
-            });
-          }
-        }
-      });
-    });
-
-    logger.info(`Extracted ${content.length} content tokens using alternative method`);
-    return content;
-  }
-
-  provisionContainers.forEach((container) => {
+  fallbackContainers.forEach((container) => {
     const rows = safeQuerySelectorAll(container, 'table tbody tr');
-
-    rows.forEach((row) => {
-      // Section Header
-      const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
-      if (sectionHeader) {
-        const headerText = sectionHeader.textContent?.trim() ?? '';
-        const headerId = sectionHeader.id?.trim() ?? null;
-
-        if (headerText) {
-          content.push({
-            type: 'sectionHeader',
-            ID: headerId,
-            content: headerText,
-          });
-        }
-      }
-
-      // Illustration Header or Content
-      const illustrationCell = safeQuerySelector(row, SELECTORS.ILLUSTRATION_CELL);
-      if (illustrationCell) {
-        const innerHTML = illustrationCell.innerHTML;
-        const text = illustrationCell.textContent?.trim() ?? '';
-
-        if (
-          innerHTML.includes('<em>Illustration</em>') ||
-          innerHTML.includes('<em>Illustrations</em>')
-        ) {
-          content.push({
-            type: 'illustrationHeader',
-            ID: null,
-            content: text,
-          });
-        } else if (text) {
-          content.push({
-            type: 'illustrationBody',
-            ID: null,
-            content: text,
-          });
-        }
-      }
-
-      // Section Body
-      const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
-      if (sectionBody) {
-        const bodyText = sectionBody.textContent?.trim() ?? '';
-        if (bodyText) {
-          content.push({
-            type: 'sectionBody',
-            ID: null,
-            content: bodyText,
-          });
-        }
-      }
-
-      // Provision Header
-      const provisionHeader = safeQuerySelector(row, SELECTORS.PROVISION_HEADER);
-      if (provisionHeader) {
-        const provisionHeaderId = provisionHeader.id || null;
-        const provisionHeaderText = provisionHeader.textContent?.trim() ?? '';
-
-        if (provisionHeaderText) {
-          content.push({
-            type: 'provisionHeader',
-            ID: provisionHeaderId,
-            content: provisionHeaderText,
-          });
-        }
-      }
-
-      // Provision Number
-      const provisionNumber = safeQuerySelector(row, SELECTORS.PROVISION_NUMBER);
-      if (provisionNumber) {
-        const provisionNumberId = provisionNumber.id || null;
-        const provisionNumberDiv = safeQuerySelector(
-          provisionNumber,
-          SELECTORS.PROVISION_NUMBER_DIV
-        );
-        const provisionNumberText = provisionNumberDiv?.textContent?.trim() ?? '';
-
-        if (provisionNumberText) {
-          content.push({
-            type: 'provisionNumber',
-            ID: provisionNumberId,
-            content: provisionNumberText,
-          });
-        }
-      }
-    });
+    parseRowsIntoTokens(rows, content);
   });
 
-  logger.info(`Extracted ${content.length} content tokens`);
+  if (content.length === 0) {
+    throw new DOMParsingError('No readable legislation content could be extracted from this page');
+  }
+
+  parserLogger.info('Content extraction completed', {
+    tokenCount: content.length,
+    containerCount: fallbackContainers.length,
+  });
+
   return content;
 }
