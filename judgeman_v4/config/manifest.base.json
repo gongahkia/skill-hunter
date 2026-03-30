@@ -30,6 +30,8 @@
       ],
       "js": [
         "browserApi.js",
+        "logger.js",
+        "caseToolkit.js",
         "extractor.js",
         "contentApp.js",
         "contentScript.js"
