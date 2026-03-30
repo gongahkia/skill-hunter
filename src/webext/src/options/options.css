@@ -44,3 +44,20 @@ button {
 .note {
   color: #cbd5e1;
 }
+
+.diagnostics {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+}
+
+.diagnostics h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
