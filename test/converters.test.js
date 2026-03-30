@@ -88,11 +88,21 @@ describe('FormatConverter', () => {
     expect(result).toContain('  - role: user');
   });
 
+  it('toMarkdown produces readable sections', () => {
+    const result = FormatConverter.toMarkdown(envelope);
+    expect(result).toContain('# Test Chat');
+    expect(result).toContain('## USER');
+    expect(result).toContain('## ASSISTANT');
+    expect(result).toContain('Hello');
+  });
+
   it('convert dispatches to correct method', () => {
     const json = FormatConverter.convert('json', envelope);
     expect(JSON.parse(json).platform).toBe('chatgpt');
     const csv = FormatConverter.convert('csv', envelope);
     expect(csv).toContain('role,content');
+    const md = FormatConverter.convert('markdown', envelope);
+    expect(md).toContain('# Test Chat');
   });
 
   it('convert throws on unknown format', () => {
@@ -103,5 +113,6 @@ describe('FormatConverter', () => {
     expect(FormatConverter.formats.csv.ext).toBe('csv');
     expect(FormatConverter.formats.json.mime).toBe('application/json');
     expect(FormatConverter.formats.yaml.ext).toBe('yaml');
+    expect(FormatConverter.formats.markdown.ext).toBe('md');
   });
 });
