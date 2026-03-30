@@ -2,6 +2,9 @@
  * Centralized logging utility for the extension
  */
 
+import type { DiagnosticLogEntry, LogLevelName } from '@/types';
+import { UX_LIMITS } from '@/utils/constants';
+
 enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -9,13 +12,39 @@ enum LogLevel {
   ERROR = 3,
 }
 
+type LogMethodName = 'debug' | 'info' | 'warn' | 'error';
+
+function levelToName(level: LogLevel): LogLevelName {
+  switch (level) {
+    case LogLevel.DEBUG:
+      return 'debug';
+    case LogLevel.INFO:
+      return 'info';
+    case LogLevel.WARN:
+      return 'warn';
+    case LogLevel.ERROR:
+      return 'error';
+    default:
+      return 'error';
+  }
+}
+
+function shouldCaptureData(data: unknown): boolean {
+  return typeof data !== 'undefined';
+}
+
+function createSessionId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 class Logger {
   private static instance: Logger;
   private logLevel: LogLevel = LogLevel.INFO;
-  private prefix = '[Skill Hunter]';
+  private readonly prefix = '[Skill Hunter]';
+  private readonly sessionId = createSessionId();
+  private readonly logEntries: DiagnosticLogEntry[] = [];
 
   private constructor() {
-    // Set log level based on environment
     if (process.env.NODE_ENV === 'development') {
       this.logLevel = LogLevel.DEBUG;
     }
@@ -25,6 +54,7 @@ class Logger {
     if (!Logger.instance) {
       Logger.instance = new Logger();
     }
+
     return Logger.instance;
   }
 
@@ -32,28 +62,93 @@ class Logger {
     this.logLevel = level;
   }
 
-  debug(message: string, ...args: unknown[]): void {
-    if (this.logLevel <= LogLevel.DEBUG) {
-      console.debug(`${this.prefix} [DEBUG]`, message, ...args);
-    }
+  getSessionId(): string {
+    return this.sessionId;
   }
 
-  info(message: string, ...args: unknown[]): void {
-    if (this.logLevel <= LogLevel.INFO) {
-      console.info(`${this.prefix} [INFO]`, message, ...args);
-    }
+  getBufferedEntries(): DiagnosticLogEntry[] {
+    return [...this.logEntries];
   }
 
-  warn(message: string, ...args: unknown[]): void {
-    if (this.logLevel <= LogLevel.WARN) {
-      console.warn(`${this.prefix} [WARN]`, message, ...args);
-    }
+  clearBufferedEntries(): void {
+    this.logEntries.length = 0;
+  }
+
+  withContext(context: string): {
+    debug: (message: string, data?: unknown, ...args: unknown[]) => void;
+    info: (message: string, data?: unknown, ...args: unknown[]) => void;
+    warn: (message: string, data?: unknown, ...args: unknown[]) => void;
+    error: (message: string, error?: unknown, ...args: unknown[]) => void;
+  } {
+    const contextMarker = `context:${context}`;
+    return {
+      debug: (message, data, ...args) => this.debug(message, data, ...args, contextMarker),
+      info: (message, data, ...args) => this.info(message, data, ...args, contextMarker),
+      warn: (message, data, ...args) => this.warn(message, data, ...args, contextMarker),
+      error: (message, error, ...args) => this.error(message, error, ...args, contextMarker),
+    };
+  }
+
+  debug(message: string, data?: unknown, ...args: unknown[]): void {
+    this.log(LogLevel.DEBUG, 'debug', message, data, args);
+  }
+
+  info(message: string, data?: unknown, ...args: unknown[]): void {
+    this.log(LogLevel.INFO, 'info', message, data, args);
+  }
+
+  warn(message: string, data?: unknown, ...args: unknown[]): void {
+    this.log(LogLevel.WARN, 'warn', message, data, args);
   }
 
   error(message: string, error?: unknown, ...args: unknown[]): void {
-    if (this.logLevel <= LogLevel.ERROR) {
-      console.error(`${this.prefix} [ERROR]`, message, error, ...args);
+    this.log(LogLevel.ERROR, 'error', message, error, args);
+  }
+
+  private captureEntry(level: LogLevel, message: string, data?: unknown, context = 'app'): void {
+    const entry: DiagnosticLogEntry = {
+      sessionId: this.sessionId,
+      timestamp: new Date().toISOString(),
+      level: levelToName(level),
+      context,
+      message,
+      ...(shouldCaptureData(data) ? { data } : {}),
+    };
+
+    this.logEntries.push(entry);
+    if (this.logEntries.length > UX_LIMITS.MAX_LOG_ENTRIES) {
+      this.logEntries.splice(0, this.logEntries.length - UX_LIMITS.MAX_LOG_ENTRIES);
     }
+  }
+
+  private log(
+    level: LogLevel,
+    method: LogMethodName,
+    message: string,
+    data: unknown,
+    args: unknown[]
+  ): void {
+    let context = 'app';
+    const finalArgs = [...args];
+    const maybeContext = finalArgs.at(-1);
+
+    if (typeof maybeContext === 'string' && maybeContext.startsWith('context:')) {
+      context = maybeContext.replace('context:', '');
+      finalArgs.pop();
+    }
+
+    this.captureEntry(level, message, data, context);
+
+    if (this.logLevel > level) {
+      return;
+    }
+
+    const consoleMethod: Console[LogMethodName] = console[method].bind(console);
+    const payload = shouldCaptureData(data)
+      ? { data, sessionId: this.sessionId, context }
+      : { sessionId: this.sessionId, context };
+
+    consoleMethod(`${this.prefix} [${method.toUpperCase()}]`, message, payload, ...finalArgs);
   }
 }
 
