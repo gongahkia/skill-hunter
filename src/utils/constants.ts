@@ -117,4 +117,26 @@ export const SKILL_HUNTER_IDS = {
   ROOT_HOST: 'skill-hunter-root',
   TOC_TARGET_ATTR: 'data-skill-hunter-scroll-target',
   ACTION_ATTR: 'data-skill-hunter-action',
+  MAIN_CONTENT_ID: 'skill-hunter-main-content',
+  SEARCH_INPUT_ID: 'skill-hunter-search-input',
+  SEARCH_COUNT_ID: 'skill-hunter-search-count',
+  SEARCH_PREV_ID: 'skill-hunter-search-prev',
+  SEARCH_NEXT_ID: 'skill-hunter-search-next',
+  NOTE_PANEL_ID: 'skill-hunter-note-panel',
+  NOTE_TEXTAREA_ID: 'skill-hunter-note-textarea',
+  NOTE_STATUS_ID: 'skill-hunter-note-status',
+  COPY_CITATION_ID: 'skill-hunter-copy-citation',
+  COPY_LINK_ID: 'skill-hunter-copy-link',
+  EXPORT_NOTE_ID: 'skill-hunter-export-note',
+  TOAST_ID: 'skill-hunter-toast',
+} as const;
+
+export const STORAGE_KEYS = {
+  NOTE_PREFIX: 'skill-hunter.note.',
+} as const;
+
+export const UX_LIMITS = {
+  MAX_LOG_ENTRIES: 300,
+  NOTE_MAX_CHARACTERS: 8000,
+  SEARCH_QUERY_MAX_CHARACTERS: 80,
 } as const;
