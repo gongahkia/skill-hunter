@@ -15,19 +15,21 @@ describe('Logger', () => {
     consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation();
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    logger.clearBufferedEntries();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('should log debug messages', () => {
+  it('should log debug messages with payload metadata', () => {
     logger.setLogLevel(LogLevel.DEBUG);
-    logger.debug('Debug message');
+    logger.debug('Debug message', { tokenCount: 3 });
 
     expect(consoleDebugSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
-      'Debug message'
+      'Debug message',
+      expect.objectContaining({ context: 'app' })
     );
   });
 
@@ -37,7 +39,8 @@ describe('Logger', () => {
 
     expect(consoleInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
-      'Info message'
+      'Info message',
+      expect.objectContaining({ context: 'app' })
     );
   });
 
@@ -47,7 +50,8 @@ describe('Logger', () => {
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
-      'Warning message'
+      'Warning message',
+      expect.objectContaining({ context: 'app' })
     );
   });
 
@@ -59,7 +63,7 @@ describe('Logger', () => {
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining('[Skill Hunter]'),
       'Error message',
-      error
+      expect.objectContaining({ context: 'app' })
     );
   });
 
@@ -74,6 +78,16 @@ describe('Logger', () => {
     expect(consoleDebugSpy).not.toHaveBeenCalled();
     expect(consoleInfoSpy).not.toHaveBeenCalled();
     expect(consoleWarnSpy).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should buffer diagnostic entries', () => {
+    logger.setLogLevel(LogLevel.DEBUG);
+    logger.info('Buffered info');
+
+    const entries = logger.getBufferedEntries();
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries[0]?.message).toBe('Buffered info');
+    expect(entries[0]?.sessionId).toBe(logger.getSessionId());
   });
 });
