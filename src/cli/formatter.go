@@ -51,9 +51,10 @@ func fmtTable(results map[string][]TagEntry, schemeName string, custom []string)
 }
 
 func fmtJSON(results map[string][]TagEntry) error {
+	export := NewExport("cli", results)
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	return enc.Encode(results)
+	return enc.Encode(export)
 }
 
 func fmtMarkdown(results map[string][]TagEntry) error {
