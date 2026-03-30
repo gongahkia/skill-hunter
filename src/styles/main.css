@@ -535,6 +535,79 @@ mark.skill-hunter-search-hit.search-hit-active {
   font-size: 12px;
 }
 
+.timeline-panel {
+  display: none;
+  position: fixed;
+  right: var(--spacing-lg);
+  bottom: 64px;
+  width: 340px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+  z-index: 3;
+}
+
+.timeline-panel.visible {
+  display: block;
+}
+
+.timeline-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.timeline-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+}
+
+.timeline-label {
+  color: var(--text-tertiary);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.timeline-value {
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.timeline-empty {
+  margin: var(--spacing-sm) 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.timeline-nav {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-nav-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.timeline-date-input {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 8px;
+}
+
 .skill-hunter-toast {
   position: fixed;
   left: 50%;

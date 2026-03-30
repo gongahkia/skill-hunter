@@ -129,6 +129,8 @@ export const SKILL_HUNTER_IDS = {
   COPY_CITATION_ID: 'skill-hunter-copy-citation',
   COPY_LINK_ID: 'skill-hunter-copy-link',
   EXPORT_NOTE_ID: 'skill-hunter-export-note',
+  TIMELINE_BTN_ID: 'skill-hunter-timeline-btn',
+  TIMELINE_PANEL_ID: 'skill-hunter-timeline-panel',
   TOAST_ID: 'skill-hunter-toast',
 } as const;
 

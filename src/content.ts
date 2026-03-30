@@ -7,6 +7,7 @@ import type {
   ChromeMessageResponse,
   CitationFormat,
   HTMLContent,
+  LegislationMetadata,
   LegislationNote,
 } from '@/types';
 import {
@@ -27,6 +28,7 @@ import { getUserFacingErrorMessage, handleError } from '@/utils/errorHandler';
 import type { NormalizedError } from '@/utils/errorHandler';
 import { logger } from '@/utils/logger';
 import {
+  buildRevisionUrl,
   copyTextToClipboard,
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
@@ -101,6 +103,7 @@ function createSimplifiedContent(): HTMLContent {
   });
 
   statuteTitle = pageBasicData.legislationTitle || 'Untitled Legislation';
+  const timelineHTML = generateTimelinePanelHTML(legislationMetadata);
 
   return {
     title: `Skill Hunter: ${pageBasicData.legislationTitle}`,
@@ -132,6 +135,7 @@ function createSimplifiedContent(): HTMLContent {
             <button id="${SKILL_HUNTER_IDS.COPY_CITATION_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-citation">Copy citation</button>
             <button id="${SKILL_HUNTER_IDS.COPY_LINK_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-link">Copy page link</button>
             <button id="${SKILL_HUNTER_IDS.EXPORT_NOTE_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-note">Export notes</button>
+            <button id="${SKILL_HUNTER_IDS.TIMELINE_BTN_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-timeline">Timeline</button>
             <button type="button" class="skill-hunter-close" ${SKILL_HUNTER_IDS.ACTION_ATTR}="close">Close</button>
           </div>
         </div>
@@ -158,6 +162,7 @@ function createSimplifiedContent(): HTMLContent {
           </aside>
         </div>
         <div id="${SKILL_HUNTER_IDS.TOAST_ID}" class="skill-hunter-toast" role="status" aria-live="polite"></div>
+        ${timelineHTML}
       </div>
     `,
   };
@@ -463,6 +468,51 @@ async function initializeNotePanel(): Promise<void> {
   });
 }
 
+function generateTimelinePanelHTML(metadata: LegislationMetadata): string {
+  const items: Array<{ label: string; value: string }> = [
+    { label: 'Legislation', value: metadata.legislationName },
+    { label: 'Date', value: metadata.legislationDate },
+    { label: 'Revised Title', value: metadata.revisedLegislationName },
+    { label: 'Revised Info', value: metadata.revisedLegislationText },
+  ].filter((i) => i.value.trim().length > 0);
+  const rows = items
+    .map(
+      (i) =>
+        `<div class="timeline-row"><span class="timeline-label">${escapeHtml(i.label)}</span><span class="timeline-value">${escapeHtml(i.value)}</span></div>`
+    )
+    .join('');
+  return `
+    <div id="${SKILL_HUNTER_IDS.TIMELINE_PANEL_ID}" class="timeline-panel" aria-label="Revision timeline">
+      <h3 class="timeline-title">Revision Timeline</h3>
+      ${rows || '<p class="timeline-empty">No revision metadata available.</p>'}
+      <div class="timeline-nav">
+        <label class="timeline-nav-label" for="skill-hunter-rev-date">Compare revision date</label>
+        <input id="skill-hunter-rev-date" class="timeline-date-input" type="date" />
+        <button class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="open-revision">Open revision</button>
+      </div>
+    </div>`;
+}
+
+function toggleTimelinePanel(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  const panel = shadowRoot?.getElementById(SKILL_HUNTER_IDS.TIMELINE_PANEL_ID);
+  if (panel instanceof HTMLElement) {
+    panel.classList.toggle('visible');
+  }
+}
+
+function openRevisionDate(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  const input = shadowRoot?.getElementById('skill-hunter-rev-date');
+  if (!(input instanceof HTMLInputElement) || !input.value) {
+    showToast('Enter a revision date first.');
+    return;
+  }
+  const formatted = input.value.replace(/-/g, ''); // YYYYMMDD
+  const url = buildRevisionUrl(window.location.href, formatted);
+  window.open(url, '_blank', 'noopener');
+}
+
 async function exportCurrentNote(): Promise<void> {
   const note: LegislationNote = {
     statuteKey,
@@ -513,6 +563,16 @@ function handleOverlayClick(event: Event): void {
 
   if (action === 'export-note') {
     void exportCurrentNote();
+    return;
+  }
+
+  if (action === 'toggle-timeline') {
+    toggleTimelinePanel();
+    return;
+  }
+
+  if (action === 'open-revision') {
+    openRevisionDate();
     return;
   }
 

@@ -111,6 +111,13 @@ export function formatCitation(
   }
 }
 
+export function buildRevisionUrl(currentUrl: string, revDate: string): string {
+  const url = new URL(currentUrl);
+  url.searchParams.set('WholeDoc', '1');
+  url.searchParams.set('RevDate', revDate);
+  return url.toString();
+}
+
 export function exportLegislationNoteAsMarkdown(note: LegislationNote): string {
   return [
     `# ${note.statuteTitle}`,

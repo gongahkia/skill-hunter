@@ -4,6 +4,7 @@
 
 import type { LegislationNote } from '@/types';
 import {
+  buildRevisionUrl,
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
   formatCitation,
@@ -54,6 +55,19 @@ describe('storage utils', () => {
     expect(markdown).toContain('# Evidence Act');
     expect(markdown).toContain('## Notes');
     expect(markdown).toContain('Check burden of proof provisions.');
+  });
+
+  describe('buildRevisionUrl', () => {
+    it('should set RevDate and WholeDoc params', () => {
+      const result = buildRevisionUrl('https://sso.agc.gov.sg/Act/PC1871?WholeDoc=1', '20200101');
+      expect(result).toContain('RevDate=20200101');
+      expect(result).toContain('WholeDoc=1');
+    });
+
+    it('should add WholeDoc if missing', () => {
+      const result = buildRevisionUrl('https://sso.agc.gov.sg/Act/PC1871', '20200101');
+      expect(result).toContain('WholeDoc=1');
+    });
   });
 
   describe('formatCitation', () => {
