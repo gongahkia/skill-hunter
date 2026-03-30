@@ -14,7 +14,7 @@ INCLUDED_PATHS = [
     ".eslintrc.json",
     ".gitignore",
     ".prettierrc.json",
-    "DOC.md",
+
     "Makefile",
     "jest.config.js",
     "package-lock.json",
