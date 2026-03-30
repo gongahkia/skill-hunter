@@ -23,12 +23,20 @@ test("extractCaseData returns structured ELIT judgment metadata and sections", (
     "Criminal Procedure and Sentencing",
     "Evidence and Witness Credibility"
   ]);
-  assert.deepEqual(Object.keys(caseData.caseBody), ["Facts", "Decision"]);
+  assert.deepEqual(Object.keys(caseData.caseBody), ["Facts", "Reasoning", "Decision"]);
   assert.equal(caseData.caseBody.Facts.length, 2);
+  assert.equal(caseData.caseBody.Reasoning.length, 1);
   assert.equal(
-    extractorApi.sanitiseParagraph(caseData.caseBody.Decision[0]),
-    "The court upheld the conviction and varied the sentence."
+    extractorApi.sanitiseParagraph(caseData.caseBody.Decision[0]).includes("appeal is dismissed"),
+    true
   );
+  assert.equal(caseData.extractionErrors.length, 0);
+  assert.ok(caseData.caseAnalysis);
+  assert.equal(caseData.caseAnalysis.metrics.sectionCount, 3);
+  assert.equal(caseData.caseAnalysis.metrics.paragraphCount, 4);
+  assert.equal(caseData.caseAnalysis.brief.outcome, "Appeal dismissed");
+  assert.deepEqual(caseData.caseAnalysis.citations, ["[2024] SGHC 101", "[2021] SGCA 12"]);
+  assert.equal(caseData.caseAnalysis.statutoryReferences[0], "section 304A of the Penal Code.");
 });
 
 test("extractCaseData no-ops cleanly on non-judgment pages", () => {
@@ -39,4 +47,6 @@ test("extractCaseData no-ops cleanly on non-judgment pages", () => {
   assert.equal(caseData.caseTitle, "ELIT Portal");
   assert.equal(caseData.caseLegalIssues.length, 0);
   assert.deepEqual(caseData.caseBody, {});
+  assert.ok(caseData.caseAnalysis);
+  assert.equal(caseData.caseAnalysis.dataQualityWarnings.includes("No judgment sections were parsed."), true);
 });
