@@ -191,6 +191,24 @@ export function integrateDefinitions(
 }
 
 /**
+ * Link cross-references like "section 12" or "section 12A" to in-document scroll targets.
+ * Uses the SSO anchor convention where section N maps to id "prN-he-".
+ */
+export function linkCrossReferences(html: string): string {
+  const segments = splitPreservingTags(html);
+  const processed = segments.map((seg) => {
+    if (seg.isTag) return seg.text;
+    return seg.text.replace(/\b(sections?\s+\d+[A-Z]?)\b/gi, (_match, ref: string) => {
+      const numMatch = ref.match(/\d+[A-Z]?/i);
+      if (!numMatch) return ref;
+      const targetId = `pr${numMatch[0]}-he-`;
+      return `<button type="button" class="cross-ref" data-skill-hunter-scroll-target="${targetId}">${ref}</button>`;
+    });
+  });
+  return processed.join('');
+}
+
+/**
  * Process content lines with proper formatting
  * Note: Logical connectors are already formatted in integrateDefinitions
  */
@@ -200,14 +218,16 @@ export function processContentLines(content: string): string {
   const processedLines = lines.map((line) => {
     if (!line.trim()) return '';
 
+    const linked = linkCrossReferences(line); // cross-ref linking
+
     // Apply indentation if needed
     // Check the original line (without HTML) for indentation pattern
     const textOnly = line.replace(/<[^>]+>/g, '');
     if (needsIndentation(textOnly)) {
-      return `<div class="indented-line">${line}</div>`;
+      return `<div class="indented-line">${linked}</div>`;
     }
 
-    return `<div class="content-line">${line}</div>`;
+    return `<div class="content-line">${linked}</div>`;
   });
 
   return processedLines.join('');

@@ -10,6 +10,7 @@ import {
   extractReferenceTargetId,
   generateTableOfContentsHTML,
   generateMetadataSummaryHTML,
+  linkCrossReferences,
 } from '../contentProcessor';
 import type { Definition } from '@/types';
 
@@ -149,6 +150,37 @@ describe('contentProcessor', () => {
       expect(html).toContain('data-skill-hunter-scroll-target="pr1-he-"');
       expect(html).not.toContain('target="_blank"');
       expect(html).toContain('<button type="button" class="toc-link"');
+    });
+  });
+
+  describe('linkCrossReferences', () => {
+    it('should wrap "section 12" in a scroll-target button', () => {
+      const result = linkCrossReferences('See section 12 for details');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr12-he-"');
+      expect(result).toContain('class="cross-ref"');
+      expect(result).toContain('section 12');
+    });
+
+    it('should handle alphanumeric section references like "section 12A"', () => {
+      const result = linkCrossReferences('Refer to section 12A');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr12A-he-"');
+    });
+
+    it('should handle plural "sections 3"', () => {
+      const result = linkCrossReferences('under sections 3 and 4');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr3-he-"');
+    });
+
+    it('should not alter text without section references', () => {
+      const input = 'No references here';
+      expect(linkCrossReferences(input)).toBe(input);
+    });
+
+    it('should not process inside HTML tags', () => {
+      const input = '<span class="section 5">section 5</span>';
+      const result = linkCrossReferences(input);
+      expect(result).toContain('<span class="section 5">');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr5-he-"');
     });
   });
 
