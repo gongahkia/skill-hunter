@@ -117,7 +117,8 @@ export function getPageBasicData(): { pageMetadata: PageMetadata; pageBasicData:
     const pdfEl = safeQuerySelector(header, SELECTORS.PDF_LINK);
     const statusEl = safeQuerySelector(header, SELECTORS.STATUS_VALUE);
 
-    legislationTitle = normalizeText(titleEl?.textContent) || deriveTitleFallback(pageMetadata.title);
+    legislationTitle =
+      normalizeText(titleEl?.textContent) || deriveTitleFallback(pageMetadata.title);
     legislationPdfLink = normalizeText(pdfEl?.parentElement?.getAttribute('href'));
     legislationStatus = normalizeText(statusEl?.textContent);
   } else {
@@ -235,7 +236,10 @@ function parseRowsIntoTokens(rows: NodeListOf<Element> | [], content: ContentTok
       const innerHTML = illustrationCell.innerHTML;
       const text = normalizeText(illustrationCell.textContent);
 
-      if (innerHTML.includes('<em>Illustration</em>') || innerHTML.includes('<em>Illustrations</em>')) {
+      if (
+        innerHTML.includes('<em>Illustration</em>') ||
+        innerHTML.includes('<em>Illustrations</em>')
+      ) {
         pushToken(content, { type: 'illustrationHeader', ID: null, content: text });
       } else {
         pushToken(content, { type: 'illustrationBody', ID: null, content: text });
@@ -257,7 +261,10 @@ function parseRowsIntoTokens(rows: NodeListOf<Element> | [], content: ContentTok
     });
 
     const provisionNumber = safeQuerySelector(row, SELECTORS.PROVISION_NUMBER);
-    const provisionNumberDiv = safeQuerySelector(provisionNumber ?? row, SELECTORS.PROVISION_NUMBER_DIV);
+    const provisionNumberDiv = safeQuerySelector(
+      provisionNumber ?? row,
+      SELECTORS.PROVISION_NUMBER_DIV
+    );
     pushToken(content, {
       type: 'provisionNumber',
       ID: normalizeText(provisionNumber?.id) || null,
@@ -278,7 +285,9 @@ export function getLegislationContent(): ContentToken[] {
   );
 
   const fallbackContainers =
-    primaryContainers.length > 0 ? primaryContainers : safeQuerySelectorAll(document, "div[class^='prov']");
+    primaryContainers.length > 0
+      ? primaryContainers
+      : safeQuerySelectorAll(document, "div[class^='prov']");
 
   fallbackContainers.forEach((container) => {
     const rows = safeQuerySelectorAll(container, 'table tbody tr');
