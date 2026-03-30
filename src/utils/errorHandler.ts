@@ -4,14 +4,55 @@
 
 import { logger } from './logger';
 
+export interface NormalizedError {
+  name: string;
+  message: string;
+  stack?: string;
+  code?: string;
+  cause?: unknown;
+  occurredAt: string;
+}
+
+function normalizeError(error: unknown): NormalizedError {
+  const occurredAt = new Date().toISOString();
+
+  if (error instanceof SkillHunterError) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      cause: error.originalError,
+      occurredAt,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      occurredAt,
+    };
+  }
+
+  return {
+    name: 'UnknownError',
+    message: typeof error === 'string' ? error : 'Unknown error occurred',
+    cause: error,
+    occurredAt,
+  };
+}
+
 export class SkillHunterError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public originalError?: Error
-  ) {
+  readonly code: string;
+  readonly originalError?: Error;
+
+  constructor(message: string, code: string, originalError?: Error) {
     super(message);
     this.name = 'SkillHunterError';
+    this.code = code;
+    this.originalError = originalError;
     Object.setPrototypeOf(this, SkillHunterError.prototype);
   }
 }
@@ -30,19 +71,32 @@ export class ContentProcessingError extends SkillHunterError {
   }
 }
 
-export function handleError(error: unknown, context?: string): void {
-  const contextMsg = context ? `[${context}]` : '';
-
-  if (error instanceof SkillHunterError) {
-    logger.error(`${contextMsg} ${error.message}`, error.originalError);
-  } else if (error instanceof Error) {
-    logger.error(`${contextMsg} Unexpected error: ${error.message}`, error);
-  } else {
-    logger.error(`${contextMsg} Unknown error occurred`, error);
-  }
+export function handleError(error: unknown, context = 'unknown'): NormalizedError {
+  const normalized = normalizeError(error);
+  logger.error(`Captured error in ${context}`, normalized, `context:${context}`);
+  return normalized;
 }
 
-export function safeExecute<T>(fn: () => T, fallback: T, context?: string): T {
+export function getUserFacingErrorMessage(
+  normalizedError: NormalizedError,
+  fallbackMessage: string
+): string {
+  if (!normalizedError.message.trim()) {
+    return fallbackMessage;
+  }
+
+  if (normalizedError.code === 'DOM_PARSING_ERROR') {
+    return 'Skill Hunter could not parse this legislation page safely.';
+  }
+
+  if (normalizedError.code === 'CONTENT_PROCESSING_ERROR') {
+    return 'Skill Hunter could not process this legislation content safely.';
+  }
+
+  return fallbackMessage;
+}
+
+export function safeExecute<T>(fn: () => T, fallback: T, context = 'safeExecute'): T {
   try {
     return fn();
   } catch (error) {
@@ -54,7 +108,7 @@ export function safeExecute<T>(fn: () => T, fallback: T, context?: string): T {
 export async function safeExecuteAsync<T>(
   fn: () => Promise<T>,
   fallback: T,
-  context?: string
+  context = 'safeExecuteAsync'
 ): Promise<T> {
   try {
     return await fn();
