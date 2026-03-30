@@ -8,12 +8,11 @@ const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
 const BUILD_SCRIPT_PATH = path.join(ROOT, "scripts", "build-extension.mjs");
 const DIST_FIREFOX_DIR = path.join(ROOT, "dist", "firefox");
 const SUBMISSION_DIR = path.join(ROOT, "submission", "firefox");
-const SOURCE_INCLUDE = [
-  "AUDIT.md",
-  "README2.md",
+const REQUIRED_SOURCE_INCLUDE = [
   "Makefile",
   "package.json",
   "package-lock.json",
+  "DOC.md",
   path.join("scripts", "build-extension.mjs"),
   path.join("scripts", "generate-icons.py"),
   path.join("scripts", "package-firefox-submission.mjs"),
@@ -21,6 +20,7 @@ const SOURCE_INCLUDE = [
   path.join("judgeman_v4", "src"),
   "tests"
 ];
+const OPTIONAL_SOURCE_INCLUDE = ["AUDIT.md", "README2.md"];
 
 function run(command, args, options = {}) {
   execFileSync(command, args, {
@@ -52,9 +52,14 @@ function zipDirectoryContents(sourceDir, outputPath) {
 }
 
 function copyIntoStage(stageDir) {
-  for (const relativePath of SOURCE_INCLUDE) {
+  for (const relativePath of REQUIRED_SOURCE_INCLUDE) {
     const sourcePath = path.join(ROOT, relativePath);
     const destinationPath = path.join(stageDir, relativePath);
+
+    if (!fs.existsSync(sourcePath)) {
+      throw new Error(`Missing required source path for AMO source package: ${relativePath}`);
+    }
+
     fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
 
     if (fs.statSync(sourcePath).isDirectory()) {
@@ -75,6 +80,18 @@ function copyIntoStage(stageDir) {
       continue;
     }
 
+    fs.copyFileSync(sourcePath, destinationPath);
+  }
+
+  for (const relativePath of OPTIONAL_SOURCE_INCLUDE) {
+    const sourcePath = path.join(ROOT, relativePath);
+    if (!fs.existsSync(sourcePath)) {
+      console.warn(`Skipping optional source path (not found): ${relativePath}`);
+      continue;
+    }
+
+    const destinationPath = path.join(stageDir, relativePath);
+    fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
     fs.copyFileSync(sourcePath, destinationPath);
   }
 }
