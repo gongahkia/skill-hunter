@@ -53,12 +53,34 @@ export interface HTMLContent {
   content: string;
 }
 
+export type SkillHunterMessageAction = 'toggle_simplified_view' | 'check_supported_page';
+
 export interface ChromeMessage {
-  action: 'toggle_simplified_view';
+  action: SkillHunterMessageAction;
 }
 
 export interface ChromeMessageResponse {
   status: 'success' | 'error' | 'unsupported_page';
   isSimplified?: boolean;
+  supportedPage?: boolean;
   error?: string;
+}
+
+export type LogLevelName = 'debug' | 'info' | 'warn' | 'error';
+
+export interface DiagnosticLogEntry {
+  sessionId: string;
+  timestamp: string;
+  level: LogLevelName;
+  context: string;
+  message: string;
+  data?: unknown;
+}
+
+export interface LegislationNote {
+  statuteKey: string;
+  statuteTitle: string;
+  statuteUrl: string;
+  note: string;
+  updatedAt: string;
 }
