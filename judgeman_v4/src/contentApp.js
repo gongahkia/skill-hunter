@@ -24,6 +24,7 @@
 
   function createContentApp({ window, document, browserApi, extractorApi, caseToolkit, loggerApi }) {
     const citationLinker = root.JudgemanCitationLinker || safeRequire("./citationLinker.js");
+    const annotationsApi = root.JudgemanAnnotations || safeRequire("./annotations.js");
     const runtimeCaseToolkit =
       caseToolkit || root.JudgemanCaseToolkit || {
         analyseCase() {
@@ -327,6 +328,65 @@
       ]);
     }
 
+    function buildAnnotationsContent(page) {
+      if (!annotationsApi) {
+        return createElement("p", { className: "jm-empty", text: "Annotations module unavailable." });
+      }
+      const caseNum = page.caseNumber || "unknown";
+      const wrapper = createElement("div", { className: "jm-annotations" });
+      const inputRow = createElement("div", { className: "jm-annotation-input" });
+      const textarea = createElement("textarea", {
+        attrs: { placeholder: "Add a note for this case...", rows: "2" }
+      });
+      const addBtn = createElement("button", {
+        className: "jm-btn jm-btn-quiet", text: "Add note", attrs: { type: "button" }
+      });
+      const exportBtn = createElement("button", {
+        className: "jm-btn jm-btn-quiet", text: "Export annotations", attrs: { type: "button" }
+      });
+      inputRow.appendChild(textarea);
+      inputRow.appendChild(addBtn);
+      inputRow.appendChild(exportBtn);
+      wrapper.appendChild(inputRow);
+      const listEl = createElement("ul", { className: "jm-annotation-list" });
+      wrapper.appendChild(listEl);
+      function renderList() {
+        clearNode(listEl);
+        const notes = annotationsApi.load(caseNum);
+        if (notes.length === 0) {
+          listEl.appendChild(createElement("li", { className: "jm-empty", text: "No annotations yet." }));
+          return;
+        }
+        for (const note of notes) {
+          const li = createElement("li", { className: "jm-annotation-item" });
+          li.appendChild(createElement("span", { text: note.text }));
+          li.appendChild(createElement("small", { text: ` (${note.createdAt})` }));
+          const delBtn = createElement("button", {
+            className: "jm-btn jm-btn-quiet", text: "x",
+            attrs: { type: "button", "aria-label": "Delete annotation" }
+          });
+          delBtn.addEventListener("click", () => { annotationsApi.remove(caseNum, note.id); renderList(); });
+          li.appendChild(delBtn);
+          listEl.appendChild(li);
+        }
+      }
+      addBtn.addEventListener("click", () => {
+        const text = textarea.value.trim();
+        if (!text) return;
+        annotationsApi.add(caseNum, text);
+        textarea.value = "";
+        renderList();
+      });
+      exportBtn.addEventListener("click", () => {
+        const bundle = annotationsApi.exportBundle(caseNum, page);
+        void copyToClipboard(JSON.stringify(bundle, null, 2)).then(() => {
+          setStatus("Annotations exported to clipboard.", "success");
+        });
+      });
+      renderList();
+      return wrapper;
+    }
+
     function renderNoJudgment(readerMain) {
       const message = createElement("p", { className: "jm-empty" }, [
         "Judgeman activates on ELIT judgment pages under ",
@@ -370,6 +430,7 @@
       readerMain.appendChild(buildCard("Case brief (student mode)", buildBriefContent(page)));
       readerMain.appendChild(buildCard("Authorities and statutory references", buildAuthoritiesContent(page)));
       readerMain.appendChild(buildCard("Research checklist", buildChecklistContent(page)));
+      readerMain.appendChild(buildCard("Annotations", buildAnnotationsContent(page)));
       readerMain.appendChild(buildCard("Judgment sections", buildSectionsContent(page)));
     }
 
