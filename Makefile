@@ -1,6 +1,6 @@
 # Makefile for Skill Hunter development
 
-.PHONY: all install dev build package firefox-package package-source firefox-source-package firefox-submit-prep safari-build test lint format clean help
+.PHONY: all install dev build package firefox-package package-source firefox-source-package firefox-submit-prep safari-build test lint format clean ci help
 
 VERSION := $(shell node -p "require('./package.json').version")
 FIREFOX_ARTIFACTS_DIR := submission/firefox/artifacts
@@ -45,6 +45,10 @@ format:
 # Type check
 type-check:
 	npm run type-check
+
+# Local CI-equivalent quality gate
+ci:
+	npm run ci
 
 # Clean build artifacts
 clean:
@@ -102,6 +106,7 @@ help:
 	@echo "  make lint-fix     - Fix linting issues"
 	@echo "  make format       - Format code with Prettier"
 	@echo "  make type-check   - Run TypeScript type checking"
+	@echo "  make ci           - Run local CI-equivalent checks"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean        - Remove build artifacts"
