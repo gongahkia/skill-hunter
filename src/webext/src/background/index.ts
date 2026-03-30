@@ -2,10 +2,19 @@ import { ExtensionIdentityAuthLauncher } from '../auth/launchers/chrome-firefox'
 import { SafariBridgeAuthLauncher } from '../auth/launchers/safari';
 import { GoogleAuthClient } from '../auth/google';
 import { extensionBrowser } from '../browser-api';
+import {
+  clearDiagnostics,
+  getDiagnostics as getDiagnosticEvents,
+  logDebug,
+  logError,
+  logInfo,
+  logWarn,
+} from '../logger';
 import { getAllPrefixes } from '../parser';
 import { detectBrowserTarget } from '../platform';
 import { clearToken, loadSettings, saveSettings } from '../storage';
 import {
+  DiagnosticEvent,
   EditorContext,
   PopupState,
   RuntimeMessageMap,
@@ -20,6 +29,8 @@ type RuntimeRequest =
   | { type: 'saveSettings'; payload: RuntimeMessageMap['saveSettings'] }
   | { type: 'scanCurrentDocument' }
   | { type: 'signOut' }
+  | { type: 'getDiagnostics' }
+  | { type: 'clearDiagnostics' }
   | { type: 'navigateBestEffort'; payload: RuntimeMessageMap['navigateBestEffort'] }
   | { type: 'runMutation'; payload: RuntimeMessageMap['runMutation'] };
 
@@ -31,6 +42,10 @@ function getAuthClient(): GoogleAuthClient {
   }
 
   return new GoogleAuthClient(new ExtensionIdentityAuthLauncher());
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function getCurrentContext(): Promise<EditorContext | undefined> {
@@ -52,8 +67,12 @@ async function ensureContentScript(tabId: number): Promise<void> {
       target: { tabId },
       files: ['content.js'],
     });
-  } catch (_error) {
+  } catch (error: unknown) {
     // The file can already be present on the page after a prior injection.
+    logDebug('background', 'content script injection skipped', {
+      tabId,
+      reason: getErrorMessage(error),
+    });
   }
 }
 
@@ -75,6 +94,10 @@ async function maybeRequestEditorOrigins(context: EditorContext): Promise<void> 
   });
 
   if (!hasAccess) {
+    logInfo('background', 'requesting optional editor origin permission', {
+      editor: context.editor,
+      origin,
+    });
     await extensionBrowser.permissions.request({
       origins: [origin],
     });
@@ -95,6 +118,11 @@ async function scanCurrentDocument(): Promise<ScanResult> {
   const adapter = getEditorAdapter(context.editor);
   const prefixes = getAllPrefixes(settings.customPrefixes);
   lastScan = await adapter.scan(context, prefixes, accessToken);
+  logInfo('background', 'scan completed', {
+    editor: context.editor,
+    documentId: context.documentId,
+    entries: lastScan.entries.length,
+  });
   return lastScan;
 }
 
@@ -141,6 +169,12 @@ async function runMutation(action: 'highlight' | 'markDone' | 'archive', entries
 
   const prefixes = getAllPrefixes(settings.customPrefixes);
   lastScan = await adapter.scan(context, prefixes, accessToken);
+  logInfo('background', 'mutation completed', {
+    action,
+    editor: context.editor,
+    affectedEntries: entries.length,
+    refreshedEntries: lastScan.entries.length,
+  });
   return lastScan;
 }
 
@@ -160,7 +194,18 @@ async function navigateBestEffort(entry: TagEntry): Promise<boolean> {
     payload: entry,
   });
 
-  return response?.ok ?? false;
+  const ok = response?.ok ?? false;
+  if (!ok) {
+    logWarn('background', 'content navigation failed', {
+      entryId: entry.id,
+      location: entry.locationLabel,
+    });
+  }
+  return ok;
+}
+
+function getDiagnostics(): DiagnosticEvent[] {
+  return getDiagnosticEvents();
 }
 
 extensionBrowser.runtime.onMessage.addListener(
@@ -179,6 +224,14 @@ extensionBrowser.runtime.onMessage.addListener(
           break;
         case 'signOut':
           await clearToken();
+          logInfo('background', 'cleared cached OAuth token');
+          sendResponse({ ok: true });
+          break;
+        case 'getDiagnostics':
+          sendResponse({ ok: true, value: getDiagnostics() });
+          break;
+        case 'clearDiagnostics':
+          clearDiagnostics();
           sendResponse({ ok: true });
           break;
         case 'navigateBestEffort':
@@ -192,7 +245,11 @@ extensionBrowser.runtime.onMessage.addListener(
           break;
       }
     })().catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
+      logError('background', 'runtime message failed', {
+        requestType: request.type,
+        message,
+      });
       sendResponse({ ok: false, error: message });
     });
 
