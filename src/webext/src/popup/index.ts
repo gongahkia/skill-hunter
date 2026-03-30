@@ -1,5 +1,6 @@
 import { extensionBrowser } from '../browser-api';
 import { getPrefixColor } from '../colors';
+import { logError, logInfo } from '../logger';
 import { PopupState, ScanResult, TagEntry, WebExtSettings } from '../types';
 
 type RuntimeResponse<T> = {
@@ -29,6 +30,19 @@ async function sendMessage<T>(message: unknown): Promise<T> {
 
 function setStatus(message: string): void {
   elementById<HTMLParagraphElement>('status').textContent = message;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function runUserAction(label: string, task: () => Promise<void>): Promise<void> {
+  try {
+    await task();
+  } catch (error: unknown) {
+    logError('popup', `${label} failed`, error);
+    setStatus(getErrorMessage(error));
+  }
 }
 
 function formatExport(result: ScanResult, mode: 'json' | 'md' | 'txt'): string {
@@ -74,6 +88,10 @@ async function copyExport(mode: 'json' | 'md' | 'txt'): Promise<void> {
 
   const text = formatExport(popupState.lastScan, mode);
   await navigator.clipboard.writeText(text);
+  logInfo('popup', 'copied export to clipboard', {
+    mode,
+    entries: popupState.lastScan.entries.length,
+  });
   setStatus(`Copied ${mode.toUpperCase()} export to the clipboard.`);
 }
 
@@ -122,6 +140,10 @@ async function runMutation(action: 'highlight' | 'markDone' | 'archive'): Promis
   });
   selectedEntryIds.clear();
   render();
+  logInfo('popup', 'completed mutation', {
+    action,
+    entries: selectedEntries.length,
+  });
   setStatus(`${action} completed.`);
 }
 
@@ -130,6 +152,12 @@ async function navigate(entry: TagEntry): Promise<void> {
     type: 'navigateBestEffort',
     payload: entry,
   });
+  if (!ok) {
+    logError('popup', 'navigation request returned false', {
+      entryId: entry.id,
+      location: entry.locationLabel,
+    });
+  }
   setStatus(ok ? `Navigated to ${entry.locationLabel}.` : `Unable to navigate to ${entry.locationLabel}.`);
 }
 
@@ -233,47 +261,66 @@ async function boot(): Promise<void> {
   render();
 
   elementById<HTMLButtonElement>('scan-button').addEventListener('click', async () => {
-    setStatus('Scanning current document...');
-    popupState!.lastScan = await sendMessage<ScanResult>({ type: 'scanCurrentDocument' });
-    selectedEntryIds.clear();
-    render();
-    setStatus(`Found ${popupState!.lastScan.entries.length} tags.`);
+    await runUserAction('scan', async () => {
+      setStatus('Scanning current document...');
+      popupState!.lastScan = await sendMessage<ScanResult>({ type: 'scanCurrentDocument' });
+      selectedEntryIds.clear();
+      render();
+      setStatus(`Found ${popupState!.lastScan.entries.length} tags.`);
+    });
   });
 
   elementById<HTMLButtonElement>('highlight-button').addEventListener('click', async () => {
-    await runMutation('highlight');
+    await runUserAction('highlight mutation', async () => {
+      await runMutation('highlight');
+    });
   });
 
   elementById<HTMLButtonElement>('markdone-button').addEventListener('click', async () => {
-    await runMutation('markDone');
+    await runUserAction('mark-done mutation', async () => {
+      await runMutation('markDone');
+    });
   });
 
   elementById<HTMLButtonElement>('archive-button').addEventListener('click', async () => {
-    await runMutation('archive');
+    await runUserAction('archive mutation', async () => {
+      await runMutation('archive');
+    });
   });
 
   elementById<HTMLButtonElement>('export-json-button').addEventListener('click', async () => {
-    await copyExport('json');
+    await runUserAction('JSON export', async () => {
+      await copyExport('json');
+    });
   });
 
   elementById<HTMLButtonElement>('export-md-button').addEventListener('click', async () => {
-    await copyExport('md');
+    await runUserAction('Markdown export', async () => {
+      await copyExport('md');
+    });
   });
 
   elementById<HTMLButtonElement>('export-txt-button').addEventListener('click', async () => {
-    await copyExport('txt');
+    await runUserAction('text export', async () => {
+      await copyExport('txt');
+    });
   });
 
   elementById<HTMLButtonElement>('signout-button').addEventListener('click', async () => {
-    await sendMessage<void>({ type: 'signOut' });
-    setStatus('Cleared the cached Google OAuth token.');
+    await runUserAction('sign-out', async () => {
+      await sendMessage<void>({ type: 'signOut' });
+      setStatus('Cleared the cached Google OAuth token.');
+    });
   });
 
   elementById<HTMLButtonElement>('options-button').addEventListener('click', async () => {
-    await extensionBrowser.runtime.openOptionsPage();
+    await runUserAction('open settings', async () => {
+      await extensionBrowser.runtime.openOptionsPage();
+    });
   });
 }
 
 boot().catch((error: unknown) => {
-  setStatus(error instanceof Error ? error.message : String(error));
+  logError('popup', 'popup boot failed', error);
+  setStatus(getErrorMessage(error));
 });
