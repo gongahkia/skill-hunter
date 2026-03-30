@@ -18,7 +18,9 @@ describe('storage utils', () => {
   });
 
   it('should derive stable statute keys from URLs', () => {
-    const key = createStatuteKeyFromUrl('https://sso.agc.gov.sg/Act/PenalCode?WholeDoc=1&ViewType=Full');
+    const key = createStatuteKeyFromUrl(
+      'https://sso.agc.gov.sg/Act/PenalCode?WholeDoc=1&ViewType=Full'
+    );
     expect(key).toContain('sso.agc.gov.sg/Act/PenalCode');
     expect(key).toContain('?Full');
   });
@@ -70,7 +72,11 @@ describe('storage utils', () => {
       clipboard: { writeText },
     });
 
-    const execCommand = jest.spyOn(document, 'execCommand').mockReturnValue(true);
+    const execCommand = jest.fn().mockReturnValue(true);
+    Object.defineProperty(document, 'execCommand', {
+      value: execCommand,
+      configurable: true,
+    });
 
     const copied = await copyTextToClipboard('fallback');
     expect(copied).toBe(true);
