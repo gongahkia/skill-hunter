@@ -2,12 +2,7 @@
  * Content script - Main entry point for the browser extension
  */
 
-import type {
-  ChromeMessage,
-  ChromeMessageResponse,
-  HTMLContent,
-  LegislationNote,
-} from '@/types';
+import type { ChromeMessage, ChromeMessageResponse, HTMLContent, LegislationNote } from '@/types';
 import {
   getPageBasicData,
   getLegislationDefinitions,
@@ -278,7 +273,8 @@ function moveToSearchResult(nextIndex: number): void {
     return;
   }
 
-  const normalizedIndex = ((nextIndex % searchResults.length) + searchResults.length) % searchResults.length;
+  const normalizedIndex =
+    ((nextIndex % searchResults.length) + searchResults.length) % searchResults.length;
   activeSearchResultIndex = normalizedIndex;
 
   searchResults.forEach((result, index) => {
@@ -321,7 +317,9 @@ function getNearestHeadingForCitation(): HTMLElement | null {
     return null;
   }
 
-  const headings = Array.from(mainContent.querySelectorAll<HTMLElement>('h2.section-header, h3.provision-header'));
+  const headings = Array.from(
+    mainContent.querySelectorAll<HTMLElement>('h2.section-header, h3.provision-header')
+  );
   if (headings.length === 0) {
     return null;
   }
@@ -371,6 +369,10 @@ function updateNoteStatus(message: string, isError = false): void {
 
 function updateNoteCounter(): void {
   const shadowRoot = getOverlayShadowRoot();
+  if (!shadowRoot) {
+    return;
+  }
+
   const textarea = shadowRoot?.getElementById(SKILL_HUNTER_IDS.NOTE_TEXTAREA_ID);
   if (!(textarea instanceof HTMLTextAreaElement)) {
     return;
@@ -571,12 +573,12 @@ function registerGlobalErrorListeners(): void {
       filename: event.filename,
       line: event.lineno,
       column: event.colno,
-      error: event.error,
+      error: event.error as unknown,
     });
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    contentLogger.error('Unhandled promise rejection', { reason: event.reason });
+    contentLogger.error('Unhandled promise rejection', { reason: event.reason as unknown });
   });
 
   errorListenersRegistered = true;
