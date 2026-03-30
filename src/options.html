@@ -2,58 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rakuzaichi Options</title>
+  <title>Rakuzaichi Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <div class="options-container">
-    <h1>Rakuzaichi Settings</h1>
-    <form id="options-form">
-      <label>
-        Default Format
-        <select id="defaultFormat">
-          <option value="csv">CSV</option>
-          <option value="tsv">TSV</option>
-          <option value="json" selected>JSON</option>
-          <option value="ndjson">NDJSON</option>
-          <option value="xml">XML</option>
-          <option value="yaml">YAML</option>
-        </select>
-      </label>
-      <label>
-        Filename Template
-        <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
-        <small>Variables: {platform}, {title}, {date}, {time}, {format}, {ext}</small>
-      </label>
-      <label>
-        Theme
-        <select id="darkMode">
-          <option value="system">System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="showPreview" checked>
-        Show export preview before download
-      </label>
-      <label>
-        Auto-export interval (minutes, 0 = disabled)
-        <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
-        <small>When enabled, Rakuzaichi periodically exports the active supported tab and opens the browser save flow. It never runs silently in the background.</small>
-      </label>
-      <div class="status-card">
-        <strong>Last auto-export result</strong>
-        <p id="autoExportStatus">Auto-export has not run yet.</p>
+  <main class="options-shell">
+    <header class="options-hero">
+      <h1>Rakuzaichi Control Center</h1>
+      <p>Tune export behavior, review runtime health, and keep diagnostics local.</p>
+    </header>
+
+    <section class="panel" aria-label="Export settings">
+      <h2>Export preferences</h2>
+      <form id="options-form" class="settings-form">
+        <label>
+          Default format
+          <select id="defaultFormat">
+            <option value="json">JSON</option>
+            <option value="markdown">Markdown</option>
+            <option value="csv">CSV</option>
+            <option value="tsv">TSV</option>
+            <option value="ndjson">NDJSON</option>
+            <option value="xml">XML</option>
+            <option value="yaml">YAML</option>
+          </select>
+        </label>
+
+        <label>
+          Filename template
+          <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
+          <small>Variables: {platform}, {title}, {date}, {time}, {format}, {ext}</small>
+        </label>
+
+        <label>
+          Theme
+          <select id="darkMode">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="showPreview" checked>
+          Show preview confirmation before exporting
+        </label>
+
+        <label>
+          Auto-export interval (minutes, 0 disables)
+          <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
+          <small>Auto-export still opens the browser save flow. Nothing is silently uploaded.</small>
+        </label>
+
+        <section class="subpanel" aria-label="Auto-export status">
+          <h3>Last auto-export result</h3>
+          <p id="autoExportStatus">Auto-export has not run yet.</p>
+        </section>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save settings</button>
+          <span id="save-status"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" aria-label="Diagnostics">
+      <div class="panel-heading">
+        <h2>Diagnostics</h2>
+        <div class="button-row">
+          <button id="download-diagnostics" class="btn btn-secondary" type="button">Download JSON</button>
+          <button id="clear-diagnostics" class="btn btn-ghost" type="button">Clear logs</button>
+        </div>
       </div>
-      <div class="form-actions">
-        <button type="submit">Save</button>
-        <span id="save-status"></span>
+      <p class="panel-note">Recent runtime events are kept locally to make debugging easier.</p>
+      <ul id="diagnostics-list" class="log-list"></ul>
+    </section>
+
+    <section class="panel" aria-label="Export history">
+      <div class="panel-heading">
+        <h2>Export history</h2>
+        <div class="button-row">
+          <button id="download-history" class="btn btn-secondary" type="button">Download history</button>
+          <button id="clear-history" class="btn btn-ghost" type="button">Clear history</button>
+        </div>
       </div>
-    </form>
-  </div>
+      <p id="history-summary" class="panel-note">No exports captured yet.</p>
+    </section>
+  </main>
+
   <script src="compat.js"></script>
+  <script src="logger.js"></script>
   <script src="storage.js"></script>
+  <script src="history.js"></script>
   <script src="options.js"></script>
 </body>
 </html>
