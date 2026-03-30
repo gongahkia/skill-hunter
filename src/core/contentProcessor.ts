@@ -2,7 +2,7 @@
  * Content processing utilities for transforming and enhancing legislation content
  */
 
-import type { ContentToken, Definition } from '@/types';
+import type { ContentToken, Definition, LegislationMetadata, PageBasicData } from '@/types';
 import { LOGICAL_CONNECTORS, SKILL_HUNTER_IDS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
@@ -159,7 +159,7 @@ export function integrateDefinitions(
 
           // Replace term with definition tooltip
           // Use a placeholder to prevent recursive replacements
-          const placeholder = `___STATUTE_TERM_${Math.random().toString(36).substr(2, 9)}___`;
+          const placeholder = `___STATUTE_TERM_${Math.random().toString(36).slice(2, 11)}___`;
           const replacementMap = new Map<string, string>();
 
           textSegment = textSegment.replace(regex, (match) => {
@@ -255,6 +255,43 @@ export function generateTableOfContentsHTML(
         </ul>
       </div>
     </div>`;
+}
+
+/**
+ * Generate metadata summary cards for legal research context.
+ */
+export function generateMetadataSummaryHTML(
+  pageBasicData: PageBasicData,
+  legislationMetadata: LegislationMetadata
+): string {
+  const items: Array<{ label: string; value: string }> = [
+    { label: 'Status', value: pageBasicData.legislationStatus },
+    { label: 'Date', value: legislationMetadata.legislationDate },
+    { label: 'Revised Title', value: legislationMetadata.revisedLegislationName },
+    {
+      label: 'PDF',
+      value: pageBasicData.legislationPDFDownloadLink ? 'Official PDF available' : '',
+    },
+  ].filter((item) => item.value.trim().length > 0);
+
+  if (items.length === 0) {
+    return '';
+  }
+
+  const cards = items
+    .map(
+      (item) => `
+        <div class="meta-card">
+          <div class="meta-label">${escapeHtml(item.label)}</div>
+          <div class="meta-value">${escapeHtml(item.value)}</div>
+        </div>`
+    )
+    .join('');
+
+  return `
+    <section class="metadata-grid" aria-label="Legislation metadata">
+      ${cards}
+    </section>`;
 }
 
 /**
