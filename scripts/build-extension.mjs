@@ -15,6 +15,7 @@ const FIREFOX_ANDROID_STRICT_MIN_VERSION =
 const COPY_FILES = [
   "browserApi.js",
   "logger.js",
+  "citationAdapters.js",
   "caseToolkit.js",
   "contentApp.js",
   "contentScript.js",

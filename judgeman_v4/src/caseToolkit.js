@@ -5,6 +5,12 @@
     module.exports = api;
   }
 })(typeof globalThis !== "undefined" ? globalThis : window, function caseToolkitFactory() {
+  function safeRequire(modulePath) {
+    if (typeof require !== "function") return null;
+    try { return require(modulePath); } catch (_e) { return null; }
+  }
+  const root = typeof globalThis !== "undefined" ? globalThis : window;
+  const citationAdapters = root.JudgemanCitationAdapters || safeRequire("./citationAdapters.js");
   const FACT_SECTION_PATTERNS = [/facts?/i, /background/i];
   const PROCEDURAL_SECTION_PATTERNS = [/procedural/i, /history/i];
   const ISSUE_SECTION_PATTERNS = [/issues?/i, /question/i];
@@ -231,8 +237,15 @@
     ].join("\n");
 
     const brief = inferBrief(caseData);
-    const citations = extractNeutralCitations(metadataText);
-    const statutes = extractStatutoryReferences(metadataText);
+    let citations, statutes;
+    if (citationAdapters?.extractAll) {
+      const adapted = citationAdapters.extractAll(metadataText);
+      citations = adapted.citations;
+      statutes = adapted.statutes;
+    } else {
+      citations = extractNeutralCitations(metadataText);
+      statutes = extractStatutoryReferences(metadataText);
+    }
     const dataQualityWarnings = buildDataQualityWarnings(caseData);
 
     return {
