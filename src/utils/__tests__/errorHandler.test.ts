@@ -6,6 +6,7 @@ import {
   SkillHunterError,
   DOMParsingError,
   ContentProcessingError,
+  getUserFacingErrorMessage,
   safeExecute,
   safeExecuteAsync,
 } from '../errorHandler';
@@ -90,6 +91,35 @@ describe('Error Handlers', () => {
       const result = await safeExecuteAsync(() => Promise.reject('rejection'), 'fallback');
 
       expect(result).toBe('fallback');
+    });
+  });
+
+  describe('getUserFacingErrorMessage', () => {
+    it('should return domain specific DOM parsing message', () => {
+      const message = getUserFacingErrorMessage(
+        {
+          name: 'DOMParsingError',
+          message: 'No content',
+          code: 'DOM_PARSING_ERROR',
+          occurredAt: '2026-03-30T00:00:00.000Z',
+        },
+        'fallback'
+      );
+
+      expect(message).toContain('could not parse');
+    });
+
+    it('should return fallback for unknown errors', () => {
+      const message = getUserFacingErrorMessage(
+        {
+          name: 'Error',
+          message: 'Unknown',
+          occurredAt: '2026-03-30T00:00:00.000Z',
+        },
+        'fallback'
+      );
+
+      expect(message).toBe('fallback');
     });
   });
 });
