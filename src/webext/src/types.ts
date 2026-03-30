@@ -121,11 +121,21 @@ export interface PopupState {
   lastScan?: ScanResult;
 }
 
+export interface DiagnosticEvent {
+  timestamp: string;
+  level: 'debug' | 'info' | 'warn' | 'error';
+  scope: string;
+  message: string;
+  details?: string;
+}
+
 export interface RuntimeMessageMap {
   getPopupState: undefined;
   saveSettings: WebExtSettings;
   scanCurrentDocument: undefined;
   signOut: undefined;
+  getDiagnostics: undefined;
+  clearDiagnostics: undefined;
   navigateBestEffort: TagEntry;
   runMutation: {
     action: MutationAction;
