@@ -53,6 +53,7 @@
       "compat.js",
       "dom-utils.js",
       "schema.js",
+      "logger.js",
       "platforms/chatgpt.js",
       "platforms/claude.js",
       "platforms/gemini.js",
