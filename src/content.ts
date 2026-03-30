@@ -33,6 +33,7 @@ import {
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
   formatCitation,
+  formatDiagnosticsReport,
   readLegislationNote,
   saveLegislationNote,
 } from '@/utils/storage';
@@ -136,6 +137,7 @@ function createSimplifiedContent(): HTMLContent {
             <button id="${SKILL_HUNTER_IDS.COPY_LINK_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-link">Copy page link</button>
             <button id="${SKILL_HUNTER_IDS.EXPORT_NOTE_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-note">Export notes</button>
             <button id="${SKILL_HUNTER_IDS.TIMELINE_BTN_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-timeline">Timeline</button>
+            <button id="${SKILL_HUNTER_IDS.EXPORT_DIAGNOSTICS_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-diagnostics">Export diagnostics</button>
             <button type="button" class="skill-hunter-close" ${SKILL_HUNTER_IDS.ACTION_ATTR}="close">Close</button>
           </div>
         </div>
@@ -513,6 +515,14 @@ function openRevisionDate(): void {
   window.open(url, '_blank', 'noopener');
 }
 
+async function exportDiagnostics(): Promise<void> {
+  const entries = logger.getBufferedEntries();
+  const sessionId = logger.getSessionId();
+  const report = formatDiagnosticsReport(entries, sessionId);
+  const copied = await copyTextToClipboard(report);
+  showToast(copied ? `Diagnostics copied (${entries.length} entries).` : 'Failed to export.');
+}
+
 async function exportCurrentNote(): Promise<void> {
   const note: LegislationNote = {
     statuteKey,
@@ -573,6 +583,11 @@ function handleOverlayClick(event: Event): void {
 
   if (action === 'open-revision') {
     openRevisionDate();
+    return;
+  }
+
+  if (action === 'export-diagnostics') {
+    void exportDiagnostics();
     return;
   }
 

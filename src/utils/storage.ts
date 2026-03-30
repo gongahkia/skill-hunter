@@ -2,7 +2,7 @@
  * Storage and clipboard helper utilities for legal research workflows.
  */
 
-import type { CitationFormat, LegislationNote } from '@/types';
+import type { CitationFormat, DiagnosticLogEntry, LegislationNote } from '@/types';
 import { STORAGE_KEYS, UX_LIMITS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
@@ -116,6 +116,21 @@ export function buildRevisionUrl(currentUrl: string, revDate: string): string {
   url.searchParams.set('WholeDoc', '1');
   url.searchParams.set('RevDate', revDate);
   return url.toString();
+}
+
+export function formatDiagnosticsReport(entries: DiagnosticLogEntry[], sessionId: string): string {
+  return JSON.stringify(
+    {
+      exportedAt: new Date().toISOString(),
+      sessionId,
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      entryCount: entries.length,
+      entries,
+    },
+    null,
+    2
+  );
 }
 
 export function exportLegislationNoteAsMarkdown(note: LegislationNote): string {

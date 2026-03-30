@@ -8,6 +8,7 @@ import {
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
   formatCitation,
+  formatDiagnosticsReport,
   readLegislationNote,
   saveLegislationNote,
   copyTextToClipboard,
@@ -89,6 +90,31 @@ describe('storage utils', () => {
       const result = formatCitation('oscola', title, heading, url);
       expect(result).toContain('Penal Code 1871, s 302');
       expect(result).toContain(`<${url}>`);
+    });
+  });
+
+  describe('formatDiagnosticsReport', () => {
+    it('should produce valid JSON with session metadata', () => {
+      const entries = [
+        {
+          sessionId: 'abc',
+          timestamp: '2026-03-30T00:00:00.000Z',
+          level: 'info' as const,
+          context: 'test',
+          message: 'Hello',
+        },
+      ];
+      const report = formatDiagnosticsReport(entries, 'abc');
+      const parsed = JSON.parse(report) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('sessionId', 'abc');
+      expect(parsed).toHaveProperty('entryCount', 1);
+      expect(parsed).toHaveProperty('entries');
+    });
+
+    it('should handle empty entries', () => {
+      const report = formatDiagnosticsReport([], 'xyz');
+      const parsed = JSON.parse(report) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('entryCount', 0);
     });
   });
 
