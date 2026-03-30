@@ -1,5 +1,9 @@
 const DEBUG_MODE = false;
 function debugLog(message) { if (DEBUG_MODE) Logger.log(message); }
+function reportError(context, error) {
+  var message = error && error.message ? error.message : String(error);
+  Logger.log('[OWL][' + context + '] ' + message);
+}
 
 const CONFIG = {
   PREFIXES: ['TODO', 'FIXME', 'TEMP', 'REF', 'REV'],
@@ -37,7 +41,14 @@ function setDarkMode(enabled) {
 }
 function getCustomPrefixes() {
   var val = PropertiesService.getUserProperties().getProperty('owl_custom_prefixes');
-  return val ? JSON.parse(val) : [];
+  if (!val) return [];
+  try {
+    var parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    reportError('getCustomPrefixes', error);
+    return [];
+  }
 }
 function setCustomPrefixes(arr) {
   PropertiesService.getUserProperties().setProperty('owl_custom_prefixes', JSON.stringify(arr));
