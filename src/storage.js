@@ -9,8 +9,7 @@ var StorageManager = {
       state: 'idle',
       message: 'Auto-export has not run yet.',
       timestamp: ''
-    },
-    runtimeDiagnostics: []
+    }
   },
   _ensureStorage() {
     if (!api || !api.storage || !api.storage.local) {
