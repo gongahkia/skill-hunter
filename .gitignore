@@ -5,3 +5,4 @@ node_modules/
 *.js.map
 src/webext/dist/
 src/webext/submission/
+src/cli/cli
