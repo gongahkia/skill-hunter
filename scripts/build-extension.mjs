@@ -14,6 +14,8 @@ const FIREFOX_ANDROID_STRICT_MIN_VERSION =
   process.env.JUDGEMAN_FIREFOX_ANDROID_STRICT_MIN_VERSION || "142.0";
 const COPY_FILES = [
   "browserApi.js",
+  "logger.js",
+  "caseToolkit.js",
   "contentApp.js",
   "contentScript.js",
   "extractor.js",
