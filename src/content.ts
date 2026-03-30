@@ -2,7 +2,13 @@
  * Content script - Main entry point for the browser extension
  */
 
-import type { ChromeMessage, ChromeMessageResponse, HTMLContent, LegislationNote } from '@/types';
+import type {
+  ChromeMessage,
+  ChromeMessageResponse,
+  CitationFormat,
+  HTMLContent,
+  LegislationNote,
+} from '@/types';
 import {
   getPageBasicData,
   getLegislationDefinitions,
@@ -24,6 +30,7 @@ import {
   copyTextToClipboard,
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
+  formatCitation,
   readLegislationNote,
   saveLegislationNote,
 } from '@/utils/storage';
@@ -117,6 +124,11 @@ function createSimplifiedContent(): HTMLContent {
               <button id="${SKILL_HUNTER_IDS.SEARCH_NEXT_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-next">Next</button>
               <span id="${SKILL_HUNTER_IDS.SEARCH_COUNT_ID}" class="search-count" aria-live="polite">0 results</span>
             </div>
+            <select id="${SKILL_HUNTER_IDS.CITATION_FORMAT_ID}" class="citation-format-select">
+              <option value="default">Default</option>
+              <option value="bluebook">Bluebook</option>
+              <option value="oscola">OSCOLA</option>
+            </select>
             <button id="${SKILL_HUNTER_IDS.COPY_CITATION_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-citation">Copy citation</button>
             <button id="${SKILL_HUNTER_IDS.COPY_LINK_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-link">Copy page link</button>
             <button id="${SKILL_HUNTER_IDS.EXPORT_NOTE_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-note">Export notes</button>
@@ -336,6 +348,15 @@ function getNearestHeadingForCitation(): HTMLElement | null {
   return nearest;
 }
 
+function getSelectedCitationFormat(): CitationFormat {
+  const shadowRoot = getOverlayShadowRoot();
+  const select = shadowRoot?.getElementById(SKILL_HUNTER_IDS.CITATION_FORMAT_ID);
+  if (select instanceof HTMLSelectElement) {
+    return select.value as CitationFormat;
+  }
+  return 'default';
+}
+
 async function copyCitation(): Promise<void> {
   const heading = getNearestHeadingForCitation();
   if (!heading) {
@@ -345,7 +366,9 @@ async function copyCitation(): Promise<void> {
 
   const headingId = heading.id ? `#${heading.id}` : '';
   const citationUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${headingId}`;
-  const citationText = `${statuteTitle} | ${heading.textContent?.trim() || 'Section'} | ${citationUrl}`;
+  const sectionHeading = heading.textContent?.trim() || 'Section';
+  const format = getSelectedCitationFormat();
+  const citationText = formatCitation(format, statuteTitle, sectionHeading, citationUrl);
 
   const copied = await copyTextToClipboard(citationText);
   showToast(copied ? 'Citation copied.' : 'Failed to copy citation.');

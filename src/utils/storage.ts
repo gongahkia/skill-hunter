@@ -2,7 +2,7 @@
  * Storage and clipboard helper utilities for legal research workflows.
  */
 
-import type { LegislationNote } from '@/types';
+import type { CitationFormat, LegislationNote } from '@/types';
 import { STORAGE_KEYS, UX_LIMITS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
@@ -91,6 +91,23 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
   } catch (error) {
     storageLogger.error('Failed to copy text to clipboard', error);
     return false;
+  }
+}
+
+export function formatCitation(
+  format: CitationFormat,
+  statuteTitle: string,
+  sectionHeading: string,
+  url: string
+): string {
+  const sectionNum = sectionHeading.match(/\d+[A-Z]?/i)?.[0] ?? '';
+  switch (format) {
+    case 'bluebook':
+      return `${statuteTitle}, s ${sectionNum || sectionHeading}`.trim();
+    case 'oscola':
+      return `${statuteTitle}, s ${sectionNum || sectionHeading} <${url}>`.trim();
+    default:
+      return `${statuteTitle} | ${sectionHeading} | ${url}`;
   }
 }
 

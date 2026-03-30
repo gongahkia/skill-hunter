@@ -125,6 +125,7 @@ export const SKILL_HUNTER_IDS = {
   NOTE_PANEL_ID: 'skill-hunter-note-panel',
   NOTE_TEXTAREA_ID: 'skill-hunter-note-textarea',
   NOTE_STATUS_ID: 'skill-hunter-note-status',
+  CITATION_FORMAT_ID: 'skill-hunter-citation-format',
   COPY_CITATION_ID: 'skill-hunter-copy-citation',
   COPY_LINK_ID: 'skill-hunter-copy-link',
   EXPORT_NOTE_ID: 'skill-hunter-export-note',

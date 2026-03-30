@@ -66,6 +66,8 @@ export interface ChromeMessageResponse {
   error?: string;
 }
 
+export type CitationFormat = 'default' | 'bluebook' | 'oscola';
+
 export type LogLevelName = 'debug' | 'info' | 'warn' | 'error';
 
 export interface DiagnosticLogEntry {

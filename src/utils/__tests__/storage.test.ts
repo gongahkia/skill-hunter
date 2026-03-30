@@ -6,6 +6,7 @@ import type { LegislationNote } from '@/types';
 import {
   createStatuteKeyFromUrl,
   exportLegislationNoteAsMarkdown,
+  formatCitation,
   readLegislationNote,
   saveLegislationNote,
   copyTextToClipboard,
@@ -53,6 +54,28 @@ describe('storage utils', () => {
     expect(markdown).toContain('# Evidence Act');
     expect(markdown).toContain('## Notes');
     expect(markdown).toContain('Check burden of proof provisions.');
+  });
+
+  describe('formatCitation', () => {
+    const title = 'Penal Code 1871';
+    const heading = 'Punishment for murder 302';
+    const url = 'https://sso.agc.gov.sg/Act/PC1871#pr302-';
+
+    it('should produce default pipe-delimited format', () => {
+      const result = formatCitation('default', title, heading, url);
+      expect(result).toBe(`${title} | ${heading} | ${url}`);
+    });
+
+    it('should produce Bluebook format', () => {
+      const result = formatCitation('bluebook', title, heading, url);
+      expect(result).toBe('Penal Code 1871, s 302');
+    });
+
+    it('should produce OSCOLA format with URL', () => {
+      const result = formatCitation('oscola', title, heading, url);
+      expect(result).toContain('Penal Code 1871, s 302');
+      expect(result).toContain(`<${url}>`);
+    });
   });
 
   it('should copy text using clipboard API when available', async () => {
