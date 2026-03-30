@@ -20,7 +20,8 @@ export function createStatuteKeyFromUrl(url: string): string {
   try {
     const parsed = new URL(url);
     const base = `${parsed.hostname}${parsed.pathname}`;
-    const versionTag = parsed.searchParams.get('RevDate') ?? parsed.searchParams.get('ViewType') ?? '';
+    const versionTag =
+      parsed.searchParams.get('RevDate') ?? parsed.searchParams.get('ViewType') ?? '';
     return `${base}${versionTag ? `?${versionTag}` : ''}`;
   } catch (error) {
     storageLogger.warn('Failed to parse statute URL for storage key', { url, error });
