@@ -9,5 +9,8 @@
 
 2. Replace Safari OAuth bridge stub with a real implementation.
 - File: `src/webext/src/auth/launchers/safari.ts`
-- Current behavior: throws errors indicating a required containing macOS app bridge.
-- Required completion step: implement Safari-specific auth flow and callback handling through the host bridge.
+- Completion (2026-03-30): implemented native host bridge messaging for Safari OAuth redirect URI and interactive auth callback handling.
+- Added test coverage: `src/webext/tests/safari-auth-launcher.test.ts`
+- Verification commands:
+  - `cd src/webext && npm run check`
+  - `cd src/webext && npm test`
