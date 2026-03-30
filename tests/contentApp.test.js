@@ -48,6 +48,8 @@ test("reader overlay preserves the original ELIT DOM while toggling", async () =
   assert.ok(readerRoot);
   assert.equal(readerRoot.classList.contains("jm-reader-visible"), true);
   assert.match(dom.window.document.body.innerHTML, /Public Prosecutor v Tan Example/);
+  assert.match(readerRoot.textContent, /Case brief \(student mode\)/);
+  assert.match(readerRoot.textContent, /Authorities and statutory references/);
   assert.equal(
     dom.window.document.querySelector(".caseTitle")?.textContent?.trim(),
     "Public Prosecutor v Tan Example [2024] SGHC 101"
