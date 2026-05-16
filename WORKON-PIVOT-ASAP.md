@@ -1,186 +1,121 @@
 # WORKON-PIVOT-ASAP
 
-Working doc for Dorso v3.0 pivot. Output of a strategy session on 2026-05-16. Captures market research, the decisions made, the v3.0 cut list, risks, and the ship plan. Optimize for HN front page first, real users second.
+Pivot brief for `Rakuzaichi`. Goal: HN front page + GitHub stars. Direction: memory-vault. Brand: keep name + add tagline. Scope: drop NDJSON/XML/YAML, add MD/PDF.
+
+## TL;DR
+
+`Rakuzaichi` today = generic LLM chat exporter in a saturated, post-Show-HN niche. [Inference] Same pitch already shipped Feb 2026 (HN 46844001). To stand out we reframe from *exporter* → *local-first AI memory vault*: auto-backup, full-text search, tags/folders, Obsidian/Notion sync. Same code spine, new narrative + new hooks.
+
+## Market findings (raw)
+
+- Saturated competitors: ChatGPT Exporter (4.4★, freemium PDF), ExportGPT (4.8★), ChatGPT Export Assistant (4.9★), AI Toolbox (20k+ users, $9.99/mo or $99 LTD), Superpower ChatGPT (folders+search+export), Local AI Chat Exporter, llm-chat-exporter (multi-platform, same pitch).
+- Built-in OpenAI export: free, ZIP-only, slow (up to 7d), requires active account, no per-chat selection, no images. Floor-not-ceiling competitor.
+- HN signal exhausted: "lost my chat history → built exporter" already posted Feb 2026. Wrapped-style analytics post (46168782) ran low traction. Local-AI front-page hits go to *capability* posts not *export* posts.
+- Privacy/data-loss anxiety is real and rising (Nature Jan 2026 case, ToS;DR D rating for OpenAI). Tailwind exists.
+- Browser ext revenue: 10k users ≈ $1k–$10k/mo *if* monetized. Most make $0. Chrome Web Store payments dead since 2021 → ExtensionPay is incumbent rail. [Unverified] — sourced from monetization blogs, not audited.
+
+## Positioning
+
+- *Old*: "Export your LLM chat history to 6 formats." Forgettable, commoditized.
+- *New*: "Your local-first memory vault for every LLM you use." Auto-captures, searches, exports, syncs.
+- Tagline candidate: `Rakuzaichi — your private archive for every AI conversation.`
+
+## Scope changes
+
+**Drop** (low utility, high maintenance):
+- NDJSON export
+- XML export
+- YAML export
+
+**Add** (table stakes for adoption):
+- Markdown export (per-chat, per-message)
+- PDF export (print path is fine; no server)
+
+**Keep**: CSV, TSV, JSON. [Inference] These cover spreadsheet users (CSV/TSV) and devs (JSON).
+
+**Platforms**: keep all 9 for now. Revisit after install telemetry — drop the bottom 2 if usage <5%.
+
+## Feature roadmap (memory-vault pivot)
+
+Ordered by HN-demo leverage.
+
+### M1 — Foundation (1–2 wk) ; ship as v3.0.0
+
+1. Markdown exporter (per-chat + bulk). Reuse `converters.js`. // priority hook for devs.
+2. PDF exporter via `window.print()` styled CSS. No external dep.
+3. Background auto-capture: on chat URL change, snapshot DOM → IndexedDB. Manifest already has `alarms` + `storage`. Use `alarms` for periodic sweep.
+4. CWS + AMO listings. Sideload-only kills adoption.
+
+### M2 — Vault UX (2–3 wk)
+
+5. Local IndexedDB store: `chats`, `messages`, `tags`, `meta`. Schema-versioned. // see existing `schema.js`.
+6. Options page → full vault browser: list, filter by platform/date, full-text search (Lunr or MiniSearch, in-browser, no server).
+7. Tag/folder UX. Drag-to-tag. Pinning.
+8. "Restore to clipboard" + "Send to new ChatGPT chat" primer button.
+
+### M3 — Demo-ready hooks (HN bait) (1–2 wk)
+
+9. Obsidian sync: write MD files into a configured vault folder via File System Access API.
+10. Notion sync via user's own integration token (no broker).
+11. Per-chat shareable HTML (offline, single file) — for archive-the-web vibes.
+12. *Optional but high-leverage:* "AI Wrapped"-style local stats page — counts/time/top words across vault. Pure client-side. Demo-friendly.
+
+### M4 — Stretch (post-launch)
+
+- Local RAG: embed vault into a tiny model (transformers.js) for "ask your past conversations."
+- Cross-LLM primer generator: condense Claude convo → ChatGPT-pasteable preamble.
+- Mobile read-only PWA over exported HTML bundles.
+
+## HN launch plan
+
+- **Title**: `Show HN: Rakuzaichi – local-first memory vault for ChatGPT, Claude, Gemini, and 6 more`
+- **First comment template** ready: explain why-not-OpenAI-export, screenshots, GIF of auto-capture + search.
+- **Demo asset**: 30s screencap — multi-platform capture → search across vault → export to Obsidian. No voiceover.
+- **Repo polish**: README rewrite leading with the vault framing, not the export framing. Architecture diagram refreshed. Pin Wrapped-style screenshot.
+- **Timing**: Tue/Wed 8–10am PT.
+
+## Branding/tagline
+
+- Name: `Rakuzaichi` retained.
+- Tagline (primary): *Your private archive for every AI conversation.*
+- Sub-tagline (dev surface): *Local-first. Multi-LLM. Open source.*
+- README hero block: tagline first, kanji + manga reference moved to footer "Etymology" section.
+
+## Risk register
+
+- [Inference] Platforms changing DOM regularly → high maintenance burden. Mitigate via platform-adapter pattern (already partially present in `src/platforms/*.js`) and automated DOM-shape canary tests.
+- [Inference] ToS friction: scraping authenticated chats *may* violate provider ToS. Add disclaimer (already present) + frame as "data you can already export — just better." Don't promise circumventing exports they don't permit.
+- Manifest V3 background script lifetime limits — `alarms` + service worker only. No persistent background pages. Already MV3-compliant.
+- Chrome Web Store review may flag broad host permissions. Pre-empt with clear privacy policy + zero-cloud claim verifiable from open source.
+
+## Cut list (do NOT do)
+
+- No SaaS backend. No cloud sync server. Zero-server is the entire moat.
+- No subscription before there's an audience. ExtensionPay tier is M4+ at earliest.
+- No fine-tune dataset builder yet — separate audience, splits focus.
+- No mobile-native app yet.
+
+## Open questions
+
+- Telemetry: ship anonymous opt-in counts (which platforms get used) to inform platform-drop decisions, or stay zero-telemetry for HN purity? [Speculation] Zero-telemetry wins on HN.
+- License: confirm MIT vs MPL. AMO prefers MPL for hybrid distribution. // verify before publishing.
+- Icon refresh: current icon is fine but a vault/key motif would map better to the new positioning.
+
+## Immediate next actions
+
+1. Branch `feat/v3-vault`.
+2. Rip NDJSON/XML/YAML from `converters.js` + tests + options UI.
+3. Add MD + PDF converters.
+4. Implement IndexedDB capture pipeline behind a feature flag.
+5. README rewrite with new tagline + hero.
+6. CWS developer account + AMO account, prep listing copy.
 
 ---
 
-## 1. Current state of Dorso (as of 2026-05-16)
-
-- Product: browser extension that gates web AI chatbots (ChatGPT, Claude, Gemini, Perplexity, Copilot, DeepSeek, etc.) behind a correctly-answered LeetCode question. 15-minute session on success.
-- Stack: JS extension (Chrome/Firefox/Safari builds) + Django backend + PostgreSQL + Redis + Prometheus + Grafana + Docker.
-- Distribution: Firefox AMO v1.0 and v2.0 listed. Chrome Web Store: awaiting approval. Safari: unsupported (skeleton only).
-- Traction: AMO listing shows **0 users, 0 reviews** on v1.0. Effectively pre-launch.
-- Repo: solo author (gongahkia). Recent commits show backend feature creep (mood/Spotify experiments under `sato` history merge) that does not belong in the shipped product.
-
----
-
-## 2. Market research
-
-### 2.1 Tailwinds (the zeitgeist is on our side)
-
-2026 is the peak of the "AI is rotting developers" media cycle. Recent signal:
-
-- MIT study on cognitive decline from AI use [discussed on HN](https://news.ycombinator.com/item?id=45114753).
-- Shen & Tamkin 2026 preprint: devs who fully delegated to AI performed **17% worse** on conceptual quizzes about code they had just shipped. (Surfaced in [Psychology Today](https://www.psychologytoday.com/us/blog/the-algorithmic-mind/202603/adults-lose-skills-to-ai-children-never-build-them).)
-- HBR Mar 2026: ["When Using AI Leads to Brain Fry"](https://hbr.org/2026/03/when-using-ai-leads-to-brain-fry).
-- TechSpot: ["Forced to vibe code at work, programmers say their skills are deteriorating"](https://www.techspot.com/news/112415-forced-vibe-code-work-programmers-their-skills-deteriorating.html).
-- Stack Overflow blog: ["A new worst coder has entered the chat: vibe coding without code knowledge"](https://stackoverflow.blog/2026/01/02/a-new-worst-coder-has-entered-the-chat-vibe-coding-without-code-knowledge/).
-- HN already eating tools in this space: ["Show HN: Dev atrophy test"](https://news.ycombinator.com/item?id=44507369), ["Ask HN: How to avoid skill atrophy in LLM-assisted programming era?"](https://news.ycombinator.com/item?id=46783679).
-
-[Inference] The "AI hygiene" narrative is hot enough to carry a Show HN launch right now. The window will close as the topic saturates; ship in months, not quarters.
-
-### 2.2 Competitive landscape
-
-| Tool | Concept | Stats | Weakness |
-| :--- | :--- | :--- | :--- |
-| [LeetCode Torture](https://chrome-stats.com/d/clbhgfneekiimoaakhhdjimgnnbnfbeh) | Block all sites until LC solve | 2.9★ avg, low installs | Repeated questions, broken submission detection, no customization, broad site-block hurts UX |
-| [LeetCode Forcer](https://chromewebstore.google.com/detail/leetcode-forcer-beat-proc/bfhandefodflloblgbmckmildnmangcb) | Redirect to LC until daily solved | 1,000 users, 4.5★ | Last updated 2023, breaks on new LC UI, no Firefox/Safari, no AI-chatbot targeting |
-| [Leetblock](https://chromewebstore.google.com/detail/leetblock-block-leetcode/dopkcagmapfpgabhpnbdonlejcidmpel) | Block other LC users | 84 users, 5★ | Unrelated to Dorso's thesis (mute, not gate) |
-| [DeProcrastination](https://www.deprocrastination.co/extension) | Generic site blocker w/ Pro tier | Mature | Generic, not coder-flavored, no AI angle |
-
-**Dorso's wedge:** target **AI chatbots specifically** (not the whole web), use **a relevant gate** (a coding question — thematic match), and **ship in 2026** while the narrative is hot. Nobody else combines all three.
-
-### 2.3 Monetization signal
-
-Anti-procrastination / focus extensions monetize fine: subscriptions, one-time purchases, freemium. Examples in [extensionpay.com analysis](https://extensionpay.com/articles/browser-extensions-make-money) hit four-to-five-figure MRR with 10k users.
-
-[Inference] Revenue is not the v3.0 goal (see §3). But the category is monetizable later if installs land.
-
-### 2.4 Verdict on market viability
-
-- **As a sellable product:** weak-to-moderate. Self-flagellation purchases are a small TAM; willingness-to-pay is low among the loudest target audience (interview-prep grinders, hair-shirt productivity nerds). A B2B angle (bootcamps / CS departments / new-hire onboarding) is plausible but not the current shape.
-- **As a viral GitHub / HN product:** **strong, time-limited**. Premise is meme-shaped, narrative is in season, demo screenshots ("ChatGPT is locked behind a LeetCode problem") sell themselves, competitors are stale, and the author has a credible voice ("braindead programmers" tone is on-brand for HN).
-- **Recommendation:** sharpen the current shape, fix the three weakest legs, launch loud, harvest stars, then decide whether to chase users or revenue.
-
----
-
-## 3. Decisions made this session
-
-| # | Decision | Rationale |
-| :--- | :--- | :--- |
-| D1 | **Sharpen current shape** (no reframe, no B2B pivot, no separate viral wedge product) | Lowest-risk evolution; existing positioning is already on-trend; product is mostly there |
-| D2 | **Delete the backend entirely** | Django/PG/Redis/Prometheus/Grafana is wildly over-engineered for "fetch a coding problem." Distribution friction; reviewer red flags; privacy story improves; "no server, no tracking" is itself an HN talking point |
-| D3 | **Primary metric: stars first, real users second** | HN front page + GitHub stars are cheap and time-sensitive; users follow stars; revenue can wait |
-| D4 | **Keep the "braindead programmer" tone** | It's the brand. Softening to "AI-free focus mode" would compete with DeProcrastination etc. on their turf. Punchy framing is a feature |
-| D5 | **Add 3 new challenge sources** beyond LeetCode | Fixes the #1 LC Torture complaint (repetition) and removes the LC-GraphQL single point of failure |
-| D6 | **Add Atrophy Score (shareable badge) + per-solve lock-screen receipt** | Two layered viral artifacts: high-frequency low-friction (receipts) and high-status low-frequency (score badge on LinkedIn/X) |
-
----
-
-## 4. v3.0 cut list
-
-### 4.1 IN — what ships
-
-**Core gate (keep, simplify):**
-- Existing chatbot blacklist (`src/shared/core/constants.js` is fine as-is).
-- 15-min session on successful solve (`SESSION_DURATION_MS` unchanged).
-- Manifest V3 builds for Chrome + Firefox; Safari wrapper as time permits.
-
-**Challenge sources (new, all client-side):**
-
-1. **Type-from-memory drills** — user types a stdlib function signature, an algo skeleton (e.g. quicksort partition), or a syntax snippet from memory. Levenshtein-tolerant match. Bundled JSON pack, no API.
-2. **Fundamentals MCQ bank** — bundled JSON of CS fundamentals (Big-O, DS internals, language quirks, concurrency basics). 200+ Qs at launch; tag by difficulty.
-3. **Project Euler / Advent of Code static set** — bundled subset (public-domain phrasing where possible; otherwise link out with problem ID and verify by numeric answer). No API.
-4. **LeetCode** stays as a source for users who want it, but is no longer the only source and no longer the default.
-
-User chooses sources in popup; rotation algo avoids recent repeats (extend existing `RECENT_CHALLENGE_SLUGS` pattern).
-
-**Viral surface (new, all client-side):**
-
-5. **Lock-screen receipt** — every successful solve renders a small PNG/SVG card: problem title, time-to-solve, current streak, Dorso wordmark. One-tap "share" copies image + suggested caption. High-frequency, low-friction; designed to leak organically.
-6. **Atrophy Score (public badge)** — derived from: bypass attempts, average time-to-solve, fail rate, solves-per-week, streak length. Single integer 0–100 (lower = more atrophied, on purpose: makes "low score" the badge). Exports as shareable card for X/LinkedIn/Bluesky. URL of the badge is a static rendered image (no backend; embed score in URL params, generate image client-side, upload to a static host like imgur via user action OR render via a thin Cloudflare Worker if needed — TBD; default plan is purely local download).
-
-**Polish:**
-
-7. Onboarding popup rewrite — 3 panels: pick sources, pick chatbots to gate, see your first receipt.
-8. Streak tracking in `chrome.storage.local` (already partially modelled via `LAST_SOLVED_TIME`).
-9. README rewrite with new screenshots, the atrophy thesis up top, demo GIF.
-
-### 4.2 OUT — what gets deleted
-
-- `backend/` directory — **entirely deleted** (not archived).
-- `docker-compose.yml` — deleted.
-- `monitoring/` — deleted.
-- `.env.example` — replaced with extension-only env (likely empty).
-- `safari/DorsoSafari` — kept (low cost) but not blocking launch.
-- Any Django/REST/Prometheus refs in README, CI, requirements.
-- `artifacts/dorso-firefox-2.1.0-source-staging-*` — audit, keep only what the AMO submission needs.
-- The `sato` merge ghosts (mood/Spotify) — confirm they have already been excised by commit `88ffab2` ("Restore dorso working tree to pre-merge state"); if any orphan files remain, delete.
-
-### 4.3 EXPLICITLY DEFERRED (not in v3.0)
-
-- B2B / bootcamp dashboard.
-- Premium tier / payments.
-- "Dev Atrophy Index" as a separate marketing-site tool.
-- Cross-device sync (intentionally giving up; "no server" is the story).
-- Mobile.
-
----
-
-## 5. Launch / ship plan
-
-**Target: HN Show HN post within 4 weeks.** Tuesday or Wednesday 8–10am ET launch window.
-
-### Sequence
-
-1. **Week 1 — Demolition.** Delete backend, docker-compose, monitoring. Update CI to drop Python jobs. Verify Chrome + Firefox builds still pass. Tag `v2.x-final` before deletion so the old shape is preserved in git history.
-2. **Week 2 — Challenge sources.** Implement the three new sources behind a unified `ChallengeProvider` interface in `src/shared/core/`. Bundle the JSON packs. Add source-picker to popup. Update tests in `src/shared/__tests__/`.
-3. **Week 3 — Viral surface.** Lock-screen receipt renderer (canvas/SVG). Atrophy Score calculation + share-card export. Streak persistence. Wire into popup.
-4. **Week 4 — Launch prep.** README rewrite, demo GIF, new screenshots, Chrome Web Store resubmission, AMO update, Show HN draft (title candidates below), Twitter/Bluesky thread, badge embed snippet for users to paste into their READMEs (compounding distribution).
-
-### Show HN title drafts
-
-- `Show HN: Dorso – CAPTCHA for braindead programmers (block AI chatbots behind a coding question)`
-- `Show HN: Dorso – Block ChatGPT/Claude/Gemini until you solve a coding problem`
-- `Show HN: Dorso – An AI-fast for your browser. No server, no tracking.`
-
-[Speculation] First framing leans into the meme and the existing brand; likely strongest. A/B with the third (the no-server angle) if first underperforms in pre-flight tests.
-
-### Success criteria
-
-- **HN:** ≥150 points and ≥80 comments within 24h of post. Stretch: front page.
-- **Stars:** ≥1k GitHub stars within 30 days of launch.
-- **Installs:** ≥5k combined Chrome + Firefox within 60 days.
-- **Press:** ≥1 pickup by a developer-trade outlet (Hacker Newsletter, TLDR, devto, Stack Overflow blog).
-
----
-
-## 6. Risks and open questions
-
-| Risk | Severity | Mitigation |
-| :--- | :--- | :--- |
-| Chrome Web Store still pending; could reject the v3.0 too | Med | Ship Firefox first; treat Chrome as bonus |
-| LeetCode GraphQL is unofficial → could break; was a load-bearing dependency in v2.x | Low (after pivot) | LC becomes one of four sources; bundled JSON sources are immune |
-| "Braindead" framing offends a reviewer / store team | Low | Have a sanitized variant of store-listing copy ready; keep the meme in README only |
-| Atrophy Score derided as gamification gimmick | Med | Lean into it; the meme *is* the gimmick; the score doesn't need to be psychometrically valid |
-| Image hosting for shared badges adds infra back in | Low | Default: user downloads PNG and posts manually. No hosting needed. Worker-rendered URLs are a stretch goal |
-| MIT/HBR-style "AI atrophy" narrative cools before launch | Med | 4-week ship window is tight specifically to beat saturation |
-| Solo maintainer burnout post-launch if traction lands | Med | Pre-write a CONTRIBUTING.md and tag good-first-issues for the challenge JSON packs (community-maintainable) |
-
-### Open questions to resolve during week 1
-
-- Do we publish challenge JSON packs in-repo (community PRs) or as separate releases? In-repo lowers friction.
-- Atrophy Score formula — calibrate against the author's own usage for 1 week before locking.
-- Do we keep the Python `helper/scraper.py` and `helper/serialize.py`? If they only served the deleted backend, delete them too.
-- Tag-and-archive of v2.x: pure git tag, or a branch?
-
----
-
-## 7. Sources / receipts
-
-- [Psychology Today — Adults Lose Skills to AI](https://www.psychologytoday.com/us/blog/the-algorithmic-mind/202603/adults-lose-skills-to-ai-children-never-build-them)
-- [HBR — When Using AI Leads to Brain Fry](https://hbr.org/2026/03/when-using-ai-leads-to-brain-fry)
-- [HN — MIT Study: AI Reprograms the Brain](https://news.ycombinator.com/item?id=45114753)
-- [TechSpot — Forced to vibe code, skills deteriorating](https://www.techspot.com/news/112415-forced-vibe-code-work-programmers-their-skills-deteriorating.html)
-- [Stack Overflow — Vibe coding without code knowledge](https://stackoverflow.blog/2026/01/02/a-new-worst-coder-has-entered-the-chat-vibe-coding-without-code-knowledge/)
-- [HN — Show HN: Dev atrophy test](https://news.ycombinator.com/item?id=44507369)
-- [HN — Ask HN: avoid skill atrophy in LLM era](https://news.ycombinator.com/item?id=46783679)
-- [Chrome Stats — LeetCode Torture](https://chrome-stats.com/d/clbhgfneekiimoaakhhdjimgnnbnfbeh)
-- [Chrome Web Store — LeetCode Forcer](https://chromewebstore.google.com/detail/leetcode-forcer-beat-proc/bfhandefodflloblgbmckmildnmangcb)
-- [Chrome Web Store — Leetblock](https://chromewebstore.google.com/detail/leetblock-block-leetcode/dopkcagmapfpgabhpnbdonlejcidmpel)
-- [DeProcrastination extension](https://www.deprocrastination.co/extension)
-- [ExtensionPay — indie revenue examples](https://extensionpay.com/articles/browser-extensions-make-money)
-
----
-
-*Author: strategy session w/ Claude Opus 4.7 (1M ctx). Owner: gongahkia. Status: live working doc — edit freely as v3.0 progresses.*
+Sources researched (2026-05-16):
+- HN 46844001 — Show HN: lost ChatGPT history → backup tool (Feb 2026)
+- HN 46168782 — Show HN: Wrapped for ChatGPT/Claude history
+- Chrome Web Store: ExportGPT, ChatGPT Exporter, ChatGPT Toolbox, Superpower ChatGPT, Local AI Chat Exporter
+- OpenAI Help Center — official export limits
+- Fortune Business Insights — data privacy software market 2026 ($5.37B → $45.13B by 2034, CAGR 35.5%)
+- ExtensionPay / extensionradar.com — monetization data ($1k–$10k/mo at 10k users)
