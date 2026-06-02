@@ -190,20 +190,140 @@ export function integrateDefinitions(
   });
 }
 
+export interface CrossRefContext {
+  currentSectionId?: string | null;
+  sectionPreviews?: Map<string, string>;
+}
+
+const SECTION_ID_FROM_HEADER = /^pr(\d+[A-Z]?)-he-/;
+
 /**
- * Link cross-references like "section 12" or "section 12A" to in-document scroll targets.
- * Uses the SSO anchor convention where section N maps to id "prN-he-".
+ * Pull the bare section number ("12A") out of an SSO anchor id like "pr12A-he-".
  */
-export function linkCrossReferences(html: string): string {
+function sectionNumberFromAnchorId(anchorId: string | null | undefined): string | null {
+  if (!anchorId) return null;
+  const match = SECTION_ID_FROM_HEADER.exec(anchorId);
+  return match ? (match[1] ?? null) : null;
+}
+
+/**
+ * Build a map from SSO section anchor id (`pr12-he-`) to a short preview of the
+ * section body, used to power hover tooltips on cross-reference links.
+ */
+export function buildSectionPreviewMap(
+  contentTokens: ContentToken[],
+  wordLimit: number = 25
+): Map<string, string> {
+  const previews = new Map<string, string>();
+  for (let i = 0; i < contentTokens.length; i++) {
+    const token = contentTokens[i];
+    if (!token || token.type !== 'sectionHeader' || !token.ID) continue;
+    for (let j = i + 1; j < contentTokens.length; j++) {
+      const next = contentTokens[j];
+      if (!next) continue;
+      if (next.type === 'sectionHeader') break;
+      if (next.type !== 'sectionBody') continue;
+      const words = next.content.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+      if (words.length === 0) continue;
+      const slice = words.slice(0, wordLimit).join(' ');
+      const preview = words.length > wordLimit ? `${slice}…` : slice;
+      previews.set(token.ID, preview);
+      break;
+    }
+  }
+  return previews;
+}
+
+function renderCrossRefButton(
+  label: string,
+  targetId: string | null,
+  preview: string | null
+): string {
+  const safeLabel = label; // label sourced from already-escaped segment text
+  const previewHtml = preview
+    ? `<span class="cross-ref-tooltip">${escapeHtml(preview)}</span>`
+    : '';
+  if (!targetId) {
+    return `<button type="button" class="cross-ref cross-ref-unresolved" disabled aria-disabled="true">${safeLabel}${previewHtml}</button>`;
+  }
+  return `<button type="button" class="cross-ref" data-skill-hunter-scroll-target="${escapeAttribute(targetId)}">${safeLabel}${previewHtml}</button>`;
+}
+
+/**
+ * Link cross-references in a single text segment (no HTML tags).
+ * Returns the rewritten text plus an array of protected button HTML strings
+ * keyed by placeholder so subsequent regex passes don't mangle them.
+ */
+function rewriteCrossRefSegment(text: string, context: CrossRefContext): string {
+  const placeholders = new Map<string, string>();
+  let counter = 0;
+
+  const protect = (html: string): string => {
+    const key = ` CR${counter++} `;
+    placeholders.set(key, html);
+    return key;
+  };
+
+  const previews = context.sectionPreviews;
+  const currentSectionId = context.currentSectionId ?? null;
+
+  const resolveSectionTarget = (sectionNum: string): string => `pr${sectionNum}-he-`;
+  const previewFor = (anchorId: string | null): string | null =>
+    anchorId && previews ? (previews.get(anchorId) ?? null) : null;
+
+  // Pass 1: long-form "section(s) N" with optional sub-parts and ranges.
+  // Trailing `\b` omitted on purpose — sub-part suffixes like `(3)(a)` end on `)`
+  // which is non-word, so `\b` would refuse to anchor and the match would lose the suffix.
+  let working = text.replace(
+    /\b(sections?)\s+(\d+[A-Z]?(?:\(\w+\))*)(?:\s+(?:and|to|[-–—])\s+(\d+[A-Z]?(?:\(\w+\))*))?/gi,
+    (match, _kw: string, first: string, _second: string | undefined) => {
+      const firstNum = first.match(/^\d+[A-Z]?/i)?.[0];
+      if (!firstNum) return match;
+      const targetId = resolveSectionTarget(firstNum);
+      return protect(renderCrossRefButton(match, targetId, previewFor(targetId)));
+    }
+  );
+
+  // Pass 2: "subsection (N)" / "subsections (N)(M)" — scroll to current section.
+  working = working.replace(/\b(subsections?)\s+(\(\w+\)(?:\(\w+\))*)/gi, (match) =>
+    protect(renderCrossRefButton(match, currentSectionId, previewFor(currentSectionId)))
+  );
+
+  // Pass 3: "paragraph (a)" / "paras 3-5" — scroll to current section, no preview.
+  working = working.replace(
+    /\b(paragraphs?|paras?\.?)\s+(\(\w+\)|\d+(?:\s*[-–—]\s*\d+)?)/gi,
+    (match) => protect(renderCrossRefButton(match, currentSectionId, previewFor(currentSectionId)))
+  );
+
+  // Pass 4: bare "s N" / "s. N" — narrower delimiter context to avoid false hits like "his 5".
+  working = working.replace(
+    /(^|[\s(,;:])(s\.?)\s+(\d+[A-Z]?)(?=[\s,.;:)\]]|$)/gi,
+    (_match, lead: string, _kw: string, num: string) => {
+      const targetId = resolveSectionTarget(num);
+      const label = `${_kw} ${num}`;
+      return `${lead}${protect(renderCrossRefButton(label, targetId, previewFor(targetId)))}`;
+    }
+  );
+
+  // Restore protected placeholders.
+  placeholders.forEach((html, key) => {
+    working = working.split(key).join(html);
+  });
+  return working;
+}
+
+/**
+ * Link cross-references like "section 12", "subsection (3)", "paragraph (a)", "s 5",
+ * or "paras 3-5" to in-document scroll targets. Sub-section / paragraph references
+ * resolve to the enclosing section anchor when `currentSectionId` is supplied.
+ *
+ * Sections use the SSO anchor convention where section N maps to id "prN-he-".
+ */
+export function linkCrossReferences(html: string, context: CrossRefContext = {}): string {
   const segments = splitPreservingTags(html);
   const processed = segments.map((seg) => {
     if (seg.isTag) return seg.text;
-    return seg.text.replace(/\b(sections?\s+\d+[A-Z]?)\b/gi, (_match, ref: string) => {
-      const numMatch = ref.match(/\d+[A-Z]?/i);
-      if (!numMatch) return ref;
-      const targetId = `pr${numMatch[0]}-he-`;
-      return `<button type="button" class="cross-ref" data-skill-hunter-scroll-target="${targetId}">${ref}</button>`;
-    });
+    return rewriteCrossRefSegment(seg.text, context);
   });
   return processed.join('');
 }
@@ -212,13 +332,13 @@ export function linkCrossReferences(html: string): string {
  * Process content lines with proper formatting
  * Note: Logical connectors are already formatted in integrateDefinitions
  */
-export function processContentLines(content: string): string {
+export function processContentLines(content: string, context: CrossRefContext = {}): string {
   const lines = content.split('<br>');
 
   const processedLines = lines.map((line) => {
     if (!line.trim()) return '';
 
-    const linked = linkCrossReferences(line); // cross-ref linking
+    const linked = linkCrossReferences(line, context); // cross-ref linking
 
     // Apply indentation if needed
     // Check the original line (without HTML) for indentation pattern
@@ -318,15 +438,21 @@ export function generateMetadataSummaryHTML(
  * Generate HTML for main content
  */
 export function generateContentHTML(contentTokens: ContentToken[]): string {
+  const sectionPreviews = buildSectionPreviewMap(contentTokens);
+  let currentSectionId: string | null = null;
+
   const contentParts = contentTokens.map((token) => {
     const escapedId = token.ID ? escapeAttribute(token.ID) : null;
 
     switch (token.type) {
       case 'sectionHeader':
+        if (token.ID && sectionNumberFromAnchorId(token.ID)) {
+          currentSectionId = token.ID; // refresh section context for nested refs
+        }
         return `<h2 class="section-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h2>`;
 
       case 'sectionBody':
-        return `<div class="section-body">${processContentLines(token.content)}</div>`;
+        return `<div class="section-body">${processContentLines(token.content, { currentSectionId, sectionPreviews })}</div>`;
 
       case 'provisionHeader':
         return `<h3 class="provision-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h3>`;
