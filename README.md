@@ -99,7 +99,7 @@ $ make
 3. Open the `skill-hunter` repo, select `manifest.json`.
 4. Open any **SSO** page, then click *Whole Document*.
 
-![](./asset/screenshots/skill-hunter-screenshot-3.png)
+![](./asset/screenshots/skill-hunter-installation-3.png)
 
 5. Click the simplify button.
 
