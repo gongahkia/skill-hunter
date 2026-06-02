@@ -354,7 +354,7 @@ export function processContentLines(content: string, context: CrossRefContext = 
  * Generate HTML for table of contents
  */
 export function generateTableOfContentsHTML(
-  legislationTitle: string,
+  _legislationTitle: string,
   tocItems: Array<{ referenceText: string; referenceUrl: string }>
 ): string {
   const tocItemsHTML = tocItems
@@ -381,11 +381,10 @@ export function generateTableOfContentsHTML(
     })
     .join('');
 
+  // Header block intentionally removed: the statute title now lives in the top
+  // toolbar so the TOC sidebar doesn't duplicate it.
   return `
     <div class="toc-container">
-      <div class="toc-header">
-        <h2 class="toc-title">${escapeHtml(legislationTitle)}</h2>
-      </div>
       <div class="toc-content">
         <ul class="toc-list">
           ${tocItemsHTML}

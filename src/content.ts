@@ -786,18 +786,60 @@ let statuteTermShowTimeoutId: number | null = null;
 let statuteTermHideTimeoutId: number | null = null;
 let tocSpyCleanup: (() => void) | null = null;
 
-function clearActiveStatuteTerm(): void {
+function getTooltipElement(): HTMLElement | null {
+  const shadowRoot = getOverlayShadowRoot();
+  const el = shadowRoot?.getElementById(SKILL_HUNTER_IDS.TOOLTIP_ID);
+  return el instanceof HTMLElement ? el : null;
+}
+
+function hideTooltip(): void {
+  const tooltip = getTooltipElement();
+  if (tooltip) {
+    tooltip.classList.remove('visible');
+    tooltip.setAttribute('aria-hidden', 'true');
+  }
   if (activeStatuteTerm) {
     activeStatuteTerm.classList.remove('statute-term-active');
     activeStatuteTerm = null;
   }
 }
 
-function setActiveStatuteTerm(term: HTMLElement): void {
-  if (activeStatuteTerm === term) return;
-  clearActiveStatuteTerm();
-  term.classList.add('statute-term-active');
+function showTooltipForTerm(term: HTMLElement): void {
+  const tooltip = getTooltipElement();
+  if (!tooltip) return;
+
+  const text = term.getAttribute(SKILL_HUNTER_IDS.TOOLTIP_ATTR);
+  if (!text) return;
+
+  if (activeStatuteTerm && activeStatuteTerm !== term) {
+    activeStatuteTerm.classList.remove('statute-term-active');
+  }
   activeStatuteTerm = term;
+  term.classList.add('statute-term-active');
+
+  tooltip.textContent = text;
+  tooltip.setAttribute('aria-hidden', 'false');
+
+  // Position relative to viewport (position: fixed in CSS). Place above the
+  // term by default, flip below if it would clip the top of the viewport, and
+  // clamp horizontally so it never overflows past either sidebar.
+  tooltip.classList.add('visible');
+  // Measure after making it visible so width is accurate.
+  const termRect = term.getBoundingClientRect();
+  const tipRect = tooltip.getBoundingClientRect();
+  const viewportW = document.documentElement.clientWidth;
+  const margin = 12;
+
+  let left = termRect.left + termRect.width / 2 - tipRect.width / 2;
+  left = Math.max(margin, Math.min(left, viewportW - tipRect.width - margin));
+
+  let top = termRect.top - tipRect.height - 8;
+  if (top < margin) {
+    // Not enough room above — flip below.
+    top = termRect.bottom + 8;
+  }
+
+  tooltip.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
 }
 
 function registerStatuteTermSingleton(): void {
@@ -817,7 +859,7 @@ function registerStatuteTermSingleton(): void {
       window.clearTimeout(statuteTermShowTimeoutId);
     }
     statuteTermShowTimeoutId = window.setTimeout(() => {
-      setActiveStatuteTerm(term);
+      showTooltipForTerm(term);
     }, 80);
   };
 
@@ -833,14 +875,18 @@ function registerStatuteTermSingleton(): void {
       window.clearTimeout(statuteTermHideTimeoutId);
     }
     statuteTermHideTimeoutId = window.setTimeout(() => {
-      clearActiveStatuteTerm();
+      hideTooltip();
     }, 120);
   };
 
-  // Capture-phase so we win the race against the bubbling click-handler that
-  // also listens on .skill-hunter-root.
   shadowRoot.addEventListener('mouseover', onEnter, true);
   shadowRoot.addEventListener('mouseout', onLeave, true);
+
+  // Hide tooltip on scroll — easier than tracking and repositioning.
+  const mainContent = getMainContentElement();
+  if (mainContent) mainContent.addEventListener('scroll', hideTooltip, { passive: true });
+  const layout = shadowRoot.querySelector<HTMLElement>('.skill-hunter-layout');
+  if (layout && layout !== mainContent) layout.addEventListener('scroll', hideTooltip, { passive: true });
 }
 
 function initializeTocScrollSpy(): void {
