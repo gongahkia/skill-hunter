@@ -617,6 +617,26 @@ function handleOverlayClick(event: Event): void {
     return;
   }
 
+  if (action === 'toggle-search') {
+    toggleSearchBar();
+    return;
+  }
+
+  if (action === 'search-close') {
+    closeSearchBar();
+    return;
+  }
+
+  if (action === 'toggle-toc') {
+    toggleSidebar('toc');
+    return;
+  }
+
+  if (action === 'toggle-notes') {
+    toggleSidebar('notes');
+    return;
+  }
+
   if (action === 'copy-citation') {
     void copyCitation();
     return;
@@ -663,6 +683,18 @@ function createMarkupFragment(markup: string): DocumentFragment {
   return range.createContextualFragment(markup);
 }
 
+let searchDebounceTimeoutId: number | null = null;
+
+function scheduleSearch(query: string): void {
+  if (searchDebounceTimeoutId) {
+    window.clearTimeout(searchDebounceTimeoutId);
+  }
+  searchDebounceTimeoutId = window.setTimeout(() => {
+    searchDebounceTimeoutId = null;
+    highlightSearchMatches(query);
+  }, 180);
+}
+
 function registerSearchEvents(): void {
   const shadowRoot = getOverlayShadowRoot();
   const searchInput = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_INPUT_ID);
@@ -673,7 +705,7 @@ function registerSearchEvents(): void {
   }
 
   searchInput.addEventListener('input', () => {
-    highlightSearchMatches(searchInput.value);
+    scheduleSearch(searchInput.value);
   });
 
   searchInput.addEventListener('keydown', (event) => {
@@ -690,24 +722,125 @@ function registerSearchEvents(): void {
   });
 }
 
+function openSearchBar(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  const bar = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
+  if (!(bar instanceof HTMLElement)) return;
+  bar.hidden = false;
+  const input = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_INPUT_ID);
+  if (input instanceof HTMLInputElement) {
+    input.focus();
+    input.select();
+  }
+}
+
+function closeSearchBar(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  const bar = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
+  if (bar instanceof HTMLElement) {
+    bar.hidden = true;
+  }
+  const input = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_INPUT_ID);
+  if (input instanceof HTMLInputElement) {
+    input.value = '';
+  }
+  clearSearchHighlights();
+  if (searchDebounceTimeoutId) {
+    window.clearTimeout(searchDebounceTimeoutId);
+    searchDebounceTimeoutId = null;
+  }
+}
+
+function toggleSearchBar(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  const bar = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
+  if (!(bar instanceof HTMLElement)) return;
+  if (bar.hidden) {
+    openSearchBar();
+  } else {
+    closeSearchBar();
+  }
+}
+
+function getRootDiv(): HTMLElement | null {
+  const shadowRoot = getOverlayShadowRoot();
+  return shadowRoot?.querySelector<HTMLElement>('.skill-hunter-root') ?? null;
+}
+
+function toggleSidebar(which: 'toc' | 'notes'): void {
+  const root = getRootDiv();
+  if (!root) return;
+  const className = which === 'toc' ? 'toc-collapsed' : 'notes-collapsed';
+  const collapsed = root.classList.toggle(className);
+  const buttonId = which === 'toc' ? SKILL_HUNTER_IDS.TOC_TOGGLE_ID : SKILL_HUNTER_IDS.NOTES_TOGGLE_ID;
+  const shadowRoot = getOverlayShadowRoot();
+  const btn = shadowRoot?.getElementById(buttonId);
+  if (btn instanceof HTMLElement) {
+    btn.classList.toggle('icon-btn-active', !collapsed);
+  }
+  void persistSidebarState(which, collapsed);
+}
+
+async function persistSidebarState(which: 'toc' | 'notes', collapsed: boolean): Promise<void> {
+  try {
+    const key =
+      which === 'toc' ? SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED : SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED;
+    await chrome.storage.local.set({ [key]: collapsed });
+  } catch (error) {
+    contentLogger.warn('Failed to persist sidebar state', { which, error });
+  }
+}
+
+async function loadSidebarState(): Promise<void> {
+  try {
+    const { [SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED]: tocCollapsed, [SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED]: notesCollapsed } =
+      await chrome.storage.local.get([
+        SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED,
+        SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED,
+      ]);
+    const root = getRootDiv();
+    const shadowRoot = getOverlayShadowRoot();
+    if (root && Boolean(tocCollapsed)) {
+      root.classList.add('toc-collapsed');
+    }
+    if (root && Boolean(notesCollapsed)) {
+      root.classList.add('notes-collapsed');
+    }
+    const tocBtn = shadowRoot?.getElementById(SKILL_HUNTER_IDS.TOC_TOGGLE_ID);
+    if (tocBtn instanceof HTMLElement) {
+      tocBtn.classList.toggle('icon-btn-active', !Boolean(tocCollapsed));
+    }
+    const notesBtn = shadowRoot?.getElementById(SKILL_HUNTER_IDS.NOTES_TOGGLE_ID);
+    if (notesBtn instanceof HTMLElement) {
+      notesBtn.classList.toggle('icon-btn-active', !Boolean(notesCollapsed));
+    }
+  } catch (error) {
+    contentLogger.warn('Failed to load sidebar state', { error });
+  }
+}
+
 function handleOverlayKeydown(event: KeyboardEvent): void {
   if (!isSimplified || !overlayHost?.shadowRoot) {
     return;
   }
 
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
-    const searchInput = overlayHost.shadowRoot.getElementById(SKILL_HUNTER_IDS.SEARCH_INPUT_ID);
-    if (searchInput instanceof HTMLInputElement) {
-      event.preventDefault();
-      searchInput.focus();
-      searchInput.select();
-    }
+    event.preventDefault();
+    openSearchBar();
     return;
   }
 
   if (event.key === 'Escape') {
+    // Search open → close search instead of overlay.
+    const searchBar = overlayHost.shadowRoot.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
+    if (searchBar instanceof HTMLElement && !searchBar.hidden) {
+      event.preventDefault();
+      closeSearchBar();
+      return;
+    }
+
     const target = event.target;
-    if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {
+    if (target instanceof HTMLTextAreaElement) {
       return;
     }
 
@@ -776,6 +909,7 @@ function simplifyPage(): void {
   void initializeCitationGraph();
   registerStatuteTermSingleton();
   initializeTocScrollSpy();
+  void loadSidebarState();
   window.addEventListener('keydown', handleOverlayKeydown);
 
   contentLogger.info('Page simplified successfully');
