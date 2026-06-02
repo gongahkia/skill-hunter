@@ -230,7 +230,7 @@ function getOverlayShadowRoot(): ShadowRoot | null {
   return overlayHost?.shadowRoot ?? null;
 }
 
-function updateSearchCountLabel(): void {
+function updateSearchCountLabel(capped: boolean = false): void {
   const shadowRoot = getOverlayShadowRoot();
   const label = shadowRoot?.getElementById(SKILL_HUNTER_IDS.SEARCH_COUNT_ID);
   if (!(label instanceof HTMLElement)) {
@@ -238,12 +238,13 @@ function updateSearchCountLabel(): void {
   }
 
   const total = searchResults.length;
+  label.classList.toggle('search-count-empty', total === 0);
   if (total === 0) {
-    label.textContent = '0 results';
+    label.textContent = '0/0';
     return;
   }
-
-  label.textContent = `${activeSearchResultIndex + 1} / ${total}`;
+  const suffix = capped ? '+' : '';
+  label.textContent = `${activeSearchResultIndex + 1}/${total}${suffix}`;
 }
 
 function clearSearchHighlights(): void {
@@ -268,45 +269,54 @@ function clearSearchHighlights(): void {
   updateSearchCountLabel();
 }
 
+const SEARCH_MAX_MATCHES = 2000;
+const SEARCH_MIN_QUERY_LENGTH = 2;
+let cachedSearchTextNodes: Text[] | null = null;
+
+function getSearchableTextNodes(container: HTMLElement): Text[] {
+  if (cachedSearchTextNodes) return cachedSearchTextNodes;
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const out: Text[] = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    const parent = node.parentElement;
+    if (!parent) continue;
+    // Skip empty / whitespace-only nodes and anything inside an existing mark.
+    if (!node.textContent?.trim()) continue;
+    out.push(node);
+  }
+  cachedSearchTextNodes = out;
+  return out;
+}
+
 function highlightSearchMatches(query: string): void {
   clearSearchHighlights();
 
   const shadowRoot = getOverlayShadowRoot();
   const container = shadowRoot?.getElementById(SKILL_HUNTER_IDS.MAIN_CONTENT_ID);
-  if (!(container instanceof HTMLElement) || !query.trim()) {
+  if (!(container instanceof HTMLElement)) return;
+
+  const trimmedQuery = query.trim();
+  if (trimmedQuery.length < SEARCH_MIN_QUERY_LENGTH) {
+    updateSearchCountLabel();
     return;
   }
 
-  const escapedQuery = escapeRegExp(query.trim());
+  // Cache text nodes once per simplified-view lifecycle. Subsequent searches
+  // skip the tree walk entirely.
+  const textNodes = getSearchableTextNodes(container);
+  const escapedQuery = escapeRegExp(trimmedQuery);
   const regex = new RegExp(escapedQuery, 'gi');
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-  const textNodes: Text[] = [];
 
-  while (walker.nextNode()) {
-    const node = walker.currentNode as Text;
-    const parent = node.parentElement;
-    if (!parent) {
-      continue;
-    }
+  let totalMatches = 0;
+  let capped = false;
 
-    if (parent.closest('mark.skill-hunter-search-hit')) {
-      continue;
-    }
-
-    if (!node.textContent?.trim()) {
-      continue;
-    }
-
-    textNodes.push(node);
-  }
-
-  textNodes.forEach((textNode) => {
+  for (const textNode of textNodes) {
+    if (capped) break;
+    if (!textNode.isConnected) continue; // node may have been spliced by a previous run
     const text = textNode.textContent ?? '';
     regex.lastIndex = 0;
-
-    if (!regex.test(text)) {
-      return;
-    }
+    if (!regex.test(text)) continue;
 
     const fragment = document.createDocumentFragment();
     regex.lastIndex = 0;
@@ -314,17 +324,21 @@ function highlightSearchMatches(query: string): void {
     let match: RegExpExecArray | null;
 
     while ((match = regex.exec(text)) !== null) {
+      if (totalMatches >= SEARCH_MAX_MATCHES) {
+        capped = true;
+        break;
+      }
       const [matchedText] = match;
       const startIndex = match.index;
       if (startIndex > lastIndex) {
         fragment.appendChild(document.createTextNode(text.slice(lastIndex, startIndex)));
       }
-
       const mark = document.createElement('mark');
       mark.className = 'skill-hunter-search-hit';
       mark.textContent = matchedText;
       fragment.appendChild(mark);
       searchResults.push(mark);
+      totalMatches += 1;
       lastIndex = startIndex + matchedText.length;
     }
 
@@ -333,14 +347,17 @@ function highlightSearchMatches(query: string): void {
     }
 
     textNode.parentNode?.replaceChild(fragment, textNode);
-  });
+  }
 
   if (searchResults.length > 0) {
     activeSearchResultIndex = 0;
     moveToSearchResult(activeSearchResultIndex);
   }
 
-  updateSearchCountLabel();
+  updateSearchCountLabel(capped);
+  // Splicing the cached text nodes invalidated them — drop the cache so the
+  // next clear-and-search rebuild walks a clean tree.
+  cachedSearchTextNodes = null;
 }
 
 function moveToSearchResult(nextIndex: number): void {
@@ -772,7 +789,8 @@ function toggleSidebar(which: 'toc' | 'notes'): void {
   if (!root) return;
   const className = which === 'toc' ? 'toc-collapsed' : 'notes-collapsed';
   const collapsed = root.classList.toggle(className);
-  const buttonId = which === 'toc' ? SKILL_HUNTER_IDS.TOC_TOGGLE_ID : SKILL_HUNTER_IDS.NOTES_TOGGLE_ID;
+  const buttonId =
+    which === 'toc' ? SKILL_HUNTER_IDS.TOC_TOGGLE_ID : SKILL_HUNTER_IDS.NOTES_TOGGLE_ID;
   const shadowRoot = getOverlayShadowRoot();
   const btn = shadowRoot?.getElementById(buttonId);
   if (btn instanceof HTMLElement) {
@@ -793,11 +811,13 @@ async function persistSidebarState(which: 'toc' | 'notes', collapsed: boolean): 
 
 async function loadSidebarState(): Promise<void> {
   try {
-    const { [SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED]: tocCollapsed, [SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED]: notesCollapsed } =
-      await chrome.storage.local.get([
-        SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED,
-        SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED,
-      ]);
+    const {
+      [SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED]: tocCollapsed,
+      [SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED]: notesCollapsed,
+    } = await chrome.storage.local.get([
+      SIDEBAR_STORAGE_KEYS.TOC_COLLAPSED,
+      SIDEBAR_STORAGE_KEYS.NOTES_COLLAPSED,
+    ]);
     const root = getRootDiv();
     const shadowRoot = getOverlayShadowRoot();
     if (root && Boolean(tocCollapsed)) {
@@ -808,11 +828,11 @@ async function loadSidebarState(): Promise<void> {
     }
     const tocBtn = shadowRoot?.getElementById(SKILL_HUNTER_IDS.TOC_TOGGLE_ID);
     if (tocBtn instanceof HTMLElement) {
-      tocBtn.classList.toggle('icon-btn-active', !Boolean(tocCollapsed));
+      tocBtn.classList.toggle('icon-btn-active', !tocCollapsed);
     }
     const notesBtn = shadowRoot?.getElementById(SKILL_HUNTER_IDS.NOTES_TOGGLE_ID);
     if (notesBtn instanceof HTMLElement) {
-      notesBtn.classList.toggle('icon-btn-active', !Boolean(notesCollapsed));
+      notesBtn.classList.toggle('icon-btn-active', !notesCollapsed);
     }
   } catch (error) {
     contentLogger.warn('Failed to load sidebar state', { error });
@@ -1020,7 +1040,8 @@ function registerStatuteTermSingleton(): void {
   const mainContent = getMainContentElement();
   if (mainContent) mainContent.addEventListener('scroll', hideTooltip, { passive: true });
   const layout = shadowRoot.querySelector<HTMLElement>('.skill-hunter-layout');
-  if (layout && layout !== mainContent) layout.addEventListener('scroll', hideTooltip, { passive: true });
+  if (layout && layout !== mainContent)
+    layout.addEventListener('scroll', hideTooltip, { passive: true });
 }
 
 function initializeTocScrollSpy(): void {

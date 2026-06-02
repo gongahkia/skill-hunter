@@ -124,7 +124,7 @@ async function checkPageEligibility(): Promise<void> {
     return;
   }
 
-  if (!Boolean(eligibility.supportedPage)) {
+  if (!eligibility.supportedPage) {
     renderEmptyProperties('SSO Whole Document view required');
     setButton('unsupported', 'Switch to Whole Document view');
     return;
