@@ -25,13 +25,9 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Screenshot
 
-<div align="center">
-    <img src="./asset/screenshots/1.png" width="45%">
-    <img src="./asset/screenshots/2.png" width="45%">
-</div>
-
+![](./asset/screenshots/1.png)
+![](./asset/screenshots/2.png)
 ![](./asset/screenshots/3.png)
-![](./asset/screenshots/4.png)
 
 ## Stack
 
