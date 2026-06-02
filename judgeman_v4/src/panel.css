@@ -282,6 +282,18 @@
   color: rgba(230, 238, 247, 0.52);
 }
 
+#judgeman-reader-root .jm-cite-link {
+  color: #79c0ff;
+  text-decoration: underline;
+  text-decoration-color: rgba(121, 192, 255, 0.45);
+  text-underline-offset: 2px;
+}
+
+#judgeman-reader-root .jm-cite-link:hover {
+  color: #b6daff;
+  text-decoration-color: rgba(182, 218, 255, 0.85);
+}
+
 #judgeman-reader-root .jm-btn {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;

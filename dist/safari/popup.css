@@ -9,6 +9,8 @@
   --primary2: #3d9f61;
   --secondary: #2d76db;
   --secondary2: #2058a6;
+  --warn: #f5bb4f;
+  --error: #ff7b7b;
 }
 
 * {
@@ -48,6 +50,30 @@ body {
   text-overflow: ellipsis;
 }
 
+.signal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  color: #d8e4f0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pill-warn {
+  color: #2d1e00;
+  border-color: rgba(0, 0, 0, 0.15);
+  background: var(--warn);
+}
+
 .main {
   display: grid;
   gap: 12px;
@@ -70,6 +96,18 @@ body {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+#status.status-success {
+  color: var(--primary);
+}
+
+#status.status-warn {
+  color: var(--warn);
+}
+
+#status.status-error {
+  color: var(--error);
 }
 
 .row {

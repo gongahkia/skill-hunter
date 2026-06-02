@@ -30,6 +30,12 @@
       ],
       "js": [
         "browserApi.js",
+        "logger.js",
+        "citationAdapters.js",
+        "citationLinker.js",
+        "inlineCitations.js",
+        "annotations.js",
+        "caseToolkit.js",
         "extractor.js",
         "contentApp.js",
         "contentScript.js"
