@@ -21,13 +21,13 @@ function describeError(error) {
 }
 
 function setStatus(text, tone = "info") {
-  const statusEl = $("#status");
-  if (!statusEl) return;
-  statusEl.textContent = text || "";
-  statusEl.classList.remove("status-error", "status-warn", "status-success");
-  if (tone === "error") statusEl.classList.add("status-error");
-  else if (tone === "warn") statusEl.classList.add("status-warn");
-  else if (tone === "success") statusEl.classList.add("status-success");
+  const indicator = $("#statusIndicator");
+  const srText = $("#statusText");
+  if (!indicator) return;
+  const value = text || "";
+  indicator.setAttribute("data-tone", tone);
+  indicator.setAttribute("title", value || "Ready");
+  if (srText) srText.textContent = value;
 }
 
 function setCaseTitle(text) {
