@@ -9,6 +9,8 @@ import type {
   HTMLContent,
   LegislationMetadata,
   LegislationNote,
+  PageSummary,
+  StatuteType,
 } from '@/types';
 import {
   getPageBasicData,
@@ -783,6 +785,58 @@ function checkSupportedPage(): ChromeMessageResponse {
   };
 }
 
+function inferStatuteType(url: string): StatuteType {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== 'sso.agc.gov.sg') return 'Unknown';
+    const path = parsed.pathname;
+    if (path.startsWith('/Act')) return 'Act';
+    if (path.startsWith('/SL')) return 'Subsidiary Legislation';
+    if (path.startsWith('/Bills-Supp')) return 'Supplement';
+    return 'Unknown';
+  } catch {
+    return 'Unknown';
+  }
+}
+
+async function getPageSummary(): Promise<ChromeMessageResponse> {
+  try {
+    const url = window.location.href;
+    const { pageBasicData } = getPageBasicData();
+    const legislationMetadata = getLegislationMetadata();
+    const actSlug = extractActSlugFromUrl(url);
+
+    let citationCount = 0;
+    if (actSlug) {
+      const index = await loadCitationIndex(actSlug);
+      if (index) {
+        for (const entries of Object.values(index.sections)) {
+          citationCount += Array.isArray(entries) ? entries.length : 0;
+        }
+      }
+    }
+
+    const summary: PageSummary = {
+      title: pageBasicData.legislationTitle || 'Untitled Legislation',
+      type: inferStatuteType(url),
+      status: pageBasicData.legislationStatus,
+      date: legislationMetadata.legislationDate,
+      revisedTitle: legislationMetadata.revisedLegislationName,
+      hasPdf: Boolean(pageBasicData.legislationPDFDownloadLink),
+      sourceUrl: url,
+      actSlug,
+      citationCount,
+    };
+    return { status: 'success', pageSummary: summary };
+  } catch (error) {
+    const normalized = handleError(error, 'getPageSummary');
+    return {
+      status: 'error',
+      error: resolveUserFacingMessage(normalized, 'Failed to read page metadata.'),
+    };
+  }
+}
+
 function toggleSimplifiedView(): ChromeMessageResponse {
   try {
     if (isSimplified) {
@@ -823,6 +877,11 @@ function handleMessage(
   if (message.action === 'check_supported_page') {
     sendResponse(checkSupportedPage());
     return false;
+  }
+
+  if (message.action === 'get_page_summary') {
+    void getPageSummary().then(sendResponse);
+    return true; // async response
   }
 
   sendResponse({ status: 'error', error: 'Unknown action' });
