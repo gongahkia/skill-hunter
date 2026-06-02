@@ -11,8 +11,10 @@ import {
   generateTableOfContentsHTML,
   generateMetadataSummaryHTML,
   linkCrossReferences,
+  buildSectionPreviewMap,
+  generateContentHTML,
 } from '../contentProcessor';
-import type { Definition } from '@/types';
+import type { ContentToken, Definition } from '@/types';
 
 describe('contentProcessor', () => {
   describe('needsIndentation', () => {
@@ -181,6 +183,109 @@ describe('contentProcessor', () => {
       const result = linkCrossReferences(input);
       expect(result).toContain('<span class="section 5">');
       expect(result).toContain('data-skill-hunter-scroll-target="pr5-he-"');
+    });
+
+    it('should preserve sub-part suffixes in section reference label and anchor to base section', () => {
+      const result = linkCrossReferences('breach of section 5(3)(a) applies');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr5-he-"');
+      expect(result).toContain('section 5(3)(a)');
+    });
+
+    it('should link ranges like "sections 5 to 7" to the first section', () => {
+      const result = linkCrossReferences('see sections 5 to 7');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr5-he-"');
+      expect(result).toContain('sections 5 to 7');
+    });
+
+    it('should anchor subsection references to the current section', () => {
+      const result = linkCrossReferences('as defined in subsection (3)(a)', {
+        currentSectionId: 'pr12-he-',
+      });
+      expect(result).toContain('data-skill-hunter-scroll-target="pr12-he-"');
+      expect(result).toContain('subsection (3)(a)');
+    });
+
+    it('should render subsection refs as unresolved when no current section context', () => {
+      const result = linkCrossReferences('see subsection (2)');
+      expect(result).toContain('cross-ref-unresolved');
+      expect(result).toContain('subsection (2)');
+    });
+
+    it('should link "paragraph (a)" to the current section', () => {
+      const result = linkCrossReferences('subject to paragraph (a)', {
+        currentSectionId: 'pr8-he-',
+      });
+      expect(result).toContain('data-skill-hunter-scroll-target="pr8-he-"');
+      expect(result).toContain('paragraph (a)');
+    });
+
+    it('should handle "paras 3-5" range form', () => {
+      const result = linkCrossReferences('refer to paras 3-5 above', {
+        currentSectionId: 'pr2-he-',
+      });
+      expect(result).toContain('paras 3-5');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr2-he-"');
+    });
+
+    it('should link bare "s 5" form when preceded by a delimiter', () => {
+      const result = linkCrossReferences('a breach of s 5 of the Act');
+      expect(result).toContain('data-skill-hunter-scroll-target="pr5-he-"');
+      expect(result).toContain('s 5');
+    });
+
+    it('should not link "s" inside non-legal words like "his 5"', () => {
+      const result = linkCrossReferences('his 5 dogs');
+      expect(result).not.toContain('cross-ref');
+    });
+
+    it('should inject a hover preview tooltip when a preview is available', () => {
+      const previews = new Map<string, string>([
+        ['pr12-he-', 'A person who dishonestly takes property…'],
+      ]);
+      const result = linkCrossReferences('see section 12', { sectionPreviews: previews });
+      expect(result).toContain('class="cross-ref-tooltip"');
+      expect(result).toContain('A person who dishonestly takes property…');
+    });
+  });
+
+  describe('buildSectionPreviewMap', () => {
+    it('should map section anchor ids to truncated body previews', () => {
+      const tokens: ContentToken[] = [
+        { type: 'sectionHeader', ID: 'pr1-he-', content: '1. Short title' },
+        { type: 'sectionBody', ID: null, content: 'This Act is the Test Act.' },
+        { type: 'sectionHeader', ID: 'pr2-he-', content: '2. Interpretation' },
+        {
+          type: 'sectionBody',
+          ID: null,
+          content: 'In this Act, unless the context otherwise requires.',
+        },
+      ];
+      const previews = buildSectionPreviewMap(tokens, 4);
+      expect(previews.get('pr1-he-')).toBe('This Act is the…');
+      expect(previews.get('pr2-he-')).toBe('In this Act, unless…');
+    });
+
+    it('should skip sections without body content', () => {
+      const tokens: ContentToken[] = [
+        { type: 'sectionHeader', ID: 'pr1-he-', content: '1. Empty' },
+        { type: 'sectionHeader', ID: 'pr2-he-', content: '2. Has body' },
+        { type: 'sectionBody', ID: null, content: 'Body here.' },
+      ];
+      const previews = buildSectionPreviewMap(tokens);
+      expect(previews.has('pr1-he-')).toBe(false);
+      expect(previews.get('pr2-he-')).toBe('Body here.');
+    });
+  });
+
+  describe('generateContentHTML cross-reference integration', () => {
+    it('should resolve subsection refs to enclosing section anchor', () => {
+      const tokens: ContentToken[] = [
+        { type: 'sectionHeader', ID: 'pr5-he-', content: '5. Offence' },
+        { type: 'sectionBody', ID: null, content: 'subject to subsection (3) and section 12' },
+      ];
+      const html = generateContentHTML(tokens);
+      expect(html).toContain('data-skill-hunter-scroll-target="pr5-he-"');
+      expect(html).toContain('data-skill-hunter-scroll-target="pr12-he-"');
     });
   });
 

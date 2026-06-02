@@ -380,6 +380,7 @@
 }
 
 .cross-ref {
+  position: relative;
   display: inline;
   border: 0;
   padding: 0;
@@ -395,6 +396,45 @@
 
 .cross-ref:hover {
   color: var(--accent-hover);
+}
+
+.cross-ref-unresolved {
+  color: var(--text-secondary);
+  cursor: help;
+  text-decoration-style: dotted;
+}
+
+.cross-ref-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  width: min(360px, 70vw);
+  min-width: 200px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+  pointer-events: none;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.cross-ref:hover .cross-ref-tooltip,
+.cross-ref:focus-visible .cross-ref-tooltip {
+  opacity: 1;
+  visibility: visible;
 }
 
 .statute-term {
