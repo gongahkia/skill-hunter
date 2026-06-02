@@ -1,140 +1,43 @@
-#judgeman-panel {
-  position: fixed;
-  top: 14px;
-  left: 14px;
-  z-index: 2147483647;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-#judgeman-panel .jm-launcher {
-  border: 0;
-  border-radius: 999px;
-  background: #0f1b29;
-  color: #e6eef7;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 10px 14px;
-}
-
-#judgeman-panel .jm-launcher:hover {
-  background: #132435;
-}
-
-#judgeman-panel .jm-shell {
-  width: 320px;
-  margin-top: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  background: rgba(8, 18, 29, 0.96);
-  color: #e6eef7;
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-}
-
-#judgeman-panel.jm-shell-collapsed .jm-shell {
-  display: none;
-}
-
-#judgeman-panel .jm-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-#judgeman-panel .jm-title {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-#judgeman-panel .jm-subtitle {
-  margin-top: 3px;
-  color: rgba(230, 238, 247, 0.68);
-  font-size: 12px;
-  line-height: 1.3;
-  max-width: 230px;
-}
-
-#judgeman-panel .jm-icon-btn,
-#judgeman-panel .jm-btn {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #e6eef7;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-#judgeman-panel .jm-icon-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-}
-
-#judgeman-panel .jm-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 14px 0;
-}
-
-#judgeman-panel .jm-btn {
-  padding: 8px 10px;
-}
-
-#judgeman-panel .jm-btn:hover,
-#judgeman-panel .jm-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
-}
-
-#judgeman-panel .jm-btn-primary {
-  background: #67d18f;
-  border-color: rgba(0, 0, 0, 0.18);
-  color: #071420;
-  font-weight: 650;
-}
-
-#judgeman-panel .jm-btn-primary:hover {
-  background: #3d9f61;
-  color: #ffffff;
-}
-
-#judgeman-panel .jm-btn-quiet {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-#judgeman-panel .jm-status {
-  margin: 10px 14px 14px;
-  color: rgba(230, 238, 247, 0.7);
-  font-size: 12px;
-}
-
-#judgeman-panel .jm-status-success {
-  color: #67d18f;
-}
-
-#judgeman-panel .jm-status-warn {
-  color: #f5bb4f;
-}
-
-#judgeman-panel .jm-status-error {
-  color: #ff7b7b;
-}
+/* ==========================================================================
+   Reader overlay — dark theme defaults
+   Light theme overrides via #judgeman-reader-root.jm-theme-light
+   Accent color #6e2527 carries across both themes.
+   ========================================================================== */
 
 #judgeman-reader-root {
+  --jm-accent: #6e2527;
+  --jm-accent-strong: #561d1f;
+  --jm-bg: rgba(7, 20, 32, 0.96);
+  --jm-surface: rgba(255, 255, 255, 0.04);
+  --jm-surface-hover: rgba(255, 255, 255, 0.09);
+  --jm-text: #e6eef7;
+  --jm-text-muted: rgba(230, 238, 247, 0.7);
+  --jm-text-faint: rgba(230, 238, 247, 0.52);
+  --jm-border: rgba(255, 255, 255, 0.1);
+  --jm-link: #79c0ff;
+  --jm-statute: #f5bb4f;
+  --jm-statute-muted: rgba(245, 187, 79, 0.62);
+
   position: fixed;
   inset: 0;
   display: none;
   z-index: 2147483646;
-  background: rgba(7, 20, 32, 0.92);
-  color: #e6eef7;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--jm-bg);
+  color: var(--jm-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+}
+
+#judgeman-reader-root.jm-theme-light {
+  --jm-bg: #ffffff;
+  --jm-surface: #fafafa;
+  --jm-surface-hover: #f2f2f2;
+  --jm-text: #1a1a1a;
+  --jm-text-muted: #6b6b6b;
+  --jm-text-faint: #8a8a8a;
+  --jm-border: #eaeaea;
+  --jm-link: #1858a8;
+  --jm-statute: #8a5a00;
+  --jm-statute-muted: #b08538;
 }
 
 #judgeman-reader-root.jm-reader-visible {
@@ -151,30 +54,88 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 22px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(16, 31, 47, 0.96), rgba(8, 18, 29, 0.92));
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--jm-border);
+  background: var(--jm-bg);
 }
 
 #judgeman-reader-root .jm-reader-kicker {
-  color: rgba(230, 238, 247, 0.62);
-  font-size: 12px;
+  color: var(--jm-text-muted);
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
 #judgeman-reader-root .jm-reader-title {
   margin: 4px 0 0;
-  font-size: 26px;
-  line-height: 1.15;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
 }
 
 #judgeman-reader-root .jm-reader-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
 }
+
+#judgeman-reader-root .jm-icon-btn {
+  appearance: none;
+  border: 1px solid var(--jm-border);
+  background: var(--jm-surface);
+  color: var(--jm-text);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+#judgeman-reader-root .jm-icon-btn:hover {
+  background: var(--jm-surface-hover);
+}
+
+#judgeman-reader-root .jm-btn {
+  appearance: none;
+  border: 1px solid var(--jm-border);
+  background: var(--jm-surface);
+  color: var(--jm-text);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+#judgeman-reader-root .jm-btn:hover {
+  background: var(--jm-surface-hover);
+}
+
+#judgeman-reader-root .jm-btn-quiet {
+  background: transparent;
+}
+
+#judgeman-reader-root .jm-btn-quiet:hover {
+  background: var(--jm-surface-hover);
+}
+
+#judgeman-reader-root .jm-btn-primary {
+  background: var(--jm-accent);
+  color: #ffffff;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+#judgeman-reader-root .jm-btn-primary:hover {
+  background: var(--jm-accent-strong);
+}
+
+/* ----- body grid + overlay sidebar collapse ----- */
 
 #judgeman-reader-root .jm-reader-body {
   display: grid;
@@ -187,81 +148,43 @@
   grid-template-columns: 320px 1fr;
 }
 
+#judgeman-reader-root.jm-overlay-collapsed .jm-reader-body {
+  grid-template-columns: 28px 1fr;
+}
+
 #judgeman-reader-root .jm-overlay-sidebar {
   display: none;
   overflow: auto;
-  padding: 22px 14px 22px 22px;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.015);
+  padding: 18px 14px 22px 22px;
+  border-right: 1px solid var(--jm-border);
+  background: var(--jm-bg);
 }
 
 #judgeman-reader-root.jm-overlay-visible .jm-overlay-sidebar {
   display: block;
 }
 
-#judgeman-reader-root .jm-overlay-sidebar .jm-card {
-  max-width: 100%;
-  margin: 0 0 12px;
-  padding: 14px;
-}
-
-#judgeman-reader-root .jm-overlay-row {
-  margin-bottom: 12px;
-}
-
-#judgeman-reader-root .jm-overlay-label {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(230, 238, 247, 0.55);
-  margin-bottom: 4px;
-}
-
-#judgeman-reader-root .jm-overlay-value {
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-#judgeman-reader-root .jm-overlay-list,
-#judgeman-reader-root .jm-overlay-excerpts {
-  margin: 0;
-  padding-left: 16px;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-#judgeman-reader-root .jm-overlay-excerpts {
-  margin: -4px 0 12px;
-  color: rgba(230, 238, 247, 0.72);
-  font-size: 12px;
-  font-style: italic;
-}
-
-#judgeman-reader-root .jm-overlay-section-links {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-#judgeman-reader-root .jm-overlay-link {
-  border: 1px solid rgba(103, 209, 143, 0.4);
-  border-radius: 8px;
-  background: rgba(103, 209, 143, 0.08);
-  color: #b6e6c9;
+#judgeman-reader-root .jm-overlay-expand-tab {
+  display: none;
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--jm-border);
+  background: var(--jm-surface);
+  color: var(--jm-text-muted);
   cursor: pointer;
-  font-size: 12px;
-  padding: 4px 8px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0;
 }
 
-#judgeman-reader-root .jm-overlay-link:hover {
-  background: rgba(103, 209, 143, 0.18);
-  color: #d6f3df;
+#judgeman-reader-root.jm-overlay-collapsed .jm-overlay-expand-tab {
+  display: block;
 }
 
-#judgeman-reader-root .jm-section-flash {
-  outline: 2px solid rgba(103, 209, 143, 0.6);
-  outline-offset: 4px;
-  transition: outline-color 0.3s ease;
+#judgeman-reader-root .jm-overlay-expand-tab:hover {
+  background: var(--jm-surface-hover);
+  color: var(--jm-text);
 }
 
 #judgeman-reader-root .jm-reader-main {
@@ -270,24 +193,61 @@
   min-height: 0;
 }
 
+/* ----- cards ----- */
+
 #judgeman-reader-root .jm-card {
   max-width: 980px;
-  margin: 0 auto 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 18px;
+  margin: 0 auto 14px;
+  border: 1px solid var(--jm-border);
+  border-radius: 12px;
+  background: var(--jm-surface);
+  padding: 16px;
 }
 
 #judgeman-reader-root .jm-card-title {
-  margin-bottom: 14px;
-  font-size: 18px;
+  margin-bottom: 12px;
+  font-size: 15px;
   font-weight: 650;
+}
+
+#judgeman-reader-root .jm-overlay-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+#judgeman-reader-root .jm-overlay-collapse-btn {
+  appearance: none;
+  border: 1px solid var(--jm-border);
+  background: var(--jm-surface);
+  color: var(--jm-text-muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#judgeman-reader-root .jm-overlay-collapse-btn:hover {
+  background: var(--jm-surface-hover);
+  color: var(--jm-text);
+}
+
+#judgeman-reader-root .jm-overlay-sidebar .jm-card {
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 14px;
 }
 
 #judgeman-reader-root .jm-subheading {
   margin: 14px 0 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -307,7 +267,7 @@
   grid-template-columns: 160px 1fr;
   gap: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  border-bottom: 1px dashed var(--jm-border);
 }
 
 #judgeman-reader-root .jm-kv:last-child {
@@ -316,12 +276,12 @@
 }
 
 #judgeman-reader-root .jm-k {
-  color: rgba(230, 238, 247, 0.62);
+  color: var(--jm-text-muted);
   font-size: 12px;
 }
 
 #judgeman-reader-root .jm-v {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -333,14 +293,14 @@
 
 #judgeman-reader-root .jm-empty {
   margin: 0;
-  color: rgba(230, 238, 247, 0.72);
+  color: var(--jm-text-muted);
   line-height: 1.5;
 }
 
 #judgeman-reader-root .jm-section {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--jm-border);
+  border-radius: 12px;
+  background: var(--jm-surface);
   margin-top: 12px;
   overflow: hidden;
 }
@@ -368,38 +328,36 @@
 #judgeman-reader-root .jm-paragraph-number {
   display: inline-block;
   min-width: 28px;
-  color: rgba(230, 238, 247, 0.52);
+  color: var(--jm-text-faint);
 }
 
 #judgeman-reader-root .jm-cite-link {
-  color: #79c0ff;
+  color: var(--jm-link);
   text-decoration: underline;
-  text-decoration-color: rgba(121, 192, 255, 0.45);
+  text-decoration-color: color-mix(in srgb, var(--jm-link) 50%, transparent);
   text-underline-offset: 2px;
 }
 
 #judgeman-reader-root .jm-cite-link:hover {
-  color: #b6daff;
-  text-decoration-color: rgba(182, 218, 255, 0.85);
+  text-decoration-color: var(--jm-link);
 }
 
 #judgeman-reader-root .jm-statute-link {
-  border-bottom: 1px dotted rgba(245, 187, 79, 0.6);
+  border-bottom: 1px dotted var(--jm-statute-muted);
 }
 
 #judgeman-reader-root .jm-statute-resolved {
-  color: #f5bb4f;
+  color: var(--jm-statute);
   text-decoration: none;
-  border-bottom-color: rgba(245, 187, 79, 0.8);
+  border-bottom-color: var(--jm-statute);
 }
 
 #judgeman-reader-root .jm-statute-resolved:hover {
-  color: #fcd58c;
-  border-bottom-color: rgba(252, 213, 140, 0.9);
+  filter: brightness(1.15);
 }
 
 #judgeman-reader-root .jm-statute-unresolved {
-  color: rgba(245, 187, 79, 0.62);
+  color: var(--jm-statute-muted);
   cursor: help;
   border-bottom-style: dashed;
 }
@@ -407,33 +365,64 @@
 #judgeman-reader-root .jm-statute-unresolved::after {
   content: " ?";
   font-size: 11px;
-  color: rgba(245, 187, 79, 0.55);
 }
 
-#judgeman-reader-root .jm-btn {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #e6eef7;
-  cursor: pointer;
+#judgeman-reader-root .jm-overlay-row {
+  margin-bottom: 12px;
+}
+
+#judgeman-reader-root .jm-overlay-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--jm-text-faint);
+  margin-bottom: 4px;
+}
+
+#judgeman-reader-root .jm-overlay-value {
   font-size: 13px;
-  padding: 9px 11px;
+  line-height: 1.4;
 }
 
-#judgeman-reader-root .jm-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
+#judgeman-reader-root .jm-overlay-list,
+#judgeman-reader-root .jm-overlay-excerpts {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-#judgeman-reader-root .jm-btn-primary {
-  background: #67d18f;
-  border-color: rgba(0, 0, 0, 0.18);
-  color: #071420;
-  font-weight: 650;
+#judgeman-reader-root .jm-overlay-excerpts {
+  margin: -4px 0 12px;
+  color: var(--jm-text-muted);
+  font-size: 12px;
+  font-style: italic;
 }
 
-#judgeman-reader-root .jm-btn-primary:hover {
-  background: #3d9f61;
-  color: #ffffff;
+#judgeman-reader-root .jm-overlay-section-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+#judgeman-reader-root .jm-overlay-link {
+  border: 1px solid var(--jm-accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--jm-accent) 14%, transparent);
+  color: var(--jm-text);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+#judgeman-reader-root .jm-overlay-link:hover {
+  background: color-mix(in srgb, var(--jm-accent) 24%, transparent);
+}
+
+#judgeman-reader-root .jm-section-flash {
+  outline: 2px solid var(--jm-accent);
+  outline-offset: 4px;
+  transition: outline-color 0.3s ease;
 }
 
 @media (max-width: 860px) {
@@ -454,9 +443,20 @@
     grid-template-rows: auto 1fr;
   }
 
+  #judgeman-reader-root.jm-overlay-collapsed .jm-reader-body {
+    grid-template-columns: 1fr;
+  }
+
   #judgeman-reader-root .jm-overlay-sidebar {
     border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--jm-border);
     max-height: 40vh;
+  }
+
+  #judgeman-reader-root.jm-overlay-collapsed .jm-overlay-expand-tab {
+    border-right: 0;
+    border-bottom: 1px solid var(--jm-border);
+    height: 28px;
+    width: 100%;
   }
 }

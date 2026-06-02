@@ -80,8 +80,26 @@
       return `jm-section-${index}-${slugifyHeading(title)}`;
     }
 
+    const READER_THEME_STORAGE_KEY = "judgeman.readerTheme";
+
+    function loadReaderTheme() {
+      try {
+        const value = window.localStorage?.getItem(READER_THEME_STORAGE_KEY);
+        return value === "light" ? "light" : "dark";
+      } catch (_e) {
+        return "dark";
+      }
+    }
+
+    function persistReaderTheme(theme) {
+      try {
+        window.localStorage?.setItem(READER_THEME_STORAGE_KEY, theme);
+      } catch (_e) {
+        // best-effort
+      }
+    }
+
     const state = {
-      panelMounted: false,
       readerMounted: false,
       readerVisible: false,
       listenerRegistered: false,
@@ -89,7 +107,8 @@
       lastCaseData: null,
       pageOverflow: "",
       pageTitle: "",
-      overlayVisible: loadOverlayVisible()
+      overlayVisible: loadOverlayVisible(),
+      readerTheme: loadReaderTheme()
     };
 
     function appendChildren(parent, children) {
@@ -405,6 +424,23 @@
       return row;
     }
 
+    function buildFieldOverlayHeader() {
+      const collapseBtn = createElement("button", {
+        id: "jm-overlay-collapse",
+        className: "jm-overlay-collapse-btn",
+        text: "−", // minus sign
+        attrs: { type: "button", "aria-label": "Hide case fields panel" }
+      });
+      collapseBtn.addEventListener("click", () => {
+        if (state.overlayVisible) toggleOverlay();
+      });
+      const header = createElement("div", { className: "jm-card-title jm-overlay-card-title" }, [
+        createElement("span", { text: "Case fields (BLUF)" }),
+        collapseBtn
+      ]);
+      return header;
+    }
+
     function buildFieldOverlayContent(page) {
       if (!fieldOverlayApi?.buildFieldOverlay) {
         return createElement("p", { className: "jm-empty", text: "Field overlay module unavailable." });
@@ -457,11 +493,7 @@
       const root = getReaderRoot();
       if (!root) return;
       root.classList.toggle("jm-overlay-visible", state.overlayVisible);
-      const toggleBtn = document.getElementById("jm-overlay-toggle");
-      if (toggleBtn) {
-        toggleBtn.textContent = state.overlayVisible ? "Hide field overlay" : "Show field overlay";
-        toggleBtn.setAttribute("aria-pressed", state.overlayVisible ? "true" : "false");
-      }
+      root.classList.toggle("jm-overlay-collapsed", !state.overlayVisible);
     }
 
     function toggleOverlay() {
@@ -672,7 +704,11 @@
       const overlaySidebar = document.getElementById("jm-overlay-sidebar");
       if (overlaySidebar) {
         clearNode(overlaySidebar);
-        overlaySidebar.appendChild(buildCard("Case fields (BLUF)", buildFieldOverlayContent(page)));
+        const card = createElement("section", { className: "jm-card" }, [
+          buildFieldOverlayHeader(),
+          buildFieldOverlayContent(page)
+        ]);
+        overlaySidebar.appendChild(card);
       }
 
       readerMain.appendChild(buildCard("Case metadata", buildMetadataGrid(page)));
@@ -771,136 +807,75 @@
       }
     }
 
-    function ensurePanel() {
-      if (state.panelMounted) return;
-      state.panelMounted = true;
+    function makeSvgIcon(paths, opts = {}) {
+      const svgNs = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNs, "svg");
+      svg.setAttribute("width", String(opts.size || 16));
+      svg.setAttribute("height", String(opts.size || 16));
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      svg.setAttribute("aria-hidden", "true");
+      for (const d of paths) {
+        const path = document.createElementNS(svgNs, "path");
+        path.setAttribute("d", d);
+        svg.appendChild(path);
+      }
+      return svg;
+    }
 
-      const launcher = createElement("button", {
-        id: "jm-launcher",
-        className: "jm-launcher",
-        text: "Judgeman",
-        attrs: {
-          type: "button",
-          "aria-expanded": "false"
-        }
-      });
-      const title = createElement("div", { className: "jm-title", text: "Judgeman" });
-      const subtitle = createElement("div", {
-        id: "jm-case-title",
-        className: "jm-subtitle",
-        text: "Loading..."
-      });
-      const closeBtn = createElement("button", {
-        id: "jm-close",
-        className: "jm-icon-btn",
-        text: "x",
-        attrs: {
-          type: "button",
-          "aria-label": "Collapse panel"
-        }
-      });
-      const toggleBtn = createElement("button", {
-        id: "jm-toggle",
-        className: "jm-btn jm-btn-primary",
-        text: "Toggle readable view",
-        attrs: { type: "button" }
-      });
-      const refreshBtn = createElement("button", {
-        id: "jm-refresh",
-        className: "jm-btn",
-        text: "Refresh",
-        attrs: { type: "button" }
-      });
-      const copyJsonBtn = createElement("button", {
-        id: "jm-copy-case",
-        className: "jm-btn jm-btn-quiet",
-        text: "Copy case JSON",
-        attrs: { type: "button" }
-      });
-      const copyBriefBtn = createElement("button", {
-        id: "jm-copy-brief",
-        className: "jm-btn jm-btn-quiet",
-        text: "Copy case brief",
-        attrs: { type: "button" }
-      });
-      const copyDiagnosticsBtn = createElement("button", {
-        id: "jm-copy-diagnostics",
-        className: "jm-btn jm-btn-quiet",
-        text: "Copy diagnostics",
-        attrs: { type: "button" }
-      });
-      const status = createElement("p", {
-        id: "jm-status",
-        className: "jm-status",
-        text: "Ready."
-      });
+    function buildThemeToggleIcon(theme) {
+      if (theme === "light") {
+        // moon (means "switch to dark")
+        return makeSvgIcon(["M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"]);
+      }
+      // sun (means "switch to light")
+      const sun = makeSvgIcon([
+        "M12 1v2",
+        "M12 21v2",
+        "M4.22 4.22l1.42 1.42",
+        "M18.36 18.36l1.42 1.42",
+        "M1 12h2",
+        "M21 12h2",
+        "M4.22 19.78l1.42-1.42",
+        "M18.36 5.64l1.42-1.42"
+      ]);
+      const ns = "http://www.w3.org/2000/svg";
+      const circle = document.createElementNS(ns, "circle");
+      circle.setAttribute("cx", "12");
+      circle.setAttribute("cy", "12");
+      circle.setAttribute("r", "4");
+      sun.appendChild(circle);
+      return sun;
+    }
 
-      const panel = createElement(
-        "div",
-        {
-          id: "judgeman-panel",
-          className: "jm-shell-collapsed"
-        },
-        [
-          launcher,
-          createElement(
-            "section",
-            {
-              className: "jm-shell",
-              attrs: { "aria-label": "Judgeman controls" }
-            },
-            [
-              createElement("header", { className: "jm-header" }, [
-                createElement("div", {}, [title, subtitle]),
-                closeBtn
-              ]),
-              createElement("div", { className: "jm-actions" }, [
-                toggleBtn,
-                refreshBtn,
-                copyJsonBtn,
-                copyBriefBtn,
-                copyDiagnosticsBtn
-              ]),
-              status
-            ]
-          )
-        ]
-      );
+    function buildCloseIcon() {
+      return makeSvgIcon(["M18 6L6 18", "M6 6l12 12"], { size: 18 });
+    }
 
-      document.documentElement.appendChild(panel);
+    function applyReaderTheme() {
+      const root = getReaderRoot();
+      if (!root) return;
+      root.classList.toggle("jm-theme-light", state.readerTheme === "light");
+      root.classList.toggle("jm-theme-dark", state.readerTheme !== "light");
+      const toggleBtn = document.getElementById("jm-theme-toggle");
+      if (toggleBtn) {
+        clearNode(toggleBtn);
+        toggleBtn.appendChild(buildThemeToggleIcon(state.readerTheme));
+        toggleBtn.setAttribute(
+          "aria-label",
+          state.readerTheme === "light" ? "Switch to dark theme" : "Switch to light theme"
+        );
+      }
+    }
 
-      const setExpanded = (expanded) => {
-        panel.classList.toggle("jm-shell-collapsed", !expanded);
-        launcher.setAttribute("aria-expanded", expanded ? "true" : "false");
-      };
-
-      launcher.addEventListener("click", () => {
-        setExpanded(panel.classList.contains("jm-shell-collapsed"));
-      });
-
-      closeBtn.addEventListener("click", () => {
-        setExpanded(false);
-      });
-
-      toggleBtn.addEventListener("click", () => {
-        void runAction("toggle_reader", toggleReadableView);
-      });
-
-      refreshBtn.addEventListener("click", () => {
-        void runAction("refresh", refreshCaseData, "Case data refreshed.");
-      });
-
-      copyJsonBtn.addEventListener("click", () => {
-        void runAction("copy_case_json", copyCaseJson, "Case JSON copied.");
-      });
-
-      copyBriefBtn.addEventListener("click", () => {
-        void runAction("copy_case_brief", copyCaseBrief, "Case brief copied.");
-      });
-
-      copyDiagnosticsBtn.addEventListener("click", () => {
-        void runAction("copy_diagnostics", copyDiagnostics, "Diagnostics copied.");
-      });
+    function toggleReaderTheme() {
+      state.readerTheme = state.readerTheme === "light" ? "dark" : "light";
+      persistReaderTheme(state.readerTheme);
+      applyReaderTheme();
     }
 
     function ensureReaderRoot() {
@@ -909,39 +884,48 @@
 
       const readerClose = createElement("button", {
         id: "jm-reader-close",
-        className: "jm-btn jm-btn-primary",
-        text: "Close reader",
-        attrs: { type: "button" }
+        className: "jm-icon-btn",
+        attrs: { type: "button", "aria-label": "Close reader" }
       });
+      readerClose.appendChild(buildCloseIcon());
+
+      const themeToggle = createElement("button", {
+        id: "jm-theme-toggle",
+        className: "jm-icon-btn",
+        attrs: { type: "button", "aria-label": "Toggle reader theme" }
+      });
+      themeToggle.appendChild(buildThemeToggleIcon(state.readerTheme));
+
       const readerCopyJson = createElement("button", {
         id: "jm-reader-copy-json",
         className: "jm-btn jm-btn-quiet",
-        text: "Copy case JSON",
+        text: "Copy JSON",
         attrs: { type: "button" }
       });
       const readerCopyBrief = createElement("button", {
         id: "jm-reader-copy-brief",
         className: "jm-btn jm-btn-quiet",
-        text: "Copy case brief",
+        text: "Copy brief",
         attrs: { type: "button" }
       });
       const readerCopyDiagnostics = createElement("button", {
         id: "jm-reader-copy-diagnostics",
         className: "jm-btn jm-btn-quiet",
-        text: "Copy diagnostics",
+        text: "Diagnostics",
         attrs: { type: "button" }
-      });
-      const overlayToggle = createElement("button", {
-        id: "jm-overlay-toggle",
-        className: "jm-btn jm-btn-quiet",
-        text: state.overlayVisible ? "Hide field overlay" : "Show field overlay",
-        attrs: { type: "button", "aria-pressed": state.overlayVisible ? "true" : "false" }
       });
       const readerTitle = createElement("h1", {
         id: "jm-reader-title",
         className: "jm-reader-title",
         text: "Judgment"
       });
+      const overlayExpandTab = createElement("button", {
+        id: "jm-overlay-expand-tab",
+        className: "jm-overlay-expand-tab",
+        text: "+",
+        attrs: { type: "button", "aria-label": "Show case fields panel" }
+      });
+
       const readerRoot = createElement(
         "div",
         {
@@ -954,15 +938,15 @@
               createElement("div", {}, [
                 createElement("div", {
                   className: "jm-reader-kicker",
-                  text: "Judgeman readable view"
+                  text: "Readable view"
                 }),
                 readerTitle
               ]),
               createElement("div", { className: "jm-reader-actions" }, [
-                overlayToggle,
                 readerCopyJson,
                 readerCopyBrief,
                 readerCopyDiagnostics,
+                themeToggle,
                 readerClose
               ])
             ]),
@@ -972,6 +956,7 @@
                 className: "jm-overlay-sidebar",
                 attrs: { "aria-label": "Case field overlay" }
               }),
+              overlayExpandTab,
               createElement("main", {
                 id: "jm-reader-main",
                 className: "jm-reader-main"
@@ -987,8 +972,12 @@
         hideReadableView();
       });
 
-      overlayToggle.addEventListener("click", () => {
-        toggleOverlay();
+      themeToggle.addEventListener("click", () => {
+        toggleReaderTheme();
+      });
+
+      overlayExpandTab.addEventListener("click", () => {
+        if (!state.overlayVisible) toggleOverlay();
       });
 
       readerCopyJson.addEventListener("click", () => {
@@ -1004,6 +993,7 @@
       });
 
       applyOverlayClass();
+      applyReaderTheme();
     }
 
     async function showReadableView() {
@@ -1127,7 +1117,6 @@
     }
 
     function start() {
-      ensurePanel();
       ensureReaderRoot();
       registerMessageListener();
       registerGlobalErrorHandlers();
