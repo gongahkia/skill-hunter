@@ -12,6 +12,11 @@
         <div class="brand-title">Judgeman</div>
         <div class="brand-subtitle" id="caseTitle">ELIT judgment helper</div>
       </div>
+      <div class="signal-row">
+        <span class="pill" id="outcomeSignal">Outcome undetected</span>
+        <span class="pill" id="readTimeSignal">0 min read</span>
+        <span class="pill" id="warningSignal">0 warnings</span>
+      </div>
     </header>
 
     <main class="main">
@@ -29,10 +34,12 @@
       <section class="card">
         <div class="card-title">Structured export</div>
         <p class="muted">
-          Copies the locally extracted case JSON. No page content leaves the browser in this build.
+          Keep data local: copy JSON for tooling, markdown for study notes, and diagnostics for debugging.
         </p>
         <div class="row">
           <button id="copyCaseBtn" class="btn btn-secondary" type="button">Copy case JSON</button>
+          <button id="copyBriefBtn" class="btn btn-quiet" type="button">Copy case brief</button>
+          <button id="copyDiagnosticsBtn" class="btn btn-quiet" type="button">Copy diagnostics</button>
         </div>
       </section>
 
@@ -43,6 +50,8 @@
     </main>
 
     <script src="browserApi.js"></script>
+    <script src="logger.js"></script>
+    <script src="caseToolkit.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

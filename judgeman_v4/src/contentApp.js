@@ -24,6 +24,7 @@
 
   function createContentApp({ window, document, browserApi, extractorApi, caseToolkit, loggerApi }) {
     const citationLinker = root.JudgemanCitationLinker || safeRequire("./citationLinker.js");
+    const inlineCitations = root.JudgemanInlineCitations || safeRequire("./inlineCitations.js");
     const annotationsApi = root.JudgemanAnnotations || safeRequire("./annotations.js");
     const runtimeCaseToolkit =
       caseToolkit || root.JudgemanCaseToolkit || {
@@ -194,6 +195,14 @@
       return list;
     }
 
+    function appendParagraphContent(paragraphEl, text) {
+      if (inlineCitations?.renderTextWithCitations) {
+        paragraphEl.appendChild(inlineCitations.renderTextWithCitations(document, text));
+        return;
+      }
+      paragraphEl.appendChild(document.createTextNode(text));
+    }
+
     function buildSectionsContent(page) {
       let paragraphNumber = 0;
       const fragment = document.createDocumentFragment();
@@ -207,16 +216,15 @@
         for (const paragraph of paragraphs) {
           paragraphNumber += 1;
           const content = extractorApi.sanitiseParagraph(paragraph);
-          body.appendChild(
-            createElement("p", {}, [
-              createElement("span", {
-                className: "jm-paragraph-number",
-                text: `${paragraphNumber}.`
-              }),
-              " ",
-              content
-            ])
-          );
+          const p = createElement("p", {}, [
+            createElement("span", {
+              className: "jm-paragraph-number",
+              text: `${paragraphNumber}.`
+            }),
+            " "
+          ]);
+          appendParagraphContent(p, content);
+          body.appendChild(p);
         }
 
         details.appendChild(body);
