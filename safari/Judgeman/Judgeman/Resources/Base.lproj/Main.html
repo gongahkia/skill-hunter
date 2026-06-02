@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../Style.css">
+    <script src="../Script.js" defer></script>
+</head>
+<body>
+    <main class="wrap">
+        <section class="hero">
+            <img src="../Icon.png" width="96" height="96" alt="Judgeman Icon">
+            <div>
+                <p class="eyebrow">Judgeman for Safari</p>
+                <h1>Readable ELIT judgments with local structured export</h1>
+                <p class="lede">
+                    This app enables the Judgeman Safari web extension and explains exactly what the shipped build does.
+                </p>
+                <div class="status-pill state-unknown">Extension status unavailable. Open Safari Settings to confirm enablement.</div>
+                <div class="status-pill state-on">Extension enabled in Safari.</div>
+                <div class="status-pill state-off">Extension disabled in Safari.</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>How to enable it</h2>
+            <ol>
+                <li>Click the button below to open Safari Settings.</li>
+                <li>Open the Extensions section.</li>
+                <li>Enable <strong>Judgeman</strong>.</li>
+                <li>Visit a public ELIT judgment under <code>/gd/</code> or <code>/gdviewer/</code>.</li>
+            </ol>
+            <button class="open-preferences">Quit and Open Safari Settings…</button>
+        </section>
+
+        <section class="card">
+            <h2>What this release does</h2>
+            <ul>
+                <li>Shows a compact launcher on supported ELIT judgment pages.</li>
+                <li>Opens a non-destructive reader overlay for the current judgment.</li>
+                <li>Extracts case metadata and judgment sections locally.</li>
+                <li>Copies structured case JSON only when the user clicks the export action.</li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>Privacy and support</h2>
+            <p>
+                The shipped store-safe build does not send judgment content to third-party services and does not store API keys.
+            </p>
+            <div class="links">
+                <a href="https://github.com/gongahkia/judgeman/blob/main/README2.md#privacy-policy">Privacy policy</a>
+                <a href="https://github.com/gongahkia/judgeman/issues">Support</a>
+                <a href="https://github.com/gongahkia/judgeman">Project source</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
