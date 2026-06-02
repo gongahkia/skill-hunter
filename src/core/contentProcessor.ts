@@ -143,7 +143,13 @@ export function integrateDefinitions(
 
         let textSegment = segment.text;
 
-        // Process each definition, but only in plain text
+        // Defer placeholder expansion until ALL definitions are processed.
+        // Otherwise the second iteration's regex sees the first's expanded
+        // tooltip HTML as plain text and matches terms inside it — producing
+        // nested .statute-term spans visible inside tooltips.
+        const allReplacements = new Map<string, string>();
+        let placeholderCounter = 0;
+
         sortedDefinitions.forEach((definitionPair) => {
           const term = Object.keys(definitionPair)[0];
           if (!term) return;
@@ -151,32 +157,22 @@ export function integrateDefinitions(
           const definition = definitionPair[term];
           if (!definition) return;
 
-          // Escape special regex characters in the term
           const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-          // Create a regex that matches whole words only, case-insensitive
           const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'gi');
 
-          // Replace term with definition tooltip
-          // Use a placeholder to prevent recursive replacements
-          const placeholder = `___STATUTE_TERM_${Math.random().toString(36).slice(2, 11)}___`;
-          const replacementMap = new Map<string, string>();
-
           textSegment = textSegment.replace(regex, (match) => {
-            const key = `${placeholder}${replacementMap.size}`;
-            // Escape the definition text to prevent HTML injection
+            const key = `___SH_TERM_${placeholderCounter++}___`;
             const escapedDefinition = escapeHtml(definition);
-            replacementMap.set(
+            allReplacements.set(
               key,
               `<span class="statute-term">${match}<div class="statute-tooltip">${escapedDefinition}</div></span>`
             );
             return key;
           });
+        });
 
-          // Replace placeholders with actual HTML
-          replacementMap.forEach((value, key) => {
-            textSegment = textSegment.replace(key, value);
-          });
+        allReplacements.forEach((value, key) => {
+          textSegment = textSegment.replace(key, value);
         });
 
         return textSegment;
