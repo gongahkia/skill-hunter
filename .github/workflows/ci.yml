@@ -1,4 +1,4 @@
-name: CI
+name: Judgeman CI/CD on Push
 
 on:
   push:
