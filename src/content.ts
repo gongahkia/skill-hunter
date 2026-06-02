@@ -703,11 +703,12 @@ function simplifyPage(): void {
   const styleEl = document.createElement('style');
   styleEl.textContent = mainStyles;
 
-  const mountEl = document.createElement('div');
-  mountEl.appendChild(createMarkupFragment(simplifiedContent.content));
-  mountEl.addEventListener('click', handleOverlayClick);
-
-  shadowRoot.append(styleEl, mountEl);
+  // append fragment directly so .skill-hunter-root is a direct shadow child;
+  // an extra wrapper <div> breaks the height: 100% cascade and lets the
+  // flex root grow to content height, killing scroll.
+  shadowRoot.append(styleEl, createMarkupFragment(simplifiedContent.content));
+  const rootDiv = shadowRoot.querySelector<HTMLElement>('.skill-hunter-root');
+  rootDiv?.addEventListener('click', handleOverlayClick);
 
   document.body.appendChild(host);
   document.documentElement.style.overflow = 'hidden';
