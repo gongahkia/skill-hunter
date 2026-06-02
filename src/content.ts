@@ -722,9 +722,71 @@ function simplifyPage(): void {
   registerSearchEvents();
   void initializeNotePanel();
   void initializeCitationGraph();
+  registerStatuteTermSingleton();
   window.addEventListener('keydown', handleOverlayKeydown);
 
   contentLogger.info('Page simplified successfully');
+}
+
+let activeStatuteTerm: HTMLElement | null = null;
+let statuteTermShowTimeoutId: number | null = null;
+let statuteTermHideTimeoutId: number | null = null;
+
+function clearActiveStatuteTerm(): void {
+  if (activeStatuteTerm) {
+    activeStatuteTerm.classList.remove('statute-term-active');
+    activeStatuteTerm = null;
+  }
+}
+
+function setActiveStatuteTerm(term: HTMLElement): void {
+  if (activeStatuteTerm === term) return;
+  clearActiveStatuteTerm();
+  term.classList.add('statute-term-active');
+  activeStatuteTerm = term;
+}
+
+function registerStatuteTermSingleton(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  if (!shadowRoot) return;
+
+  const onEnter = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const term = target.closest<HTMLElement>('.statute-term');
+    if (!term) return;
+    if (statuteTermHideTimeoutId) {
+      window.clearTimeout(statuteTermHideTimeoutId);
+      statuteTermHideTimeoutId = null;
+    }
+    if (statuteTermShowTimeoutId) {
+      window.clearTimeout(statuteTermShowTimeoutId);
+    }
+    statuteTermShowTimeoutId = window.setTimeout(() => {
+      setActiveStatuteTerm(term);
+    }, 80);
+  };
+
+  const onLeave = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest('.statute-term')) return;
+    if (statuteTermShowTimeoutId) {
+      window.clearTimeout(statuteTermShowTimeoutId);
+      statuteTermShowTimeoutId = null;
+    }
+    if (statuteTermHideTimeoutId) {
+      window.clearTimeout(statuteTermHideTimeoutId);
+    }
+    statuteTermHideTimeoutId = window.setTimeout(() => {
+      clearActiveStatuteTerm();
+    }, 120);
+  };
+
+  // Capture-phase so we win the race against the bubbling click-handler that
+  // also listens on .skill-hunter-root.
+  shadowRoot.addEventListener('mouseover', onEnter, true);
+  shadowRoot.addEventListener('mouseout', onLeave, true);
 }
 
 async function initializeCitationGraph(): Promise<void> {
@@ -763,6 +825,16 @@ function revertPage(): void {
   }
 
   window.removeEventListener('keydown', handleOverlayKeydown);
+
+  if (statuteTermShowTimeoutId) {
+    window.clearTimeout(statuteTermShowTimeoutId);
+    statuteTermShowTimeoutId = null;
+  }
+  if (statuteTermHideTimeoutId) {
+    window.clearTimeout(statuteTermHideTimeoutId);
+    statuteTermHideTimeoutId = null;
+  }
+  activeStatuteTerm = null;
 
   searchResults = [];
   activeSearchResultIndex = -1;

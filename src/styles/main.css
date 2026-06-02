@@ -279,6 +279,16 @@
   cursor: not-allowed;
 }
 
+.toc-link.toc-link-active {
+  background: var(--accent-light);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.toc-link.toc-link-active .toc-section-number {
+  color: var(--accent-primary);
+}
+
 .toc-section-number {
   margin-right: var(--spacing-xs);
   color: var(--text-tertiary);
@@ -445,11 +455,15 @@
   border-bottom: 1px dotted var(--accent-primary);
 }
 
-.statute-term:hover {
+.statute-term:hover,
+.statute-term.statute-term-active {
   color: var(--accent-hover);
   border-bottom-color: var(--accent-hover);
 }
 
+/* Singleton tooltip: only the .statute-term-active anchor renders its tooltip.
+   Pure-CSS :hover would stack multiple tooltips when adjacent terms overlap; JS
+   toggles .statute-term-active so exactly one is open. */
 .statute-tooltip {
   position: absolute;
   left: 50%;
@@ -473,10 +487,10 @@
   line-height: 1.5;
   white-space: normal;
   word-break: break-word;
-  z-index: 2;
+  z-index: 100;
 }
 
-.statute-term:hover .statute-tooltip {
+.statute-term.statute-term-active > .statute-tooltip {
   opacity: 1;
   visibility: visible;
 }
