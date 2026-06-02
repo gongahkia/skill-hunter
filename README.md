@@ -29,14 +29,6 @@ Time is often spent poring over definitions and navigating between interpretatio
 ![](./asset/screenshots/2.png)
 ![](./asset/screenshots/3.png)
 
-## Stack
-
-* *Frontend*: [TypeScript](https://www.typescriptlang.org/), [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS)
-* *Build*: [Webpack](https://webpack.js.org/), [TypeScript Compiler](https://www.typescriptlang.org/)
-* *Testing*: [Jest](https://jestjs.io/), [ts-jest](https://kulshekhar.github.io/ts-jest/)
-* *Code Quality*: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
-* *Package Manager*: [npm](https://www.npmjs.com/)
-
 ## Supported browsers
 
 Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
