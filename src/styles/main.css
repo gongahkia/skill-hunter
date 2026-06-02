@@ -492,6 +492,107 @@ mark.skill-hunter-search-hit.search-hit-active {
   background: #ffbf47;
 }
 
+.skill-hunter-citation-panel {
+  margin: var(--spacing-md) 0 var(--spacing-lg);
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  font-size: 13px;
+}
+
+.skill-hunter-citation-panel[open] {
+  background: var(--bg-tertiary);
+}
+
+.citation-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.citation-summary::-webkit-details-marker {
+  display: none;
+}
+
+.citation-summary-label::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.skill-hunter-citation-panel[open] .citation-summary-label::before {
+  transform: rotate(90deg);
+}
+
+.citation-summary-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.citation-list {
+  margin: var(--spacing-sm) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.citation-entry {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+}
+
+.citation-link {
+  display: block;
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.citation-link:hover .citation-title {
+  text-decoration: underline;
+}
+
+.citation-title {
+  display: block;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.citation-meta {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.citation-snippet {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
 .illustration-header {
   margin: var(--spacing-lg) 0 var(--spacing-sm);
   color: var(--text-secondary);

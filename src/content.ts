@@ -23,6 +23,8 @@ import {
   integrateDefinitions,
   PerformanceMonitor,
 } from '@/core/contentProcessor';
+import { injectCitationPanels } from '@/core/citationGraphPanel';
+import { extractActSlugFromUrl, loadCitationIndex } from '@/utils/citationIndex';
 import { SKILL_HUNTER_IDS, UX_LIMITS } from '@/utils/constants';
 import { getUserFacingErrorMessage, handleError } from '@/utils/errorHandler';
 import type { NormalizedError } from '@/utils/errorHandler';
@@ -716,9 +718,23 @@ function simplifyPage(): void {
 
   registerSearchEvents();
   void initializeNotePanel();
+  void initializeCitationGraph();
   window.addEventListener('keydown', handleOverlayKeydown);
 
   contentLogger.info('Page simplified successfully');
+}
+
+async function initializeCitationGraph(): Promise<void> {
+  const mainContent = getMainContentElement();
+  if (!mainContent) return;
+  const actSlug = extractActSlugFromUrl(window.location.href);
+  if (!actSlug) return;
+  const index = await loadCitationIndex(actSlug);
+  if (!index) return;
+  const decorated = injectCitationPanels(mainContent, index);
+  if (decorated > 0) {
+    contentLogger.info('Citation graph panels injected', { actSlug, decorated });
+  }
 }
 
 function revertPage(): void {

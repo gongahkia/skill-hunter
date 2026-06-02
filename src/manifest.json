@@ -40,6 +40,15 @@
 
   "permissions": ["storage"],
 
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/citations/*.json"],
+      "matches": [
+        "https://sso.agc.gov.sg/*"
+      ]
+    }
+  ],
+
   "browser_specific_settings": {
     "gecko": {
       "id": "skill-hunter@gongahkia.dev",

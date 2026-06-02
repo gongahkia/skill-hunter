@@ -86,3 +86,32 @@ export interface LegislationNote {
   note: string;
   updatedAt: string;
 }
+
+export interface CitationEntry {
+  citation: string;
+  title: string;
+  year: number;
+  court: string;
+  url: string;
+  snippet: string;
+}
+
+export interface CitationIndex {
+  actSlug: string;
+  actName: string;
+  builtAt: string;
+  sourceCorpusSize: number;
+  sections: Record<string, CitationEntry[]>;
+}
+
+export interface CitationManifestEntry {
+  slug: string;
+  name: string;
+  sections: number;
+  citations: number;
+}
+
+export interface CitationManifest {
+  builtAt: string;
+  acts: CitationManifestEntry[];
+}

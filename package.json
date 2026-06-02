@@ -13,7 +13,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run build && make firefox-source-package"
+    "build:citation-index": "node scripts/build-citation-index.mjs",
+    "test:citation-index": "node --test scripts/__tests__/build-citation-index.test.mjs",
+    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run test:citation-index && npm run build && make firefox-source-package"
   },
   "keywords": [
     "browser-extension",

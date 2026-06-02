@@ -47,6 +47,7 @@ module.exports = (env, argv) => {
           { from: 'src/popup.html', to: 'popup.html' },
           { from: 'src/local_asset', to: 'local_asset' },
           { from: 'src/styles/popup.css', to: 'styles/popup.css' },
+          { from: 'src/assets/citations', to: 'assets/citations', noErrorOnMissing: true },
         ],
       }),
     ],

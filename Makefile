@@ -50,6 +50,12 @@ type-check:
 ci:
 	npm run ci
 
+# Rebuild the bundled citation-graph indexes from a case corpus
+# Usage: make citation-index CORPUS=/path/to/corpus_dir_or_file
+citation-index:
+	@if [ -z "$(CORPUS)" ]; then echo "CORPUS=<path> required"; exit 2; fi
+	node scripts/build-citation-index.mjs "$(CORPUS)" src/assets/citations/
+
 # Clean build artifacts
 clean:
 	rm -rf dist/
