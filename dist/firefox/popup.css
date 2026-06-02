@@ -143,6 +143,31 @@ body {
   font-style: italic;
 }
 
+.prop-value-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.prop-value-list li {
+  position: relative;
+  padding-left: 12px;
+  line-height: 1.4;
+}
+
+.prop-value-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--label);
+}
+
 .prop-value[data-state="warn"] {
   color: var(--warn-fg);
 }

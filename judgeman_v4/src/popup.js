@@ -46,20 +46,51 @@ function ensureCaseAnalysis(caseData) {
   return null;
 }
 
+function clearChildren(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
 function setPropertyValue(id, value, opts = {}) {
   const wrapper = document.getElementById(id);
   if (!wrapper) return;
   const valueEl = wrapper.querySelector(".prop-value");
   if (!valueEl) return;
-  const trimmed = String(value || "").trim();
-  if (!trimmed) {
+  clearChildren(valueEl);
+
+  const isList = Array.isArray(value);
+  const isEmpty = isList ? value.length === 0 : !String(value || "").trim();
+
+  if (isEmpty) {
     valueEl.textContent = valueEl.getAttribute("data-empty") || "Not stated";
     valueEl.setAttribute("data-state", "empty");
     return;
   }
-  valueEl.textContent = trimmed;
+
+  if (isList) {
+    const ul = document.createElement("ul");
+    ul.className = "prop-value-list";
+    for (const item of value) {
+      const li = document.createElement("li");
+      li.textContent = String(item).trim();
+      ul.appendChild(li);
+    }
+    valueEl.appendChild(ul);
+  } else {
+    valueEl.textContent = String(value).trim();
+  }
+
   if (opts.tone) valueEl.setAttribute("data-state", opts.tone);
   else valueEl.removeAttribute("data-state");
+}
+
+function stripTrailingPunctuation(text) {
+  return String(text || "").replace(/[\s;,.•]+$/u, "").trim();
+}
+
+function formatCounsel(caseCounsel) {
+  const cleaned = stripTrailingPunctuation(caseCounsel);
+  if (!cleaned) return "";
+  return cleaned.split(/\s*;\s*/).map((segment) => stripTrailingPunctuation(segment)).filter(Boolean);
 }
 
 function formatParties(caseParties) {
@@ -68,8 +99,8 @@ function formatParties(caseParties) {
 }
 
 function formatIssues(caseLegalIssues) {
-  if (!Array.isArray(caseLegalIssues) || caseLegalIssues.length === 0) return "";
-  return caseLegalIssues.join(" | ");
+  if (!Array.isArray(caseLegalIssues) || caseLegalIssues.length === 0) return [];
+  return caseLegalIssues.map((issue) => stripTrailingPunctuation(issue)).filter(Boolean);
 }
 
 function populateFields(caseData) {
@@ -83,7 +114,7 @@ function populateFields(caseData) {
   setPropertyValue("prop-date", caseData?.caseDate);
   setPropertyValue("prop-coram", caseData?.caseCoram);
   setPropertyValue("prop-parties", formatParties(caseData?.caseParties));
-  setPropertyValue("prop-counsel", caseData?.caseCounsel);
+  setPropertyValue("prop-counsel", formatCounsel(caseData?.caseCounsel));
   setPropertyValue("prop-issues", formatIssues(caseData?.caseLegalIssues));
 
   const outcome = analysis?.brief?.outcome;
