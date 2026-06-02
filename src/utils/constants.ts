@@ -133,7 +133,12 @@ export const SKILL_HUNTER_IDS = {
   TIMELINE_BTN_ID: 'skill-hunter-timeline-btn',
   TIMELINE_PANEL_ID: 'skill-hunter-timeline-panel',
   TOAST_ID: 'skill-hunter-toast',
+  CITATION_PANEL_CLASS: 'skill-hunter-citation-panel',
+  CITATION_SECTION_ATTR: 'data-skill-hunter-citation-section',
 } as const;
+
+export const CITATION_ASSET_BASE_PATH = 'assets/citations/';
+export const CITATION_TOP_N = 5;
 
 export const STORAGE_KEYS = {
   NOTE_PREFIX: 'skill-hunter.note.',
