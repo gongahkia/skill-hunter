@@ -294,6 +294,33 @@
   text-decoration-color: rgba(182, 218, 255, 0.85);
 }
 
+#judgeman-reader-root .jm-statute-link {
+  border-bottom: 1px dotted rgba(245, 187, 79, 0.6);
+}
+
+#judgeman-reader-root .jm-statute-resolved {
+  color: #f5bb4f;
+  text-decoration: none;
+  border-bottom-color: rgba(245, 187, 79, 0.8);
+}
+
+#judgeman-reader-root .jm-statute-resolved:hover {
+  color: #fcd58c;
+  border-bottom-color: rgba(252, 213, 140, 0.9);
+}
+
+#judgeman-reader-root .jm-statute-unresolved {
+  color: rgba(245, 187, 79, 0.62);
+  cursor: help;
+  border-bottom-style: dashed;
+}
+
+#judgeman-reader-root .jm-statute-unresolved::after {
+  content: " ?";
+  font-size: 11px;
+  color: rgba(245, 187, 79, 0.55);
+}
+
 #judgeman-reader-root .jm-btn {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;

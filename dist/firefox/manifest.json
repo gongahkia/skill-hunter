@@ -34,6 +34,7 @@
         "citationAdapters.js",
         "citationLinker.js",
         "inlineCitations.js",
+        "inlineStatutes.js",
         "annotations.js",
         "caseToolkit.js",
         "extractor.js",
