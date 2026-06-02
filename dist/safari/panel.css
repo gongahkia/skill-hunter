@@ -62,14 +62,6 @@
   background: var(--jm-bg);
 }
 
-#judgeman-reader-root .jm-reader-kicker {
-  color: var(--jm-text-muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
-}
-
 #judgeman-reader-root .jm-reader-title {
   margin: 4px 0 0;
   font-size: 22px;

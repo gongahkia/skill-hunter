@@ -861,13 +861,7 @@
         [
           createElement("div", { className: "jm-reader-shell" }, [
             createElement("header", { className: "jm-reader-header" }, [
-              createElement("div", {}, [
-                createElement("div", {
-                  className: "jm-reader-kicker",
-                  text: "Readable view"
-                }),
-                readerTitle
-              ]),
+              createElement("div", {}, [readerTitle]),
               createElement("div", { className: "jm-reader-actions" }, [
                 readerCopyJson,
                 readerCopyBrief,
