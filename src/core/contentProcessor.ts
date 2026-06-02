@@ -6,6 +6,9 @@ import type { ContentToken, Definition, LegislationMetadata, PageBasicData } fro
 import { LOGICAL_CONNECTORS, SKILL_HUNTER_IDS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
+const STATUTE_TERM_TEMPLATE = (match: string, escapedDefinition: string): string =>
+  `<span class="statute-term" ${SKILL_HUNTER_IDS.TOOLTIP_ATTR}="${escapedDefinition}">${match}</span>`;
+
 /**
  * Check if a line needs indentation based on its pattern
  */
@@ -162,11 +165,9 @@ export function integrateDefinitions(
 
           textSegment = textSegment.replace(regex, (match) => {
             const key = `___SH_TERM_${placeholderCounter++}___`;
-            const escapedDefinition = escapeHtml(definition);
-            allReplacements.set(
-              key,
-              `<span class="statute-term">${match}<div class="statute-tooltip">${escapedDefinition}</div></span>`
-            );
+            // escapeAttribute === escapeHtml; safe in a double-quoted attr.
+            const escapedDefinition = escapeAttribute(definition);
+            allReplacements.set(key, STATUTE_TERM_TEMPLATE(match, escapedDefinition));
             return key;
           });
         });

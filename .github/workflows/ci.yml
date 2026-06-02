@@ -1,4 +1,4 @@
-name: CI
+name: Skill Hunter CI/CD on Push
 
 on:
   workflow_dispatch:

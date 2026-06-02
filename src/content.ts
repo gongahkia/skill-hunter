@@ -27,7 +27,7 @@ import {
 } from '@/core/contentProcessor';
 import { injectCitationPanels } from '@/core/citationGraphPanel';
 import { extractActSlugFromUrl, loadCitationIndex } from '@/utils/citationIndex';
-import { SKILL_HUNTER_IDS, UX_LIMITS } from '@/utils/constants';
+import { SIDEBAR_STORAGE_KEYS, SKILL_HUNTER_IDS, UX_LIMITS } from '@/utils/constants';
 import { getUserFacingErrorMessage, handleError } from '@/utils/errorHandler';
 import type { NormalizedError } from '@/utils/errorHandler';
 import { logger } from '@/utils/logger';
@@ -115,40 +115,49 @@ function createSimplifiedContent(): HTMLContent {
     content: `
       <div class="skill-hunter-root">
         <div class="skill-hunter-toolbar">
-          <div class="skill-hunter-toolbar-copy">
-            <span class="skill-hunter-badge">Skill Hunter</span>
-            <p class="skill-hunter-subtitle">Legal reading and note-taking workspace for Singapore legislation</p>
+          <div class="skill-hunter-toolbar-title">
+            <h1 id="${SKILL_HUNTER_IDS.STATUTE_TITLE_ID}" class="skill-hunter-statute-title" title="${escapeAttr(statuteTitle)}">${escapeHtml(statuteTitle)}</h1>
           </div>
           <div class="skill-hunter-toolbar-actions">
-            <div class="search-group" aria-label="Search statute text">
-              <input
-                id="${SKILL_HUNTER_IDS.SEARCH_INPUT_ID}"
-                class="search-input"
-                type="search"
-                placeholder="Search within this statute"
-                maxlength="${UX_LIMITS.SEARCH_QUERY_MAX_CHARACTERS}"
-              />
-              <button id="${SKILL_HUNTER_IDS.SEARCH_PREV_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-prev">Prev</button>
-              <button id="${SKILL_HUNTER_IDS.SEARCH_NEXT_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-next">Next</button>
-              <span id="${SKILL_HUNTER_IDS.SEARCH_COUNT_ID}" class="search-count" aria-live="polite">0 results</span>
-            </div>
-            <select id="${SKILL_HUNTER_IDS.CITATION_FORMAT_ID}" class="citation-format-select">
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.TOC_TOGGLE_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-toc" title="Toggle table of contents" aria-label="Toggle table of contents">
+              ${ICONS.panelLeft}
+            </button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.NOTES_TOGGLE_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-notes" title="Toggle research notes" aria-label="Toggle research notes">
+              ${ICONS.panelRight}
+            </button>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.SEARCH_TOGGLE_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-search" title="Search (⌘F)" aria-label="Search">
+              ${ICONS.search}
+            </button>
+            <select id="${SKILL_HUNTER_IDS.CITATION_FORMAT_ID}" class="citation-format-select" title="Citation format" aria-label="Citation format">
               <option value="default">Default</option>
               <option value="bluebook">Bluebook</option>
               <option value="oscola">OSCOLA</option>
             </select>
-            <button id="${SKILL_HUNTER_IDS.COPY_CITATION_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-citation">Copy citation</button>
-            <button id="${SKILL_HUNTER_IDS.COPY_LINK_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-link">Copy page link</button>
-            <button id="${SKILL_HUNTER_IDS.EXPORT_NOTE_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-note">Export notes</button>
-            <button id="${SKILL_HUNTER_IDS.TIMELINE_BTN_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-timeline">Timeline</button>
-            <button id="${SKILL_HUNTER_IDS.EXPORT_DIAGNOSTICS_ID}" class="toolbar-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-diagnostics">Export diagnostics</button>
-            <button type="button" class="skill-hunter-close" ${SKILL_HUNTER_IDS.ACTION_ATTR}="close">Close</button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.COPY_CITATION_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-citation" title="Copy citation" aria-label="Copy citation">
+              ${ICONS.quote}
+            </button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.COPY_LINK_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="copy-link" title="Copy page link" aria-label="Copy page link">
+              ${ICONS.link}
+            </button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.EXPORT_NOTE_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-note" title="Export notes" aria-label="Export notes">
+              ${ICONS.download}
+            </button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.TIMELINE_BTN_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="toggle-timeline" title="Timeline" aria-label="Timeline">
+              ${ICONS.clock}
+            </button>
+            <button class="icon-btn" type="button" id="${SKILL_HUNTER_IDS.EXPORT_DIAGNOSTICS_ID}" ${SKILL_HUNTER_IDS.ACTION_ATTR}="export-diagnostics" title="Export diagnostics" aria-label="Export diagnostics">
+              ${ICONS.bug}
+            </button>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <button class="icon-btn icon-btn-close" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="close" title="Close (Esc)" aria-label="Close">
+              ${ICONS.close}
+            </button>
           </div>
         </div>
         <div class="skill-hunter-layout">
           ${tocHTML}
           <main id="${SKILL_HUNTER_IDS.MAIN_CONTENT_ID}" class="main-content" aria-label="Simplified legislation">
-            <h1 class="page-title">${escapeHtml(pageBasicData.legislationTitle)}</h1>
             ${metadataHTML}
             ${contentHTML}
           </main>
@@ -167,12 +176,55 @@ function createSimplifiedContent(): HTMLContent {
             </div>
           </aside>
         </div>
+        <div id="${SKILL_HUNTER_IDS.SEARCH_BAR_ID}" class="skill-hunter-search-bar" role="search" aria-label="Search within this statute" hidden>
+          <input
+            id="${SKILL_HUNTER_IDS.SEARCH_INPUT_ID}"
+            class="search-input"
+            type="search"
+            placeholder="Find in statute"
+            maxlength="${UX_LIMITS.SEARCH_QUERY_MAX_CHARACTERS}"
+            autocomplete="off"
+          />
+          <span id="${SKILL_HUNTER_IDS.SEARCH_COUNT_ID}" class="search-count" aria-live="polite">0/0</span>
+          <span class="search-divider" aria-hidden="true"></span>
+          <button id="${SKILL_HUNTER_IDS.SEARCH_PREV_ID}" class="search-icon-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-prev" title="Previous match" aria-label="Previous match">${ICONS.chevronUp}</button>
+          <button id="${SKILL_HUNTER_IDS.SEARCH_NEXT_ID}" class="search-icon-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-next" title="Next match" aria-label="Next match">${ICONS.chevronDown}</button>
+          <button id="${SKILL_HUNTER_IDS.SEARCH_CLOSE_ID}" class="search-icon-btn" type="button" ${SKILL_HUNTER_IDS.ACTION_ATTR}="search-close" title="Close (Esc)" aria-label="Close search">${ICONS.close}</button>
+        </div>
+        <div id="${SKILL_HUNTER_IDS.TOOLTIP_ID}" class="skill-hunter-tooltip" role="tooltip" aria-hidden="true"></div>
         <div id="${SKILL_HUNTER_IDS.TOAST_ID}" class="skill-hunter-toast" role="status" aria-live="polite"></div>
         ${timelineHTML}
       </div>
     `,
   };
 }
+
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+const ICONS = {
+  panelLeft:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M8 4v12"/></svg>',
+  panelRight:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M12 4v12"/></svg>',
+  search:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5.2"/><path d="M13 13l3.5 3.5"/></svg>',
+  quote:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13c-1 0-2-1-2-2.5C3 8 4.5 6 7 5"/><path d="M13 13c-1 0-2-1-2-2.5 0-2.5 1.5-4.5 4-5.5"/></svg>',
+  link: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 11.5l3-3"/><path d="M11.5 6.5L13 5a3 3 0 014.2 4.2L15.5 11"/><path d="M8.5 13.5L7 15a3 3 0 01-4.2-4.2L4.5 9"/></svg>',
+  download:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10"/><path d="M5.5 9l4.5 4.5L14.5 9"/><path d="M3.5 16.5h13"/></svg>',
+  clock:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 1.5"/></svg>',
+  bug: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="9" rx="4"/><path d="M3 8h3M14 8h3M3 12h3M14 12h3M3 16h3M14 16h3M8 5l-1-2M12 5l1-2"/></svg>',
+  close:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  chevronUp:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l5-5 5 5"/></svg>',
+  chevronDown:
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7.5l5 5 5-5"/></svg>',
+};
 
 function getOverlayShadowRoot(): ShadowRoot | null {
   return overlayHost?.shadowRoot ?? null;

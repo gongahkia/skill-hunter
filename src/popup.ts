@@ -18,23 +18,14 @@ const PROPERTY_FIELDS = [
   'propSource',
 ] as const;
 
-function setStatus(message: string, variant: 'info' | 'error' | 'success' = 'info'): void {
-  const statusEl = document.getElementById('statusMessage');
-  if (!(statusEl instanceof HTMLElement)) {
-    popupLogger.warn('Status element missing');
-    return;
-  }
+type ButtonState = 'loading' | 'ready' | 'unsupported' | 'error';
 
-  statusEl.textContent = message;
-  statusEl.classList.remove('status-error', 'status-success');
-
-  if (variant === 'error') {
-    statusEl.classList.add('status-error');
-  }
-
-  if (variant === 'success') {
-    statusEl.classList.add('status-success');
-  }
+function setButton(state: ButtonState, label: string): void {
+  const btn = document.getElementById('toggleButton');
+  if (!(btn instanceof HTMLButtonElement)) return;
+  btn.dataset.state = state;
+  btn.textContent = label;
+  btn.disabled = state !== 'ready';
 }
 
 async function getActiveTabId(): Promise<number | null> {
@@ -48,21 +39,13 @@ async function sendMessageToActiveTab(message: ChromeMessage): Promise<ChromeMes
     if (!tabId) {
       return { status: 'error', error: 'No active tab available.' };
     }
-
     return await chrome.tabs.sendMessage(tabId, message);
   } catch (error) {
     handleError(error, 'popup.sendMessageToActiveTab');
     return {
       status: 'unsupported_page',
-      error: 'Open a supported SSO legislation page to use Skill Hunter.',
+      error: 'Open a supported SSO legislation page.',
     };
-  }
-}
-
-function setToggleButtonState(disabled: boolean): void {
-  const toggleButton = document.getElementById('toggleButton');
-  if (toggleButton instanceof HTMLButtonElement) {
-    toggleButton.disabled = disabled;
   }
 }
 
@@ -131,33 +114,31 @@ function renderEmptyProperties(reason: string): void {
   }
 }
 
-async function checkPageEligibility(): Promise<boolean> {
-  setStatus('Checking current tab…');
+async function checkPageEligibility(): Promise<void> {
+  setButton('loading', 'Checking current tab…');
 
   const eligibility = await sendMessageToActiveTab({ action: 'check_supported_page' });
   if (eligibility.status !== 'success') {
     renderEmptyProperties('Not an SSO page');
-    setStatus(eligibility.error ?? 'This page is not supported.', 'error');
-    return false;
+    setButton('unsupported', 'Open an SSO legislation page');
+    return;
   }
 
-  const supportedPage = Boolean(eligibility.supportedPage);
-  if (!supportedPage) {
+  if (!Boolean(eligibility.supportedPage)) {
     renderEmptyProperties('SSO Whole Document view required');
-    setStatus('Open the SSO Whole Document view before toggling Skill Hunter.', 'error');
-    return false;
+    setButton('unsupported', 'Switch to Whole Document view');
+    return;
   }
 
   const summaryResponse = await sendMessageToActiveTab({ action: 'get_page_summary' });
   if (summaryResponse.status === 'success' && summaryResponse.pageSummary) {
     renderPageSummary(summaryResponse.pageSummary);
-    setStatus('Ready to open simplified research view.', 'success');
-    return true;
+    setButton('ready', 'Open simplified research view');
+    return;
   }
 
   renderEmptyProperties('Metadata unavailable');
-  setStatus(summaryResponse.error ?? 'Could not read page metadata.', 'error');
-  return false;
+  setButton('error', summaryResponse.error ?? 'Could not read page metadata');
 }
 
 function registerGlobalErrorListeners(): void {
@@ -185,30 +166,19 @@ function initialize(): void {
     return;
   }
 
-  setToggleButtonState(true);
-
-  void (async () => {
-    const eligible = await checkPageEligibility();
-    setToggleButtonState(!eligible);
-  })();
-
-  const handleToggleClick = async (): Promise<void> => {
-    setToggleButtonState(true);
-    setStatus('Opening simplified view…');
-
-    const response = await sendMessageToActiveTab({ action: 'toggle_simplified_view' });
-    if (response.status === 'success') {
-      setStatus('Opening view.', 'success');
-      window.close();
-      return;
-    }
-
-    setToggleButtonState(false);
-    setStatus(response.error ?? 'Skill Hunter could not access this page.', 'error');
-  };
+  void checkPageEligibility();
 
   toggleButton.addEventListener('click', () => {
-    void handleToggleClick();
+    if (toggleButton.disabled) return;
+    void (async () => {
+      setButton('loading', 'Opening…');
+      const response = await sendMessageToActiveTab({ action: 'toggle_simplified_view' });
+      if (response.status === 'success') {
+        window.close();
+        return;
+      }
+      setButton('error', response.error ?? 'Skill Hunter could not access this page');
+    })();
   });
 }
 
