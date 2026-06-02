@@ -25,6 +25,7 @@
   function createContentApp({ window, document, browserApi, extractorApi, caseToolkit, loggerApi }) {
     const citationLinker = root.JudgemanCitationLinker || safeRequire("./citationLinker.js");
     const inlineCitations = root.JudgemanInlineCitations || safeRequire("./inlineCitations.js");
+    const inlineStatutes = root.JudgemanInlineStatutes || safeRequire("./inlineStatutes.js");
     const annotationsApi = root.JudgemanAnnotations || safeRequire("./annotations.js");
     const runtimeCaseToolkit =
       caseToolkit || root.JudgemanCaseToolkit || {
@@ -195,12 +196,78 @@
       return list;
     }
 
+    function collectInlineMatches(text) { // merges citations (high priority) + statutes
+      const matches = [];
+      if (inlineCitations?.findMatches) {
+        for (const m of inlineCitations.findMatches(text)) {
+          matches.push({ ...m, kind: "citation" });
+        }
+      }
+      if (inlineStatutes?.findStatuteMatches) {
+        for (const m of inlineStatutes.findStatuteMatches(text)) {
+          matches.push({ ...m, kind: m.kind || "statute" });
+        }
+      }
+      matches.sort((a, b) => {
+        if (a.start !== b.start) return a.start - b.start;
+        return (b.end - b.start) - (a.end - a.start); // longer first on tie
+      });
+      const filtered = [];
+      let cursor = 0;
+      for (const match of matches) {
+        if (match.start < cursor) continue;
+        filtered.push(match);
+        cursor = match.end;
+      }
+      return filtered;
+    }
+
+    function buildLinkNode(match) {
+      if (match.kind === "citation") {
+        const anchor = document.createElement("a");
+        anchor.className = "jm-cite-link";
+        anchor.textContent = match.citation;
+        anchor.setAttribute("href", inlineCitations.buildElitUrl(match.citation));
+        anchor.setAttribute("target", "_blank");
+        anchor.setAttribute("rel", "noopener noreferrer");
+        anchor.setAttribute("title", match.citation);
+        return anchor;
+      }
+      if (match.resolved && match.url) {
+        const anchor = document.createElement("a");
+        anchor.className = "jm-statute-link jm-statute-resolved";
+        anchor.textContent = match.label;
+        anchor.setAttribute("href", match.url);
+        anchor.setAttribute("target", "_blank");
+        anchor.setAttribute("rel", "noopener noreferrer");
+        anchor.setAttribute("title", `SSO: ${match.actName}`);
+        return anchor;
+      }
+      const span = document.createElement("span");
+      span.className = "jm-statute-link jm-statute-unresolved";
+      span.textContent = match.label;
+      span.setAttribute("title", `Unresolved act: ${match.actName || "unknown"}`);
+      return span;
+    }
+
     function appendParagraphContent(paragraphEl, text) {
-      if (inlineCitations?.renderTextWithCitations) {
-        paragraphEl.appendChild(inlineCitations.renderTextWithCitations(document, text));
+      const matches = collectInlineMatches(text);
+      if (matches.length === 0) {
+        paragraphEl.appendChild(document.createTextNode(text));
         return;
       }
-      paragraphEl.appendChild(document.createTextNode(text));
+      const input = String(text || "");
+      let cursor = 0;
+      for (const match of matches) {
+        if (match.start > cursor) {
+          paragraphEl.appendChild(document.createTextNode(input.slice(cursor, match.start)));
+        }
+        paragraphEl.appendChild(buildLinkNode(match));
+        cursor = match.end;
+      }
+      if (cursor < input.length) {
+        paragraphEl.appendChild(document.createTextNode(input.slice(cursor)));
+      }
     }
 
     function buildSectionsContent(page) {
