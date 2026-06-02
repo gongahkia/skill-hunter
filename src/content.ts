@@ -21,7 +21,6 @@ import {
 import {
   generateContentHTML,
   generateTableOfContentsHTML,
-  generateMetadataSummaryHTML,
   integrateDefinitions,
   PerformanceMonitor,
 } from '@/core/contentProcessor';
@@ -96,7 +95,6 @@ function createSimplifiedContent(): HTMLContent {
     pageBasicData.legislationTitle,
     pageBasicData.tableOfContents
   );
-  const metadataHTML = generateMetadataSummaryHTML(pageBasicData, legislationMetadata);
   const contentHTML = generateContentHTML(legislationContent);
   monitor.mark('HTML generated');
 
@@ -158,7 +156,6 @@ function createSimplifiedContent(): HTMLContent {
         <div class="skill-hunter-layout">
           ${tocHTML}
           <main id="${SKILL_HUNTER_IDS.MAIN_CONTENT_ID}" class="main-content" aria-label="Simplified legislation">
-            ${metadataHTML}
             ${contentHTML}
           </main>
           <aside id="${SKILL_HUNTER_IDS.NOTE_PANEL_ID}" class="note-panel" aria-label="Research notes">

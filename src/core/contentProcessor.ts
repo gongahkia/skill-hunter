@@ -354,10 +354,17 @@ export function processContentLines(content: string, context: CrossRefContext = 
  * Generate HTML for table of contents
  */
 export function generateTableOfContentsHTML(
-  _legislationTitle: string,
+  legislationTitle: string,
   tocItems: Array<{ referenceText: string; referenceUrl: string }>
 ): string {
-  const tocItemsHTML = tocItems
+  // act title already shown in top toolbar — drop matching TOC entry so the
+  // sidebar doesn't duplicate it.
+  const normalizedTitle = legislationTitle.trim().toLowerCase();
+  const filteredItems = normalizedTitle
+    ? tocItems.filter((item) => item.referenceText.trim().toLowerCase() !== normalizedTitle)
+    : tocItems;
+
+  const tocItemsHTML = filteredItems
     .map((item) => {
       const text = item.referenceText;
       const targetId = extractReferenceTargetId(item.referenceUrl);
