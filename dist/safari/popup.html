@@ -7,47 +7,138 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <header class="header">
-      <div class="brand">
-        <div class="brand-title">Judgeman</div>
-        <div class="brand-subtitle" id="caseTitle">ELIT judgment helper</div>
-      </div>
-      <div class="signal-row">
-        <span class="pill" id="outcomeSignal">Outcome undetected</span>
-        <span class="pill" id="readTimeSignal">0 min read</span>
-        <span class="pill" id="warningSignal">0 warnings</span>
-      </div>
-    </header>
+    <div class="card">
+      <header class="card-header">
+        <div class="header-text">
+          <div class="kicker">Case viewer</div>
+          <h1 class="case-title" id="caseTitle">Judgeman</h1>
+        </div>
+        <button id="refreshBtn" class="icon-btn" type="button" aria-label="Refresh case data" title="Refresh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7" />
+            <path d="M21 3v6h-6" />
+          </svg>
+        </button>
+      </header>
 
-    <main class="main">
-      <section class="card">
-        <div class="card-title">Readable view</div>
-        <p class="muted">
-          Opens a non-destructive reader overlay on supported ELIT judgment pages.
-        </p>
-        <div class="row">
-          <button id="toggleBtn" class="btn btn-primary" type="button">Toggle readable view</button>
-          <button id="refreshBtn" class="btn btn-quiet" type="button">Refresh</button>
+      <section class="properties" aria-label="Case properties">
+        <div class="properties-title">Properties</div>
+        <dl class="properties-list">
+          <div class="prop" id="prop-court">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 21h18" />
+                <path d="M5 21V10l7-5 7 5v11" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
+              <span>court</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-case-number">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 7h16" />
+                <path d="M4 12h16" />
+                <path d="M4 17h10" />
+              </svg>
+              <span>case number</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-date">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4" />
+                <path d="M8 2v4" />
+                <path d="M3 10h18" />
+              </svg>
+              <span>date</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-coram">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M4 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                <circle cx="10" cy="7" r="4" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>coram</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-parties">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>parties</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-counsel">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+              </svg>
+              <span>counsel</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not stated">Not stated</dd>
+          </div>
+          <div class="prop" id="prop-issues">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.59 13.41 11 22.83l-9.5-9.5L11 3.83l9.5 9.5z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              <span>issues</span>
+            </dt>
+            <dd class="prop-value" data-empty="None detected">None detected</dd>
+          </div>
+          <div class="prop" id="prop-outcome">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 12l2 2 4-4" />
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+              <span>outcome</span>
+            </dt>
+            <dd class="prop-value" data-empty="Not detected">Not detected</dd>
+          </div>
+          <div class="prop" id="prop-read-time">
+            <dt class="prop-label">
+              <svg class="prop-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              <span>read time</span>
+            </dt>
+            <dd class="prop-value" data-empty="0 min">0 min</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="export" aria-label="Export actions">
+        <div class="export-row">
+          <button id="copyCaseBtn" class="ghost-btn" type="button">Copy JSON</button>
+          <button id="copyBriefBtn" class="ghost-btn" type="button">Copy brief</button>
+          <button id="copyDiagnosticsBtn" class="ghost-btn" type="button">Diagnostics</button>
         </div>
       </section>
 
-      <section class="card">
-        <div class="card-title">Structured export</div>
-        <p class="muted">
-          Keep data local: copy JSON for tooling, markdown for study notes, and diagnostics for debugging.
-        </p>
-        <div class="row">
-          <button id="copyCaseBtn" class="btn btn-secondary" type="button">Copy case JSON</button>
-          <button id="copyBriefBtn" class="btn btn-quiet" type="button">Copy case brief</button>
-          <button id="copyDiagnosticsBtn" class="btn btn-quiet" type="button">Copy diagnostics</button>
-        </div>
-      </section>
+      <div class="status" id="status">Ready.</div>
 
-      <section class="card">
-        <div class="card-title">Status</div>
-        <p class="muted" id="status">Ready.</p>
-      </section>
-    </main>
+      <footer class="cta">
+        <button id="toggleBtn" class="primary-btn" type="button">Open readable view</button>
+      </footer>
+    </div>
 
     <script src="browserApi.js"></script>
     <script src="logger.js"></script>
