@@ -807,6 +807,7 @@ i > b {
 @media (max-width: 1080px) {
   .skill-hunter-layout {
     flex-direction: column;
+    overflow-y: auto; /* single scroll axis at narrow widths */
   }
 
   .toc-container {
@@ -818,7 +819,9 @@ i > b {
   }
 
   .main-content {
-    min-height: 44vh;
+    flex: 0 0 auto; /* avoid flex+min-height fighting root overflow:hidden */
+    min-height: 0;
+    overflow-y: visible;
     padding: var(--spacing-lg);
   }
 
