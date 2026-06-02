@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light dark;
   --accent: #6e2527;
   --accent-strong: #561d1f;
   --bg: #ffffff;
@@ -12,6 +13,10 @@
   --warn-fg: #6b4500;
   --error: #b00020;
   --success: #1a7a3a;
+  --status-info: #c5c5c5;
+  --status-success: #34a853;
+  --status-warn: #e3a13b;
+  --status-error: #d83a3a;
 }
 
 * {
@@ -68,13 +73,21 @@ body {
   word-break: break-word;
 }
 
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .icon-btn {
   appearance: none;
   border: 0;
   background: transparent;
   color: var(--text-muted);
   padding: 6px;
-  margin: -6px;
+  margin: 0;
   border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
@@ -86,6 +99,51 @@ body {
 .icon-btn:hover {
   background: var(--hover);
   color: var(--text);
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: help;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-info);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-info) 28%, transparent);
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.status-indicator[data-tone="success"] .status-dot {
+  background: var(--status-success);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-success) 28%, transparent);
+}
+
+.status-indicator[data-tone="warn"] .status-dot {
+  background: var(--status-warn);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-warn) 28%, transparent);
+}
+
+.status-indicator[data-tone="error"] .status-dot {
+  background: var(--status-error);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-error) 28%, transparent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .properties {
@@ -196,25 +254,6 @@ body {
 
 .ghost-btn:hover {
   background: var(--hover);
-}
-
-.status {
-  padding: 8px 16px 0;
-  font-size: 12px;
-  color: var(--text-muted);
-  min-height: 24px;
-}
-
-.status.status-success {
-  color: var(--success);
-}
-
-.status.status-warn {
-  color: var(--warn-fg);
-}
-
-.status.status-error {
-  color: var(--error);
 }
 
 .cta {

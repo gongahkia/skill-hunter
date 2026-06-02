@@ -80,25 +80,6 @@
       return `jm-section-${index}-${slugifyHeading(title)}`;
     }
 
-    const READER_THEME_STORAGE_KEY = "judgeman.readerTheme";
-
-    function loadReaderTheme() {
-      try {
-        const value = window.localStorage?.getItem(READER_THEME_STORAGE_KEY);
-        return value === "light" ? "light" : "dark";
-      } catch (_e) {
-        return "dark";
-      }
-    }
-
-    function persistReaderTheme(theme) {
-      try {
-        window.localStorage?.setItem(READER_THEME_STORAGE_KEY, theme);
-      } catch (_e) {
-        // best-effort
-      }
-    }
-
     const state = {
       readerMounted: false,
       readerVisible: false,
@@ -107,8 +88,7 @@
       lastCaseData: null,
       pageOverflow: "",
       pageTitle: "",
-      overlayVisible: loadOverlayVisible(),
-      readerTheme: loadReaderTheme()
+      overlayVisible: loadOverlayVisible()
     };
 
     function appendChildren(parent, children) {
@@ -827,55 +807,8 @@
       return svg;
     }
 
-    function buildThemeToggleIcon(theme) {
-      if (theme === "light") {
-        // moon (means "switch to dark")
-        return makeSvgIcon(["M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"]);
-      }
-      // sun (means "switch to light")
-      const sun = makeSvgIcon([
-        "M12 1v2",
-        "M12 21v2",
-        "M4.22 4.22l1.42 1.42",
-        "M18.36 18.36l1.42 1.42",
-        "M1 12h2",
-        "M21 12h2",
-        "M4.22 19.78l1.42-1.42",
-        "M18.36 5.64l1.42-1.42"
-      ]);
-      const ns = "http://www.w3.org/2000/svg";
-      const circle = document.createElementNS(ns, "circle");
-      circle.setAttribute("cx", "12");
-      circle.setAttribute("cy", "12");
-      circle.setAttribute("r", "4");
-      sun.appendChild(circle);
-      return sun;
-    }
-
     function buildCloseIcon() {
       return makeSvgIcon(["M18 6L6 18", "M6 6l12 12"], { size: 18 });
-    }
-
-    function applyReaderTheme() {
-      const root = getReaderRoot();
-      if (!root) return;
-      root.classList.toggle("jm-theme-light", state.readerTheme === "light");
-      root.classList.toggle("jm-theme-dark", state.readerTheme !== "light");
-      const toggleBtn = document.getElementById("jm-theme-toggle");
-      if (toggleBtn) {
-        clearNode(toggleBtn);
-        toggleBtn.appendChild(buildThemeToggleIcon(state.readerTheme));
-        toggleBtn.setAttribute(
-          "aria-label",
-          state.readerTheme === "light" ? "Switch to dark theme" : "Switch to light theme"
-        );
-      }
-    }
-
-    function toggleReaderTheme() {
-      state.readerTheme = state.readerTheme === "light" ? "dark" : "light";
-      persistReaderTheme(state.readerTheme);
-      applyReaderTheme();
     }
 
     function ensureReaderRoot() {
@@ -888,13 +821,6 @@
         attrs: { type: "button", "aria-label": "Close reader" }
       });
       readerClose.appendChild(buildCloseIcon());
-
-      const themeToggle = createElement("button", {
-        id: "jm-theme-toggle",
-        className: "jm-icon-btn",
-        attrs: { type: "button", "aria-label": "Toggle reader theme" }
-      });
-      themeToggle.appendChild(buildThemeToggleIcon(state.readerTheme));
 
       const readerCopyJson = createElement("button", {
         id: "jm-reader-copy-json",
@@ -946,7 +872,6 @@
                 readerCopyJson,
                 readerCopyBrief,
                 readerCopyDiagnostics,
-                themeToggle,
                 readerClose
               ])
             ]),
@@ -972,10 +897,6 @@
         hideReadableView();
       });
 
-      themeToggle.addEventListener("click", () => {
-        toggleReaderTheme();
-      });
-
       overlayExpandTab.addEventListener("click", () => {
         if (!state.overlayVisible) toggleOverlay();
       });
@@ -993,7 +914,6 @@
       });
 
       applyOverlayClass();
-      applyReaderTheme();
     }
 
     async function showReadableView() {
