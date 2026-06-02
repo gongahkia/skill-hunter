@@ -19,6 +19,7 @@ const COPY_FILES = [
   "citationLinker.js",
   "inlineCitations.js",
   "inlineStatutes.js",
+  "fieldOverlay.js",
   "annotations.js",
   "caseToolkit.js",
   "contentApp.js",

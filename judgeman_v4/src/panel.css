@@ -176,9 +176,98 @@
   align-items: flex-start;
 }
 
+#judgeman-reader-root .jm-reader-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#judgeman-reader-root.jm-overlay-visible .jm-reader-body {
+  grid-template-columns: 320px 1fr;
+}
+
+#judgeman-reader-root .jm-overlay-sidebar {
+  display: none;
+  overflow: auto;
+  padding: 22px 14px 22px 22px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+#judgeman-reader-root.jm-overlay-visible .jm-overlay-sidebar {
+  display: block;
+}
+
+#judgeman-reader-root .jm-overlay-sidebar .jm-card {
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 14px;
+}
+
+#judgeman-reader-root .jm-overlay-row {
+  margin-bottom: 12px;
+}
+
+#judgeman-reader-root .jm-overlay-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(230, 238, 247, 0.55);
+  margin-bottom: 4px;
+}
+
+#judgeman-reader-root .jm-overlay-value {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#judgeman-reader-root .jm-overlay-list,
+#judgeman-reader-root .jm-overlay-excerpts {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#judgeman-reader-root .jm-overlay-excerpts {
+  margin: -4px 0 12px;
+  color: rgba(230, 238, 247, 0.72);
+  font-size: 12px;
+  font-style: italic;
+}
+
+#judgeman-reader-root .jm-overlay-section-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+#judgeman-reader-root .jm-overlay-link {
+  border: 1px solid rgba(103, 209, 143, 0.4);
+  border-radius: 8px;
+  background: rgba(103, 209, 143, 0.08);
+  color: #b6e6c9;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+#judgeman-reader-root .jm-overlay-link:hover {
+  background: rgba(103, 209, 143, 0.18);
+  color: #d6f3df;
+}
+
+#judgeman-reader-root .jm-section-flash {
+  outline: 2px solid rgba(103, 209, 143, 0.6);
+  outline-offset: 4px;
+  transition: outline-color 0.3s ease;
+}
+
 #judgeman-reader-root .jm-reader-main {
   overflow: auto;
   padding: 22px;
+  min-height: 0;
 }
 
 #judgeman-reader-root .jm-card {
@@ -358,5 +447,16 @@
 
   #judgeman-reader-root .jm-kv {
     grid-template-columns: 1fr;
+  }
+
+  #judgeman-reader-root.jm-overlay-visible .jm-reader-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  #judgeman-reader-root .jm-overlay-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 40vh;
   }
 }

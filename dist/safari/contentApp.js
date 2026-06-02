@@ -26,6 +26,7 @@
     const citationLinker = root.JudgemanCitationLinker || safeRequire("./citationLinker.js");
     const inlineCitations = root.JudgemanInlineCitations || safeRequire("./inlineCitations.js");
     const inlineStatutes = root.JudgemanInlineStatutes || safeRequire("./inlineStatutes.js");
+    const fieldOverlayApi = root.JudgemanFieldOverlay || safeRequire("./fieldOverlay.js");
     const annotationsApi = root.JudgemanAnnotations || safeRequire("./annotations.js");
     const runtimeCaseToolkit =
       caseToolkit || root.JudgemanCaseToolkit || {
@@ -46,6 +47,39 @@
       ? root.JudgemanLogger.createLogger({ namespace: "ContentApp" })
       : createFallbackLogger();
 
+    const OVERLAY_STORAGE_KEY = "judgeman.fieldOverlay.visible";
+
+    function loadOverlayVisible() {
+      try {
+        const value = window.localStorage?.getItem(OVERLAY_STORAGE_KEY);
+        return value === null || value === undefined ? true : value !== "0";
+      } catch (_e) {
+        return true;
+      }
+    }
+
+    function persistOverlayVisible(visible) {
+      try {
+        window.localStorage?.setItem(OVERLAY_STORAGE_KEY, visible ? "1" : "0");
+      } catch (_e) {
+        // best-effort persistence; surface no error to the panel
+      }
+    }
+
+    function slugifyHeading(title) {
+      return (
+        String(title || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .substring(0, 40) || "section"
+      );
+    }
+
+    function sectionDomId(title, index) {
+      return `jm-section-${index}-${slugifyHeading(title)}`;
+    }
+
     const state = {
       panelMounted: false,
       readerMounted: false,
@@ -54,7 +88,8 @@
       globalHandlersRegistered: false,
       lastCaseData: null,
       pageOverflow: "",
-      pageTitle: ""
+      pageTitle: "",
+      overlayVisible: loadOverlayVisible()
     };
 
     function appendChildren(parent, children) {
@@ -272,10 +307,14 @@
 
     function buildSectionsContent(page) {
       let paragraphNumber = 0;
+      let sectionIndex = 0;
       const fragment = document.createDocumentFragment();
 
       for (const [title, paragraphs] of Object.entries(page.caseBody)) {
-        const details = createElement("details", { className: "jm-section" });
+        const details = createElement("details", {
+          className: "jm-section",
+          id: sectionDomId(title, sectionIndex)
+        });
         details.open = true;
         details.appendChild(createElement("summary", { text: title }));
 
@@ -296,9 +335,139 @@
 
         details.appendChild(body);
         fragment.appendChild(details);
+        sectionIndex += 1;
       }
 
       return fragment;
+    }
+
+    function findSectionIndex(page, title) {
+      const titles = Object.keys(page?.caseBody || {});
+      return titles.indexOf(title);
+    }
+
+    function scrollToSection(title, page) {
+      const idx = findSectionIndex(page, title);
+      if (idx < 0) return;
+      const id = sectionDomId(title, idx);
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (el.tagName === "DETAILS") el.open = true;
+        el.classList.add("jm-section-flash");
+        window.setTimeout(() => el.classList.remove("jm-section-flash"), 1200);
+      } catch (_e) {
+        el.scrollIntoView();
+      }
+    }
+
+    function buildOverlayKvRow(label, value) {
+      return createElement("div", { className: "jm-overlay-row" }, [
+        createElement("div", { className: "jm-overlay-label", text: label }),
+        createElement("div", { className: "jm-overlay-value", text: value || "Not stated" })
+      ]);
+    }
+
+    function buildOverlayListRow(label, items) {
+      const row = createElement("div", { className: "jm-overlay-row" });
+      row.appendChild(createElement("div", { className: "jm-overlay-label", text: label }));
+      const list = createElement("ul", { className: "jm-overlay-list" });
+      if (!items || items.length === 0) {
+        list.appendChild(createElement("li", { className: "jm-empty", text: "Not stated" }));
+      } else {
+        for (const item of items) {
+          list.appendChild(createElement("li", { text: typeof item === "string" ? item : `${item.role}: ${item.name}` }));
+        }
+      }
+      row.appendChild(list);
+      return row;
+    }
+
+    function buildOverlaySectionsRow(label, sectionTitles, page) {
+      const row = createElement("div", { className: "jm-overlay-row" });
+      row.appendChild(createElement("div", { className: "jm-overlay-label", text: label }));
+      if (!sectionTitles || sectionTitles.length === 0) {
+        row.appendChild(createElement("p", { className: "jm-empty", text: "No matching section." }));
+        return row;
+      }
+      const list = createElement("div", { className: "jm-overlay-section-links" });
+      for (const title of sectionTitles) {
+        const btn = createElement("button", {
+          className: "jm-overlay-link",
+          text: title,
+          attrs: { type: "button" }
+        });
+        btn.addEventListener("click", () => scrollToSection(title, page));
+        list.appendChild(btn);
+      }
+      row.appendChild(list);
+      return row;
+    }
+
+    function buildFieldOverlayContent(page) {
+      if (!fieldOverlayApi?.buildFieldOverlay) {
+        return createElement("p", { className: "jm-empty", text: "Field overlay module unavailable." });
+      }
+      const fields = fieldOverlayApi.buildFieldOverlay(page);
+      const wrapper = createElement("div", { className: "jm-overlay-body" });
+
+      wrapper.appendChild(buildOverlayKvRow("Court", fields.court));
+      wrapper.appendChild(buildOverlayKvRow("Case number", fields.caseNumber));
+      wrapper.appendChild(buildOverlayKvRow("Judgment date", fields.judgmentDate));
+      if (fields.hearingDate) {
+        wrapper.appendChild(buildOverlayKvRow("Hearing date", fields.hearingDate));
+      }
+      wrapper.appendChild(buildOverlayListRow("Parties", fields.parties));
+      wrapper.appendChild(buildOverlayListRow("Coram", fields.judges));
+      wrapper.appendChild(buildOverlayListRow("Counsel", fields.counsel));
+      wrapper.appendChild(buildOverlayKvRow("Outcome signal", fields.outcomeSignal));
+
+      wrapper.appendChild(buildOverlaySectionsRow("Holding (jump)", fields.holding.sections, page));
+      if (fields.holding.excerpts.length) {
+        const excerpts = createElement("ul", { className: "jm-overlay-excerpts" });
+        for (const line of fields.holding.excerpts) {
+          excerpts.appendChild(createElement("li", { text: line }));
+        }
+        wrapper.appendChild(excerpts);
+      }
+
+      wrapper.appendChild(buildOverlaySectionsRow("Ratio (jump)", fields.ratio.sections, page));
+      if (fields.ratio.excerpts.length) {
+        const excerpts = createElement("ul", { className: "jm-overlay-excerpts" });
+        for (const line of fields.ratio.excerpts) {
+          excerpts.appendChild(createElement("li", { text: line }));
+        }
+        wrapper.appendChild(excerpts);
+      }
+
+      wrapper.appendChild(buildOverlayListRow(
+        `Citations used (${fields.citationsUsed.length})`,
+        fields.citationsUsed.slice(0, 5)
+      ));
+      wrapper.appendChild(buildOverlayListRow(
+        `Statutes cited (${fields.statutesCited.length})`,
+        fields.statutesCited.slice(0, 5)
+      ));
+
+      return wrapper;
+    }
+
+    function applyOverlayClass() {
+      const root = getReaderRoot();
+      if (!root) return;
+      root.classList.toggle("jm-overlay-visible", state.overlayVisible);
+      const toggleBtn = document.getElementById("jm-overlay-toggle");
+      if (toggleBtn) {
+        toggleBtn.textContent = state.overlayVisible ? "Hide field overlay" : "Show field overlay";
+        toggleBtn.setAttribute("aria-pressed", state.overlayVisible ? "true" : "false");
+      }
+    }
+
+    function toggleOverlay() {
+      state.overlayVisible = !state.overlayVisible;
+      persistOverlayVisible(state.overlayVisible);
+      applyOverlayClass();
     }
 
     function buildBulletList(items, emptyMessage) {
@@ -500,6 +669,12 @@
         return;
       }
 
+      const overlaySidebar = document.getElementById("jm-overlay-sidebar");
+      if (overlaySidebar) {
+        clearNode(overlaySidebar);
+        overlaySidebar.appendChild(buildCard("Case fields (BLUF)", buildFieldOverlayContent(page)));
+      }
+
       readerMain.appendChild(buildCard("Case metadata", buildMetadataGrid(page)));
       readerMain.appendChild(buildCard("Legal issues", buildIssuesContent(page)));
       readerMain.appendChild(buildCard("Case brief (student mode)", buildBriefContent(page)));
@@ -507,6 +682,8 @@
       readerMain.appendChild(buildCard("Research checklist", buildChecklistContent(page)));
       readerMain.appendChild(buildCard("Annotations", buildAnnotationsContent(page)));
       readerMain.appendChild(buildCard("Judgment sections", buildSectionsContent(page)));
+
+      applyOverlayClass();
     }
 
     async function refreshCaseData() {
@@ -754,6 +931,12 @@
         text: "Copy diagnostics",
         attrs: { type: "button" }
       });
+      const overlayToggle = createElement("button", {
+        id: "jm-overlay-toggle",
+        className: "jm-btn jm-btn-quiet",
+        text: state.overlayVisible ? "Hide field overlay" : "Show field overlay",
+        attrs: { type: "button", "aria-pressed": state.overlayVisible ? "true" : "false" }
+      });
       const readerTitle = createElement("h1", {
         id: "jm-reader-title",
         className: "jm-reader-title",
@@ -776,16 +959,24 @@
                 readerTitle
               ]),
               createElement("div", { className: "jm-reader-actions" }, [
+                overlayToggle,
                 readerCopyJson,
                 readerCopyBrief,
                 readerCopyDiagnostics,
                 readerClose
               ])
             ]),
-            createElement("main", {
-              id: "jm-reader-main",
-              className: "jm-reader-main"
-            })
+            createElement("div", { className: "jm-reader-body" }, [
+              createElement("aside", {
+                id: "jm-overlay-sidebar",
+                className: "jm-overlay-sidebar",
+                attrs: { "aria-label": "Case field overlay" }
+              }),
+              createElement("main", {
+                id: "jm-reader-main",
+                className: "jm-reader-main"
+              })
+            ])
           ])
         ]
       );
@@ -794,6 +985,10 @@
 
       readerClose.addEventListener("click", () => {
         hideReadableView();
+      });
+
+      overlayToggle.addEventListener("click", () => {
+        toggleOverlay();
       });
 
       readerCopyJson.addEventListener("click", () => {
@@ -807,6 +1002,8 @@
       readerCopyDiagnostics.addEventListener("click", () => {
         void runAction("reader_copy_diagnostics", copyDiagnostics, "Diagnostics copied.");
       });
+
+      applyOverlayClass();
     }
 
     async function showReadableView() {
