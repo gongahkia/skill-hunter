@@ -8,7 +8,15 @@ import { logger } from '@/utils/logger';
 
 const popupLogger = logger.withContext('popup');
 
-const PROPERTY_FIELDS = ['propType', 'propStatus', 'propDate', 'propRevised', 'propPdf', 'propCitations', 'propSource'] as const;
+const PROPERTY_FIELDS = [
+  'propType',
+  'propStatus',
+  'propDate',
+  'propRevised',
+  'propPdf',
+  'propCitations',
+  'propSource',
+] as const;
 
 function setStatus(message: string, variant: 'info' | 'error' | 'success' = 'info'): void {
   const statusEl = document.getElementById('statusMessage');

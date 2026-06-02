@@ -723,6 +723,7 @@ function simplifyPage(): void {
   void initializeNotePanel();
   void initializeCitationGraph();
   registerStatuteTermSingleton();
+  initializeTocScrollSpy();
   window.addEventListener('keydown', handleOverlayKeydown);
 
   contentLogger.info('Page simplified successfully');
@@ -731,6 +732,7 @@ function simplifyPage(): void {
 let activeStatuteTerm: HTMLElement | null = null;
 let statuteTermShowTimeoutId: number | null = null;
 let statuteTermHideTimeoutId: number | null = null;
+let tocSpyCleanup: (() => void) | null = null;
 
 function clearActiveStatuteTerm(): void {
   if (activeStatuteTerm) {
@@ -789,6 +791,105 @@ function registerStatuteTermSingleton(): void {
   shadowRoot.addEventListener('mouseout', onLeave, true);
 }
 
+function initializeTocScrollSpy(): void {
+  const shadowRoot = getOverlayShadowRoot();
+  if (!shadowRoot) return;
+
+  const mainContent = getMainContentElement();
+  const tocContainer = shadowRoot.querySelector<HTMLElement>('.toc-container');
+  if (!mainContent || !tocContainer) return;
+
+  const headers = Array.from(mainContent.querySelectorAll<HTMLElement>('h2.section-header[id]'));
+  if (headers.length === 0) return;
+
+  // headerId → TOC button reference; some buttons may be disabled (no target).
+  const tocButtons = Array.from(
+    tocContainer.querySelectorAll<HTMLElement>(`[${SKILL_HUNTER_IDS.TOC_TARGET_ATTR}]`)
+  );
+  const buttonByTargetId = new Map<string, HTMLElement>();
+  for (const btn of tocButtons) {
+    const targetId = btn.dataset.skillHunterScrollTarget;
+    if (targetId) buttonByTargetId.set(targetId, btn);
+  }
+
+  let activeTargetId: string | null = null;
+
+  const scrollContainer = (): HTMLElement => {
+    // Narrow viewport: .skill-hunter-layout owns vertical scroll; otherwise .main-content.
+    const layout = shadowRoot.querySelector<HTMLElement>('.skill-hunter-layout');
+    if (layout && getComputedStyle(layout).overflowY === 'auto') return layout;
+    return mainContent;
+  };
+
+  const updateActive = (): void => {
+    const container = scrollContainer();
+    const containerTop = container.getBoundingClientRect().top;
+    const threshold = containerTop + 80; // dead zone for toolbar/sticky chrome
+
+    let candidate: HTMLElement | null = null;
+    for (const header of headers) {
+      const top = header.getBoundingClientRect().top;
+      if (top <= threshold) {
+        candidate = header;
+      } else {
+        break;
+      }
+    }
+    if (!candidate) candidate = headers[0] ?? null;
+    if (!candidate) return;
+
+    const targetId = candidate.id;
+    if (targetId === activeTargetId) return;
+    activeTargetId = targetId;
+
+    for (const btn of tocButtons) {
+      btn.classList.remove('toc-link-active');
+    }
+    const activeBtn = buttonByTargetId.get(targetId);
+    if (!activeBtn) return;
+    activeBtn.classList.add('toc-link-active');
+
+    // Scroll TOC sidebar to keep the active item visible.
+    const item = activeBtn.closest<HTMLElement>('.toc-item') ?? activeBtn;
+    const itemRect = item.getBoundingClientRect();
+    const tocRect = tocContainer.getBoundingClientRect();
+    if (itemRect.top < tocRect.top + 40 || itemRect.bottom > tocRect.bottom - 40) {
+      item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  let rafId = 0;
+  const onScroll = (): void => {
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(() => {
+      rafId = 0;
+      updateActive();
+    });
+  };
+
+  const containerInitial = scrollContainer();
+  containerInitial.addEventListener('scroll', onScroll, { passive: true });
+  // The other potential scroll container needs the listener too in case the
+  // viewport crosses the breakpoint while open.
+  const layout = shadowRoot.querySelector<HTMLElement>('.skill-hunter-layout');
+  if (layout && layout !== containerInitial) {
+    layout.addEventListener('scroll', onScroll, { passive: true });
+  }
+  if (mainContent !== containerInitial) {
+    mainContent.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  updateActive();
+
+  tocSpyCleanup = (): void => {
+    if (rafId) window.cancelAnimationFrame(rafId);
+    containerInitial.removeEventListener('scroll', onScroll);
+    if (layout) layout.removeEventListener('scroll', onScroll);
+    mainContent.removeEventListener('scroll', onScroll);
+    tocSpyCleanup = null;
+  };
+}
+
 async function initializeCitationGraph(): Promise<void> {
   const mainContent = getMainContentElement();
   if (!mainContent) return;
@@ -835,6 +936,10 @@ function revertPage(): void {
     statuteTermHideTimeoutId = null;
   }
   activeStatuteTerm = null;
+
+  if (tocSpyCleanup) {
+    tocSpyCleanup();
+  }
 
   searchResults = [];
   activeSearchResultIndex = -1;
