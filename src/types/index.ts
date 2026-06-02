@@ -53,16 +53,34 @@ export interface HTMLContent {
   content: string;
 }
 
-export type SkillHunterMessageAction = 'toggle_simplified_view' | 'check_supported_page';
+export type SkillHunterMessageAction =
+  | 'toggle_simplified_view'
+  | 'check_supported_page'
+  | 'get_page_summary';
 
 export interface ChromeMessage {
   action: SkillHunterMessageAction;
+}
+
+export type StatuteType = 'Act' | 'Subsidiary Legislation' | 'Supplement' | 'Unknown';
+
+export interface PageSummary {
+  title: string;
+  type: StatuteType;
+  status: string;
+  date: string;
+  revisedTitle: string;
+  hasPdf: boolean;
+  sourceUrl: string;
+  actSlug: string | null;
+  citationCount: number;
 }
 
 export interface ChromeMessageResponse {
   status: 'success' | 'error' | 'unsupported_page';
   isSimplified?: boolean;
   supportedPage?: boolean;
+  pageSummary?: PageSummary;
   error?: string;
 }
 

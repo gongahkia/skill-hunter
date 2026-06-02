@@ -6,6 +6,9 @@ import type { ContentToken, Definition, LegislationMetadata, PageBasicData } fro
 import { LOGICAL_CONNECTORS, SKILL_HUNTER_IDS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
 
+const STATUTE_TERM_TEMPLATE = (match: string, escapedDefinition: string): string =>
+  `<span class="statute-term" ${SKILL_HUNTER_IDS.TOOLTIP_ATTR}="${escapedDefinition}">${match}</span>`;
+
 /**
  * Check if a line needs indentation based on its pattern
  */
@@ -143,7 +146,13 @@ export function integrateDefinitions(
 
         let textSegment = segment.text;
 
-        // Process each definition, but only in plain text
+        // Defer placeholder expansion until ALL definitions are processed.
+        // Otherwise the second iteration's regex sees the first's expanded
+        // tooltip HTML as plain text and matches terms inside it — producing
+        // nested .statute-term spans visible inside tooltips.
+        const allReplacements = new Map<string, string>();
+        let placeholderCounter = 0;
+
         sortedDefinitions.forEach((definitionPair) => {
           const term = Object.keys(definitionPair)[0];
           if (!term) return;
@@ -151,32 +160,20 @@ export function integrateDefinitions(
           const definition = definitionPair[term];
           if (!definition) return;
 
-          // Escape special regex characters in the term
           const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-          // Create a regex that matches whole words only, case-insensitive
           const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'gi');
 
-          // Replace term with definition tooltip
-          // Use a placeholder to prevent recursive replacements
-          const placeholder = `___STATUTE_TERM_${Math.random().toString(36).slice(2, 11)}___`;
-          const replacementMap = new Map<string, string>();
-
           textSegment = textSegment.replace(regex, (match) => {
-            const key = `${placeholder}${replacementMap.size}`;
-            // Escape the definition text to prevent HTML injection
-            const escapedDefinition = escapeHtml(definition);
-            replacementMap.set(
-              key,
-              `<span class="statute-term">${match}<div class="statute-tooltip">${escapedDefinition}</div></span>`
-            );
+            const key = `___SH_TERM_${placeholderCounter++}___`;
+            // escapeAttribute === escapeHtml; safe in a double-quoted attr.
+            const escapedDefinition = escapeAttribute(definition);
+            allReplacements.set(key, STATUTE_TERM_TEMPLATE(match, escapedDefinition));
             return key;
           });
+        });
 
-          // Replace placeholders with actual HTML
-          replacementMap.forEach((value, key) => {
-            textSegment = textSegment.replace(key, value);
-          });
+        allReplacements.forEach((value, key) => {
+          textSegment = textSegment.replace(key, value);
         });
 
         return textSegment;
@@ -360,7 +357,14 @@ export function generateTableOfContentsHTML(
   legislationTitle: string,
   tocItems: Array<{ referenceText: string; referenceUrl: string }>
 ): string {
-  const tocItemsHTML = tocItems
+  // act title already shown in top toolbar — drop matching TOC entry so the
+  // sidebar doesn't duplicate it.
+  const normalizedTitle = legislationTitle.trim().toLowerCase();
+  const filteredItems = normalizedTitle
+    ? tocItems.filter((item) => item.referenceText.trim().toLowerCase() !== normalizedTitle)
+    : tocItems;
+
+  const tocItemsHTML = filteredItems
     .map((item) => {
       const text = item.referenceText;
       const targetId = extractReferenceTargetId(item.referenceUrl);
@@ -384,11 +388,10 @@ export function generateTableOfContentsHTML(
     })
     .join('');
 
+  // Header block intentionally removed: the statute title now lives in the top
+  // toolbar so the TOC sidebar doesn't duplicate it.
   return `
     <div class="toc-container">
-      <div class="toc-header">
-        <h2 class="toc-title">${escapeHtml(legislationTitle)}</h2>
-      </div>
       <div class="toc-content">
         <ul class="toc-list">
           ${tocItemsHTML}

@@ -135,6 +135,19 @@ export const SKILL_HUNTER_IDS = {
   TOAST_ID: 'skill-hunter-toast',
   CITATION_PANEL_CLASS: 'skill-hunter-citation-panel',
   CITATION_SECTION_ATTR: 'data-skill-hunter-citation-section',
+  SEARCH_BAR_ID: 'skill-hunter-search-bar',
+  SEARCH_CLOSE_ID: 'skill-hunter-search-close',
+  TOC_TOGGLE_ID: 'skill-hunter-toggle-toc',
+  NOTES_TOGGLE_ID: 'skill-hunter-toggle-notes',
+  SEARCH_TOGGLE_ID: 'skill-hunter-toggle-search',
+  STATUTE_TITLE_ID: 'skill-hunter-statute-title',
+  TOOLTIP_ID: 'skill-hunter-tooltip',
+  TOOLTIP_ATTR: 'data-skill-hunter-tooltip',
+} as const;
+
+export const SIDEBAR_STORAGE_KEYS = {
+  TOC_COLLAPSED: 'skill-hunter.sidebar.toc.collapsed',
+  NOTES_COLLAPSED: 'skill-hunter.sidebar.notes.collapsed',
 } as const;
 
 export const CITATION_ASSET_BASE_PATH = 'assets/citations/';

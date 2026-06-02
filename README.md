@@ -1,9 +1,10 @@
 [![](https://img.shields.io/badge/skill_hunter_1.0-deprecated-red)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0) [![](https://img.shields.io/badge/skill_hunter_2.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/2.0) [![](https://img.shields.io/badge/skill_hunter_3.0-passing-dark_green)](https://github.com/gongahkia/skill-hunter/releases/tag/3.0)
+![](https://github.com/gongahkia/skill-hunter/actions/workflows/ci.yml/badge.svg)
 
-# Skill Hunter
+# `Skill Hunter`
 
 <p align="center">
-<img src="./asset/logo/logo_words.png" width=50% height=50%>
+    <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
 Browser extension that formats legislation to be more readable.
@@ -24,7 +25,13 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Screenshot
 
-![](./asset/screenshots/skill-hunter-screenshot-4.png)
+<div align="center">
+    <img src="./asset/screenshots/1.png" width="45%">
+    <img src="./asset/screenshots/2.png" width="45%">
+</div>
+
+![](./asset/screenshots/3.png)
+![](./asset/screenshots/4.png)
 
 ## Stack
 
@@ -85,7 +92,7 @@ $ make
 4. Open the `skill-hunter` repo, click *select*.
 5. Open any **SSO** page, then click *Whole Document*.
 
-![](./asset/screenshots/skill-hunter-screenshot-3.png)
+![](./asset/screenshots/skill-hunter-installation-3.png)
 
 6. Click the simplify button.
 

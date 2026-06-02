@@ -17,9 +17,9 @@
   --text-tertiary: #9b9a97;
   --border-color: #e9e9e7;
   --border-hover: #d3d3d0;
-  --accent-primary: #2383e2;
-  --accent-hover: #1a6cbd;
-  --accent-light: #e8f3ff;
+  --accent-primary: #7c161c;
+  --accent-hover: #5d0f14;
+  --accent-light: #fbeceb;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.16);
@@ -49,9 +49,9 @@
     --text-tertiary: #6f6f6d;
     --border-color: #3a3a3a;
     --border-hover: #4a4a4a;
-    --accent-primary: #5fa3e8;
-    --accent-hover: #7db4ed;
-    --accent-light: #1e3a52;
+    --accent-primary: #d6646a;
+    --accent-hover: #e88a90;
+    --accent-light: #3a1416;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.28);
     --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.4);
@@ -81,128 +81,173 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: var(--spacing-md);
-  padding: 14px var(--spacing-lg);
+  padding: 10px var(--spacing-lg);
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-primary);
 }
 
-.skill-hunter-toolbar-copy {
+.skill-hunter-toolbar-title {
   min-width: 0;
-}
-
-.skill-hunter-badge {
-  display: inline-flex;
+  flex: 1;
+  display: flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent-light);
-  color: var(--accent-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
-.skill-hunter-subtitle {
-  margin: 6px 0 0;
-  color: var(--text-secondary);
-  font-size: 13px;
+.skill-hunter-statute-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .skill-hunter-toolbar-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-.search-group {
-  display: flex;
+.toolbar-divider {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--border-color);
+}
+
+.icon-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
-}
-
-.search-input {
-  width: 220px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 0;
   border-radius: var(--radius-sm);
-  padding: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.icon-btn.icon-btn-active {
+  background: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+.icon-btn-close:hover:not(:disabled) {
+  background: #fbeceb;
+  color: #7c161c;
+}
+
+.citation-format-select {
+  height: 30px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   background: var(--bg-primary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+/* Floating Chrome-style search bar — only visible while open. */
+.skill-hunter-search-bar {
+  position: absolute;
+  top: 12px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.skill-hunter-search-bar[hidden] {
+  display: none;
+}
+
+.skill-hunter-search-bar .search-input {
+  width: 200px;
+  border: 0;
+  padding: 4px 6px;
+  background: transparent;
   color: var(--text-primary);
   font: inherit;
   font-size: 13px;
 }
 
-.search-input:focus {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 0;
+.skill-hunter-search-bar .search-input:focus {
+  outline: 0;
 }
 
-.toolbar-btn {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font: inherit;
+.skill-hunter-search-bar .search-count {
+  min-width: 50px;
+  padding: 0 4px;
+  color: var(--text-tertiary);
   font-size: 12px;
-  font-weight: 600;
-  padding: 7px 10px;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.toolbar-btn:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-}
-
-.citation-format-select {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 12px;
-  padding: 7px 8px;
-  cursor: pointer;
-}
-
-.search-count {
-  min-width: 56px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   text-align: right;
 }
 
-.skill-hunter-close {
-  flex-shrink: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
+.skill-hunter-search-bar .search-count.search-count-empty {
+  color: var(--text-tertiary);
 }
 
-.skill-hunter-close:hover {
+.search-divider {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
+}
+
+.search-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.search-icon-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.search-icon-btn:hover:not(:disabled) {
   background: var(--bg-hover);
-  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .skill-hunter-layout {
@@ -218,26 +263,21 @@
   overflow-y: auto;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
+  transition:
+    width var(--transition-fast),
+    min-width var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
-.toc-header {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.toc-title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
+.skill-hunter-root.toc-collapsed .toc-container {
+  width: 0;
+  min-width: 0;
+  border-right: 0;
+  overflow: hidden;
 }
 
 .toc-content {
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-md) 0;
 }
 
 .toc-list {
@@ -277,6 +317,16 @@
 .toc-link:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.toc-link.toc-link-active {
+  background: var(--accent-light);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.toc-link.toc-link-active .toc-section-number {
+  color: var(--accent-primary);
 }
 
 .toc-section-number {
@@ -438,24 +488,28 @@
 }
 
 .statute-term {
-  position: relative;
   color: var(--accent-primary);
   font-weight: 600;
   cursor: help;
   border-bottom: 1px dotted var(--accent-primary);
 }
 
-.statute-term:hover {
+.statute-term:hover,
+.statute-term.statute-term-active {
   color: var(--accent-hover);
   border-bottom-color: var(--accent-hover);
 }
 
-.statute-tooltip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  width: min(420px, 70vw);
-  min-width: 220px;
+/* Single floating tooltip element shared across all .statute-terms. Position
+   is computed in JS at .skill-hunter-root level so it can't be clipped by
+   the sidebars' overflow / by .main-content's scroll viewport. */
+.skill-hunter-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483646;
+  max-width: min(420px, 70vw);
+  min-width: 200px;
   padding: 12px 14px;
   border-radius: var(--radius-md);
   background: var(--text-primary);
@@ -463,20 +517,18 @@
   box-shadow: var(--shadow-lg);
   opacity: 0;
   visibility: hidden;
-  transform: translateX(-50%);
-  transition:
-    opacity var(--transition-fast),
-    visibility var(--transition-fast);
   pointer-events: none;
   font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
   white-space: normal;
   word-break: break-word;
-  z-index: 2;
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
 }
 
-.statute-term:hover .statute-tooltip {
+.skill-hunter-tooltip.visible {
   opacity: 1;
   visibility: visible;
 }
@@ -621,6 +673,18 @@ mark.skill-hunter-search-hit.search-hit-active {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition:
+    width var(--transition-fast),
+    min-width var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.skill-hunter-root.notes-collapsed .note-panel {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border-left: 0;
+  overflow: hidden;
 }
 
 .note-panel-title {
@@ -807,6 +871,7 @@ i > b {
 @media (max-width: 1080px) {
   .skill-hunter-layout {
     flex-direction: column;
+    overflow-y: auto; /* single scroll axis at narrow widths */
   }
 
   .toc-container {
@@ -818,7 +883,9 @@ i > b {
   }
 
   .main-content {
-    min-height: 44vh;
+    flex: 0 0 auto; /* avoid flex+min-height fighting root overflow:hidden */
+    min-height: 0;
+    overflow-y: visible;
     padding: var(--spacing-lg);
   }
 
