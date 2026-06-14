@@ -267,6 +267,35 @@ describe('OptionsChatDetail', () => {
     expect(cards[0].querySelector('.thread-record').textContent).toContain('reference source');
   });
 
+  it('archives a thread row when removing a message tag chip', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const archived = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        listOpenThreads: async () => [
+          { threadId: 'thread-1', chatId: 'claude:thread-1', messageId: 'm1', tag: 'TODO', text: 'follow up', source: 'explicit', subSource: 'user', status: 'open' },
+          { threadId: 'thread-2', chatId: 'claude:thread-1', messageId: 'm1', tag: 'REF', text: 'reference source', source: 'explicit', subSource: 'user', status: 'open' }
+        ],
+        setThreadStatus: async (threadId, status) => {
+          archived.push({ threadId, status });
+          return { threadId, status };
+        }
+      },
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    dom.window.document.querySelector('.thread-chip-remove[aria-label="Remove TODO thread"]').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(archived).toEqual([{ threadId: 'thread-1', status: 'archived' }]);
+    expect([...dom.window.document.querySelectorAll('.message-card:first-of-type .thread-chip')].map((chip) => chip.textContent)).toEqual(['REF']);
+  });
+
   it('opens detail when a chat-list row is clicked', async () => {
     const { dom, listRoot } = createDom();
     const { OptionsChatList, OptionsChatDetail } = loadOptionsModules(dom);

@@ -165,7 +165,7 @@ var OptionsChatDetail = (function() {
     return record;
   }
 
-  function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread) {
+  function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread, archiveThread) {
     var card = document.createElement('article');
     card.className = 'message-card ' + roleClass(message.role);
     card.dataset.messageId = getMessageId(message);
@@ -219,6 +219,10 @@ var OptionsChatDetail = (function() {
       var chips = document.createElement('div');
       chips.className = 'message-thread-chips';
       threads.forEach(function(thread) {
+        var wrap = document.createElement('span');
+        wrap.className = 'thread-chip-wrap';
+        wrap.dataset.tag = thread.tag || '';
+
         var chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'thread-chip';
@@ -238,7 +242,24 @@ var OptionsChatDetail = (function() {
           });
           openThread(thread);
         });
-        chips.appendChild(chip);
+        wrap.appendChild(chip);
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'thread-chip-remove';
+        remove.textContent = 'x';
+        remove.title = 'Remove tag';
+        remove.setAttribute('aria-label', 'Remove ' + (thread.tag || 'thread') + ' thread');
+        remove.addEventListener('click', async function(event) {
+          event.stopPropagation();
+          try {
+            await archiveThread(thread);
+          } catch (error) {
+            remove.textContent = '!';
+          }
+        });
+        wrap.appendChild(remove);
+        chips.appendChild(wrap);
       });
       card.appendChild(chips);
     }
@@ -429,6 +450,17 @@ var OptionsChatDetail = (function() {
       return thread;
     }
 
+    async function archiveThread(thread) {
+      if (!thread || !thread.threadId) throw new Error('threadId is required');
+      if (!dao || typeof dao.setThreadStatus !== 'function') throw new Error('thread status store is unavailable');
+      var updated = await dao.setThreadStatus(thread.threadId, 'archived');
+      currentThreads = activeThreads(currentThreads.filter(function(row) {
+        return row.threadId !== thread.threadId;
+      }));
+      render(currentChat, currentMessages, currentThreads);
+      return updated;
+    }
+
     async function saveTags(chat, tags, messages) {
       if (!dao || typeof dao.setChatTags !== 'function') return;
       var updated = await dao.setChatTags(chat.chatId, tags);
@@ -539,7 +571,7 @@ var OptionsChatDetail = (function() {
       var list = document.createElement('div');
       list.className = 'message-list';
       for (var i = 0; i < currentMessages.length; i++) {
-        list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen));
+        list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen, archiveThread));
       }
       root.appendChild(list);
     }

@@ -250,7 +250,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 - [x] `M4.T01` — Add per-message tag affordance in chat detail view: hovering a captured message reveals a "Tag this" button; clicking opens a popover with the 7 built-in tags + free-text input for optional note. **Success:** clicking tag in a captured chat creates an `openThreads` row with `source: 'explicit'`, sub-source `'user'`, `messageId` bound to the message, and the chosen tag.
 - [x] `M4.T02` — Per-message tag indicators in chat detail: each tagged message shows a colored chip per tag. Multiple tags allowed per message. **Success:** a message tagged `TODO` and `REF` shows both chips; click on chip opens the thread record.
-- [ ] `M4.T03` — Untag affordance: each chip has an `x` to remove that tag from the message. Removal sets thread status to `archived` (preserves audit trail; does not delete the row). **Success:** clicking `x` updates the thread row's `status` to `archived`; vault dashboard's default view hides it; chip disappears.
+- [x] `M4.T03` — Untag affordance: each chip has an `x` to remove that tag from the message. Removal sets thread status to `archived` (preserves audit trail; does not delete the row). **Success:** clicking `x` updates the thread row's `status` to `archived`; vault dashboard's default view hides it; chip disappears.
 - [ ] `M4.T04` — Keyboard shortcut for tag: pressing `t` with a message focused opens the tag popover; pressing the first letter of a tag (`f` for FIXME, `t` for TODO, etc.) applies it instantly. **Success:** keyboard-only path from "viewing a chat" → "tag applied to focused message" takes ≤3 keystrokes.
 
 ### Secondary path: opportunistic in-content scan
