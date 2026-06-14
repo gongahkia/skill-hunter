@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { runPlatformExtraction } from './helpers.js';
+import { evalSrc, runPlatformExtraction } from './helpers.js';
 
 const scenarios = [
   {
@@ -108,6 +108,21 @@ const scenarios = [
 ];
 
 describe('platform extractors', () => {
+  it('registry exports 15 platform metadata entries', () => {
+    const files = ['dom-utils.js', 'schema.js']
+      .concat(scenarios.map((scenario) => scenario.file))
+      .concat(['platforms/registry.js']);
+    const { PlatformRegistry } = evalSrc(...files);
+
+    expect(PlatformRegistry.entries).toHaveLength(15);
+    for (const entry of PlatformRegistry.entries) {
+      expect(entry.id).toBeTruthy();
+      expect(entry.displayName).toBeTruthy();
+      expect(entry.urlPatterns.length).toBeGreaterThan(0);
+      expect(entry.adapterModule).toBe(`platforms/${entry.id}.js`);
+    }
+  });
+
   for (const scenario of scenarios) {
     for (const fixture of scenario.fixtures) {
       it(`${scenario.id} extracts messages from ${fixture}`, () => {

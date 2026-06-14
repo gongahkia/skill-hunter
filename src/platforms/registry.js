@@ -1,5 +1,15 @@
+function createPlatformEntry(platform) {
+  return {
+    id: platform.id,
+    displayName: platform.displayName || platform.name,
+    urlPatterns: platform.urlPatterns || platform.hostPatterns || [],
+    adapterModule: platform.adapterModule || ('platforms/' + platform.id + '.js')
+  };
+}
+
 var PlatformRegistry = {
   platforms: (typeof _platforms !== 'undefined') ? _platforms : [],
+  entries: ((typeof _platforms !== 'undefined') ? _platforms : []).map(createPlatformEntry),
   detect() {
     for (var i = 0; i < this.platforms.length; i++) {
       try { if (this.platforms[i].detect()) return this.platforms[i]; } catch(e) {}
@@ -13,7 +23,7 @@ var PlatformRegistry = {
     return null;
   },
   list() {
-    return this.platforms.map(function(p) { return { id: p.id, name: p.name }; });
+    return this.entries.slice();
   }
 };
 if (typeof module !== 'undefined') module.exports = PlatformRegistry;
