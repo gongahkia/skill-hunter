@@ -190,7 +190,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M1.T06` — Update `src/popup.js` and `src/popup.html` to remove same. **Success:** popup format selector matches options page set.
 - [x] `M1.T07` — Update `README.md` "Export formats" table to drop NDJSON/XML/YAML and add PDF + HTML + (placeholder marker for now). **Success:** README table reads exactly the 6 final formats.
 - [x] `M1.T08` — Bump `package.json` version to `3.0.0-alpha.0` to signal pre-release. **Success:** `node -e 'console.log(require("./package.json").version)'` prints `3.0.0-alpha.0`.
-- [ ] `M1.T09` — Run full validation: `npm run validate`. **Success:** all of build + test + check:manifests + check:permissions + lint pass.
+- [x] `M1.T09` — Run full validation: `npm run validate`. **Success:** all of build + test + check:manifests + check:permissions + lint pass.
 
 ## M2 — Vault foundation (IndexedDB + capture pipeline)
 
