@@ -81,6 +81,29 @@ describe('OptionsChatDetail', () => {
     expect(copied).toEqual(['Use the latest vault snapshot.']);
   });
 
+  it('highlights recognized message tag prefixes', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const taggedMessages = [
+      { messageId: 'm1', role: 'user', content: 'TODO: ping Alice\nTODOLIST: ignore\n  ref: source doc', index: 0 }
+    ];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: { listMessages: async () => taggedMessages },
+      window: dom.window
+    });
+
+    await detail.load(Object.assign(chat(), { messageCount: 1 }));
+
+    const body = dom.window.document.querySelector('.message-content');
+    const tags = [...body.querySelectorAll('.message-tag-prefix')];
+    expect(tags.map((node) => node.dataset.tag)).toEqual(['TODO', 'REF']);
+    expect(tags.map((node) => node.textContent)).toEqual(['TODO', 'ref']);
+    expect(body.textContent).toContain('TODO: ping Alice');
+    expect(body.textContent).toContain('TODOLIST: ignore');
+  });
+
   it('adds and removes free-form chat tags', async () => {
     const { dom } = createDom();
     const { OptionsChatDetail } = loadOptionsModules(dom);

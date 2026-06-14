@@ -131,6 +131,31 @@ var OptionsChatDetail = (function() {
     return null;
   }
 
+  function tagPrefixPattern() {
+    return new RegExp('(^|\\n)([ \\t]*)(' + BUILT_IN_THREAD_TAGS.join('|') + ')(\\s*:)', 'gi');
+  }
+
+  function appendMessageContent(document, root, value) {
+    var content = text(value, '(empty)');
+    var pattern = tagPrefixPattern();
+    var index = 0;
+    var match;
+    while ((match = pattern.exec(content))) {
+      var tagStart = match.index + match[1].length + match[2].length;
+      var tagEnd = tagStart + match[3].length;
+      if (tagStart > index) root.appendChild(document.createTextNode(content.slice(index, tagStart)));
+      var tag = document.createElement('span');
+      tag.className = 'message-tag-prefix';
+      tag.dataset.tag = match[3].toUpperCase();
+      tag.textContent = content.slice(tagStart, tagEnd);
+      root.appendChild(tag);
+      index = tagEnd;
+    }
+    if (index < content.length || !root.childNodes.length) {
+      root.appendChild(document.createTextNode(content.slice(index)));
+    }
+  }
+
   function setOriginalLink(link, chat) {
     if (!link) return;
     if (chat && chat.url) {
@@ -277,7 +302,7 @@ var OptionsChatDetail = (function() {
 
     var body = document.createElement('div');
     body.className = 'message-content';
-    body.textContent = text(message.content, '(empty)');
+    appendMessageContent(document, body, message.content);
 
     card.appendChild(meta);
 

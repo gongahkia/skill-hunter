@@ -136,4 +136,15 @@ describe('options colorscheme settings', () => {
     expect(reloaded.window.document.documentElement.dataset.themeMode).toBe('light');
     expect(reloaded.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe(darkBg);
   });
+
+  it('exposes tag colors for inline message highlighting', async () => {
+    const dom = await loadOptions({ colorscheme: 'tokyo-night', darkMode: 'dark' });
+    const style = dom.window.document.documentElement.style;
+
+    expect(style.getPropertyValue('--tag-todo')).toBe('#e0af68');
+    expect(style.getPropertyValue('--tag-ref')).toBe('#7aa2f7');
+    expect(style.getPropertyValue('--tag-followup')).toBe('#bb9af7');
+    expect(style.getPropertyValue('--tag-unresolved')).toBe('#f7768e');
+    expect(style.getPropertyValue('--tag-prompt')).toBe('#9ece6a');
+  });
 });

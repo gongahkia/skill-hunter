@@ -1010,6 +1010,39 @@ select[multiple] {
   line-height: 1.45;
 }
 
+.message-tag-prefix {
+  color: var(--message-tag-color, var(--secondary));
+  font-weight: 800;
+}
+
+.message-tag-prefix[data-tag="TODO"] {
+  --message-tag-color: var(--tag-todo);
+}
+
+.message-tag-prefix[data-tag="FIXME"] {
+  --message-tag-color: var(--tag-fixme);
+}
+
+.message-tag-prefix[data-tag="REV"] {
+  --message-tag-color: var(--tag-rev);
+}
+
+.message-tag-prefix[data-tag="REF"] {
+  --message-tag-color: var(--tag-ref);
+}
+
+.message-tag-prefix[data-tag="FOLLOWUP"] {
+  --message-tag-color: var(--tag-followup);
+}
+
+.message-tag-prefix[data-tag="UNRESOLVED"] {
+  --message-tag-color: var(--tag-unresolved);
+}
+
+.message-tag-prefix[data-tag="PROMPT"] {
+  --message-tag-color: var(--tag-prompt);
+}
+
 .panel {
   padding-bottom: 12px;
 }
