@@ -83,6 +83,7 @@ describe('VaultDAO', () => {
       { messageId: 'msg-1', role: 'user', content: 'Q', index: 0, timestamp: '2026-01-01T00:00:00.000Z' }
     ]);
     expect((await dao.listMessages('chat-1')).map((message) => message.messageId)).toEqual(['msg-1', 'msg-2']);
+    expect((await dao.listAllMessages()).map((message) => message.messageId)).toEqual(['msg-1', 'msg-2']);
 
     await dao.putOpenThreads([
       {

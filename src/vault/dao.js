@@ -135,6 +135,17 @@ function createVaultDAO(options) {
     });
   }
 
+  async function listAllMessages() {
+    return withTransaction(['messages'], 'readonly', async function(transaction) {
+      var rows = await requestToPromise(transaction.objectStore('messages').getAll());
+      return rows.sort(function(a, b) {
+        var chatCompare = String(a.chatId || '').localeCompare(String(b.chatId || ''));
+        if (chatCompare !== 0) return chatCompare;
+        return (a.index || 0) - (b.index || 0);
+      });
+    });
+  }
+
   async function putOpenThreads(threads) {
     if (!Array.isArray(threads)) throw new Error('threads must be an array');
     return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
@@ -208,6 +219,7 @@ function createVaultDAO(options) {
     listChats: listChats,
     putMessages: putMessages,
     listMessages: listMessages,
+    listAllMessages: listAllMessages,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,

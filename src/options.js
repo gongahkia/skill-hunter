@@ -11,6 +11,7 @@
     autoExportStatus: document.getElementById('autoExportStatus'),
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
+    vaultSearch: document.getElementById('vaultSearch'),
     chatList: document.getElementById('chat-list'),
     chatListSummary: document.getElementById('chat-list-summary'),
     chatDetail: document.getElementById('chat-detail'),
@@ -309,7 +310,33 @@
         if (detail) detail.load(chat);
       }
     });
+    if (typeof VaultSearch !== 'undefined') {
+      try {
+        var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });
+        list.setChats(await search.load());
+        bindSearchInput(search, list);
+        return;
+      } catch (error) {
+        log('warn', 'options.search.init.failed', { error: serializeError(error) });
+      }
+    }
+
     await list.load();
+  }
+
+  function bindSearchInput(search, list) {
+    if (!els.vaultSearch) return;
+    var serial = 0;
+    els.vaultSearch.addEventListener('input', async function() {
+      var token = ++serial;
+      var query = els.vaultSearch.value || '';
+      try {
+        var chats = query.trim() ? await search.search(query, 100) : search.getChats();
+        if (token === serial) list.setChats(chats);
+      } catch (error) {
+        log('error', 'options.search.failed', { error: serializeError(error), query: query });
+      }
+    });
   }
 
   async function init() {
