@@ -1,6 +1,6 @@
 # TODO — Rakuzaichi v3 Pivot
 
-> Source of truth for the v3 pivot. Supersedes `WORKON-PIVOT-ASAP.md` for actionable work; keep that doc for narrative context. Drafted 2026-06-14. No fixed deadline. Ship when done.
+> Source of truth for the v3 pivot. Subsumes the now-deleted `WORKON-PIVOT-ASAP.md` (its narrative is folded into §Market context). Drafted 2026-06-14. No fixed deadline. Ship when done.
 
 ## TL;DR
 
@@ -193,7 +193,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 ## M2 — Vault foundation (IndexedDB + capture pipeline)
 
-> Goal: Background service worker captures chats from the 9 platforms and writes them to a versioned IndexedDB schema. Capture is idempotent (re-running on same chat updates existing record instead of duplicating). No UI yet.
+> Goal: Background service worker captures chats from all 15 platforms and writes them to a versioned IndexedDB schema. Capture is idempotent (re-running on same chat updates existing record instead of duplicating). No UI yet.
 
 - [ ] `M2.T01` — Create `src/vault/db.js` implementing IndexedDB open + upgrade with the schema in §Data model. Use a single version constant `VAULT_SCHEMA_VERSION = 1`. **Success:** `idb.open('rakuzaichi-vault')` in DevTools shows all 5 object stores with correct indexes.
 - [ ] `M2.T02` — Create `src/vault/migrations.js` with empty migration registry (no migrations needed for v1; framework only). **Success:** the file exports `migrations` array; future entries append. Unit test verifies upgrade from v0 (no DB) to v1 creates all stores.
@@ -210,7 +210,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [ ] `M2.T06g` — Update `src/platforms/registry.js` to register all 15 platforms with their URL patterns. **Success:** registry exports an array of 15 entries; each has `id`, `displayName`, `urlPatterns`, `adapterModule`.
 - [ ] `M2.T07` — Implement deterministic `chatId` derivation per platform in each `src/platforms/<platform>.js`: prefer URL path segment; fallback to hash of first message + timestamp. Document the strategy per platform in `src/platforms/README.md`. **Success:** reloading the same chat URL produces the same `chatId` for all 15 platforms; document table lists each platform's chosen strategy.
 - [ ] `M2.T08` — In `src/background-core.js`, add `handleCapture(snapshot)` that upserts chat + messages into vault. Idempotent — re-capture updates `lastUpdatedAt` and appends only new messages by index. **Success:** unit test runs capture twice with the same snapshot and asserts vault contains exactly N messages, not 2N.
-- [ ] `M2.T09` — Add capture trigger: on `chrome.tabs.onUpdated` when URL matches one of 9 platforms AND `changeInfo.status === 'complete'`, message the content script to extract and capture. Throttle per-tab to 1 capture per 30s. **Success:** opening a chat, sending 3 messages, idling 10s shows 1 capture record (with all messages) in `extractionRuns` log; rapid reloads do not multiply records.
+- [ ] `M2.T09` — Add capture trigger: on `chrome.tabs.onUpdated` when URL matches any of the 15 platforms AND `changeInfo.status === 'complete'`, message the content script to extract and capture. Throttle per-tab to 1 capture per 30s. **Success:** opening a chat, sending 3 messages, idling 10s shows 1 capture record (with all messages) in `extractionRuns` log; rapid reloads do not multiply records.
 - [ ] `M2.T10` — Add `chrome.alarms`-driven periodic background sweep every 10 minutes that re-captures any active tab on a supported platform. **Success:** simulated alarm fire triggers capture of active supported tab; no fire when no supported tab is active.
 - [ ] `M2.T11` — Add explicit "Capture this chat now" button in popup. **Success:** click invokes `handleCapture` for the active tab; popup shows toast on success.
 - [ ] `M2.T12` — Add capture-status indicator to popup: green dot if last capture <5min, amber 5-30min, red >30min or error. **Success:** indicator updates within 2s of capture completion.
@@ -303,7 +303,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [ ] `M7.T02` — Replace `asset/reference/architecture.png` with a new architecture diagram matching §Architecture above. **Success:** new image embedded in README.
 - [ ] `M7.T03` — Generate a 25-second demo GIF: open ChatGPT → capture → switch to Claude → capture → open vault → search across both → click a TODO → jump to source → run extraction → see new threads appear. No voiceover. **Success:** GIF is ≤8MB, ≤25s, embedded at top of README.
 - [ ] `M7.T04` — Build a landing page at `rakuzaichi.<domain>` (single static page; host on Cloudflare Pages or Vercel — yes this is a *web page*, not a server; it serves the binary download and the demo, nothing more). **Success:** landing page live; loads in <1s on cold cache; contains demo GIF, install buttons for Chrome/Firefox/Safari, link to source.
-- [ ] `M7.T05` — Write `PRIVACY.md` mandatory per CWS 2026 policy. State: zero data leaves the device; one-time CDN fetch for transformers.js model + chunks (state which CDN); no telemetry; no analytics. Justify broad host permissions (each of the 9 LLM domains is enumerated; no `<all_urls>`). **Success:** `PRIVACY.md` exists; each host permission has a one-line justification.
+- [ ] `M7.T05` — Write `PRIVACY.md` mandatory per CWS 2026 policy. State: zero data leaves the device; one-time CDN fetch for transformers.js model + chunks (state which CDN); no telemetry; no analytics. Justify host permissions (each of the 15 LLM domains is enumerated; no `<all_urls>`). **Success:** `PRIVACY.md` exists; each host permission has a one-line justification.
 - [ ] `M7.T06` — Audit `src/manifest.json` to use only narrow per-domain host permissions, not `<all_urls>` or `*://*/*`. Enumerate the 15 supported LLM origins explicitly: `https://chat.openai.com/*`, `https://chatgpt.com/*`, `https://gemini.google.com/*`, `https://claude.ai/*`, `https://www.perplexity.ai/*`, `https://chat.deepseek.com/*`, `https://grok.com/*`, `https://copilot.microsoft.com/*`, `https://chat.mistral.ai/*`, `https://huggingface.co/chat/*`, `https://poe.com/*`, `https://kimi.com/*`, `https://chat.qwen.ai/*` (and `https://tongyi.aliyun.com/*` if needed), `https://chatglm.cn/*`, `https://www.doubao.com/*`, `https://notebooklm.google.com/*`. **Success:** `host_permissions` contains exactly these origins; CWS reviewers can verify trivially; PRIVACY.md justifies each with a one-line "captures chat content from this LLM platform" rationale.
 - [ ] `M7.T07` — Build the "Wrapped"-style local stats page (per pivot doc M3.12): top topics, most-active platform, busiest day, longest chat — all client-side. Demo bait. **Success:** stats page renders in <500ms over a 1000-chat vault; shareable PNG screenshot button works.
 - [ ] `M7.T08` — Draft HN post title + body + first-comment template in `docs/launch/hn-post.md`. **Success:** doc contains title (<70 chars), body (<300 words), first-comment with technical Q&A primer (zero-server justification, model choice rationale, why-not-OpenAI-export comparison table).
@@ -379,7 +379,7 @@ If M9+ adapters conform to this, the vault, search, threads, and extraction laye
 
 ## Open questions deferred (decide post-M3, before M5 ships)
 
-1. **Telemetry "tasteful exception"** — pivot doc raised whether to ship opt-in anonymous platform-usage counts (which of 9 platforms get used most, to inform future drop-decisions). Currently locked at zero. Reconsider only if real install telemetry is needed for platform-pruning decisions; if so, design an explicit local-summary-only "Send report to maintainer" button that user clicks once per quarter, NOT background ping.
+1. **Telemetry "tasteful exception"** — pivot doc raised whether to ship opt-in anonymous platform-usage counts (which of the 15 platforms get used most, to inform future drop-decisions). Currently locked at zero. Reconsider only if real install telemetry is needed for platform-pruning decisions; if so, design an explicit local-summary-only "Send report to maintainer" button that user clicks once per quarter, NOT background ping.
 2. **Icon refresh** — current Rakuzaichi icon stays for v3.0; vault/key motif refresh deferred to v3.1.
 3. **Encrypted-at-rest IndexedDB** — currently plaintext. Web Crypto wrapper around all reads/writes is a v3.x feature, not v3.0 (perf cost unknown until prototyped).
 4. **Multi-device sync** — explicit non-goal. If users repeatedly ask, the answer is "use Obsidian sync (M6.T05) + Obsidian's own sync mechanism" — Rakuzaichi never touches a server.
