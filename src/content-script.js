@@ -67,6 +67,7 @@ function extractChatSnapshot(traceId) {
     pinned: false,
     archived: false,
     tags: [],
+    metadata: result.metadata || {},
     messages: normalizeSnapshotMessages(platform, result, chatId),
     traceId: traceId || ''
   };

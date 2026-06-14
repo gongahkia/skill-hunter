@@ -97,6 +97,13 @@ const scenarios = [
     url: 'https://www.doubao.com/chat/thread-123',
     fixtures: ['fixtures/platforms/doubao-primary.html', 'fixtures/platforms/doubao-variant.html'],
     expectedModel: 'Doubao 1.5 Pro'
+  },
+  {
+    id: 'notebooklm',
+    file: 'platforms/notebooklm.js',
+    url: 'https://notebooklm.google.com/notebook/thread-123',
+    fixtures: ['fixtures/platforms/notebooklm-primary.html', 'fixtures/platforms/notebooklm-variant.html'],
+    expectedModel: 'NotebookLM'
   }
 ];
 

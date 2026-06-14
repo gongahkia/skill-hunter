@@ -28,7 +28,8 @@
     "https://tongyi.aliyun.com/*",
     "https://chatglm.cn/*",
     "https://doubao.com/*",
-    "https://www.doubao.com/*"
+    "https://www.doubao.com/*",
+    "https://notebooklm.google.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -61,7 +62,8 @@
       "https://tongyi.aliyun.com/*",
       "https://chatglm.cn/*",
       "https://doubao.com/*",
-      "https://www.doubao.com/*"
+      "https://www.doubao.com/*",
+      "https://notebooklm.google.com/*"
     ],
     "js": [
       "compat.js",
@@ -82,6 +84,7 @@
       "platforms/qwen.js",
       "platforms/chatglm.js",
       "platforms/doubao.js",
+      "platforms/notebooklm.js",
       "platforms/registry.js",
       "content-script.js"
     ],

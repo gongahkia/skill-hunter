@@ -16,7 +16,8 @@ const existingPlatforms = [
   { id: 'kimi', file: 'platforms/kimi.js', fixture: 'fixtures/platforms/kimi-primary.html', url: 'https://kimi.com/chat/thread-123' },
   { id: 'qwen', file: 'platforms/qwen.js', fixture: 'fixtures/platforms/qwen-primary.html', url: 'https://chat.qwen.ai/c/thread-123' },
   { id: 'chatglm', file: 'platforms/chatglm.js', fixture: 'fixtures/platforms/chatglm-primary.html', url: 'https://chatglm.cn/main/thread-123' },
-  { id: 'doubao', file: 'platforms/doubao.js', fixture: 'fixtures/platforms/doubao-primary.html', url: 'https://www.doubao.com/chat/thread-123' }
+  { id: 'doubao', file: 'platforms/doubao.js', fixture: 'fixtures/platforms/doubao-primary.html', url: 'https://www.doubao.com/chat/thread-123' },
+  { id: 'notebooklm', file: 'platforms/notebooklm.js', fixture: 'fixtures/platforms/notebooklm-primary.html', url: 'https://notebooklm.google.com/notebook/thread-123' }
 ];
 
 function runContentAction({ fixture, url, platformFiles, action }) {
@@ -114,5 +115,20 @@ describe('content script chat snapshots', () => {
     expect(result.response.data.chatTitle).toBeTruthy();
     expect(result.response.data.messages).toHaveLength(2);
     expect(result.response.snapshot.chatId).toBe('claude:claude-thread');
+  });
+
+  it('includes NotebookLM source metadata in snapshots', () => {
+    const result = runContentAction({
+      fixture: 'fixtures/platforms/notebooklm-primary.html',
+      url: 'https://notebooklm.google.com/notebook/thread-123',
+      platformFiles: ['platforms/notebooklm.js'],
+      action: 'extractChatSnapshot'
+    });
+
+    expect(result.response.error).toBeUndefined();
+    expect(result.response.data.metadata.sources).toHaveLength(2);
+    expect(result.response.data.metadata.sources[0]).toMatchObject({
+      title: 'case-notes.pdf'
+    });
   });
 });
