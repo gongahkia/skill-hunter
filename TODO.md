@@ -1,6 +1,6 @@
 # TODO — Rakuzaichi v3 Pivot
 
-> Source of truth for the v3 pivot. Subsumes the now-deleted `WORKON-PIVOT-ASAP.md` (its narrative is folded into §Market context). Drafted 2026-06-14. No fixed deadline. Ship when done.
+> Source of truth for the v3 pivot. Subsumes the now-deleted pivot scratch doc (its narrative is folded into §Market context). Drafted 2026-06-14. No fixed deadline. Ship when done.
 
 ## TL;DR
 
@@ -176,7 +176,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [ ] `M0.T12` — In Owl repo (separate working tree), append a deprecation banner to its README pointing to Rakuzaichi v3, then commit + push. **Success:** Owl `README.md` has the deprecation pointer; Owl repo description on GitHub updated to "Archived — merged into Rakuzaichi v3."
   - 2026-06-14: local Owl commit `9708eac` created; push and `gh repo edit gongahkia/owl` return GitHub 404, so remote update is not verified.
 - [ ] `M0.T13` — Archive Owl repo on GitHub (Settings → Archive). **Success:** GitHub shows the archived banner on the Owl repo.
-- [ ] `M0.T14` — Delete `WORKON-PIVOT-ASAP.md` (its narrative is now folded into `TODO.md` §TL;DR, §Decisions locked, §Market context, and §References). **Success:** `ls WORKON-PIVOT-ASAP.md` returns "No such file or directory"; nothing in the repo links to it.
+- [x] `M0.T14` — Delete former pivot scratch doc (its narrative is now folded into `TODO.md` §TL;DR, §Decisions locked, §Market context, and §References). **Success:** file is absent; nothing in the repo links to it.
 
 ## M1 — Format purge + new-format scaffold
 
@@ -390,7 +390,7 @@ If M9+ adapters conform to this, the vault, search, threads, and extraction laye
 
 ---
 
-## Market context (migrated from former `WORKON-PIVOT-ASAP.md`)
+## Market context (migrated from former pivot scratch doc)
 
 > Why the pivot exists at all. Snapshot of the competitive read at the time of the pivot decision. [Inference] These observations decay; revalidate before launch.
 
@@ -434,7 +434,7 @@ Privacy-and-data-ownership anxiety is real and rising: a Nature article (Jan 202
 - CWS review policy 2026 (broad host perms, privacy policy, review times): `https://developer.chrome.com/docs/webstore/review-process`, `https://extensionbooster.net/blog/chrome-web-store-extension-review-time-2026-how-long-guide/`, `https://www.extensionfast.com/blog/chrome-extension-privacy-policy-requirements-template-and-examples-for-2026`
 - LLM platform landscape 2026 (market share, Claude growth, Chinese ecosystem leaders): `https://momenticmarketing.com/blog/top-ai-chatbots`, `https://firstpagesage.com/reports/top-generative-ai-chatbots/`, `https://digitalinasia.com/which-llms-work-asia-accessibility-tracker/`, `https://www.index.dev/blog/chinese-open-source-llm-models`, `https://aiportalx.com/blog/best-chinese-ai-models-2026-glm-4-qwen-deepseek`
 - Phind shutdown (Jan 16 2026): `https://www.toolsforhumans.ai/ai-tools/phind`
-- Pivot context: history of `WORKON-PIVOT-ASAP.md` (deleted post-M0.T14; folded into this doc's §Market context).
+- Pivot context: folded into this doc's §Market context.
 - Origin context (merged from Owl): see Owl history in `git log --all` post-M0.
 
 ---
