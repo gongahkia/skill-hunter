@@ -26,13 +26,13 @@
 
       <section class="nav-group" aria-label="Tags">
         <h2>Tags</h2>
-        <div class="tag-grid">
-          <button type="button">TODO</button>
-          <button type="button">FIXME</button>
-          <button type="button">UNRESOLVED</button>
-          <button type="button">FOLLOWUP</button>
-          <button type="button">REF</button>
-          <button type="button">PROMPT</button>
+        <div id="tagFilter" class="tag-grid">
+          <button type="button" data-tag="TODO" aria-pressed="false">TODO</button>
+          <button type="button" data-tag="FIXME" aria-pressed="false">FIXME</button>
+          <button type="button" data-tag="UNRESOLVED" aria-pressed="false">UNRESOLVED</button>
+          <button type="button" data-tag="FOLLOWUP" aria-pressed="false">FOLLOWUP</button>
+          <button type="button" data-tag="REF" aria-pressed="false">REF</button>
+          <button type="button" data-tag="PROMPT" aria-pressed="false">PROMPT</button>
         </div>
       </section>
 
@@ -40,12 +40,22 @@
         <h2>Filters</h2>
         <label>
           Platform
-          <select id="platformFilter">
-            <option value="all">All platforms</option>
+          <select id="platformFilter" multiple size="6">
             <option value="chatgpt">ChatGPT</option>
             <option value="claude">Claude</option>
             <option value="gemini">Gemini</option>
+            <option value="perplexity">Perplexity</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="grok">Grok</option>
+            <option value="copilot">Copilot</option>
+            <option value="mistral">Mistral</option>
+            <option value="huggingchat">HuggingChat</option>
+            <option value="poe">Poe</option>
+            <option value="kimi">Kimi</option>
             <option value="qwen">Qwen Chat</option>
+            <option value="chatglm">ChatGLM</option>
+            <option value="doubao">Doubao</option>
+            <option value="notebooklm">NotebookLM</option>
           </select>
         </label>
         <label>
@@ -55,8 +65,24 @@
             <option value="today">Today</option>
             <option value="week">This week</option>
             <option value="month">This month</option>
+            <option value="custom">Custom</option>
           </select>
         </label>
+        <div id="customDateFields" class="date-grid" hidden>
+          <label>
+            Start
+            <input id="dateStart" type="date">
+          </label>
+          <label>
+            End
+            <input id="dateEnd" type="date">
+          </label>
+        </div>
+        <label class="checkbox-label">
+          <input id="pinnedOnly" type="checkbox">
+          Pinned only
+        </label>
+        <button id="clearFilters" class="btn btn-ghost filter-clear" type="button">Clear filters</button>
       </section>
     </aside>
 
@@ -178,6 +204,7 @@
   <script src="vault/db.js"></script>
   <script src="vault/dao.js"></script>
   <script src="vault/search.js"></script>
+  <script src="options/filters.js"></script>
   <script src="options/chat-list.js"></script>
   <script src="options/chat-detail.js"></script>
   <script src="options.js"></script>

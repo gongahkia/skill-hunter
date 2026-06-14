@@ -173,6 +173,12 @@ small {
   font-weight: 700;
 }
 
+.tag-grid button[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
 label {
   display: flex;
   flex-direction: column;
@@ -186,6 +192,7 @@ label {
 select,
 input[type="text"],
 input[type="number"],
+input[type="date"],
 input[type="search"] {
   width: 100%;
   min-height: 36px;
@@ -195,6 +202,21 @@ input[type="search"] {
   color: var(--ink);
   padding: 8px 9px;
   font: inherit;
+}
+
+select[multiple] {
+  min-height: 132px;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+
+.filter-clear {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .vault-topbar {

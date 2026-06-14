@@ -12,6 +12,14 @@
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
     vaultSearch: document.getElementById('vaultSearch'),
+    platformFilter: document.getElementById('platformFilter'),
+    dateFilter: document.getElementById('dateFilter'),
+    customDateFields: document.getElementById('customDateFields'),
+    dateStart: document.getElementById('dateStart'),
+    dateEnd: document.getElementById('dateEnd'),
+    tagFilter: document.getElementById('tagFilter'),
+    pinnedOnly: document.getElementById('pinnedOnly'),
+    clearFilters: document.getElementById('clearFilters'),
     chatList: document.getElementById('chat-list'),
     chatListSummary: document.getElementById('chat-list-summary'),
     chatDetail: document.getElementById('chat-detail'),
@@ -314,7 +322,7 @@
       try {
         var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });
         list.setChats(await search.load());
-        bindSearchInput(search, list);
+        bindVaultControls(search, list);
         return;
       } catch (error) {
         log('warn', 'options.search.init.failed', { error: serializeError(error) });
@@ -324,19 +332,96 @@
     await list.load();
   }
 
-  function bindSearchInput(search, list) {
-    if (!els.vaultSearch) return;
+  function selectedOptions(select) {
+    if (!select) return [];
+    return Array.prototype.slice.call(select.selectedOptions || []).map(function(option) {
+      return option.value;
+    }).filter(Boolean);
+  }
+
+  function selectedTags() {
+    if (!els.tagFilter) return [];
+    return Array.prototype.slice.call(els.tagFilter.querySelectorAll('button[aria-pressed="true"]')).map(function(button) {
+      return button.dataset.tag;
+    }).filter(Boolean);
+  }
+
+  function filterState() {
+    return {
+      platforms: selectedOptions(els.platformFilter),
+      datePreset: els.dateFilter ? els.dateFilter.value : 'all',
+      dateStart: els.dateStart ? els.dateStart.value : '',
+      dateEnd: els.dateEnd ? els.dateEnd.value : '',
+      tags: selectedTags(),
+      pinnedOnly: !!(els.pinnedOnly && els.pinnedOnly.checked)
+    };
+  }
+
+  function resetFilters() {
+    if (els.vaultSearch) els.vaultSearch.value = '';
+    if (els.platformFilter) {
+      Array.prototype.forEach.call(els.platformFilter.options, function(option) {
+        option.selected = false;
+      });
+    }
+    if (els.dateFilter) els.dateFilter.value = 'all';
+    if (els.dateStart) els.dateStart.value = '';
+    if (els.dateEnd) els.dateEnd.value = '';
+    if (els.pinnedOnly) els.pinnedOnly.checked = false;
+    if (els.tagFilter) {
+      Array.prototype.forEach.call(els.tagFilter.querySelectorAll('button'), function(button) {
+        button.setAttribute('aria-pressed', 'false');
+      });
+    }
+    syncCustomDateVisibility();
+  }
+
+  function syncCustomDateVisibility() {
+    if (!els.customDateFields || !els.dateFilter) return;
+    els.customDateFields.hidden = els.dateFilter.value !== 'custom';
+  }
+
+  function bindVaultControls(search, list) {
     var serial = 0;
-    els.vaultSearch.addEventListener('input', async function() {
+
+    async function refresh() {
       var token = ++serial;
-      var query = els.vaultSearch.value || '';
+      var query = els.vaultSearch ? els.vaultSearch.value || '' : '';
       try {
-        var chats = query.trim() ? await search.search(query, 100) : search.getChats();
+        var source = query.trim() ? await search.search(query, 100) : search.getChats();
+        var chats = typeof OptionsFilters !== 'undefined' ? OptionsFilters.apply(source, filterState()) : source;
         if (token === serial) list.setChats(chats);
       } catch (error) {
         log('error', 'options.search.failed', { error: serializeError(error), query: query });
       }
-    });
+    }
+
+    if (els.vaultSearch) els.vaultSearch.addEventListener('input', refresh);
+    if (els.platformFilter) els.platformFilter.addEventListener('change', refresh);
+    if (els.dateFilter) {
+      els.dateFilter.addEventListener('change', function() {
+        syncCustomDateVisibility();
+        refresh();
+      });
+    }
+    if (els.dateStart) els.dateStart.addEventListener('change', refresh);
+    if (els.dateEnd) els.dateEnd.addEventListener('change', refresh);
+    if (els.pinnedOnly) els.pinnedOnly.addEventListener('change', refresh);
+    if (els.tagFilter) {
+      els.tagFilter.addEventListener('click', function(event) {
+        var button = event.target.closest('button[data-tag]');
+        if (!button) return;
+        button.setAttribute('aria-pressed', button.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+        refresh();
+      });
+    }
+    if (els.clearFilters) {
+      els.clearFilters.addEventListener('click', function() {
+        resetFilters();
+        refresh();
+      });
+    }
+    syncCustomDateVisibility();
   }
 
   async function init() {
