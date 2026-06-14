@@ -149,6 +149,37 @@ describe('VaultDAO', () => {
     expect(await dao.deleteChat('missing')).toBe(false);
   });
 
+  it('toggles pinned chats and sorts pinned rows first', async () => {
+    const dao = makeDAO(dbName());
+    await dao.putChat({
+      chatId: 'older',
+      platform: 'chatgpt',
+      title: 'Older',
+      capturedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      messageCount: 0,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+    await dao.putChat({
+      chatId: 'newer',
+      platform: 'chatgpt',
+      title: 'Newer',
+      capturedAt: '2026-01-02T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+      messageCount: 0,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+
+    expect((await dao.listChats()).map((chat) => chat.chatId)).toEqual(['newer', 'older']);
+    await expect(dao.setChatPinned('older', true)).resolves.toMatchObject({ pinned: true });
+    expect((await dao.listChats()).map((chat) => chat.chatId)).toEqual(['older', 'newer']);
+    await expect(dao.setChatPinned('missing', true)).resolves.toBeNull();
+  });
+
   it('creates nested folders, moves chats, and deletes folder subtrees', async () => {
     const dao = makeDAO(dbName());
     await dao.putChat({

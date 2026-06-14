@@ -19,6 +19,7 @@ function createDom() {
   const dom = new JSDOM(`
     <main>
       <a id="open-original" href="#" aria-disabled="true">Open original</a>
+      <button id="detail-pin" type="button"></button>
       <div id="chat-detail"></div>
       <span id="chat-list-summary">0 captured</span>
       <strong id="vault-count">0</strong>
@@ -110,6 +111,30 @@ describe('OptionsChatDetail', () => {
       { chatId: 'claude:thread-1', tags: [] }
     ]);
     expect(changed).toEqual([['research'], []]);
+  });
+
+  it('toggles pinned state from the detail header', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const changed = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      pinButton: dom.window.document.getElementById('detail-pin'),
+      dao: {
+        listMessages: async () => messages(),
+        setChatPinned: async (chatId, pinned) => Object.assign(chat(), { chatId, pinned })
+      },
+      onPinChanged: (updated) => changed.push(updated.pinned),
+      window: dom.window
+    });
+
+    await detail.load(Object.assign(chat(), { pinned: false }));
+    dom.window.document.getElementById('detail-pin').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(changed).toEqual([true]);
+    expect(dom.window.document.getElementById('detail-pin').textContent).toBe('★');
   });
 
   it('opens detail when a chat-list row is clicked', async () => {

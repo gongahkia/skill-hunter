@@ -115,6 +115,9 @@ var OptionsChatDetail = (function() {
     var win = options.window || document.defaultView || fallbackWindow;
     var dao = options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null);
     var onTagsChanged = typeof options.onTagsChanged === 'function' ? options.onTagsChanged : function() {};
+    var onPinChanged = typeof options.onPinChanged === 'function' ? options.onPinChanged : function() {};
+    var pinButton = options.pinButton || null;
+    var currentChat = null;
     var copyText = options.copyText || function(value) {
       return defaultCopy(document, win, value);
     };
@@ -130,6 +133,19 @@ var OptionsChatDetail = (function() {
       empty.appendChild(heading);
       empty.appendChild(copy);
       return empty;
+    }
+
+    function syncPinButton(chat) {
+      if (!pinButton) return;
+      if (!chat || !chat.chatId) {
+        pinButton.disabled = true;
+        pinButton.textContent = '☆';
+        pinButton.setAttribute('aria-label', 'Pin chat');
+        return;
+      }
+      pinButton.disabled = false;
+      pinButton.textContent = chat.pinned ? '★' : '☆';
+      pinButton.setAttribute('aria-label', chat.pinned ? 'Unpin chat' : 'Pin chat');
     }
 
     async function saveTags(chat, tags, messages) {
@@ -197,13 +213,17 @@ var OptionsChatDetail = (function() {
 
     function renderEmpty(title, message) {
       root.innerHTML = '';
+      currentChat = null;
+      syncPinButton(null);
       var empty = makeEmpty(title, message);
       root.appendChild(empty);
     }
 
     function render(chat, messages) {
       root.innerHTML = '';
+      currentChat = chat;
       setOriginalLink(openLink, chat);
+      syncPinButton(chat);
 
       var summary = document.createElement('section');
       summary.className = 'detail-summary';
@@ -253,6 +273,17 @@ var OptionsChatDetail = (function() {
         }
         return [];
       }
+    }
+
+    if (pinButton) {
+      pinButton.addEventListener('click', async function() {
+        if (!currentChat || !dao || typeof dao.setChatPinned !== 'function') return;
+        var updated = await dao.setChatPinned(currentChat.chatId, !currentChat.pinned);
+        if (!updated) return;
+        currentChat.pinned = !!updated.pinned;
+        syncPinButton(currentChat);
+        onPinChanged(currentChat);
+      });
     }
 
     setOriginalLink(openLink, null);

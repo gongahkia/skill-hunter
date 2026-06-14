@@ -96,4 +96,28 @@ describe('OptionsChatList', () => {
     expect(selected).toEqual(['chat-0', 'chat-0']);
     expect(root.querySelector('[data-chat-id="chat-0"]').className).toContain('selected');
   });
+
+  it('toggles pin without selecting the row', async () => {
+    const { dom, root } = createDom();
+    const OptionsChatList = loadChatList(dom);
+    const selected = [];
+    const toggles = [];
+    const list = OptionsChatList.create({
+      root,
+      onSelect: (chat) => selected.push(chat.chatId),
+      onPinToggle: async (chat, pinned) => {
+        toggles.push({ chatId: chat.chatId, pinned });
+        return Object.assign({}, chat, { pinned });
+      },
+      window: dom.window
+    });
+
+    list.setChats(makeChats(1));
+    root.querySelector('.pin-toggle').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(selected).toEqual([]);
+    expect(toggles).toEqual([{ chatId: 'chat-0', pinned: true }]);
+    expect(root.querySelector('.pin-toggle').textContent).toBe('★');
+  });
 });

@@ -31,6 +31,7 @@
     chatListSummary: document.getElementById('chat-list-summary'),
     chatDetail: document.getElementById('chat-detail'),
     openOriginal: document.getElementById('open-original'),
+    detailPin: document.getElementById('detailPin'),
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
@@ -314,8 +315,12 @@
       detail = OptionsChatDetail.create({
         root: els.chatDetail,
         openLink: els.openOriginal,
+        pinButton: els.detailPin,
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         onTagsChanged: function() {
+          refreshVault(true);
+        },
+        onPinChanged: function() {
           refreshVault(true);
         }
       });
@@ -328,6 +333,12 @@
       countEl: els.vaultCount,
       onSelect: function(chat) {
         if (detail) detail.load(chat);
+      },
+      onPinToggle: async function(chat, pinned) {
+        if (typeof VaultDAO === 'undefined' || !VaultDAO.setChatPinned) return null;
+        var updated = await VaultDAO.setChatPinned(chat.chatId, pinned);
+        await refreshVault(true);
+        return updated;
       }
     });
     if (typeof VaultSearch !== 'undefined') {

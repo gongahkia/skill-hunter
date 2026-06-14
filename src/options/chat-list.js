@@ -44,17 +44,33 @@ var OptionsChatList = (function() {
     row.appendChild(cell);
   }
 
+  function appendPinCell(row, chat, onPinToggle) {
+    var cell = row.ownerDocument.createElement('span');
+    cell.setAttribute('role', 'cell');
+    var button = row.ownerDocument.createElement('button');
+    button.type = 'button';
+    button.className = 'pin-toggle';
+    button.textContent = chat.pinned ? '★' : '☆';
+    button.setAttribute('aria-label', chat.pinned ? 'Unpin chat' : 'Pin chat');
+    button.addEventListener('click', function(event) {
+      event.stopPropagation();
+      onPinToggle(chat);
+    });
+    cell.appendChild(button);
+    row.appendChild(cell);
+  }
+
   function makeHeader(document) {
     var header = document.createElement('div');
     header.className = 'chat-row chat-row-head';
     header.setAttribute('role', 'row');
-    ['Date', 'Platform', 'Title', 'Messages', 'Tags'].forEach(function(label) {
+    ['Pin', 'Date', 'Platform', 'Title', 'Messages', 'Tags'].forEach(function(label) {
       appendCell(header, label);
     });
     return header;
   }
 
-  function makeRow(document, chat, index, top, selectedChatId, onSelect, draggable) {
+  function makeRow(document, chat, index, top, selectedChatId, onSelect, onPinToggle, draggable) {
     var row = document.createElement('div');
     row.className = 'chat-row chat-row-data' + (chat.chatId === selectedChatId ? ' selected' : '');
     row.setAttribute('role', 'row');
@@ -77,6 +93,7 @@ var OptionsChatList = (function() {
       event.dataTransfer.setData('application/x-rakuzaichi-chat-id', chat.chatId || '');
     });
 
+    appendPinCell(row, chat, onPinToggle);
     appendCell(row, formatDate(chat.lastUpdatedAt || chat.capturedAt));
     appendCell(row, platformLabel(chat.platform));
     appendCell(row, text(chat.title, 'Untitled chat'));
@@ -99,6 +116,7 @@ var OptionsChatList = (function() {
       countEl: options.countEl || null,
       dao: options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null),
       onSelect: typeof options.onSelect === 'function' ? options.onSelect : function() {},
+      onPinToggle: typeof options.onPinToggle === 'function' ? options.onPinToggle : function() {},
       draggable: options.draggable !== false,
       chats: [],
       selectedChatId: '',
@@ -155,7 +173,7 @@ var OptionsChatList = (function() {
 
       var fragment = document.createDocumentFragment();
       for (var i = start; i < end; i++) {
-        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, select, state.draggable));
+        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, select, togglePinned, state.draggable));
       }
       state.window.appendChild(fragment);
     }
@@ -170,6 +188,12 @@ var OptionsChatList = (function() {
     function select(chat) {
       state.selectedChatId = chat.chatId || '';
       state.onSelect(chat);
+      render(true);
+    }
+
+    async function togglePinned(chat) {
+      var updated = await state.onPinToggle(chat, !chat.pinned);
+      chat.pinned = updated && typeof updated.pinned === 'boolean' ? updated.pinned : !chat.pinned;
       render(true);
     }
 

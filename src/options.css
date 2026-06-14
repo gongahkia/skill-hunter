@@ -409,6 +409,17 @@ select[multiple] {
   pointer-events: none;
 }
 
+.pane-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pane-actions .pin-toggle:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+}
+
 .chat-table {
   height: calc(100vh - 122px);
   overflow: auto;
@@ -417,7 +428,7 @@ select[multiple] {
 
 .chat-row {
   display: grid;
-  grid-template-columns: 110px 110px minmax(180px, 1fr) 80px 120px;
+  grid-template-columns: 36px 110px 110px minmax(180px, 1fr) 80px 120px;
   gap: 10px;
   align-items: center;
   min-width: 640px;
@@ -425,6 +436,18 @@ select[multiple] {
   padding: 0 12px;
   border-bottom: 1px solid var(--line);
   font-size: 0.82rem;
+}
+
+.pin-toggle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-soft);
+  color: var(--secondary);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .chat-row-data {
@@ -749,12 +772,12 @@ select[multiple] {
   }
 
   .chat-row {
-    grid-template-columns: 90px 90px minmax(140px, 1fr);
+    grid-template-columns: 34px 90px 90px minmax(140px, 1fr);
     min-width: 0;
   }
 
-  .chat-row span:nth-child(4),
-  .chat-row span:nth-child(5) {
+  .chat-row span:nth-child(5),
+  .chat-row span:nth-child(6) {
     display: none;
   }
 }

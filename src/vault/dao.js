@@ -129,6 +129,7 @@ function createVaultDAO(options) {
     return withTransaction(['chats'], 'readonly', async function(transaction) {
       var rows = await requestToPromise(transaction.objectStore('chats').getAll());
       return filterRows(rows, filter).sort(function(a, b) {
+        if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
         return String(b.lastUpdatedAt || '').localeCompare(String(a.lastUpdatedAt || ''));
       });
     });
@@ -274,6 +275,18 @@ function createVaultDAO(options) {
     });
   }
 
+  async function setChatPinned(chatId, pinned) {
+    if (!chatId) throw new Error('chatId is required');
+    return withTransaction(['chats'], 'readwrite', async function(transaction) {
+      var store = transaction.objectStore('chats');
+      var chat = await requestToPromise(store.get(chatId));
+      if (!chat) return null;
+      chat.pinned = !!pinned;
+      await requestToPromise(store.put(chat));
+      return chat;
+    });
+  }
+
   async function putOpenThreads(threads) {
     if (!Array.isArray(threads)) throw new Error('threads must be an array');
     return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
@@ -374,6 +387,7 @@ function createVaultDAO(options) {
     deleteFolder: deleteFolder,
     setChatFolder: setChatFolder,
     setChatTags: setChatTags,
+    setChatPinned: setChatPinned,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,
