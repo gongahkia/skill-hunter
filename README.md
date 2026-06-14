@@ -37,7 +37,14 @@ With these considerations in mind, I created [`Owl`](https://github.com/gongahki
 ![](./asset/screenshot/sheetsFilled.png)
 ![](./asset/screenshot/sheetsEmpty.png)
 
-### Slides Owl
+| File type | Purpose |
+| :--- | :--- |
+| [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | Wide support for tabular data and spreadsheet operations|
+| [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) | Tab-delimited CSV alternative for ease of parsing and storage|
+| [JSON](https://en.wikipedia.org/wiki/JSON) | Human-readable and universally supported storage format|
+| [Markdown](https://en.wikipedia.org/wiki/Markdown) | Portable prose archive for notes and review |
+| [PDF](https://en.wikipedia.org/wiki/PDF) | Printable offline archive *(placeholder until M6)* |
+| [HTML](https://en.wikipedia.org/wiki/HTML) | Shareable offline archive *(placeholder until M6)* |
 
 ![](./asset/screenshot/slidesFilled.png)
 ![](./asset/screenshot/slidesEmpty.png)
@@ -109,7 +116,11 @@ By using this extension, you acknowledge and agree to the following:
 
 6. **Indemnification**: You agree to indemnify and hold harmless the developer from any claims, losses, liabilities, damages, costs, or expenses (including reasonable attorney fees) arising out of your use of this extension.
 
-7. **Disclaimer changes**: This disclaimer is subject to change without notice. Please review it periodically for updates.
+Data exported by Rakuzaichi in JSON, Markdown, CSV, TSV, PDF, HTML, or other formats may contain limitations, inconsistencies, or formatting issues. Users should:
+* Not rely solely on exported chat data for critical decisions
+* Verify all information against the original chat interfaces
+* Understand that format conversion may result in partial data loss or transformation
+* Be aware that exported data may not include all metadata from the original chat platform
 
 ## References
 
