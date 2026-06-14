@@ -182,10 +182,10 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 > Goal: Drop NDJSON/XML/YAML from converters, tests, options UI. Add PDF and HTML scaffolding (full implementation comes in M6 — but the format registry shifts now to avoid double work).
 
-- [ ] `M1.T01` — Remove `toNDJSON`, `toXML`, `toYAML` from `src/converters.js`. **Success:** `grep -E "(toNDJSON|toXML|toYAML)" src/converters.js` returns no matches.
-- [ ] `M1.T02` — Remove `ndjson`, `xml`, `yaml` entries from `FormatConverter.formats` and `methodMap` in `src/converters.js`. **Success:** `Object.keys(FormatConverter.formats)` is exactly `['csv','tsv','json','markdown','pdf','html']`.
-- [ ] `M1.T03` — Add PDF placeholder in `FormatConverter.formats` (`{ mime: 'application/pdf', ext: 'pdf' }`) and HTML placeholder (`{ mime: 'text/html', ext: 'html' }`). Stub `toPDF` and `toHTML` methods that throw `not implemented — see M6`. **Success:** unit tests for `convert('pdf', ...)` and `convert('html', ...)` throw with the expected message.
-- [ ] `M1.T04` — Delete unit tests for NDJSON/XML/YAML in `test/`. **Success:** `grep -rE "(ndjson|toxml|toyaml)" test/` returns no matches.
+- [x] `M1.T01` — Remove `toNDJSON`, `toXML`, `toYAML` from `src/converters.js`. **Success:** `grep -E "(toNDJSON|toXML|toYAML)" src/converters.js` returns no matches.
+- [x] `M1.T02` — Remove `ndjson`, `xml`, `yaml` entries from `FormatConverter.formats` and `methodMap` in `src/converters.js`. **Success:** `Object.keys(FormatConverter.formats)` is exactly `['csv','tsv','json','markdown','pdf','html']`.
+- [x] `M1.T03` — Add PDF placeholder in `FormatConverter.formats` (`{ mime: 'application/pdf', ext: 'pdf' }`) and HTML placeholder (`{ mime: 'text/html', ext: 'html' }`). Stub `toPDF` and `toHTML` methods that throw `not implemented — see M6`. **Success:** unit tests for `convert('pdf', ...)` and `convert('html', ...)` throw with the expected message.
+- [x] `M1.T04` — Delete unit tests for NDJSON/XML/YAML in `test/`. **Success:** `grep -rE "(ndjson|toxml|toyaml)" test/` returns no matches.
 - [ ] `M1.T05` — Update `src/options.html` and `src/options.js` to remove NDJSON/XML/YAML options from format dropdown. **Success:** loading the options page in a built extension and inspecting the dropdown shows only CSV/TSV/JSON/MD (PDF/HTML disabled until M6).
 - [ ] `M1.T06` — Update `src/popup.js` and `src/popup.html` to remove same. **Success:** popup format selector matches options page set.
 - [ ] `M1.T07` — Update `README.md` "Export formats" table to drop NDJSON/XML/YAML and add PDF + HTML + (placeholder marker for now). **Success:** README table reads exactly the 6 final formats.

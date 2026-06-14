@@ -53,41 +53,6 @@ describe('FormatConverter', () => {
     expect(result).not.toContain('col1\tcol2'); // tab should be replaced
   });
 
-  it('toNDJSON first line is metadata, rest are messages', () => {
-    const result = FormatConverter.toNDJSON(envelope);
-    const lines = result.split('\n');
-    expect(lines).toHaveLength(3); // 1 meta + 2 messages
-    const meta = JSON.parse(lines[0]);
-    expect(meta.exportVersion).toBe('2.0');
-    expect(meta.platform).toBe('chatgpt');
-    const msg = JSON.parse(lines[1]);
-    expect(msg.role).toBe('user');
-  });
-
-  it('toXML produces valid XML structure', () => {
-    const result = FormatConverter.toXML(envelope);
-    expect(result).toContain('<?xml version="1.0"');
-    expect(result).toContain('<export>');
-    expect(result).toContain('<platform>chatgpt</platform>');
-    expect(result).toContain('<message>');
-    expect(result).toContain('<role>user</role>');
-    expect(result).toContain('</export>');
-  });
-
-  it('toXML escapes special chars', () => {
-    const env = { ...envelope, chatTitle: '<script>alert("xss")</script>', messages: [], messageCount: 0 };
-    const result = FormatConverter.toXML(env);
-    expect(result).toContain('&lt;script&gt;');
-    expect(result).not.toContain('<script>');
-  });
-
-  it('toYAML produces valid YAML structure', () => {
-    const result = FormatConverter.toYAML(envelope);
-    expect(result).toContain('exportVersion: 2.0');
-    expect(result).toContain('platform: chatgpt');
-    expect(result).toContain('  - role: user');
-  });
-
   it('toMarkdown produces readable sections', () => {
     const result = FormatConverter.toMarkdown(envelope);
     expect(result).toContain('# Test Chat');
@@ -105,14 +70,21 @@ describe('FormatConverter', () => {
     expect(md).toContain('# Test Chat');
   });
 
+  it('PDF and HTML stubs throw until M6', () => {
+    expect(() => FormatConverter.convert('pdf', envelope)).toThrow('not implemented — see M6');
+    expect(() => FormatConverter.convert('html', envelope)).toThrow('not implemented — see M6');
+  });
+
   it('convert throws on unknown format', () => {
     expect(() => FormatConverter.convert('xlsx', envelope)).toThrow('Unsupported');
   });
 
   it('formats map has correct entries', () => {
+    expect(Object.keys(FormatConverter.formats)).toEqual(['csv', 'tsv', 'json', 'markdown', 'pdf', 'html']);
     expect(FormatConverter.formats.csv.ext).toBe('csv');
     expect(FormatConverter.formats.json.mime).toBe('application/json');
-    expect(FormatConverter.formats.yaml.ext).toBe('yaml');
     expect(FormatConverter.formats.markdown.ext).toBe('md');
+    expect(FormatConverter.formats.pdf.mime).toBe('application/pdf');
+    expect(FormatConverter.formats.html.ext).toBe('html');
   });
 });
