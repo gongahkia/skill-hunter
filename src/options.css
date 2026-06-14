@@ -595,6 +595,72 @@ select[multiple] {
   overflow: auto;
 }
 
+.detail-thread-layout {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.38fr) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.chat-thread-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: grid;
+  gap: 8px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  padding: 10px;
+  border-right: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.chat-thread-sidebar h4 {
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.chat-thread-list {
+  display: grid;
+  gap: 6px;
+}
+
+.chat-thread-link {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.76rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-thread-link strong {
+  color: var(--primary);
+  font-size: 0.7rem;
+}
+
+.chat-thread-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-thread-link:hover,
+.chat-thread-link:focus-visible {
+  border-color: var(--primary);
+  color: var(--ink);
+}
+
+.message-highlight {
+  box-shadow: 0 0 0 2px var(--primary), 0 8px 24px var(--shadow);
+}
+
 .threads-pane {
   margin: 0 12px 12px;
 }
@@ -1097,6 +1163,17 @@ select[multiple] {
 
   .chat-detail-pane {
     margin-top: 10px;
+  }
+
+  .detail-thread-layout {
+    display: block;
+  }
+
+  .chat-thread-sidebar {
+    position: static;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 
   .threads-pane {

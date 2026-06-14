@@ -123,6 +123,14 @@ var OptionsChatDetail = (function() {
     return grouped;
   }
 
+  function findMessageCard(root, messageId) {
+    var cards = root.querySelectorAll('.message-card');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].dataset.messageId === messageId) return cards[i];
+    }
+    return null;
+  }
+
   function setOriginalLink(link, chat) {
     if (!link) return;
     if (chat && chat.url) {
@@ -181,6 +189,45 @@ var OptionsChatDetail = (function() {
     body.textContent = text(thread.text, '(empty)');
     record.appendChild(body);
     return record;
+  }
+
+  function makeThreadSidebar(document, threads, jumpToThread) {
+    var sidebar = document.createElement('aside');
+    sidebar.className = 'chat-thread-sidebar';
+    var heading = document.createElement('h4');
+    heading.textContent = 'Open threads';
+    sidebar.appendChild(heading);
+
+    if (!threads.length) {
+      var empty = document.createElement('p');
+      empty.className = 'panel-note';
+      empty.textContent = 'No open threads.';
+      sidebar.appendChild(empty);
+      return sidebar;
+    }
+
+    var list = document.createElement('div');
+    list.className = 'chat-thread-list';
+    threads.forEach(function(thread) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'chat-thread-link';
+      button.dataset.threadId = thread.threadId || '';
+      button.dataset.messageId = thread.messageId || '';
+      button.innerHTML = '';
+      var tag = document.createElement('strong');
+      tag.textContent = thread.tag || 'THREAD';
+      button.appendChild(tag);
+      var body = document.createElement('span');
+      body.textContent = text(thread.text, '(empty)');
+      button.appendChild(body);
+      button.addEventListener('click', function() {
+        jumpToThread(thread);
+      });
+      list.appendChild(button);
+    });
+    sidebar.appendChild(list);
+    return sidebar;
   }
 
   function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread, archiveThread) {
@@ -561,6 +608,20 @@ var OptionsChatDetail = (function() {
       return editor;
     }
 
+    function jumpToThread(thread) {
+      var target = findMessageCard(root, thread.messageId || '');
+      if (!target) return;
+      if (typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+      target.classList.add('message-highlight');
+      win.setTimeout(function() {
+        target.classList.remove('message-highlight');
+      }, 1800);
+      target.focus();
+      onThreadOpen(thread);
+    }
+
     function renderEmpty(title, message) {
       root.innerHTML = '';
       currentChat = null;
@@ -605,12 +666,17 @@ var OptionsChatDetail = (function() {
         return;
       }
 
+      var layout = document.createElement('div');
+      layout.className = 'detail-thread-layout';
+      layout.appendChild(makeThreadSidebar(document, currentThreads, jumpToThread));
+
       var list = document.createElement('div');
       list.className = 'message-list';
       for (var i = 0; i < currentMessages.length; i++) {
         list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen, archiveThread));
       }
-      root.appendChild(list);
+      layout.appendChild(list);
+      root.appendChild(layout);
     }
 
     async function load(chat) {

@@ -267,6 +267,33 @@ describe('OptionsChatDetail', () => {
     expect(cards[0].querySelector('.thread-record').textContent).toContain('reference source');
   });
 
+  it('lists chat threads and jumps to the source message', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const opened = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        listOpenThreads: async () => [
+          { threadId: 'thread-1', chatId: 'claude:thread-1', messageId: 'm1', tag: 'TODO', text: 'follow up', source: 'explicit', subSource: 'user', status: 'open' },
+          { threadId: 'thread-2', chatId: 'claude:thread-1', messageId: 'm2', tag: 'REF', text: 'reference source', source: 'explicit', subSource: 'scan', status: 'open' }
+        ]
+      },
+      onThreadOpen: (thread) => opened.push(thread.threadId),
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    expect([...dom.window.document.querySelectorAll('.chat-thread-link strong')].map((node) => node.textContent)).toEqual(['TODO', 'REF']);
+    dom.window.document.querySelector('.chat-thread-link[data-message-id="m2"]').click();
+
+    const target = dom.window.document.querySelector('.message-card[data-message-id="m2"]');
+    expect(target.className).toContain('message-highlight');
+    expect(opened).toEqual(['thread-2']);
+  });
+
   it('archives a thread row when removing a message tag chip', async () => {
     const { dom } = createDom();
     const { OptionsChatDetail } = loadOptionsModules(dom);

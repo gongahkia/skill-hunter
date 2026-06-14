@@ -263,7 +263,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 ### Dashboard + workflow
 
 - [x] `M4.T09` — Add open-threads pane to vault dashboard: list of all threads across all chats, sortable by priority, filterable by tag / chat / platform / status / source / sub-source. **Success:** opening the pane with seeded vault of 50 threads shows them in priority order (FIXME first, PROMPT last); filter by `sub-source = 'user'` narrows correctly.
-- [ ] `M4.T10` — Per-chat open-threads sidebar in chat detail view: lists threads in that chat, click jumps to the message. **Success:** clicking a thread scrolls the chat detail to and highlights the source message.
+- [x] `M4.T10` — Per-chat open-threads sidebar in chat detail view: lists threads in that chat, click jumps to the message. **Success:** clicking a thread scrolls the chat detail to and highlights the source message.
 - [ ] `M4.T11` — Status workflow: each thread has `open|done|archived`; UI provides toggle buttons. Done threads collapse by default; "show done" toggle reveals them. **Success:** marking done updates `openThreads.status` and `resolvedAt`; collapsed view hides them by default; toggle restores visibility.
 - [ ] `M4.T12` — Bulk archive: select multiple done threads, "Archive selected" moves them to status=archived. **Success:** selected threads disappear from default view; "Show archived" filter restores them.
 - [ ] `M4.T13` — Inline tag highlighting in chat detail: when rendering message content, wrap recognized tag prefixes in a colored span using the active colorscheme (this handles the scan-sourced threads; user-applied threads are shown via chips per M4.T02). **Success:** a message containing `TODO: ping Alice` renders with `TODO` colored per scheme.
