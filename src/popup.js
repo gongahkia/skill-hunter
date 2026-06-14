@@ -14,6 +14,7 @@
     contextMessages: document.getElementById('context-messages'),
     contextTitle: document.getElementById('context-title'),
     contextModel: document.getElementById('context-model'),
+    captureNow: document.getElementById('capture-now'),
     quickExport: document.getElementById('quick-export'),
     quickFormat: document.getElementById('quick-format'),
     openOptions: document.getElementById('open-options'),
@@ -86,6 +87,7 @@
   }
 
   function setActionsDisabled(disabled) {
+    if (els.captureNow) els.captureNow.disabled = disabled;
     if (els.quickExport) els.quickExport.disabled = disabled;
     els.formatButtons.forEach(function(button) {
       button.disabled = disabled;
@@ -207,6 +209,56 @@
     }
 
     return response.data;
+  }
+
+  async function requestSnapshot(traceId) {
+    var tabs = await api.tabs.query({ active: true, currentWindow: true });
+    if (!tabs.length || (tabs[0].id !== 0 && !tabs[0].id)) throw new Error('No active tab found');
+
+    var response = await api.tabs.sendMessage(tabs[0].id, {
+      action: 'extractChatSnapshot',
+      traceId: traceId
+    });
+
+    if (!response) throw new Error('No response from content script');
+    if (response.error) throw new Error(response.error);
+    if (!response.data || !Array.isArray(response.data.messages)) {
+      throw new Error('Snapshot payload was malformed');
+    }
+
+    return response.data;
+  }
+
+  async function captureCurrentChat() {
+    var traceId = trace('capture');
+    if (!state.context || !state.context.supported) {
+      showStatus('This tab is not a supported chat platform.', 'error');
+      return;
+    }
+
+    try {
+      showStatus('Capturing conversation into the local vault...', 'info');
+      var snapshot = await requestSnapshot(traceId);
+      var response = await api.runtime.sendMessage({
+        action: 'captureSnapshot',
+        snapshot: snapshot,
+        traceId: traceId
+      });
+      if (response && response.error) throw new Error(response.error);
+      showStatus('Chat captured to the local vault.', 'success');
+      log('info', 'popup.capture.success', {
+        traceId: traceId,
+        chatId: snapshot.chatId,
+        platform: snapshot.platform,
+        messageCount: snapshot.messageCount
+      });
+    } catch (error) {
+      log('error', 'popup.capture.failed', {
+        traceId: traceId,
+        error: serializeError(error)
+      });
+      showStatus('Capture failed: ' + (error.message || String(error)), 'error');
+    }
   }
 
   async function doDownload(format, data, traceId) {
@@ -395,6 +447,8 @@
         startExport(normalizeExportFormat((state.settings && state.settings.defaultFormat) || 'json'));
       });
     }
+
+    if (els.captureNow) els.captureNow.addEventListener('click', captureCurrentChat);
 
     if (els.previewConfirm) els.previewConfirm.addEventListener('click', confirmPreviewDownload);
     if (els.previewCopy) els.previewCopy.addEventListener('click', copyPreviewData);
