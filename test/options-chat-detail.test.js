@@ -200,6 +200,43 @@ describe('OptionsChatDetail', () => {
     expect(copied[0]).toContain('Keep source links.');
   });
 
+  it('creates explicit user open-thread rows from per-message tag popover', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const created = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        putOpenThreads: async (threads) => {
+          created.push(...threads);
+          return threads;
+        }
+      },
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    dom.window.document.querySelector('.tag-message').click();
+    dom.window.document.querySelector('.thread-popover input').value = 'follow up with owner';
+    dom.window.document.querySelector('.thread-tag-grid button[data-tag="TODO"]').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(created).toHaveLength(1);
+    expect(created[0]).toMatchObject({
+      chatId: 'claude:thread-1',
+      messageId: 'm1',
+      tag: 'TODO',
+      text: 'follow up with owner',
+      source: 'explicit',
+      subSource: 'user',
+      status: 'open'
+    });
+    expect(created[0].threadId).toMatch(/^thread:/);
+    expect(created[0].createdAt).toBeTruthy();
+  });
+
   it('opens detail when a chat-list row is clicked', async () => {
     const { dom, listRoot } = createDom();
     const { OptionsChatList, OptionsChatDetail } = loadOptionsModules(dom);

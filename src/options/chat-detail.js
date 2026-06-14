@@ -1,4 +1,5 @@
 var OptionsChatDetail = (function() {
+  var BUILT_IN_THREAD_TAGS = ['TODO', 'FIXME', 'REV', 'REF', 'FOLLOWUP', 'UNRESOLVED', 'PROMPT'];
   var NEW_CHAT_URLS = {
     chatgpt: 'https://chatgpt.com/',
     claude: 'https://claude.ai/new',
@@ -74,6 +75,16 @@ var OptionsChatDetail = (function() {
     if (win.open) win.open(url, '_blank', 'noopener');
   }
 
+  function createId(prefix) {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return prefix + ':' + crypto.randomUUID();
+    return prefix + ':' + Date.now().toString(36) + ':' + Math.random().toString(36).slice(2, 10);
+  }
+
+  function excerpt(value) {
+    value = text(value).replace(/\s+/g, ' ').trim();
+    return value.length > 240 ? value.slice(0, 237) + '...' : value;
+  }
+
   function setOriginalLink(link, chat) {
     if (!link) return;
     if (chat && chat.url) {
@@ -108,7 +119,7 @@ var OptionsChatDetail = (function() {
     return ok ? Promise.resolve() : Promise.reject(new Error('Clipboard API is unavailable'));
   }
 
-  function makeMessage(document, win, message, copyText) {
+  function makeMessage(document, win, chat, message, copyText, createThread) {
     var card = document.createElement('article');
     card.className = 'message-card ' + roleClass(message.role);
     card.dataset.messageId = message.messageId || '';
@@ -123,6 +134,15 @@ var OptionsChatDetail = (function() {
     var timestamp = document.createElement('span');
     timestamp.textContent = formatTimestamp(message.timestamp);
     meta.appendChild(timestamp);
+
+    var actions = document.createElement('div');
+    actions.className = 'message-actions';
+
+    var tagButton = document.createElement('button');
+    tagButton.className = 'btn btn-ghost tag-message';
+    tagButton.type = 'button';
+    tagButton.textContent = 'Tag this';
+    actions.appendChild(tagButton);
 
     var copy = document.createElement('button');
     copy.className = 'btn btn-ghost copy-message';
@@ -140,7 +160,8 @@ var OptionsChatDetail = (function() {
         copy.textContent = 'Copy failed';
       }
     });
-    meta.appendChild(copy);
+    actions.appendChild(copy);
+    meta.appendChild(actions);
 
     var body = document.createElement('div');
     body.className = 'message-content';
@@ -148,6 +169,47 @@ var OptionsChatDetail = (function() {
 
     card.appendChild(meta);
     card.appendChild(body);
+
+    var popover = document.createElement('div');
+    popover.className = 'thread-popover';
+    popover.hidden = true;
+
+    var note = document.createElement('input');
+    note.type = 'text';
+    note.placeholder = 'Optional note';
+    popover.appendChild(note);
+
+    var tagGrid = document.createElement('div');
+    tagGrid.className = 'thread-tag-grid';
+    BUILT_IN_THREAD_TAGS.forEach(function(tag) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.tag = tag;
+      button.textContent = tag;
+      button.addEventListener('click', async function() {
+        try {
+          await createThread(chat, message, tag, note.value);
+          popover.hidden = true;
+          note.value = '';
+          tagButton.textContent = 'Tagged';
+          win.setTimeout(function() {
+            tagButton.textContent = 'Tag this';
+          }, 1400);
+        } catch (error) {
+          tagButton.textContent = 'Tag failed';
+        }
+      });
+      tagGrid.appendChild(button);
+    });
+    popover.appendChild(tagGrid);
+    card.appendChild(popover);
+
+    tagButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      popover.hidden = !popover.hidden;
+      if (!popover.hidden) note.focus();
+    });
+
     return card;
   }
 
@@ -214,6 +276,7 @@ var OptionsChatDetail = (function() {
     var dao = options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null);
     var onTagsChanged = typeof options.onTagsChanged === 'function' ? options.onTagsChanged : function() {};
     var onPinChanged = typeof options.onPinChanged === 'function' ? options.onPinChanged : function() {};
+    var onThreadCreated = typeof options.onThreadCreated === 'function' ? options.onThreadCreated : function() {};
     var pinButton = options.pinButton || null;
     var sendButton = options.sendButton || null;
     var restoreButton = options.restoreButton || null;
@@ -262,6 +325,24 @@ var OptionsChatDetail = (function() {
       if (!restoreButton) return;
       restoreButton.disabled = !(chat && chat.chatId);
       restoreButton.textContent = 'Restore to clipboard';
+    }
+
+    async function createThread(chat, message, tag, note) {
+      if (!dao || typeof dao.putOpenThreads !== 'function') throw new Error('open thread store is unavailable');
+      var thread = {
+        threadId: createId('thread'),
+        chatId: chat.chatId,
+        messageId: message.messageId || message.id || '',
+        tag: tag,
+        text: text(note).trim() || excerpt(message.content),
+        source: 'explicit',
+        subSource: 'user',
+        status: 'open',
+        createdAt: new Date().toISOString()
+      };
+      await dao.putOpenThreads([thread]);
+      onThreadCreated(thread);
+      return thread;
     }
 
     async function saveTags(chat, tags, messages) {
@@ -371,7 +452,7 @@ var OptionsChatDetail = (function() {
       var list = document.createElement('div');
       list.className = 'message-list';
       for (var i = 0; i < currentMessages.length; i++) {
-        list.appendChild(makeMessage(document, win, currentMessages[i], copyText));
+        list.appendChild(makeMessage(document, win, chat, currentMessages[i], copyText, createThread));
       }
       root.appendChild(list);
     }

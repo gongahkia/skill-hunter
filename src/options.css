@@ -648,9 +648,63 @@ select[multiple] {
   color: var(--ink);
 }
 
-.copy-message {
+.message-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.copy-message,
+.tag-message {
   min-height: 28px;
   padding: 4px 8px;
+}
+
+.tag-message {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.message-card:hover .tag-message,
+.message-card:focus-within .tag-message {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.thread-popover {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.thread-popover[hidden] {
+  display: none;
+}
+
+.thread-tag-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.thread-tag-grid button {
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.thread-tag-grid button:hover,
+.thread-tag-grid button:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .message-content {
