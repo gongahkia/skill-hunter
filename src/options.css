@@ -667,11 +667,16 @@ select[multiple] {
 
 .thread-filters {
   display: grid;
-  grid-template-columns: repeat(7, minmax(110px, 1fr));
+  grid-template-columns: repeat(8, minmax(100px, 1fr));
   gap: 8px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--surface-soft);
+}
+
+.thread-show-done {
+  align-self: end;
+  min-height: 35px;
 }
 
 .thread-table {
@@ -681,7 +686,7 @@ select[multiple] {
 
 .thread-row {
   display: grid;
-  grid-template-columns: 86px 84px 120px minmax(180px, 0.9fr) minmax(240px, 1.3fr);
+  grid-template-columns: 82px 76px 116px minmax(170px, 0.9fr) minmax(220px, 1.2fr) 150px;
   gap: 10px;
   align-items: center;
   min-width: 760px;
@@ -727,6 +732,18 @@ select[multiple] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.thread-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.thread-actions .btn {
+  min-height: 26px;
+  padding: 3px 7px;
+  font-size: 0.7rem;
 }
 
 .thread-empty {

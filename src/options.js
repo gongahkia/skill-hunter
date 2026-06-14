@@ -49,6 +49,7 @@
     threadChatFilter: document.getElementById('threadChatFilter'),
     threadPlatformFilter: document.getElementById('threadPlatformFilter'),
     threadStatusFilter: document.getElementById('threadStatusFilter'),
+    threadShowDone: document.getElementById('threadShowDone'),
     threadSourceFilter: document.getElementById('threadSourceFilter'),
     threadSubSourceFilter: document.getElementById('threadSubSourceFilter'),
     threadSort: document.getElementById('threadSort'),
@@ -507,12 +508,16 @@
           chat: els.threadChatFilter,
           platform: els.threadPlatformFilter,
           status: els.threadStatusFilter,
+          showDone: els.threadShowDone,
           source: els.threadSourceFilter,
           subSource: els.threadSubSourceFilter,
           sort: els.threadSort
         },
         onSelect: function(thread) {
           if (detail && thread.chat) detail.load(thread.chat);
+        },
+        onChange: function() {
+          refreshVault(true);
         }
       });
     }

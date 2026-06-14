@@ -67,7 +67,9 @@ var OptionsOpenThreads = (function() {
   function matches(row, filters) {
     if (filters.tag && row.tag !== filters.tag) return false;
     if (filters.platform && row.platform !== filters.platform) return false;
-    if (filters.status && row.status !== filters.status) return false;
+    if (filters.status === 'open' && filters.showDone) {
+      if (row.status !== 'open' && row.status !== 'done') return false;
+    } else if (filters.status && row.status !== filters.status) return false;
     if (filters.source && row.source !== filters.source) return false;
     if (filters.subSource && text(row.subSource) !== filters.subSource) return false;
     if (filters.chat) {
@@ -100,19 +102,47 @@ var OptionsOpenThreads = (function() {
     var header = document.createElement('div');
     header.className = 'thread-row thread-row-head';
     header.setAttribute('role', 'row');
-    ['Tag', 'Status', 'Source', 'Chat', 'Text'].forEach(function(label) {
+    ['Tag', 'Status', 'Source', 'Chat', 'Text', 'Actions'].forEach(function(label) {
       appendCell(header, label);
     });
     return header;
   }
 
-  function makeRow(document, row, onSelect) {
-    var item = document.createElement('button');
-    item.type = 'button';
+  function makeActions(document, row, setStatus) {
+    var actions = document.createElement('span');
+    actions.className = 'thread-actions';
+    actions.setAttribute('role', 'cell');
+
+    function add(label, status) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-ghost';
+      button.textContent = label;
+      button.addEventListener('click', function(event) {
+        event.stopPropagation();
+        setStatus(row, status);
+      });
+      actions.appendChild(button);
+    }
+
+    if (row.status === 'done') add('Reopen', 'open');
+    else add('Done', 'done');
+    if (row.status !== 'archived') add('Archive', 'archived');
+    return actions;
+  }
+
+  function makeRow(document, row, onSelect, setStatus) {
+    var item = document.createElement('div');
     item.className = 'thread-row thread-row-data';
     item.setAttribute('role', 'row');
+    item.tabIndex = 0;
     item.dataset.threadId = row.threadId || '';
     item.addEventListener('click', function() {
+      onSelect(row);
+    });
+    item.addEventListener('keydown', function(event) {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
       onSelect(row);
     });
     appendCell(item, text(row.tag, 'THREAD'), 'thread-tag');
@@ -120,6 +150,7 @@ var OptionsOpenThreads = (function() {
     appendCell(item, [text(row.source, 'explicit'), text(row.subSource)].filter(Boolean).join(' / '));
     appendCell(item, platformLabel(row.platform) + ' | ' + text(row.chatTitle, row.chatId));
     appendCell(item, text(row.text, '(empty)'), 'thread-text');
+    item.appendChild(makeActions(document, row, setStatus));
     return item;
   }
 
@@ -147,6 +178,7 @@ var OptionsOpenThreads = (function() {
         status: optionValue(state.filters.status, 'open'),
         source: optionValue(state.filters.source, ''),
         subSource: optionValue(state.filters.subSource, ''),
+        showDone: !!(state.filters.showDone && state.filters.showDone.checked),
         sort: optionValue(state.filters.sort, 'priority')
       };
     }
@@ -174,7 +206,7 @@ var OptionsOpenThreads = (function() {
         return;
       }
       state.filteredRows.forEach(function(row) {
-        root.appendChild(makeRow(document, row, state.onSelect));
+        root.appendChild(makeRow(document, row, state.onSelect, setStatus));
       });
       updateSummary();
     }
@@ -183,9 +215,16 @@ var OptionsOpenThreads = (function() {
       Object.keys(state.filters).forEach(function(key) {
         var element = state.filters[key];
         if (!element) return;
-        var eventName = element.tagName && element.tagName.toLowerCase() === 'input' ? 'input' : 'change';
+        var eventName = element.tagName && element.tagName.toLowerCase() === 'input' && element.type !== 'checkbox' ? 'input' : 'change';
         element.addEventListener(eventName, render);
       });
+    }
+
+    async function setStatus(row, status) {
+      if (!state.dao || !state.dao.setThreadStatus) return;
+      await state.dao.setThreadStatus(row.threadId, status);
+      await load();
+      if (typeof options.onChange === 'function') options.onChange(row, status);
     }
 
     async function load() {

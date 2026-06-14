@@ -17,6 +17,7 @@ function createDom() {
       <input id="chat">
       <select id="platform"><option value="">All</option><option value="claude">Claude</option></select>
       <select id="status"><option value="open">Open</option><option value="">All</option><option value="archived">Archived</option></select>
+      <label><input id="showDone" type="checkbox">Show done</label>
       <select id="source"><option value="">All</option><option value="explicit">Explicit</option></select>
       <select id="subSource"><option value="">All</option><option value="user">User</option><option value="scan">Scan</option></select>
       <select id="sort"><option value="priority">Priority</option></select>
@@ -25,6 +26,11 @@ function createDom() {
     </main>
   `);
   return { dom, root: dom.window.document.getElementById('threads') };
+}
+
+async function flush(window) {
+  await Promise.resolve();
+  await new Promise((resolve) => window.setTimeout(resolve, 0));
 }
 
 function chats() {
@@ -61,6 +67,7 @@ describe('OptionsOpenThreads', () => {
         chat: dom.window.document.getElementById('chat'),
         platform: dom.window.document.getElementById('platform'),
         status: dom.window.document.getElementById('status'),
+        showDone: dom.window.document.getElementById('showDone'),
         source: dom.window.document.getElementById('source'),
         subSource: dom.window.document.getElementById('subSource'),
         sort: dom.window.document.getElementById('sort')
@@ -92,6 +99,7 @@ describe('OptionsOpenThreads', () => {
         chat: dom.window.document.getElementById('chat'),
         platform: dom.window.document.getElementById('platform'),
         status: dom.window.document.getElementById('status'),
+        showDone: dom.window.document.getElementById('showDone'),
         source: dom.window.document.getElementById('source'),
         subSource,
         sort: dom.window.document.getElementById('sort')
@@ -111,5 +119,56 @@ describe('OptionsOpenThreads', () => {
     expect(rows).toHaveLength(10);
     expect(rows.every((row) => row.textContent.includes('explicit / user'))).toBe(true);
     expect(dom.window.document.getElementById('summary').textContent).toBe('10 threads');
+  });
+
+  it('marks threads done and reveals them with show done', async () => {
+    const { dom, root } = createDom();
+    const OptionsOpenThreads = loadOpenThreads(dom);
+    const showDone = dom.window.document.getElementById('showDone');
+    const rows = [
+      { threadId: 'thread-open', chatId: 'chat-a', messageId: 'msg-1', tag: 'TODO', text: 'open item', source: 'explicit', subSource: 'user', status: 'open', createdAt: '2026-01-01T00:00:00.000Z' },
+      { threadId: 'thread-done', chatId: 'chat-a', messageId: 'msg-2', tag: 'REF', text: 'done item', source: 'explicit', subSource: 'scan', status: 'done', createdAt: '2026-01-01T00:01:00.000Z' }
+    ];
+    const statusCalls = [];
+    const pane = OptionsOpenThreads.create({
+      root,
+      summaryEl: dom.window.document.getElementById('summary'),
+      filters: {
+        tag: dom.window.document.getElementById('tag'),
+        chat: dom.window.document.getElementById('chat'),
+        platform: dom.window.document.getElementById('platform'),
+        status: dom.window.document.getElementById('status'),
+        showDone,
+        source: dom.window.document.getElementById('source'),
+        subSource: dom.window.document.getElementById('subSource'),
+        sort: dom.window.document.getElementById('sort')
+      },
+      dao: {
+        listOpenThreads: async () => rows,
+        listChats: async () => chats(),
+        setThreadStatus: async (threadId, status) => {
+          statusCalls.push({ threadId, status });
+          const row = rows.find((item) => item.threadId === threadId);
+          row.status = status;
+          if (status === 'done') row.resolvedAt = '2026-01-01T00:02:00.000Z';
+          return row;
+        }
+      },
+      window: dom.window
+    });
+
+    await pane.load();
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(1);
+    root.querySelector('.thread-actions button').click();
+    await flush(dom.window);
+
+    expect(statusCalls).toEqual([{ threadId: 'thread-open', status: 'done' }]);
+    expect(rows[0].resolvedAt).toBe('2026-01-01T00:02:00.000Z');
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(0);
+
+    showDone.checked = true;
+    showDone.dispatchEvent(new dom.window.Event('change'));
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(2);
+    expect(dom.window.document.getElementById('summary').textContent).toBe('2 threads');
   });
 });
