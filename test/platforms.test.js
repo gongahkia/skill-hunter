@@ -76,6 +76,13 @@ const scenarios = [
     url: 'https://kimi.com/chat/thread-123',
     fixtures: ['fixtures/platforms/kimi-primary.html', 'fixtures/platforms/kimi-variant.html'],
     expectedModel: 'Kimi K2.6'
+  },
+  {
+    id: 'qwen',
+    file: 'platforms/qwen.js',
+    url: 'https://chat.qwen.ai/c/thread-123',
+    fixtures: ['fixtures/platforms/qwen-primary.html', 'fixtures/platforms/qwen-variant.html'],
+    expectedModel: 'Qwen3-Max'
   }
 ];
 

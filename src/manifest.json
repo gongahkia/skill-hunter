@@ -23,7 +23,9 @@
     "https://chat.mistral.ai/*",
     "https://huggingface.co/chat/*",
     "https://poe.com/*",
-    "https://kimi.com/*"
+    "https://kimi.com/*",
+    "https://chat.qwen.ai/*",
+    "https://tongyi.aliyun.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -51,7 +53,9 @@
       "https://chat.mistral.ai/*",
       "https://huggingface.co/chat/*",
       "https://poe.com/*",
-      "https://kimi.com/*"
+      "https://kimi.com/*",
+      "https://chat.qwen.ai/*",
+      "https://tongyi.aliyun.com/*"
     ],
     "js": [
       "compat.js",
@@ -69,6 +73,7 @@
       "platforms/huggingchat.js",
       "platforms/poe.js",
       "platforms/kimi.js",
+      "platforms/qwen.js",
       "platforms/registry.js",
       "content-script.js"
     ],
