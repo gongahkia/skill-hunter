@@ -15,6 +15,8 @@ const firefoxBackgroundScripts = [
   "filename.js",
   "storage.js",
   "history.js",
+  "vault/db.js",
+  "vault/dao.js",
   "background-core.js"
 ];
 

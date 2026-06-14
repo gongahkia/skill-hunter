@@ -39,6 +39,81 @@ var BackgroundRuntime = (function() {
     if (!data.messages.length) throw new Error('No messages were extracted from the current conversation');
   }
 
+  function validateSnapshot(snapshot) {
+    if (!snapshot) throw new Error('Missing chat snapshot');
+    if (!snapshot.chatId) throw new Error('Snapshot missing chatId');
+    if (!snapshot.platform) throw new Error('Snapshot missing platform');
+    if (!Array.isArray(snapshot.messages)) throw new Error('Snapshot messages must be an array');
+  }
+
+  function chatFromSnapshot(snapshot, existingChat) {
+    return {
+      chatId: snapshot.chatId,
+      platform: snapshot.platform,
+      title: snapshot.title || snapshot.chatTitle || (existingChat && existingChat.title) || 'Untitled conversation',
+      url: snapshot.url || (existingChat && existingChat.url) || '',
+      model: snapshot.model || '',
+      capturedAt: (existingChat && existingChat.capturedAt) || snapshot.capturedAt || new Date().toISOString(),
+      lastUpdatedAt: snapshot.lastUpdatedAt || new Date().toISOString(),
+      messageCount: snapshot.messages.length,
+      pinned: !!(existingChat && existingChat.pinned) || !!snapshot.pinned,
+      archived: !!(existingChat && existingChat.archived) || !!snapshot.archived,
+      tags: snapshot.tags || (existingChat && existingChat.tags) || [],
+      folderId: snapshot.folderId || (existingChat && existingChat.folderId) || undefined,
+      metadata: snapshot.metadata || {}
+    };
+  }
+
+  function normalizeSnapshotMessages(snapshot) {
+    return snapshot.messages.map(function(message, index) {
+      var messageIndex = typeof message.index === 'number' ? message.index : index;
+      var messageId = message.messageId || message.id || (snapshot.chatId + ':' + messageIndex);
+      return Object.assign({}, message, {
+        messageId: messageId,
+        id: message.id || messageId,
+        chatId: snapshot.chatId,
+        platform: snapshot.platform,
+        model: message.model || snapshot.model || '',
+        index: messageIndex,
+        metadata: message.metadata || {}
+      });
+    });
+  }
+
+  async function handleCapture(snapshot) {
+    validateSnapshot(snapshot);
+    if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
+
+    var existingChat = await VaultDAO.getChat(snapshot.chatId);
+    var existingMessages = await VaultDAO.listMessages(snapshot.chatId);
+    var existingIndexes = {};
+    for (var i = 0; i < existingMessages.length; i++) {
+      existingIndexes[existingMessages[i].index] = true;
+    }
+
+    var normalizedMessages = normalizeSnapshotMessages(snapshot);
+    var newMessages = normalizedMessages.filter(function(message) {
+      return !existingIndexes[message.index];
+    });
+
+    await VaultDAO.putChat(chatFromSnapshot(Object.assign({}, snapshot, { messages: normalizedMessages }), existingChat));
+    if (newMessages.length) await VaultDAO.putMessages(snapshot.chatId, newMessages);
+
+    log('info', 'background.capture.success', {
+      chatId: snapshot.chatId,
+      platform: snapshot.platform,
+      addedMessages: newMessages.length,
+      messageCount: existingMessages.length + newMessages.length
+    });
+
+    return {
+      success: true,
+      chatId: snapshot.chatId,
+      addedMessages: newMessages.length,
+      messageCount: existingMessages.length + newMessages.length
+    };
+  }
+
   async function handleDownload(request) {
     var traceId = request && request.traceId ? request.traceId : trace('download');
     try {
@@ -171,6 +246,13 @@ var BackgroundRuntime = (function() {
         return true;
       }
 
+      if (request.action === 'captureSnapshot') {
+        handleCapture(request.snapshot).then(sendResponse).catch(function(error) {
+          sendResponse({ error: error.message || String(error) });
+        });
+        return true;
+      }
+
       return false;
     });
 
@@ -193,7 +275,10 @@ var BackgroundRuntime = (function() {
   return {
     init: init,
     handleDownload: handleDownload,
+    handleCapture: handleCapture,
     updateAutoExport: updateAutoExport,
     runAutoExport: runAutoExport
   };
 })();
+
+if (typeof module !== 'undefined') module.exports = BackgroundRuntime;
