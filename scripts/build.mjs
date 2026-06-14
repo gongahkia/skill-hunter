@@ -20,6 +20,7 @@ const firefoxBackgroundScripts = [
   "vault/dao.js",
   "vault/search-worker.js",
   "vault/search.js",
+  "threads/scanner.js",
   "background-core.js"
 ];
 

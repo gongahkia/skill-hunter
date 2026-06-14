@@ -155,6 +155,32 @@ var BackgroundRuntime = (function() {
     }
   }
 
+  async function scanCapturedMessages(chatId, messages) {
+    if (typeof ThreadScanner === 'undefined' ||
+        !ThreadScanner.scanMessage ||
+        !VaultDAO.putOpenThreads ||
+        !VaultDAO.listOpenThreads) {
+      return [];
+    }
+
+    var existingRows = await VaultDAO.listOpenThreads({ chatId: chatId });
+    var seen = {};
+    existingRows.forEach(function(thread) {
+      if (thread.threadId) seen[thread.threadId] = true;
+    });
+
+    var rows = [];
+    messages.forEach(function(message) {
+      ThreadScanner.scanMessage(message).forEach(function(thread) {
+        if (seen[thread.threadId]) return;
+        seen[thread.threadId] = true;
+        rows.push(thread);
+      });
+    });
+    if (rows.length) await VaultDAO.putOpenThreads(rows);
+    return rows;
+  }
+
   async function handleCapture(snapshot) {
     validateSnapshot(snapshot);
     if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
@@ -174,6 +200,7 @@ var BackgroundRuntime = (function() {
     var chat = chatFromSnapshot(Object.assign({}, snapshot, { messages: normalizedMessages }), existingChat);
     await VaultDAO.putChat(chat);
     if (newMessages.length) await VaultDAO.putMessages(snapshot.chatId, newMessages);
+    var scannedThreads = await scanCapturedMessages(snapshot.chatId, normalizedMessages);
     await updateSearchIndex(chat, normalizedMessages);
     if (VaultDAO.putExtractionRun) {
       await VaultDAO.putExtractionRun({
@@ -196,14 +223,16 @@ var BackgroundRuntime = (function() {
       chatId: snapshot.chatId,
       platform: snapshot.platform,
       addedMessages: newMessages.length,
-      messageCount: existingMessages.length + newMessages.length
+      messageCount: existingMessages.length + newMessages.length,
+      openThreadCount: scannedThreads.length
     });
 
     return {
       success: true,
       chatId: snapshot.chatId,
       addedMessages: newMessages.length,
-      messageCount: existingMessages.length + newMessages.length
+      messageCount: existingMessages.length + newMessages.length,
+      openThreadCount: scannedThreads.length
     };
   }
 

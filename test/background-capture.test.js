@@ -15,7 +15,7 @@ async function deleteVault() {
 
 function loadRuntime(api) {
   globalThis.indexedDB = indexedDB;
-  return evalSrc('vault/db.js', 'vault/dao.js', 'background-core.js', api ? { api } : {});
+  return evalSrc('vault/db.js', 'vault/dao.js', 'threads/scanner.js', 'background-core.js', api ? { api } : {});
 }
 
 function snapshot(messages) {
@@ -64,6 +64,30 @@ describe('BackgroundRuntime.handleCapture', () => {
       platform: 'chatgpt',
       title: 'Thread 123',
       messageCount: 3
+    });
+  });
+
+  it('scans captured tag prefixes into open-thread rows', async () => {
+    const { BackgroundRuntime, VaultDAO } = loadRuntime();
+    const taggedMessages = [
+      { messageId: 'msg-1', role: 'user', content: 'TODO: ping Alice\nTODOLIST: ignore this\nref: source doc', index: 0, timestamp: '2026-01-01T00:00:00.000Z' },
+      { messageId: 'msg-2', role: 'assistant', content: 'No tags here.', index: 1, timestamp: '2026-01-01T00:01:00.000Z' }
+    ];
+
+    const first = await BackgroundRuntime.handleCapture(snapshot(taggedMessages));
+    const second = await BackgroundRuntime.handleCapture(snapshot(taggedMessages));
+    const rows = await VaultDAO.listOpenThreads({ chatId: 'chatgpt:thread-123' });
+
+    expect(first.openThreadCount).toBe(2);
+    expect(second.openThreadCount).toBe(0);
+    expect(rows.map((row) => row.tag)).toEqual(['TODO', 'REF']);
+    expect(rows.map((row) => row.text)).toEqual(['ping Alice', 'source doc']);
+    expect(rows[0]).toMatchObject({
+      chatId: 'chatgpt:thread-123',
+      messageId: 'msg-1',
+      source: 'explicit',
+      subSource: 'scan',
+      status: 'open'
     });
   });
 
