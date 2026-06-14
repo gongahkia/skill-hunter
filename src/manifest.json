@@ -25,7 +25,8 @@
     "https://poe.com/*",
     "https://kimi.com/*",
     "https://chat.qwen.ai/*",
-    "https://tongyi.aliyun.com/*"
+    "https://tongyi.aliyun.com/*",
+    "https://chatglm.cn/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -55,7 +56,8 @@
       "https://poe.com/*",
       "https://kimi.com/*",
       "https://chat.qwen.ai/*",
-      "https://tongyi.aliyun.com/*"
+      "https://tongyi.aliyun.com/*",
+      "https://chatglm.cn/*"
     ],
     "js": [
       "compat.js",
@@ -74,6 +76,7 @@
       "platforms/poe.js",
       "platforms/kimi.js",
       "platforms/qwen.js",
+      "platforms/chatglm.js",
       "platforms/registry.js",
       "content-script.js"
     ],

@@ -83,6 +83,13 @@ const scenarios = [
     url: 'https://chat.qwen.ai/c/thread-123',
     fixtures: ['fixtures/platforms/qwen-primary.html', 'fixtures/platforms/qwen-variant.html'],
     expectedModel: 'Qwen3-Max'
+  },
+  {
+    id: 'chatglm',
+    file: 'platforms/chatglm.js',
+    url: 'https://chatglm.cn/main/thread-123',
+    fixtures: ['fixtures/platforms/chatglm-primary.html', 'fixtures/platforms/chatglm-variant.html'],
+    expectedModel: 'GLM-4.6'
   }
 ];
 
