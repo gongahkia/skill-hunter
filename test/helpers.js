@@ -14,8 +14,12 @@ export function loadFixture(filename) {
 }
 
 export function evalSrc(...files) {
+  let options = {};
+  if (files.length && typeof files[files.length - 1] === 'object') {
+    options = files.pop();
+  }
   const ctx = {};
-  const apiStub = {
+  const apiStub = options.api || {
     storage: {
       sync: { get: async (d) => d, set: async () => {} },
       local: { get: async (d) => d, set: async () => {} },
@@ -23,7 +27,7 @@ export function evalSrc(...files) {
     },
     runtime: { onMessage: { addListener() {} }, sendMessage() {} },
     downloads: { download: async () => {} },
-    tabs: { query: async () => [], sendMessage: async () => ({}) },
+    tabs: { query: async () => [], sendMessage: async () => ({}), onUpdated: { addListener() {} } },
     alarms: { create() {}, clear: async () => {}, onAlarm: { addListener() {} } }
   };
   let code = 'var api = this._api;\nvar module = undefined;\n';

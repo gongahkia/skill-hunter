@@ -184,6 +184,24 @@ function createVaultDAO(options) {
     });
   }
 
+  async function putExtractionRun(run) {
+    if (!run || !run.runId) throw new Error('runId is required');
+    return withTransaction(['extractionRuns'], 'readwrite', async function(transaction) {
+      var record = Object.assign({}, run);
+      await requestToPromise(transaction.objectStore('extractionRuns').put(record));
+      return record;
+    });
+  }
+
+  async function listExtractionRuns(filter) {
+    return withTransaction(['extractionRuns'], 'readonly', async function(transaction) {
+      var rows = await requestToPromise(transaction.objectStore('extractionRuns').getAll());
+      return filterRows(rows, filter).sort(function(a, b) {
+        return String(b.completedAt || '').localeCompare(String(a.completedAt || ''));
+      });
+    });
+  }
+
   return {
     putChat: putChat,
     getChat: getChat,
@@ -193,7 +211,9 @@ function createVaultDAO(options) {
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,
-    deleteChat: deleteChat
+    deleteChat: deleteChat,
+    putExtractionRun: putExtractionRun,
+    listExtractionRuns: listExtractionRuns
   };
 }
 

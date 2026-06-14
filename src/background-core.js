@@ -1,5 +1,28 @@
 var BackgroundRuntime = (function() {
   var AUTO_EXPORT_STATUS_KEY = 'lastAutoExportStatus';
+  var CAPTURE_THROTTLE_MS = 30000;
+  var lastCaptureByTab = {};
+  var SUPPORTED_CAPTURE_HOSTS = [
+    'chat.openai.com',
+    'chatgpt.com',
+    'claude.ai',
+    'gemini.google.com',
+    'perplexity.ai',
+    'www.perplexity.ai',
+    'chat.deepseek.com',
+    'grok.com',
+    'copilot.microsoft.com',
+    'chat.mistral.ai',
+    'huggingface.co',
+    'poe.com',
+    'kimi.com',
+    'chat.qwen.ai',
+    'tongyi.aliyun.com',
+    'chatglm.cn',
+    'doubao.com',
+    'www.doubao.com',
+    'notebooklm.google.com'
+  ];
 
   function serializeError(error) {
     if (typeof AppLogger !== 'undefined') return AppLogger.serializeError(error);
@@ -44,6 +67,17 @@ var BackgroundRuntime = (function() {
     if (!snapshot.chatId) throw new Error('Snapshot missing chatId');
     if (!snapshot.platform) throw new Error('Snapshot missing platform');
     if (!Array.isArray(snapshot.messages)) throw new Error('Snapshot messages must be an array');
+  }
+
+  function isSupportedPlatformUrl(url) {
+    try {
+      var parsed = new URL(url);
+      if (SUPPORTED_CAPTURE_HOSTS.indexOf(parsed.hostname) === -1) return false;
+      if (parsed.hostname === 'huggingface.co') return parsed.pathname.indexOf('/chat') === 0;
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   function chatFromSnapshot(snapshot, existingChat) {
@@ -98,6 +132,17 @@ var BackgroundRuntime = (function() {
 
     await VaultDAO.putChat(chatFromSnapshot(Object.assign({}, snapshot, { messages: normalizedMessages }), existingChat));
     if (newMessages.length) await VaultDAO.putMessages(snapshot.chatId, newMessages);
+    if (VaultDAO.putExtractionRun) {
+      await VaultDAO.putExtractionRun({
+        runId: (snapshot.traceId || ('capture-' + Date.now())) + ':' + snapshot.chatId,
+        chatId: snapshot.chatId,
+        modelName: 'capture',
+        modelVersion: 'snapshot-v1',
+        completedAt: new Date().toISOString(),
+        threadCount: normalizedMessages.length,
+        durationMs: 0
+      });
+    }
 
     log('info', 'background.capture.success', {
       chatId: snapshot.chatId,
@@ -112,6 +157,30 @@ var BackgroundRuntime = (function() {
       addedMessages: newMessages.length,
       messageCount: existingMessages.length + newMessages.length
     };
+  }
+
+  async function captureTab(tabId, tabUrl, traceId) {
+    var response = await api.tabs.sendMessage(tabId, {
+      action: 'extractChatSnapshot',
+      traceId: traceId
+    });
+    if (!response) throw new Error('No response from content script');
+    if (response.error) throw new Error(response.error);
+    return handleCapture(response.data);
+  }
+
+  async function handleTabUpdated(tabId, changeInfo, tab) {
+    if (!changeInfo || changeInfo.status !== 'complete') return null;
+    var tabUrl = changeInfo.url || (tab && tab.url) || '';
+    if (!isSupportedPlatformUrl(tabUrl)) return null;
+
+    var now = Date.now();
+    if (lastCaptureByTab[tabId] && now - lastCaptureByTab[tabId] < CAPTURE_THROTTLE_MS) {
+      return { skipped: true, reason: 'throttled' };
+    }
+
+    lastCaptureByTab[tabId] = now;
+    return captureTab(tabId, tabUrl, trace('capture'));
   }
 
   async function handleDownload(request) {
@@ -261,6 +330,17 @@ var BackgroundRuntime = (function() {
       runAutoExport();
     });
 
+    if (api.tabs && api.tabs.onUpdated && api.tabs.onUpdated.addListener) {
+      api.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        handleTabUpdated(tabId, changeInfo, tab).catch(function(error) {
+          log('error', 'background.capture.tabUpdated.failed', {
+            tabId: tabId,
+            error: serializeError(error)
+          });
+        });
+      });
+    }
+
     api.storage.onChanged.addListener(function(changes) {
       if (changes.autoExportInterval) updateAutoExport();
     });
@@ -276,6 +356,8 @@ var BackgroundRuntime = (function() {
     init: init,
     handleDownload: handleDownload,
     handleCapture: handleCapture,
+    handleTabUpdated: handleTabUpdated,
+    isSupportedPlatformUrl: isSupportedPlatformUrl,
     updateAutoExport: updateAutoExport,
     runAutoExport: runAutoExport
   };

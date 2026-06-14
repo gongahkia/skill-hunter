@@ -13,9 +13,9 @@ async function deleteVault() {
   await requestToPromise(indexedDB.deleteDatabase('rakuzaichi-vault'));
 }
 
-function loadRuntime() {
+function loadRuntime(api) {
   globalThis.indexedDB = indexedDB;
-  return evalSrc('vault/db.js', 'vault/dao.js', 'background-core.js');
+  return evalSrc('vault/db.js', 'vault/dao.js', 'background-core.js', api ? { api } : {});
 }
 
 function snapshot(messages) {
@@ -65,5 +65,39 @@ describe('BackgroundRuntime.handleCapture', () => {
       title: 'Thread 123',
       messageCount: 3
     });
+  });
+
+  it('captures supported completed tab updates once per throttle window', async () => {
+    let sends = 0;
+    const api = {
+      storage: {
+        local: { get: async (defaults) => defaults, set: async () => {} },
+        onChanged: { addListener() {} }
+      },
+      runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+      downloads: { download: async () => {} },
+      alarms: { create() {}, clear: async () => {}, onAlarm: { addListener() {} } },
+      tabs: {
+        query: async () => [],
+        onUpdated: { addListener() {} },
+        sendMessage: async () => {
+          sends++;
+          return { data: snapshot([
+            { messageId: 'msg-1', role: 'user', content: 'Q', index: 0 },
+            { messageId: 'msg-2', role: 'assistant', content: 'A', index: 1 }
+          ]) };
+        }
+      }
+    };
+    const { BackgroundRuntime, VaultDAO } = loadRuntime(api);
+
+    const first = await BackgroundRuntime.handleTabUpdated(10, { status: 'complete' }, { url: 'https://chatgpt.com/c/thread-123' });
+    const second = await BackgroundRuntime.handleTabUpdated(10, { status: 'complete' }, { url: 'https://chatgpt.com/c/thread-123' });
+
+    expect(first.success).toBe(true);
+    expect(second).toEqual({ skipped: true, reason: 'throttled' });
+    expect(sends).toBe(1);
+    expect(await VaultDAO.listMessages('chatgpt:thread-123')).toHaveLength(2);
+    await expect(VaultDAO.listExtractionRuns({ chatId: 'chatgpt:thread-123' })).resolves.toHaveLength(1);
   });
 });
