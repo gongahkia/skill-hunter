@@ -186,8 +186,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M1.T02` — Remove `ndjson`, `xml`, `yaml` entries from `FormatConverter.formats` and `methodMap` in `src/converters.js`. **Success:** `Object.keys(FormatConverter.formats)` is exactly `['csv','tsv','json','markdown','pdf','html']`.
 - [x] `M1.T03` — Add PDF placeholder in `FormatConverter.formats` (`{ mime: 'application/pdf', ext: 'pdf' }`) and HTML placeholder (`{ mime: 'text/html', ext: 'html' }`). Stub `toPDF` and `toHTML` methods that throw `not implemented — see M6`. **Success:** unit tests for `convert('pdf', ...)` and `convert('html', ...)` throw with the expected message.
 - [x] `M1.T04` — Delete unit tests for NDJSON/XML/YAML in `test/`. **Success:** `grep -rE "(ndjson|toxml|toyaml)" test/` returns no matches.
-- [ ] `M1.T05` — Update `src/options.html` and `src/options.js` to remove NDJSON/XML/YAML options from format dropdown. **Success:** loading the options page in a built extension and inspecting the dropdown shows only CSV/TSV/JSON/MD (PDF/HTML disabled until M6).
-- [ ] `M1.T06` — Update `src/popup.js` and `src/popup.html` to remove same. **Success:** popup format selector matches options page set.
+- [x] `M1.T05` — Update `src/options.html` and `src/options.js` to remove NDJSON/XML/YAML options from format dropdown. **Success:** loading the options page in a built extension and inspecting the dropdown shows only CSV/TSV/JSON/MD (PDF/HTML disabled until M6).
+- [x] `M1.T06` — Update `src/popup.js` and `src/popup.html` to remove same. **Success:** popup format selector matches options page set.
 - [ ] `M1.T07` — Update `README.md` "Export formats" table to drop NDJSON/XML/YAML and add PDF + HTML + (placeholder marker for now). **Success:** README table reads exactly the 6 final formats.
 - [ ] `M1.T08` — Bump `package.json` version to `3.0.0-alpha.0` to signal pre-release. **Success:** `node -e 'console.log(require("./package.json").version)'` prints `3.0.0-alpha.0`.
 - [ ] `M1.T09` — Run full validation: `npm run validate`. **Success:** all of build + test + check:manifests + check:permissions + lint pass.

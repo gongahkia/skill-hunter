@@ -1,4 +1,6 @@
 (function() {
+  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
+
   var state = {
     settings: null,
     context: null,
@@ -70,7 +72,12 @@
     return String(format || 'json').toUpperCase();
   }
 
+  function normalizeExportFormat(format) {
+    return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
+  }
+
   function setActiveFormat(format) {
+    format = normalizeExportFormat(format);
     state.lastSelectedFormat = format;
     els.formatButtons.forEach(function(button) {
       if (button.dataset.format === format) button.classList.add('active');
@@ -99,7 +106,7 @@
   }
 
   function updateQuickFormat() {
-    var format = (state.settings && state.settings.defaultFormat) || 'json';
+    var format = normalizeExportFormat((state.settings && state.settings.defaultFormat) || 'json');
     if (els.quickFormat) els.quickFormat.textContent = formatLabel(format);
   }
 
@@ -306,6 +313,7 @@
   }
 
   async function startExport(format) {
+    format = normalizeExportFormat(format);
     var traceId = trace('export');
     setActiveFormat(format);
 
@@ -384,7 +392,7 @@
 
     if (els.quickExport) {
       els.quickExport.addEventListener('click', function() {
-        startExport((state.settings && state.settings.defaultFormat) || 'json');
+        startExport(normalizeExportFormat((state.settings && state.settings.defaultFormat) || 'json'));
       });
     }
 

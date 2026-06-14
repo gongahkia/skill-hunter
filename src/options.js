@@ -1,4 +1,6 @@
 (function() {
+  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
+
   var els = {
     form: document.getElementById('options-form'),
     defaultFormat: document.getElementById('defaultFormat'),
@@ -44,6 +46,10 @@
         document.documentElement.removeAttribute('data-theme');
       }
     }
+  }
+
+  function normalizeDefaultFormat(format) {
+    return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
   }
 
   function renderAutoExportStatus(status) {
@@ -154,7 +160,7 @@
     try {
       var darkMode = els.darkMode.value;
       var payload = {
-        defaultFormat: els.defaultFormat.value,
+        defaultFormat: normalizeDefaultFormat(els.defaultFormat.value),
         filenameTemplate: els.filenameTemplate.value,
         darkMode: darkMode,
         showPreview: !!els.showPreview.checked,
@@ -233,7 +239,7 @@
       var settings = await StorageManager.getAll();
       applyTheme(settings.darkMode);
 
-      if (els.defaultFormat) els.defaultFormat.value = settings.defaultFormat;
+      if (els.defaultFormat) els.defaultFormat.value = normalizeDefaultFormat(settings.defaultFormat);
       if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
       if (els.darkMode) els.darkMode.value = settings.darkMode;
       if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
