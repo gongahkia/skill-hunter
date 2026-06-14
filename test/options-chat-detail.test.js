@@ -296,6 +296,35 @@ describe('OptionsChatDetail', () => {
     expect([...dom.window.document.querySelectorAll('.message-card:first-of-type .thread-chip')].map((chip) => chip.textContent)).toEqual(['REF']);
   });
 
+  it('opens the tag popover and applies a tag with keyboard shortcuts', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const created = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        putOpenThreads: async (threads) => {
+          created.push(...threads);
+          return threads;
+        }
+      },
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    const card = dom.window.document.querySelector('.message-card');
+    card.focus();
+    card.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 't', bubbles: true, cancelable: true }));
+    expect(dom.window.document.querySelector('.thread-popover').hidden).toBe(false);
+    card.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'f', bubbles: true, cancelable: true }));
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(created).toHaveLength(1);
+    expect(created[0]).toMatchObject({ messageId: 'm1', tag: 'FIXME', source: 'explicit', subSource: 'user' });
+  });
+
   it('opens detail when a chat-list row is clicked', async () => {
     const { dom, listRoot } = createDom();
     const { OptionsChatList, OptionsChatDetail } = loadOptionsModules(dom);

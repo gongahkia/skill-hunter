@@ -627,6 +627,11 @@ select[multiple] {
   border-left-color: var(--success);
 }
 
+.message-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .message-card.system,
 .message-card.tool {
   border-left-color: var(--secondary);

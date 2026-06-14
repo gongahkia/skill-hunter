@@ -95,6 +95,24 @@ var OptionsChatDetail = (function() {
     });
   }
 
+  function shortcutTag(key) {
+    var value = text(key).toLowerCase();
+    if (value === 't') return 'TODO';
+    if (value === 'f') return 'FIXME';
+    if (value === 'r') return 'REF';
+    if (value === 'v') return 'REV';
+    if (value === 'u') return 'UNRESOLVED';
+    if (value === 'p') return 'PROMPT';
+    if (value === 'l') return 'FOLLOWUP';
+    return '';
+  }
+
+  function isEditableTarget(target) {
+    if (!target || !target.tagName) return false;
+    var tag = target.tagName.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
+  }
+
   function threadsByMessageId(threads) {
     var grouped = {};
     activeThreads(threads).forEach(function(thread) {
@@ -169,6 +187,7 @@ var OptionsChatDetail = (function() {
     var card = document.createElement('article');
     card.className = 'message-card ' + roleClass(message.role);
     card.dataset.messageId = getMessageId(message);
+    card.tabIndex = 0;
 
     var meta = document.createElement('div');
     meta.className = 'message-meta';
@@ -277,23 +296,26 @@ var OptionsChatDetail = (function() {
 
     var tagGrid = document.createElement('div');
     tagGrid.className = 'thread-tag-grid';
+    async function applyTag(tag) {
+      try {
+        await createThread(chat, message, tag, note.value);
+        popover.hidden = true;
+        note.value = '';
+        tagButton.textContent = 'Tagged';
+        win.setTimeout(function() {
+          tagButton.textContent = 'Tag this';
+        }, 1400);
+      } catch (error) {
+        tagButton.textContent = 'Tag failed';
+      }
+    }
     BUILT_IN_THREAD_TAGS.forEach(function(tag) {
       var button = document.createElement('button');
       button.type = 'button';
       button.dataset.tag = tag;
       button.textContent = tag;
       button.addEventListener('click', async function() {
-        try {
-          await createThread(chat, message, tag, note.value);
-          popover.hidden = true;
-          note.value = '';
-          tagButton.textContent = 'Tagged';
-          win.setTimeout(function() {
-            tagButton.textContent = 'Tag this';
-          }, 1400);
-        } catch (error) {
-          tagButton.textContent = 'Tag failed';
-        }
+        await applyTag(tag);
       });
       tagGrid.appendChild(button);
     });
@@ -309,6 +331,21 @@ var OptionsChatDetail = (function() {
       event.stopPropagation();
       popover.hidden = !popover.hidden;
       if (!popover.hidden) note.focus();
+    });
+
+    card.addEventListener('keydown', async function(event) {
+      if (isEditableTarget(event.target)) return;
+      var key = text(event.key).toLowerCase();
+      if (key === 't' && popover.hidden) {
+        event.preventDefault();
+        popover.hidden = false;
+        return;
+      }
+      if (popover.hidden) return;
+      var tag = shortcutTag(key);
+      if (!tag) return;
+      event.preventDefault();
+      await applyTag(tag);
     });
 
     return card;
