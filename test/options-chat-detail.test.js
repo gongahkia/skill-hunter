@@ -237,6 +237,36 @@ describe('OptionsChatDetail', () => {
     expect(created[0].createdAt).toBeTruthy();
   });
 
+  it('renders per-message open-thread chips and opens the thread record', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const opened = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        listOpenThreads: async () => [
+          { threadId: 'thread-1', chatId: 'claude:thread-1', messageId: 'm1', tag: 'TODO', text: 'follow up', source: 'explicit', subSource: 'user', status: 'open' },
+          { threadId: 'thread-2', chatId: 'claude:thread-1', messageId: 'm1', tag: 'REF', text: 'reference source', source: 'explicit', subSource: 'user', status: 'open' },
+          { threadId: 'thread-3', chatId: 'claude:thread-1', messageId: 'm2', tag: 'FIXME', text: 'old bug', source: 'explicit', subSource: 'user', status: 'archived' }
+        ]
+      },
+      onThreadOpen: (thread) => opened.push(thread.threadId),
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    const cards = dom.window.document.querySelectorAll('.message-card');
+    expect([...cards[0].querySelectorAll('.thread-chip')].map((chip) => chip.textContent)).toEqual(['TODO', 'REF']);
+    expect(cards[1].querySelectorAll('.thread-chip')).toHaveLength(0);
+    cards[0].querySelector('.thread-chip[data-tag="REF"]').click();
+
+    expect(opened).toEqual(['thread-2']);
+    expect(cards[0].querySelector('.thread-record').textContent).toContain('REF');
+    expect(cards[0].querySelector('.thread-record').textContent).toContain('reference source');
+  });
+
   it('opens detail when a chat-list row is clicked', async () => {
     const { dom, listRoot } = createDom();
     const { OptionsChatList, OptionsChatDetail } = loadOptionsModules(dom);

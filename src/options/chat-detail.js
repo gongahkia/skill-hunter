@@ -85,6 +85,26 @@ var OptionsChatDetail = (function() {
     return value.length > 240 ? value.slice(0, 237) + '...' : value;
   }
 
+  function getMessageId(message) {
+    return message.messageId || message.id || '';
+  }
+
+  function activeThreads(threads) {
+    return (Array.isArray(threads) ? threads : []).filter(function(thread) {
+      return thread && thread.status !== 'archived';
+    });
+  }
+
+  function threadsByMessageId(threads) {
+    var grouped = {};
+    activeThreads(threads).forEach(function(thread) {
+      if (!thread.messageId) return;
+      if (!grouped[thread.messageId]) grouped[thread.messageId] = [];
+      grouped[thread.messageId].push(thread);
+    });
+    return grouped;
+  }
+
   function setOriginalLink(link, chat) {
     if (!link) return;
     if (chat && chat.url) {
@@ -119,10 +139,36 @@ var OptionsChatDetail = (function() {
     return ok ? Promise.resolve() : Promise.reject(new Error('Clipboard API is unavailable'));
   }
 
-  function makeMessage(document, win, chat, message, copyText, createThread) {
+  function makeThreadRecord(document, thread) {
+    var record = document.createElement('div');
+    record.className = 'thread-record';
+    record.tabIndex = -1;
+
+    var header = document.createElement('div');
+    header.className = 'thread-record-header';
+    var tag = document.createElement('strong');
+    tag.textContent = thread.tag || 'THREAD';
+    header.appendChild(tag);
+    var status = document.createElement('span');
+    status.textContent = text(thread.status, 'open');
+    header.appendChild(status);
+    record.appendChild(header);
+
+    var meta = document.createElement('p');
+    meta.textContent = [text(thread.source, 'explicit'), text(thread.subSource, '')].filter(Boolean).join(' / ');
+    record.appendChild(meta);
+
+    var body = document.createElement('div');
+    body.className = 'thread-record-body';
+    body.textContent = text(thread.text, '(empty)');
+    record.appendChild(body);
+    return record;
+  }
+
+  function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread) {
     var card = document.createElement('article');
     card.className = 'message-card ' + roleClass(message.role);
-    card.dataset.messageId = message.messageId || '';
+    card.dataset.messageId = getMessageId(message);
 
     var meta = document.createElement('div');
     meta.className = 'message-meta';
@@ -168,6 +214,35 @@ var OptionsChatDetail = (function() {
     body.textContent = text(message.content, '(empty)');
 
     card.appendChild(meta);
+
+    if (threads.length) {
+      var chips = document.createElement('div');
+      chips.className = 'message-thread-chips';
+      threads.forEach(function(thread) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'thread-chip';
+        chip.dataset.threadId = thread.threadId || '';
+        chip.dataset.tag = thread.tag || '';
+        chip.textContent = thread.tag || 'THREAD';
+        chip.title = 'Open thread record';
+        chip.setAttribute('aria-expanded', 'false');
+        chip.addEventListener('click', function(event) {
+          event.stopPropagation();
+          var record = card.querySelector('.thread-record-slot');
+          record.innerHTML = '';
+          record.appendChild(makeThreadRecord(document, thread));
+          record.hidden = false;
+          chips.querySelectorAll('.thread-chip').forEach(function(item) {
+            item.setAttribute('aria-expanded', String(item === chip));
+          });
+          openThread(thread);
+        });
+        chips.appendChild(chip);
+      });
+      card.appendChild(chips);
+    }
+
     card.appendChild(body);
 
     var popover = document.createElement('div');
@@ -203,6 +278,11 @@ var OptionsChatDetail = (function() {
     });
     popover.appendChild(tagGrid);
     card.appendChild(popover);
+
+    var recordSlot = document.createElement('div');
+    recordSlot.className = 'thread-record-slot';
+    recordSlot.hidden = true;
+    card.appendChild(recordSlot);
 
     tagButton.addEventListener('click', function(event) {
       event.stopPropagation();
@@ -277,11 +357,13 @@ var OptionsChatDetail = (function() {
     var onTagsChanged = typeof options.onTagsChanged === 'function' ? options.onTagsChanged : function() {};
     var onPinChanged = typeof options.onPinChanged === 'function' ? options.onPinChanged : function() {};
     var onThreadCreated = typeof options.onThreadCreated === 'function' ? options.onThreadCreated : function() {};
+    var onThreadOpen = typeof options.onThreadOpen === 'function' ? options.onThreadOpen : function() {};
     var pinButton = options.pinButton || null;
     var sendButton = options.sendButton || null;
     var restoreButton = options.restoreButton || null;
     var currentChat = null;
     var currentMessages = [];
+    var currentThreads = [];
     var copyText = options.copyText || function(value) {
       return defaultCopy(document, win, value);
     };
@@ -341,6 +423,8 @@ var OptionsChatDetail = (function() {
         createdAt: new Date().toISOString()
       };
       await dao.putOpenThreads([thread]);
+      currentThreads = activeThreads(currentThreads.concat(thread));
+      render(chat, currentMessages, currentThreads);
       onThreadCreated(thread);
       return thread;
     }
@@ -350,7 +434,7 @@ var OptionsChatDetail = (function() {
       var updated = await dao.setChatTags(chat.chatId, tags);
       if (!updated) return;
       chat.tags = updated.tags || [];
-      render(chat, messages);
+      render(chat, messages, currentThreads);
       onTagsChanged(chat);
     }
 
@@ -412,6 +496,7 @@ var OptionsChatDetail = (function() {
       root.innerHTML = '';
       currentChat = null;
       currentMessages = [];
+      currentThreads = [];
       syncPinButton(null);
       syncSendButton(null);
       syncRestoreButton(null);
@@ -419,10 +504,12 @@ var OptionsChatDetail = (function() {
       root.appendChild(empty);
     }
 
-    function render(chat, messages) {
+    function render(chat, messages, threads) {
       root.innerHTML = '';
       currentChat = chat;
       currentMessages = Array.isArray(messages) ? messages : [];
+      currentThreads = activeThreads(threads);
+      var groupedThreads = threadsByMessageId(currentThreads);
       setOriginalLink(openLink, chat);
       syncPinButton(chat);
       syncSendButton(chat);
@@ -452,7 +539,7 @@ var OptionsChatDetail = (function() {
       var list = document.createElement('div');
       list.className = 'message-list';
       for (var i = 0; i < currentMessages.length; i++) {
-        list.appendChild(makeMessage(document, win, chat, currentMessages[i], copyText, createThread));
+        list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen));
       }
       root.appendChild(list);
     }
@@ -465,8 +552,12 @@ var OptionsChatDetail = (function() {
       }
 
       try {
-        var messages = dao && typeof dao.listMessages === 'function' ? await dao.listMessages(chat.chatId) : [];
-        render(chat, Array.isArray(messages) ? messages : []);
+        var results = await Promise.all([
+          dao && typeof dao.listMessages === 'function' ? dao.listMessages(chat.chatId) : Promise.resolve([]),
+          dao && typeof dao.listOpenThreads === 'function' ? dao.listOpenThreads({ chatId: chat.chatId }) : Promise.resolve([])
+        ]);
+        var messages = Array.isArray(results[0]) ? results[0] : [];
+        render(chat, messages, Array.isArray(results[1]) ? results[1] : []);
         return messages;
       } catch (error) {
         setOriginalLink(openLink, chat);

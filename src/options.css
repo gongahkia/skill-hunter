@@ -671,6 +671,63 @@ select[multiple] {
   pointer-events: auto;
 }
 
+.message-thread-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.thread-chip {
+  --thread-color: var(--primary);
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--thread-color) 75%, var(--line-strong));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--thread-color) 12%, var(--surface));
+  color: color-mix(in srgb, var(--thread-color) 72%, var(--ink));
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.thread-chip[data-tag="TODO"] {
+  --thread-color: #b7791f;
+}
+
+.thread-chip[data-tag="FIXME"] {
+  --thread-color: #c53030;
+}
+
+.thread-chip[data-tag="REV"] {
+  --thread-color: #2b6cb0;
+}
+
+.thread-chip[data-tag="REF"] {
+  --thread-color: #2c7a7b;
+}
+
+.thread-chip[data-tag="FOLLOWUP"] {
+  --thread-color: #805ad5;
+}
+
+.thread-chip[data-tag="UNRESOLVED"] {
+  --thread-color: #dd6b20;
+}
+
+.thread-chip[data-tag="PROMPT"] {
+  --thread-color: #2f855a;
+}
+
+.thread-chip:hover,
+.thread-chip:focus-visible,
+.thread-chip[aria-expanded="true"] {
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+
 .thread-popover {
   display: grid;
   gap: 8px;
@@ -705,6 +762,41 @@ select[multiple] {
 .thread-tag-grid button:focus-visible {
   border-color: var(--primary);
   color: var(--primary);
+}
+
+.thread-record-slot[hidden] {
+  display: none;
+}
+
+.thread-record {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.thread-record-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.78rem;
+}
+
+.thread-record-header strong {
+  color: var(--ink);
+}
+
+.thread-record-header span,
+.thread-record p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.thread-record-body {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .message-content {
