@@ -162,7 +162,7 @@ Do not confuse with **`-X ours`** (capital X, merge *option*, not strategy): tha
 
 Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to graft another repo's history onto yours as an ancestor without copying any of its files. The defensive follow-up commit in `M0.T08` is belt-and-suspenders — `-s ours` should already leave the tree untouched, but we verify and commit a no-op restore so the audit trail explicitly documents intent.
 
-- [ ] `M0.T01` — Pre-merge safety: in Rakuzaichi, ensure clean tree. **Success:** `git status` in `/Users/gongahkia/Desktop/coding/projects/rakuzaichi` returns "nothing to commit, working tree clean".
+- [x] `M0.T01` — Pre-merge safety: in Rakuzaichi, ensure clean tree. **Success:** `git status` in `/Users/gongahkia/Desktop/coding/projects/rakuzaichi` returns "nothing to commit, working tree clean".
 - [ ] `M0.T02` — Tag pre-merge state: `git tag pre-owl-merge`. **Success:** `git rev-parse pre-owl-merge` returns the HEAD SHA recorded before any merge action.
 - [ ] `M0.T03` — Record Rakuzaichi's pre-merge tree SHA: `git rev-parse HEAD^{tree} > .tmp/pre-merge-tree.txt`. **Success:** file exists, contains a single 40-char SHA.
 - [ ] `M0.T04` — Add Owl as a local remote: `git remote add owl /Users/gongahkia/Desktop/coding/projects/owl`. **Success:** `git remote -v` lists `owl` with both fetch and push URLs.
