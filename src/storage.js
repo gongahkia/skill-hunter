@@ -9,6 +9,13 @@ var StorageManager = {
       state: 'idle',
       message: 'Auto-export has not run yet.',
       timestamp: ''
+    },
+    lastCaptureStatus: {
+      state: 'idle',
+      message: 'No captures yet.',
+      timestamp: '',
+      chatId: '',
+      platform: ''
     }
   },
   _ensureStorage() {

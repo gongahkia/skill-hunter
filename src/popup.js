@@ -14,6 +14,8 @@
     contextMessages: document.getElementById('context-messages'),
     contextTitle: document.getElementById('context-title'),
     contextModel: document.getElementById('context-model'),
+    captureStatus: document.getElementById('capture-status'),
+    captureStatusText: document.getElementById('capture-status-text'),
     captureNow: document.getElementById('capture-now'),
     quickExport: document.getElementById('quick-export'),
     quickFormat: document.getElementById('quick-format'),
@@ -110,6 +112,30 @@
   function updateQuickFormat() {
     var format = normalizeExportFormat((state.settings && state.settings.defaultFormat) || 'json');
     if (els.quickFormat) els.quickFormat.textContent = formatLabel(format);
+  }
+
+  function renderCaptureStatus(status) {
+    if (!els.captureStatus || !els.captureStatusText) return;
+    status = status || {};
+    var kind = 'red';
+    if (status.state === 'success' && status.timestamp) {
+      var age = Date.now() - new Date(status.timestamp).getTime();
+      if (age < 5 * 60 * 1000) kind = 'green';
+      else if (age < 30 * 60 * 1000) kind = 'amber';
+    }
+    if (status.state === 'error') kind = 'red';
+
+    els.captureStatus.className = 'capture-status ' + kind;
+    els.captureStatusText.textContent = status.message || 'No captures yet.';
+  }
+
+  async function refreshCaptureStatus() {
+    try {
+      var status = await StorageManager.get('lastCaptureStatus');
+      renderCaptureStatus(status);
+    } catch (error) {
+      renderCaptureStatus({ state: 'error', message: 'Capture status unavailable.' });
+    }
   }
 
   function updateContextUI(data) {
@@ -246,6 +272,7 @@
       });
       if (response && response.error) throw new Error(response.error);
       showStatus('Chat captured to the local vault.', 'success');
+      await refreshCaptureStatus();
       log('info', 'popup.capture.success', {
         traceId: traceId,
         chatId: snapshot.chatId,
@@ -474,6 +501,7 @@
     try {
       state.settings = await StorageManager.getAll();
       applyTheme(state.settings.darkMode);
+      renderCaptureStatus(state.settings.lastCaptureStatus);
       updateQuickFormat();
       wireEvents();
       await renderLastExport();

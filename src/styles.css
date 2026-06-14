@@ -175,6 +175,41 @@ h1 {
   gap: 8px;
 }
 
+.capture-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.capture-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 999px;
+  background: var(--error);
+}
+
+.capture-status.green .capture-dot {
+  background: var(--success);
+}
+
+.capture-status.amber .capture-dot {
+  background: var(--secondary);
+}
+
+.capture-status.red .capture-dot {
+  background: var(--error);
+}
+
 .btn {
   border: 1px solid transparent;
   border-radius: 11px;

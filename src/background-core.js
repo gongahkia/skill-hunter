@@ -1,5 +1,6 @@
 var BackgroundRuntime = (function() {
   var AUTO_EXPORT_STATUS_KEY = 'lastAutoExportStatus';
+  var CAPTURE_STATUS_KEY = 'lastCaptureStatus';
   var CAPTURE_THROTTLE_MS = 30000;
   var lastCaptureByTab = {};
   var SUPPORTED_CAPTURE_HOSTS = [
@@ -53,6 +54,18 @@ var BackgroundRuntime = (function() {
       message: message,
       timestamp: new Date().toISOString(),
       traceId: traceId || ''
+    });
+  }
+
+  async function setCaptureStatus(state, message, details) {
+    if (typeof StorageManager === 'undefined') return;
+    await StorageManager.setRuntimeValue(CAPTURE_STATUS_KEY, {
+      state: state,
+      message: message,
+      timestamp: new Date().toISOString(),
+      chatId: details && details.chatId ? details.chatId : '',
+      platform: details && details.platform ? details.platform : '',
+      traceId: details && details.traceId ? details.traceId : ''
     });
   }
 
@@ -143,6 +156,11 @@ var BackgroundRuntime = (function() {
         durationMs: 0
       });
     }
+    await setCaptureStatus('success', 'Captured ' + normalizedMessages.length + ' messages.', {
+      chatId: snapshot.chatId,
+      platform: snapshot.platform,
+      traceId: snapshot.traceId || ''
+    });
 
     log('info', 'background.capture.success', {
       chatId: snapshot.chatId,
@@ -160,13 +178,18 @@ var BackgroundRuntime = (function() {
   }
 
   async function captureTab(tabId, tabUrl, traceId) {
-    var response = await api.tabs.sendMessage(tabId, {
-      action: 'extractChatSnapshot',
-      traceId: traceId
-    });
-    if (!response) throw new Error('No response from content script');
-    if (response.error) throw new Error(response.error);
-    return handleCapture(response.data);
+    try {
+      var response = await api.tabs.sendMessage(tabId, {
+        action: 'extractChatSnapshot',
+        traceId: traceId
+      });
+      if (!response) throw new Error('No response from content script');
+      if (response.error) throw new Error(response.error);
+      return await handleCapture(response.data);
+    } catch (error) {
+      await setCaptureStatus('error', error.message || String(error), { traceId: traceId });
+      throw error;
+    }
   }
 
   async function handleTabUpdated(tabId, changeInfo, tab) {
