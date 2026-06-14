@@ -174,6 +174,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M0.T10` — Update Rakuzaichi `README.md` to add an "Origins" section noting Owl history merged on YYYY-MM-DD with the merge commit SHA. **Success:** `grep -c "Origins" README.md` returns ≥1.
 - [x] `M0.T11` — Remove `owl` remote (it was a local scratch tool): `git remote remove owl`. **Success:** `git remote -v` no longer lists `owl`.
 - [ ] `M0.T12` — In Owl repo (separate working tree), append a deprecation banner to its README pointing to Rakuzaichi v3, then commit + push. **Success:** Owl `README.md` has the deprecation pointer; Owl repo description on GitHub updated to "Archived — merged into Rakuzaichi v3."
+  - 2026-06-14: local Owl commit `9708eac` created; push and `gh repo edit gongahkia/owl` return GitHub 404, so remote update is not verified.
 - [ ] `M0.T13` — Archive Owl repo on GitHub (Settings → Archive). **Success:** GitHub shows the archived banner on the Owl repo.
 - [ ] `M0.T14` — Delete `WORKON-PIVOT-ASAP.md` (its narrative is now folded into `TODO.md` §TL;DR, §Decisions locked, §Market context, and §References). **Success:** `ls WORKON-PIVOT-ASAP.md` returns "No such file or directory"; nothing in the repo links to it.
 
