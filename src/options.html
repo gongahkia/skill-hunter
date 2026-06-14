@@ -78,16 +78,7 @@
             <h2>Chats</h2>
             <span id="chat-list-summary">0 captured</span>
           </div>
-          <div class="chat-table" role="table" aria-label="Captured chats">
-            <div class="chat-row chat-row-head" role="row">
-              <span>Date</span>
-              <span>Platform</span>
-              <span>Title</span>
-              <span>Messages</span>
-              <span>Tags</span>
-            </div>
-            <div class="chat-empty" role="row">No captured chats yet.</div>
-          </div>
+          <div id="chat-list" class="chat-table" role="table" aria-label="Captured chats"></div>
         </section>
 
         <section class="chat-detail-pane" aria-label="Chat detail">
@@ -181,6 +172,9 @@
   <script src="logger.js"></script>
   <script src="storage.js"></script>
   <script src="history.js"></script>
+  <script src="vault/db.js"></script>
+  <script src="vault/dao.js"></script>
+  <script src="options/chat-list.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

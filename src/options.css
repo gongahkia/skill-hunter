@@ -296,6 +296,7 @@ input[type="search"] {
 .chat-table {
   height: calc(100vh - 122px);
   overflow: auto;
+  position: relative;
 }
 
 .chat-row {
@@ -310,6 +311,28 @@ input[type="search"] {
   font-size: 0.82rem;
 }
 
+.chat-row-data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border-width: 0 0 1px;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-row-data:hover,
+.chat-row-data:focus-visible,
+.chat-row-data.selected {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
 .chat-row-head {
   position: sticky;
   top: 0;
@@ -320,6 +343,17 @@ input[type="search"] {
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.chat-list-body {
+  position: relative;
+}
+
+.chat-list-window {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .chat-empty,
