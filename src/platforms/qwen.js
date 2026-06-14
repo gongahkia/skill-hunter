@@ -3,6 +3,7 @@ _platforms.push({
   id: 'qwen',
   name: 'Qwen Chat',
   hostPatterns: ['*://chat.qwen.ai/*', '*://tongyi.aliyun.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return /(^chat\.qwen\.ai$|^tongyi\.aliyun\.com$)/.test(window.location.hostname) && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',

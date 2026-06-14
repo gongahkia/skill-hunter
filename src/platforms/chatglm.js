@@ -3,6 +3,7 @@ _platforms.push({
   id: 'chatglm',
   name: 'ChatGLM',
   hostPatterns: ['*://chatglm.cn/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return /(^|\.)chatglm\.cn$/.test(window.location.hostname) && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',

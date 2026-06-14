@@ -3,6 +3,7 @@ _platforms.push({
   id: 'notebooklm',
   name: 'NotebookLM',
   hostPatterns: ['*://notebooklm.google.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return window.location.hostname === 'notebooklm.google.com' && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',

@@ -25,8 +25,12 @@ function deriveChatId(platform, result) {
     if (pathId) return platform.id + ':' + pathId;
   } catch (error) {}
 
-  var firstMessage = result && result.messages && result.messages.length ? result.messages[0].content : '';
-  return platform.id + ':' + hashString([window.location.href, document.title, firstMessage].join('|'));
+  var firstMessage = result && result.messages && result.messages.length ? result.messages[0] : {};
+  return platform.id + ':' + hashString([
+    firstMessage.content || '',
+    firstMessage.timestamp || '',
+    document.title
+  ].join('|'));
 }
 
 function normalizeSnapshotMessages(platform, result, chatId) {

@@ -1,10 +1,11 @@
 function createPlatformEntry(platform) {
   return {
     id: platform.id,
-    displayName: platform.displayName || platform.name,
-    urlPatterns: platform.urlPatterns || platform.hostPatterns || [],
-    adapterModule: platform.adapterModule || ('platforms/' + platform.id + '.js')
-  };
+      displayName: platform.displayName || platform.name,
+      urlPatterns: platform.urlPatterns || platform.hostPatterns || [],
+      adapterModule: platform.adapterModule || ('platforms/' + platform.id + '.js'),
+      chatIdStrategy: platform.chatIdStrategy || ''
+    };
 }
 
 var PlatformRegistry = {

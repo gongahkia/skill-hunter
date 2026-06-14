@@ -3,6 +3,7 @@ _platforms.push({
   id: 'huggingchat',
   name: 'HuggingChat',
   hostPatterns: ['*://huggingface.co/chat/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '[class*="conversation"]',

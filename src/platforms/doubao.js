@@ -3,6 +3,7 @@ _platforms.push({
   id: 'doubao',
   name: 'Doubao',
   hostPatterns: ['*://doubao.com/*', '*://www.doubao.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return /(^|\.)doubao\.com$/.test(window.location.hostname) && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',

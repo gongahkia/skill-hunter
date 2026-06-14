@@ -101,6 +101,25 @@ describe('content script chat snapshots', () => {
     expect(first.response.data.messages[0].messageId).toBeTruthy();
   });
 
+  it('falls back to stable first-message hashing when URL has no path id', () => {
+    const first = runContentAction({
+      fixture: 'fixtures/platforms/chatgpt-primary.html',
+      url: 'https://chatgpt.com/',
+      platformFiles: ['platforms/chatgpt.js'],
+      action: 'extractChatSnapshot'
+    });
+    const second = runContentAction({
+      fixture: 'fixtures/platforms/chatgpt-primary.html',
+      url: 'https://chatgpt.com/',
+      platformFiles: ['platforms/chatgpt.js'],
+      action: 'extractChatSnapshot'
+    });
+
+    expect(first.response.data.chatId).toMatch(/^chatgpt:/);
+    expect(first.response.data.chatId).toBe(second.response.data.chatId);
+    expect(first.response.data.chatId).not.toBe('chatgpt:');
+  });
+
   it('keeps extractChat envelope compatibility while returning the snapshot', () => {
     const result = runContentAction({
       fixture: 'fixtures/platforms/claude-primary.html',

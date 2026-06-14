@@ -3,6 +3,7 @@ _platforms.push({
   id: 'copilot',
   name: 'Copilot',
   hostPatterns: ['*://copilot.microsoft.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       'cib-serp',

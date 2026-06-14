@@ -3,6 +3,7 @@ _platforms.push({
   id: 'perplexity',
   name: 'Perplexity',
   hostPatterns: ['*://perplexity.ai/*', '*://www.perplexity.ai/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '.chat-container',

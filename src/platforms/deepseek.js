@@ -3,6 +3,7 @@ _platforms.push({
   id: 'deepseek',
   name: 'DeepSeek',
   hostPatterns: ['*://chat.deepseek.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '.chat-container.divider',

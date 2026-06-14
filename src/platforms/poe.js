@@ -3,6 +3,7 @@ _platforms.push({
   id: 'poe',
   name: 'Poe',
   hostPatterns: ['*://poe.com/*', '*://www.poe.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return /(^|\.)poe\.com$/.test(window.location.hostname) && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',

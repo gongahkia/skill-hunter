@@ -120,6 +120,7 @@ describe('platform extractors', () => {
       expect(entry.displayName).toBeTruthy();
       expect(entry.urlPatterns.length).toBeGreaterThan(0);
       expect(entry.adapterModule).toBe(`platforms/${entry.id}.js`);
+      expect(entry.chatIdStrategy).toBe('last-url-path-segment; fallback:first-message-timestamp-hash');
     }
   });
 

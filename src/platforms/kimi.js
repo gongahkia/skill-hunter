@@ -3,6 +3,7 @@ _platforms.push({
   id: 'kimi',
   name: 'Kimi',
   hostPatterns: ['*://kimi.com/*', '*://www.kimi.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return /(^|\.)kimi\.com$/.test(window.location.hostname) && !!DomUtils.querySafe(document, [
       '[data-testid="chat-message"]',
