@@ -22,7 +22,8 @@
     "https://copilot.microsoft.com/*",
     "https://chat.mistral.ai/*",
     "https://huggingface.co/chat/*",
-    "https://poe.com/*"
+    "https://poe.com/*",
+    "https://kimi.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -49,7 +50,8 @@
       "https://copilot.microsoft.com/*",
       "https://chat.mistral.ai/*",
       "https://huggingface.co/chat/*",
-      "https://poe.com/*"
+      "https://poe.com/*",
+      "https://kimi.com/*"
     ],
     "js": [
       "compat.js",
@@ -66,6 +68,7 @@
       "platforms/mistral.js",
       "platforms/huggingchat.js",
       "platforms/poe.js",
+      "platforms/kimi.js",
       "platforms/registry.js",
       "content-script.js"
     ],

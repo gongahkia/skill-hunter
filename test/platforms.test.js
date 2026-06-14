@@ -69,6 +69,13 @@ const scenarios = [
     url: 'https://poe.com/chat/thread-123',
     fixtures: ['fixtures/platforms/poe-primary.html', 'fixtures/platforms/poe-variant.html'],
     expectedModel: 'Assistant Bot'
+  },
+  {
+    id: 'kimi',
+    file: 'platforms/kimi.js',
+    url: 'https://kimi.com/chat/thread-123',
+    fixtures: ['fixtures/platforms/kimi-primary.html', 'fixtures/platforms/kimi-variant.html'],
+    expectedModel: 'Kimi K2.6'
   }
 ];
 

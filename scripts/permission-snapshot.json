@@ -11,6 +11,7 @@
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
+      "https://kimi.com/*",
       "https://poe.com/*",
       "https://perplexity.ai/*",
       "https://www.perplexity.ai/*"
@@ -28,6 +29,7 @@
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
+      "https://kimi.com/*",
       "https://poe.com/*",
       "https://perplexity.ai/*",
       "https://www.perplexity.ai/*"
@@ -45,6 +47,7 @@
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
+      "https://kimi.com/*",
       "https://poe.com/*",
       "https://perplexity.ai/*",
       "https://www.perplexity.ai/*"
