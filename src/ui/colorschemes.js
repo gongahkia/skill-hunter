@@ -183,11 +183,22 @@ var OwlColorschemes = (function() {
     return luminance(hex) > 0.42 ? '#172232' : '#ffffff';
   }
 
-  function cssVars(id) {
+  function normalizeMode(mode) {
+    return mode === 'light' ? 'light' : 'dark';
+  }
+
+  function backgroundForMode(background, mode) {
+    var sourceLight = luminance(background) > 0.55;
+    if (mode === 'light') return sourceLight ? background : mixHex(background, '#ffffff', 0.88);
+    return sourceLight ? mixHex(background, '#000000', 0.86) : background;
+  }
+
+  function cssVars(id, mode) {
     var scheme = get(id);
     var colors = scheme.colors;
-    var bg = colors.BACKGROUND;
-    var light = luminance(bg) > 0.55;
+    var themeMode = normalizeMode(mode);
+    var bg = backgroundForMode(colors.BACKGROUND, themeMode);
+    var light = themeMode === 'light';
     var ink = light ? '#172232' : '#f4f7fb';
     var surface = light ? mixHex(bg, '#eef3f7', 0.55) : mixHex(bg, '#ffffff', 0.08);
     var surfaceSoft = light ? mixHex(bg, '#e8eef5', 0.38) : mixHex(bg, '#ffffff', 0.14);
@@ -241,14 +252,16 @@ var OwlColorschemes = (function() {
     return schemes.slice();
   }
 
-  function apply(rootDocument, id) {
+  function apply(rootDocument, id, mode) {
     var target = rootDocument || document;
     var style = target.documentElement.style;
-    var vars = cssVars(id);
+    var themeMode = normalizeMode(mode);
+    var vars = cssVars(id, themeMode);
     Object.keys(vars).forEach(function(key) {
       style.setProperty(key, vars[key]);
     });
     target.documentElement.dataset.colorscheme = get(id).id;
+    target.documentElement.dataset.themeMode = themeMode;
     return get(id);
   }
 

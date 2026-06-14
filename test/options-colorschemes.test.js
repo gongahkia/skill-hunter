@@ -83,7 +83,7 @@ async function loadPopup(storage) {
 
 describe('options colorscheme settings', () => {
   it('renders, applies, saves, and reloads the selected colorscheme', async () => {
-    const storage = { colorscheme: 'tokyo-night' };
+    const storage = { colorscheme: 'tokyo-night', darkMode: 'dark' };
     const dom = await loadOptions(storage);
     const select = dom.window.document.getElementById('colorscheme');
 
@@ -93,7 +93,7 @@ describe('options colorscheme settings', () => {
 
     select.value = 'github';
     select.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
-    expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).toBe('#ffffff');
+    expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe('#ffffff');
     expect(storage.colorscheme).toBe('tokyo-night');
 
     dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
@@ -102,14 +102,38 @@ describe('options colorscheme settings', () => {
 
     const reloaded = await loadOptions(storage);
     expect(reloaded.window.document.getElementById('colorscheme').value).toBe('github');
-    expect(reloaded.window.document.documentElement.style.getPropertyValue('--bg')).toBe('#ffffff');
+    expect(reloaded.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe('#ffffff');
   });
 
   it('applies the saved colorscheme in popup UI', async () => {
-    const dom = await loadPopup({ colorscheme: 'rose-pine' });
+    const dom = await loadPopup({ colorscheme: 'rose-pine', darkMode: 'dark' });
 
     expect(dom.window.document.documentElement.dataset.colorscheme).toBe('rose-pine');
+    expect(dom.window.document.documentElement.dataset.themeMode).toBe('dark');
     expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).toBe('#191724');
     expect(dom.window.document.documentElement.style.getPropertyValue('--primary')).toBe('#31748f');
+  });
+
+  it('applies and persists theme mode independently of colorscheme', async () => {
+    const storage = { colorscheme: 'tokyo-night', darkMode: 'dark' };
+    const dom = await loadOptions(storage);
+    const theme = dom.window.document.getElementById('darkMode');
+    const darkBg = dom.window.document.documentElement.style.getPropertyValue('--bg');
+
+    theme.value = 'light';
+    theme.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    expect(dom.window.document.documentElement.dataset.colorscheme).toBe('tokyo-night');
+    expect(dom.window.document.documentElement.dataset.themeMode).toBe('light');
+    expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe(darkBg);
+    expect(storage.darkMode).toBe('dark');
+
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+    expect(storage.darkMode).toBe('light');
+
+    const reloaded = await loadOptions(storage);
+    expect(reloaded.window.document.getElementById('darkMode').value).toBe('light');
+    expect(reloaded.window.document.documentElement.dataset.themeMode).toBe('light');
+    expect(reloaded.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe(darkBg);
   });
 });

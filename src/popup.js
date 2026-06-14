@@ -54,20 +54,16 @@
   }
 
   function applyTheme(mode) {
-    if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    else if (mode === 'light') document.documentElement.removeAttribute('data-theme');
-    else {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-      }
-    }
+    var effectiveMode = mode === 'dark' || (mode !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    if (effectiveMode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    document.documentElement.dataset.themeMode = effectiveMode;
+    return effectiveMode;
   }
 
-  function applyColorscheme(id) {
+  function applyColorscheme(id, mode) {
     if (typeof OwlColorschemes !== 'undefined') {
-      OwlColorschemes.apply(document, id || OwlColorschemes.defaultId);
+      OwlColorschemes.apply(document, id || OwlColorschemes.defaultId, mode || document.documentElement.dataset.themeMode || 'dark');
     }
   }
 
@@ -506,16 +502,14 @@
   async function init() {
     try {
       state.settings = await StorageManager.getAll();
-      applyTheme(state.settings.darkMode);
-      applyColorscheme(state.settings.colorscheme);
+      applyColorscheme(state.settings.colorscheme, applyTheme(state.settings.darkMode));
       renderCaptureStatus(state.settings.lastCaptureStatus);
       updateQuickFormat();
       wireEvents();
       await renderLastExport();
       await detectCurrentTabContext();
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
-        applyTheme(state.settings.darkMode);
-        applyColorscheme(state.settings.colorscheme);
+        applyColorscheme(state.settings.colorscheme, applyTheme(state.settings.darkMode));
       });
 
       log('info', 'popup.init.complete', {

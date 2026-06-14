@@ -57,13 +57,27 @@ describe('OwlColorschemes', () => {
     expect(vars['--revision']).toBe('#bb9af7');
   });
 
+  it('generates light and dark variants independent of scheme identity', () => {
+    const colorschemes = loadColorschemes();
+    const lightTokyo = colorschemes.cssVars('tokyo-night', 'light');
+    const darkGithub = colorschemes.cssVars('github', 'dark');
+
+    expect(lightTokyo['--bg']).not.toBe('#1a1b26');
+    expect(lightTokyo['--ink']).toBe('#172232');
+    expect(lightTokyo['--primary']).toBe('#7aa2f7');
+    expect(darkGithub['--bg']).not.toBe('#ffffff');
+    expect(darkGithub['--ink']).toBe('#f4f7fb');
+    expect(darkGithub['--primary']).toBe('#0366d6');
+  });
+
   it('applies a colorscheme to document root variables', () => {
     const colorschemes = loadColorschemes();
     const dom = new JSDOM('<!doctype html><html><body></body></html>');
 
-    colorschemes.apply(dom.window.document, 'github');
+    colorschemes.apply(dom.window.document, 'github', 'light');
 
     expect(dom.window.document.documentElement.dataset.colorscheme).toBe('github');
+    expect(dom.window.document.documentElement.dataset.themeMode).toBe('light');
     expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).toBe('#ffffff');
     expect(dom.window.document.documentElement.style.getPropertyValue('--primary')).toBe('#0366d6');
   });
