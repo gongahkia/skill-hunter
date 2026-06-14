@@ -84,6 +84,8 @@ describe('VaultDAO', () => {
     ]);
     expect((await dao.listMessages('chat-1')).map((message) => message.messageId)).toEqual(['msg-1', 'msg-2']);
     expect((await dao.listAllMessages()).map((message) => message.messageId)).toEqual(['msg-1', 'msg-2']);
+    await dao.setMeta('searchIndex', { version: 1, count: 1 });
+    expect(await dao.getMeta('searchIndex')).toEqual({ version: 1, count: 1 });
 
     await dao.putOpenThreads([
       {

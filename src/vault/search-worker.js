@@ -29,15 +29,36 @@
   function createVaultSearchWorkerRuntime(MiniSearchCtor) {
     if (!MiniSearchCtor) throw new Error('MiniSearch is unavailable');
     var index = null;
+    var indexOptions = {
+      fields: ['title', 'content'],
+      storeFields: ['chatId', 'title', 'platform', 'url', 'lastUpdatedAt', 'messageCount', 'tags']
+    };
 
     function build(documents) {
       var normalized = (Array.isArray(documents) ? documents : []).map(normalizeDocument);
-      index = new MiniSearchCtor({
-        fields: ['title', 'content'],
-        storeFields: ['chatId', 'title', 'platform', 'url', 'lastUpdatedAt', 'messageCount', 'tags']
-      });
+      index = new MiniSearchCtor(indexOptions);
       index.addAll(normalized);
       return { count: normalized.length };
+    }
+
+    function load(indexJson) {
+      index = MiniSearchCtor.loadJSON(indexJson, indexOptions);
+      return { loaded: true };
+    }
+
+    function upsert(document) {
+      if (!index) index = new MiniSearchCtor(indexOptions);
+      var normalized = normalizeDocument(document || {});
+      if (!normalized.id) throw new Error('Search document id is required');
+      try {
+        index.discard(normalized.id);
+      } catch (error) {}
+      index.add(normalized);
+      return { chatId: normalized.chatId };
+    }
+
+    function exportIndex() {
+      return index ? JSON.stringify(index) : '';
     }
 
     function search(query, limit) {
@@ -71,6 +92,18 @@
           respond({ id: id, ok: true, payload: build(message && message.payload && message.payload.documents) });
           return;
         }
+        if (message.type === 'load') {
+          respond({ id: id, ok: true, payload: load(message.payload && message.payload.indexJson) });
+          return;
+        }
+        if (message.type === 'upsert') {
+          respond({ id: id, ok: true, payload: upsert(message.payload && message.payload.document) });
+          return;
+        }
+        if (message.type === 'export') {
+          respond({ id: id, ok: true, payload: { indexJson: exportIndex() } });
+          return;
+        }
         if (message.type === 'search') {
           respond({
             id: id,
@@ -87,6 +120,9 @@
 
     return {
       build: build,
+      load: load,
+      upsert: upsert,
+      exportIndex: exportIndex,
       search: search,
       handleMessage: handleMessage
     };
@@ -96,7 +132,11 @@
     root.importScripts('../vendor/minisearch.js');
   }
 
-  if (root && typeof root.addEventListener === 'function' && typeof root.postMessage === 'function') {
+  function isDedicatedWorker(root) {
+    return !!(root && root.constructor && root.constructor.name === 'DedicatedWorkerGlobalScope');
+  }
+
+  if (isDedicatedWorker(root) && typeof root.addEventListener === 'function' && typeof root.postMessage === 'function') {
     var runtime = createVaultSearchWorkerRuntime(root.MiniSearch);
     root.addEventListener('message', function(event) {
       runtime.handleMessage(event.data, function(response) {
@@ -110,4 +150,5 @@
       createVaultSearchWorkerRuntime: createVaultSearchWorkerRuntime
     };
   }
+  if (root) root.createVaultSearchWorkerRuntime = createVaultSearchWorkerRuntime;
 })(typeof self !== 'undefined' ? self : (typeof globalThis !== 'undefined' ? globalThis : this));

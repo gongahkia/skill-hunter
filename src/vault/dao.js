@@ -213,6 +213,26 @@ function createVaultDAO(options) {
     });
   }
 
+  async function getMeta(key) {
+    if (!key) throw new Error('meta key is required');
+    return withTransaction(['meta'], 'readonly', async function(transaction) {
+      var row = await requestToPromise(transaction.objectStore('meta').get(key));
+      return row ? row.value : null;
+    });
+  }
+
+  async function setMeta(key, value) {
+    if (!key) throw new Error('meta key is required');
+    return withTransaction(['meta'], 'readwrite', async function(transaction) {
+      await requestToPromise(transaction.objectStore('meta').put({
+        key: key,
+        value: value,
+        updatedAt: new Date().toISOString()
+      }));
+      return value;
+    });
+  }
+
   return {
     putChat: putChat,
     getChat: getChat,
@@ -225,7 +245,9 @@ function createVaultDAO(options) {
     setThreadStatus: setThreadStatus,
     deleteChat: deleteChat,
     putExtractionRun: putExtractionRun,
-    listExtractionRuns: listExtractionRuns
+    listExtractionRuns: listExtractionRuns,
+    getMeta: getMeta,
+    setMeta: setMeta
   };
 }
 

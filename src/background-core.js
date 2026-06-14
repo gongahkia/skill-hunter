@@ -127,6 +127,34 @@ var BackgroundRuntime = (function() {
     });
   }
 
+  async function updateSearchIndex(chat, messages) {
+    if (typeof MiniSearch === 'undefined' ||
+        typeof createVaultSearchWorkerRuntime === 'undefined' ||
+        typeof VaultSearch === 'undefined' ||
+        !VaultDAO.getMeta ||
+        !VaultDAO.setMeta) {
+      return;
+    }
+
+    try {
+      var cached = await VaultDAO.getMeta(VaultSearch.SEARCH_INDEX_META_KEY);
+      if (!cached || !cached.indexJson) return;
+
+      var runtime = createVaultSearchWorkerRuntime(MiniSearch);
+      runtime.load(cached.indexJson);
+      runtime.upsert(VaultSearch.createDocuments([chat], messages)[0]);
+      var chats = await VaultDAO.listChats();
+      await VaultDAO.setMeta(VaultSearch.SEARCH_INDEX_META_KEY, {
+        version: VaultSearch.SEARCH_INDEX_VERSION,
+        signature: VaultSearch.createSignature(chats),
+        indexJson: runtime.exportIndex(),
+        savedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      log('warn', 'background.searchIndex.update.failed', { error: serializeError(error), chatId: chat.chatId });
+    }
+  }
+
   async function handleCapture(snapshot) {
     validateSnapshot(snapshot);
     if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
@@ -143,8 +171,10 @@ var BackgroundRuntime = (function() {
       return !existingIndexes[message.index];
     });
 
-    await VaultDAO.putChat(chatFromSnapshot(Object.assign({}, snapshot, { messages: normalizedMessages }), existingChat));
+    var chat = chatFromSnapshot(Object.assign({}, snapshot, { messages: normalizedMessages }), existingChat);
+    await VaultDAO.putChat(chat);
     if (newMessages.length) await VaultDAO.putMessages(snapshot.chatId, newMessages);
+    await updateSearchIndex(chat, normalizedMessages);
     if (VaultDAO.putExtractionRun) {
       await VaultDAO.putExtractionRun({
         runId: (snapshot.traceId || ('capture-' + Date.now())) + ':' + snapshot.chatId,

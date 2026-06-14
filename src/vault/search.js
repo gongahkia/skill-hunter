@@ -1,5 +1,7 @@
 var VaultSearch = (function() {
   var DEFAULT_LIMIT = 100;
+  var SEARCH_INDEX_META_KEY = 'searchIndex';
+  var SEARCH_INDEX_VERSION = 1;
 
   function text(value) {
     if (value === undefined || value === null) return '';
@@ -41,6 +43,31 @@ var VaultSearch = (function() {
     });
   }
 
+  function createSignature(chats) {
+    var latest = '';
+    var messageTotal = 0;
+    chats = Array.isArray(chats) ? chats : [];
+    chats.forEach(function(chat) {
+      var updated = text(chat.lastUpdatedAt || chat.capturedAt);
+      if (updated > latest) latest = updated;
+      messageTotal += chat.messageCount || 0;
+    });
+    return {
+      version: SEARCH_INDEX_VERSION,
+      count: chats.length,
+      latest: latest,
+      messageTotal: messageTotal
+    };
+  }
+
+  function sameSignature(a, b) {
+    return !!(a && b &&
+      a.version === b.version &&
+      a.count === b.count &&
+      a.latest === b.latest &&
+      a.messageTotal === b.messageTotal);
+  }
+
   function create(options) {
     options = options || {};
     var dao = options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null);
@@ -80,12 +107,31 @@ var VaultSearch = (function() {
     async function load() {
       if (!dao || typeof dao.listChats !== 'function') throw new Error('Vault DAO is unavailable');
       chats = await dao.listChats();
-      var messages = typeof dao.listAllMessages === 'function' ? await dao.listAllMessages() : [];
+      var signature = createSignature(chats);
       chatById = {};
       chats.forEach(function(chat) {
         chatById[chat.chatId] = chat;
       });
+
+      if (typeof dao.getMeta === 'function') {
+        var cached = await dao.getMeta(SEARCH_INDEX_META_KEY);
+        if (cached && cached.indexJson && sameSignature(cached.signature, signature)) {
+          await request('load', { indexJson: cached.indexJson });
+          return chats.slice();
+        }
+      }
+
+      var messages = typeof dao.listAllMessages === 'function' ? await dao.listAllMessages() : [];
       await request('build', { documents: createDocuments(chats, messages) });
+      if (typeof dao.setMeta === 'function') {
+        var exported = await request('export');
+        await dao.setMeta(SEARCH_INDEX_META_KEY, {
+          version: SEARCH_INDEX_VERSION,
+          signature: signature,
+          indexJson: exported.indexJson,
+          savedAt: new Date().toISOString()
+        });
+      }
       return chats.slice();
     }
 
@@ -119,7 +165,11 @@ var VaultSearch = (function() {
 
   return {
     create: create,
-    createDocuments: createDocuments
+    createDocuments: createDocuments,
+    createSignature: createSignature,
+    sameSignature: sameSignature,
+    SEARCH_INDEX_META_KEY: SEARCH_INDEX_META_KEY,
+    SEARCH_INDEX_VERSION: SEARCH_INDEX_VERSION
   };
 })();
 

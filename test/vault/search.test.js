@@ -24,8 +24,10 @@ class RuntimeWorker {
   }
 
   postMessage(message) {
-    this.runtime.handleMessage(message, (response) => {
+    Promise.resolve(this.runtime.handleMessage(message, (response) => {
       if (this.onmessage) this.onmessage({ data: response });
+    })).catch((error) => {
+      if (this.onerror) this.onerror(error);
     });
   }
 
@@ -80,10 +82,13 @@ describe('VaultSearch', () => {
 
     runtime.build(loadVaultSearch().createDocuments(chats(), messages()));
     const results = runtime.search('snapshot');
+    const loaded = createRuntime(MiniSearch);
+    loaded.load(runtime.exportIndex());
 
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({ chatId: 'chat-1', title: 'Vault restore' });
     expect(results[0].score).toBeGreaterThan(0);
+    expect(loaded.search('snapshot')[0]).toMatchObject({ chatId: 'chat-1' });
   });
 
   it('loads from DAO and maps worker results back to chat rows', async () => {
@@ -100,5 +105,57 @@ describe('VaultSearch', () => {
     expect(await search.load()).toHaveLength(2);
     expect((await search.search('browser worker')).map((chat) => chat.chatId)).toEqual(['chat-2']);
     expect((await search.search('')).map((chat) => chat.chatId)).toEqual(['chat-1', 'chat-2']);
+  });
+
+  it('loads a valid cached index without reading all messages', async () => {
+    const createRuntime = loadSearchWorkerRuntime();
+    const VaultSearch = loadVaultSearch();
+    const seeded = createRuntime(MiniSearch);
+    seeded.build(VaultSearch.createDocuments(chats(), messages()));
+    let readMessages = false;
+    const search = VaultSearch.create({
+      worker: new RuntimeWorker(createRuntime(MiniSearch)),
+      dao: {
+        listChats: async () => chats(),
+        listAllMessages: async () => {
+          readMessages = true;
+          return messages();
+        },
+        getMeta: async () => ({
+          version: VaultSearch.SEARCH_INDEX_VERSION,
+          signature: VaultSearch.createSignature(chats()),
+          indexJson: seeded.exportIndex()
+        }),
+        setMeta: async () => {
+          throw new Error('cache should not be rewritten');
+        }
+      }
+    });
+
+    await search.load();
+    expect(readMessages).toBe(false);
+    expect((await search.search('snapshot')).map((chat) => chat.chatId)).toEqual(['chat-1']);
+  });
+
+  it('persists a rebuilt index when the cache is missing', async () => {
+    const createRuntime = loadSearchWorkerRuntime();
+    const VaultSearch = loadVaultSearch();
+    let saved = null;
+    const search = VaultSearch.create({
+      worker: new RuntimeWorker(createRuntime(MiniSearch)),
+      dao: {
+        listChats: async () => chats(),
+        listAllMessages: async () => messages(),
+        getMeta: async () => null,
+        setMeta: async (key, value) => {
+          saved = { key, value };
+        }
+      }
+    });
+
+    await search.load();
+    expect(saved.key).toBe(VaultSearch.SEARCH_INDEX_META_KEY);
+    expect(saved.value.signature).toEqual(VaultSearch.createSignature(chats()));
+    expect(saved.value.indexJson.length).toBeGreaterThan(100);
   });
 });
