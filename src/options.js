@@ -43,6 +43,15 @@
     detailPin: document.getElementById('detailPin'),
     sendToNewChat: document.getElementById('sendToNewChat'),
     restoreClipboard: document.getElementById('restoreClipboard'),
+    openThreadsList: document.getElementById('openThreadsList'),
+    threadListSummary: document.getElementById('threadListSummary'),
+    threadTagFilter: document.getElementById('threadTagFilter'),
+    threadChatFilter: document.getElementById('threadChatFilter'),
+    threadPlatformFilter: document.getElementById('threadPlatformFilter'),
+    threadStatusFilter: document.getElementById('threadStatusFilter'),
+    threadSourceFilter: document.getElementById('threadSourceFilter'),
+    threadSubSourceFilter: document.getElementById('threadSubSourceFilter'),
+    threadSort: document.getElementById('threadSort'),
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
@@ -464,8 +473,13 @@
 
   async function initVaultViews() {
     var detail = null;
+    var threadPane = null;
+    async function refreshThreads() {
+      if (threadPane) await threadPane.load();
+    }
     var refreshVault = async function() {
       await refreshVaultStats();
+      await refreshThreads();
     };
     if (els.chatDetail && typeof OptionsChatDetail !== 'undefined') {
       detail = OptionsChatDetail.create({
@@ -480,6 +494,25 @@
         },
         onPinChanged: function() {
           refreshVault(true);
+        }
+      });
+    }
+    if (els.openThreadsList && typeof OptionsOpenThreads !== 'undefined') {
+      threadPane = OptionsOpenThreads.create({
+        root: els.openThreadsList,
+        summaryEl: els.threadListSummary,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        filters: {
+          tag: els.threadTagFilter,
+          chat: els.threadChatFilter,
+          platform: els.threadPlatformFilter,
+          status: els.threadStatusFilter,
+          source: els.threadSourceFilter,
+          subSource: els.threadSubSourceFilter,
+          sort: els.threadSort
+        },
+        onSelect: function(thread) {
+          if (detail && thread.chat) detail.load(thread.chat);
         }
       });
     }
@@ -503,7 +536,8 @@
       try {
         var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });
         list.setChats(await search.load());
-        refreshVault = bindVaultControls(search, list);
+        await refreshThreads();
+        refreshVault = bindVaultControls(search, list, refreshThreads);
         return refreshVault;
       } catch (error) {
         log('warn', 'options.search.init.failed', { error: serializeError(error) });
@@ -511,8 +545,10 @@
     }
 
     await list.load();
+    await refreshThreads();
     return async function() {
       await list.load();
+      await refreshThreads();
       await refreshVaultStats();
     };
   }
@@ -573,7 +609,7 @@
     els.customDateFields.hidden = els.dateFilter.value !== 'custom';
   }
 
-  function bindVaultControls(search, list) {
+  function bindVaultControls(search, list, refreshThreads) {
     var serial = 0;
 
     async function refresh() {
@@ -637,6 +673,7 @@
     return async function(reload) {
       if (reload) await search.load();
       await refresh();
+      if (refreshThreads) await refreshThreads();
       await refreshVaultStats();
     };
   }

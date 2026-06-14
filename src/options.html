@@ -166,6 +166,88 @@
           </div>
         </section>
       </section>
+
+      <section class="threads-pane" aria-label="Open threads">
+        <div class="pane-heading">
+          <h2>Open threads</h2>
+          <span id="threadListSummary">0 threads</span>
+        </div>
+        <div class="thread-filters">
+          <label>
+            Tag
+            <select id="threadTagFilter">
+              <option value="">All tags</option>
+              <option value="FIXME">FIXME</option>
+              <option value="TODO">TODO</option>
+              <option value="UNRESOLVED">UNRESOLVED</option>
+              <option value="FOLLOWUP">FOLLOWUP</option>
+              <option value="REV">REV</option>
+              <option value="REF">REF</option>
+              <option value="PROMPT">PROMPT</option>
+            </select>
+          </label>
+          <label>
+            Chat
+            <input id="threadChatFilter" type="search" placeholder="Chat title or id">
+          </label>
+          <label>
+            Platform
+            <select id="threadPlatformFilter">
+              <option value="">All platforms</option>
+              <option value="chatgpt">ChatGPT</option>
+              <option value="claude">Claude</option>
+              <option value="gemini">Gemini</option>
+              <option value="perplexity">Perplexity</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="grok">Grok</option>
+              <option value="copilot">Copilot</option>
+              <option value="mistral">Mistral</option>
+              <option value="huggingchat">HuggingChat</option>
+              <option value="poe">Poe</option>
+              <option value="kimi">Kimi</option>
+              <option value="qwen">Qwen Chat</option>
+              <option value="chatglm">ChatGLM</option>
+              <option value="doubao">Doubao</option>
+              <option value="notebooklm">NotebookLM</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select id="threadStatusFilter">
+              <option value="open">Open</option>
+              <option value="">All statuses</option>
+              <option value="done">Done</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+          <label>
+            Source
+            <select id="threadSourceFilter">
+              <option value="">All sources</option>
+              <option value="explicit">Explicit</option>
+              <option value="extracted">Extracted</option>
+            </select>
+          </label>
+          <label>
+            Sub-source
+            <select id="threadSubSourceFilter">
+              <option value="">All sub-sources</option>
+              <option value="user">User</option>
+              <option value="scan">Scan</option>
+            </select>
+          </label>
+          <label>
+            Sort
+            <select id="threadSort">
+              <option value="priority">Priority</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="chat">Chat</option>
+            </select>
+          </label>
+        </div>
+        <div id="openThreadsList" class="thread-table" role="table" aria-label="Open threads"></div>
+      </section>
     </section>
 
     <aside class="vault-inspector" aria-label="Settings and diagnostics">
@@ -262,6 +344,7 @@
   <script src="options/folders.js"></script>
   <script src="options/chat-list.js"></script>
   <script src="options/chat-detail.js"></script>
+  <script src="options/open-threads.js"></script>
   <script src="options.js"></script>
 </body>
 </html>
