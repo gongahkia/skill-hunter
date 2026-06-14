@@ -20,6 +20,7 @@ function createDom() {
     <main>
       <a id="open-original" href="#" aria-disabled="true">Open original</a>
       <button id="detail-pin" type="button"></button>
+      <button id="send-new-chat" type="button"></button>
       <div id="chat-detail"></div>
       <span id="chat-list-summary">0 captured</span>
       <strong id="vault-count">0</strong>
@@ -135,6 +136,37 @@ describe('OptionsChatDetail', () => {
 
     expect(changed).toEqual([true]);
     expect(dom.window.document.getElementById('detail-pin').textContent).toBe('★');
+  });
+
+  it('copies a primer and opens the platform new-chat URL', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const copied = [];
+    const opened = [];
+    const sendButton = dom.window.document.getElementById('send-new-chat');
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      sendButton,
+      dao: { listMessages: async () => messages() },
+      copyText: async (value) => copied.push(value),
+      openUrl: (url) => opened.push(url),
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    sendButton.click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(opened).toEqual(['https://claude.ai/new']);
+    expect(sendButton.textContent).toBe('Sent');
+    expect(copied).toHaveLength(1);
+    expect(copied[0]).toContain('# Continue this saved chat');
+    expect(copied[0]).toContain('Source platform: Claude');
+    expect(copied[0]).toContain('Source URL: https://claude.ai/chat/thread-1');
+    expect(copied[0]).toContain('\n\nUse this transcript as context.');
+    expect(copied[0]).toContain('[1] User');
+    expect(copied[0]).toContain('How should I restore this?');
   });
 
   it('opens detail when a chat-list row is clicked', async () => {

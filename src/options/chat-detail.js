@@ -1,4 +1,38 @@
 var OptionsChatDetail = (function() {
+  var NEW_CHAT_URLS = {
+    chatgpt: 'https://chatgpt.com/',
+    claude: 'https://claude.ai/new',
+    gemini: 'https://gemini.google.com/app',
+    perplexity: 'https://www.perplexity.ai/',
+    deepseek: 'https://chat.deepseek.com/',
+    grok: 'https://grok.com/',
+    copilot: 'https://copilot.microsoft.com/',
+    mistral: 'https://chat.mistral.ai/chat',
+    huggingchat: 'https://huggingface.co/chat/',
+    poe: 'https://poe.com/',
+    kimi: 'https://kimi.com/',
+    qwen: 'https://chat.qwen.ai/',
+    chatglm: 'https://chatglm.cn/main',
+    doubao: 'https://www.doubao.com/chat/',
+    notebooklm: 'https://notebooklm.google.com/'
+  };
+  var PLATFORM_LABELS = {
+    chatgpt: 'ChatGPT',
+    claude: 'Claude',
+    gemini: 'Gemini',
+    perplexity: 'Perplexity',
+    deepseek: 'DeepSeek',
+    grok: 'Grok',
+    copilot: 'Copilot',
+    mistral: 'Mistral',
+    huggingchat: 'HuggingChat',
+    poe: 'Poe',
+    kimi: 'Kimi',
+    qwen: 'Qwen Chat',
+    chatglm: 'ChatGLM',
+    doubao: 'Doubao',
+    notebooklm: 'NotebookLM'
+  };
   var DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
     year: 'numeric',
     month: 'short',
@@ -26,6 +60,18 @@ var OptionsChatDetail = (function() {
   function roleLabel(role) {
     role = text(role, 'unknown');
     return role.charAt(0).toUpperCase() + role.slice(1);
+  }
+
+  function platformLabel(platform) {
+    return PLATFORM_LABELS[platform] || text(platform, 'unknown');
+  }
+
+  function newChatUrl(platform) {
+    return NEW_CHAT_URLS[platform] || 'https://chatgpt.com/';
+  }
+
+  function defaultOpenUrl(win, url) {
+    if (win.open) win.open(url, '_blank', 'noopener');
   }
 
   function setOriginalLink(link, chat) {
@@ -105,6 +151,31 @@ var OptionsChatDetail = (function() {
     return card;
   }
 
+  function buildPrimer(chat, messages) {
+    var lines = [
+      '# Continue this saved chat',
+      '',
+      'Source title: ' + text(chat.title, 'Untitled chat'),
+      'Source platform: ' + platformLabel(chat.platform),
+      'Source URL: ' + text(chat.url, 'n/a'),
+      'Source model: ' + text(chat.model, 'n/a'),
+      'Messages: ' + String(messages.length || chat.messageCount || 0)
+    ];
+    if (chat.lastUpdatedAt) lines.push('Last updated: ' + formatTimestamp(chat.lastUpdatedAt));
+    lines.push('');
+    lines.push('Use this transcript as context. Continue from it without assuming access to the original page.');
+    lines.push('');
+    lines.push('Transcript:');
+
+    messages.forEach(function(message, index) {
+      lines.push('');
+      lines.push('[' + String(index + 1) + '] ' + roleLabel(message.role) + ' | ' + formatTimestamp(message.timestamp));
+      lines.push(text(message.content, '(empty)'));
+    });
+
+    return lines.join('\n');
+  }
+
   function create(options) {
     options = options || {};
     var root = options.root;
@@ -117,9 +188,14 @@ var OptionsChatDetail = (function() {
     var onTagsChanged = typeof options.onTagsChanged === 'function' ? options.onTagsChanged : function() {};
     var onPinChanged = typeof options.onPinChanged === 'function' ? options.onPinChanged : function() {};
     var pinButton = options.pinButton || null;
+    var sendButton = options.sendButton || null;
     var currentChat = null;
+    var currentMessages = [];
     var copyText = options.copyText || function(value) {
       return defaultCopy(document, win, value);
+    };
+    var openUrl = options.openUrl || function(url) {
+      return defaultOpenUrl(win, url);
     };
     var openLink = options.openLink || null;
 
@@ -146,6 +222,12 @@ var OptionsChatDetail = (function() {
       pinButton.disabled = false;
       pinButton.textContent = chat.pinned ? '★' : '☆';
       pinButton.setAttribute('aria-label', chat.pinned ? 'Unpin chat' : 'Pin chat');
+    }
+
+    function syncSendButton(chat) {
+      if (!sendButton) return;
+      sendButton.disabled = !(chat && chat.chatId);
+      sendButton.textContent = 'Send to new chat';
     }
 
     async function saveTags(chat, tags, messages) {
@@ -214,7 +296,9 @@ var OptionsChatDetail = (function() {
     function renderEmpty(title, message) {
       root.innerHTML = '';
       currentChat = null;
+      currentMessages = [];
       syncPinButton(null);
+      syncSendButton(null);
       var empty = makeEmpty(title, message);
       root.appendChild(empty);
     }
@@ -222,8 +306,10 @@ var OptionsChatDetail = (function() {
     function render(chat, messages) {
       root.innerHTML = '';
       currentChat = chat;
+      currentMessages = Array.isArray(messages) ? messages : [];
       setOriginalLink(openLink, chat);
       syncPinButton(chat);
+      syncSendButton(chat);
 
       var summary = document.createElement('section');
       summary.className = 'detail-summary';
@@ -234,22 +320,22 @@ var OptionsChatDetail = (function() {
       var meta = document.createElement('p');
       meta.textContent = [
         text(chat.platform, 'unknown'),
-        text(chat.messageCount, messages.length) + ' messages',
+        text(chat.messageCount, currentMessages.length) + ' messages',
         chat.lastUpdatedAt ? 'updated ' + formatTimestamp(chat.lastUpdatedAt) : ''
       ].filter(Boolean).join(' | ');
       summary.appendChild(meta);
       root.appendChild(summary);
-      root.appendChild(makeTagEditor(chat, messages));
+      root.appendChild(makeTagEditor(chat, currentMessages));
 
-      if (!messages.length) {
+      if (!currentMessages.length) {
         root.appendChild(makeEmpty('No messages', 'No messages captured for this chat.'));
         return;
       }
 
       var list = document.createElement('div');
       list.className = 'message-list';
-      for (var i = 0; i < messages.length; i++) {
-        list.appendChild(makeMessage(document, win, messages[i], copyText));
+      for (var i = 0; i < currentMessages.length; i++) {
+        list.appendChild(makeMessage(document, win, currentMessages[i], copyText));
       }
       root.appendChild(list);
     }
@@ -286,6 +372,23 @@ var OptionsChatDetail = (function() {
       });
     }
 
+    if (sendButton) {
+      sendButton.addEventListener('click', async function() {
+        if (!currentChat) return;
+        var previous = sendButton.textContent;
+        try {
+          await copyText(buildPrimer(currentChat, currentMessages));
+          openUrl(newChatUrl(currentChat.platform));
+          sendButton.textContent = 'Sent';
+          win.setTimeout(function() {
+            sendButton.textContent = previous;
+          }, 1600);
+        } catch (error) {
+          sendButton.textContent = 'Send failed';
+        }
+      });
+    }
+
     setOriginalLink(openLink, null);
     renderEmpty('Select a chat', 'No captured chat selected.');
 
@@ -295,7 +398,8 @@ var OptionsChatDetail = (function() {
   }
 
   return {
-    create: create
+    create: create,
+    newChatUrl: newChatUrl
   };
 })();
 

@@ -33,6 +33,7 @@
     chatDetail: document.getElementById('chat-detail'),
     openOriginal: document.getElementById('open-original'),
     detailPin: document.getElementById('detailPin'),
+    sendToNewChat: document.getElementById('sendToNewChat'),
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
@@ -354,6 +355,7 @@
         root: els.chatDetail,
         openLink: els.openOriginal,
         pinButton: els.detailPin,
+        sendButton: els.sendToNewChat,
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         onTagsChanged: function() {
           refreshVault(true);
