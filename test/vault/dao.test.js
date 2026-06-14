@@ -167,4 +167,37 @@ describe('VaultDAO', () => {
 
     expect(await dao.listOpenThreads({ chatId: 'chat-1' })).toEqual([]);
   });
+
+  it('opens and closes a fresh database connection per DAO call', async () => {
+    const name = dbName();
+    let opens = 0;
+    let closes = 0;
+    const db = {
+      open: async () => {
+        opens++;
+        return VaultDB.open({ indexedDB, name });
+      },
+      close: (handle) => {
+        closes++;
+        VaultDB.close(handle);
+      }
+    };
+    const dao = createVaultDAO({ db });
+
+    await dao.putChat({
+      chatId: 'chat-1',
+      platform: 'chatgpt',
+      title: 'Chat',
+      capturedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      messageCount: 0,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+    await dao.getChat('chat-1');
+
+    expect(opens).toBe(2);
+    expect(closes).toBe(2);
+  });
 });

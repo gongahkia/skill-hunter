@@ -221,7 +221,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M2.T10` — Add `chrome.alarms`-driven periodic background sweep every 10 minutes that re-captures any active tab on a supported platform. **Success:** simulated alarm fire triggers capture of active supported tab; no fire when no supported tab is active.
 - [x] `M2.T11` — Add explicit "Capture this chat now" button in popup. **Success:** click invokes `handleCapture` for the active tab; popup shows toast on success.
 - [x] `M2.T12` — Add capture-status indicator to popup: green dot if last capture <5min, amber 5-30min, red >30min or error. **Success:** indicator updates within 2s of capture completion.
-- [ ] `M2.T13` — Wire MV3 service worker resilience: vault module functions must each open + use + close their own IndexedDB connection (no module-level connection). **Success:** killing the SW (`chrome://serviceworker-internals`) and re-triggering capture works without manual reload.
+- [x] `M2.T13` — Wire MV3 service worker resilience: vault module functions must each open + use + close their own IndexedDB connection (no module-level connection). **Success:** killing the SW (`chrome://serviceworker-internals`) and re-triggering capture works without manual reload.
 
 ## M3 — Vault UX (browse, search, organize)
 
