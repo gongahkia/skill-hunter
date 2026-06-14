@@ -54,11 +54,12 @@ var OptionsChatList = (function() {
     return header;
   }
 
-  function makeRow(document, chat, index, top, selectedChatId, onSelect) {
+  function makeRow(document, chat, index, top, selectedChatId, onSelect, draggable) {
     var row = document.createElement('div');
     row.className = 'chat-row chat-row-data' + (chat.chatId === selectedChatId ? ' selected' : '');
     row.setAttribute('role', 'row');
     row.tabIndex = 0;
+    row.draggable = draggable;
     row.dataset.chatId = chat.chatId || '';
     row.style.transform = 'translateY(' + top + 'px)';
     row.addEventListener('click', function() {
@@ -68,6 +69,12 @@ var OptionsChatList = (function() {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       onSelect(chat);
+    });
+    row.addEventListener('dragstart', function(event) {
+      if (!draggable || !event.dataTransfer) return;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', chat.chatId || '');
+      event.dataTransfer.setData('application/x-rakuzaichi-chat-id', chat.chatId || '');
     });
 
     appendCell(row, formatDate(chat.lastUpdatedAt || chat.capturedAt));
@@ -92,6 +99,7 @@ var OptionsChatList = (function() {
       countEl: options.countEl || null,
       dao: options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null),
       onSelect: typeof options.onSelect === 'function' ? options.onSelect : function() {},
+      draggable: options.draggable !== false,
       chats: [],
       selectedChatId: '',
       frame: 0,
@@ -147,7 +155,7 @@ var OptionsChatList = (function() {
 
       var fragment = document.createDocumentFragment();
       for (var i = start; i < end; i++) {
-        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, select));
+        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, select, state.draggable));
       }
       state.window.appendChild(fragment);
     }

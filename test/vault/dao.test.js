@@ -149,6 +149,36 @@ describe('VaultDAO', () => {
     expect(await dao.deleteChat('missing')).toBe(false);
   });
 
+  it('creates nested folders, moves chats, and deletes folder subtrees', async () => {
+    const dao = makeDAO(dbName());
+    await dao.putChat({
+      chatId: 'chat-1',
+      platform: 'chatgpt',
+      title: 'Folder chat',
+      capturedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      messageCount: 0,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+
+    await dao.putFolder({ folderId: 'folder-1', name: 'Work' });
+    await dao.putFolder({ folderId: 'folder-2', name: 'Client', parentId: 'folder-1' });
+    await dao.putFolder({ folderId: 'folder-3', name: 'Sprint', parentId: 'folder-2' });
+    await expect(dao.putFolder({ folderId: 'folder-4', name: 'Too deep', parentId: 'folder-3' })).rejects.toThrow('folders can only be nested up to 3 levels');
+
+    await expect(dao.listFolders()).resolves.toHaveLength(3);
+    await expect(dao.renameFolder('folder-2', 'Client A')).resolves.toMatchObject({ name: 'Client A' });
+    await expect(dao.setChatFolder('chat-1', 'folder-3')).resolves.toMatchObject({ folderId: 'folder-3' });
+    await expect(dao.setChatFolder('missing', 'folder-3')).resolves.toBeNull();
+    await expect(dao.setChatFolder('chat-1', 'missing')).rejects.toThrow('folder not found');
+
+    await expect(dao.deleteFolder('folder-1')).resolves.toBe(true);
+    await expect(dao.listFolders()).resolves.toEqual([]);
+    await expect(dao.getChat('chat-1')).resolves.not.toHaveProperty('folderId');
+  });
+
   it('rolls back batched message writes when one row is invalid', async () => {
     const dao = makeDAO(dbName());
 

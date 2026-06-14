@@ -1,5 +1,6 @@
 (function() {
   var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
+  var currentFolderId = '';
 
   var els = {
     form: document.getElementById('options-form'),
@@ -12,6 +13,11 @@
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
     vaultSearch: document.getElementById('vaultSearch'),
+    allChatsFolder: document.getElementById('allChatsFolder'),
+    folderTree: document.getElementById('folderTree'),
+    folderAdd: document.getElementById('folderAdd'),
+    folderRename: document.getElementById('folderRename'),
+    folderDelete: document.getElementById('folderDelete'),
     platformFilter: document.getElementById('platformFilter'),
     dateFilter: document.getElementById('dateFilter'),
     customDateFields: document.getElementById('customDateFields'),
@@ -348,6 +354,7 @@
 
   function filterState() {
     return {
+      folderId: currentFolderId,
       platforms: selectedOptions(els.platformFilter),
       datePreset: els.dateFilter ? els.dateFilter.value : 'all',
       dateStart: els.dateStart ? els.dateStart.value : '',
@@ -419,6 +426,25 @@
       els.clearFilters.addEventListener('click', function() {
         resetFilters();
         refresh();
+      });
+    }
+    if (els.folderTree && typeof OptionsFolders !== 'undefined') {
+      var folders = OptionsFolders.create({
+        root: els.folderTree,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        allButton: els.allChatsFolder,
+        onSelect: function(folderId) {
+          currentFolderId = folderId || '';
+          refresh();
+        },
+        onChange: async function() {
+          await search.load();
+          await refresh();
+        }
+      });
+      folders.bindControls(els.folderAdd, els.folderRename, els.folderDelete, els.allChatsFolder);
+      folders.load().catch(function(error) {
+        log('error', 'options.folders.load.failed', { error: serializeError(error) });
       });
     }
     syncCustomDateVisibility();

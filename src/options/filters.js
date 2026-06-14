@@ -53,6 +53,7 @@ var OptionsFilters = (function() {
     var platforms = list(state.platforms);
     var tags = list(state.tags);
     return (Array.isArray(chats) ? chats : []).filter(function(chat) {
+      if (state.folderId && chat.folderId !== state.folderId) return false;
       if (platforms.length && platforms.indexOf(chat.platform) === -1) return false;
       if (state.pinnedOnly && !chat.pinned) return false;
       if (!matchesTags(chat, tags)) return false;

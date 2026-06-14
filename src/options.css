@@ -157,6 +157,59 @@ small {
   font-size: 0.76rem;
 }
 
+.folder-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.folder-actions .btn {
+  min-height: 30px;
+  padding: 5px 6px;
+  font-size: 0.72rem;
+}
+
+.folder-tree {
+  margin-top: 8px;
+}
+
+.folder-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folder-row {
+  width: 100%;
+  min-height: 30px;
+  margin-top: 4px;
+  padding: 6px 8px 6px calc(8px + var(--folder-level) * 12px);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder-row:hover,
+.folder-row.active,
+.folder-row.drop-target,
+#allChatsFolder.drop-target {
+  border-color: var(--line);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.folder-empty {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
 .tag-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

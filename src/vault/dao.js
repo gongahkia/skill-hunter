@@ -84,6 +84,30 @@ function createVaultDAO(options) {
     });
   }
 
+  function folderDepth(folder, foldersById) {
+    var depth = 1;
+    var parentId = folder.parentId || '';
+    while (parentId) {
+      depth++;
+      if (depth > 3) return depth;
+      var parent = foldersById[parentId];
+      if (!parent) break;
+      parentId = parent.parentId || '';
+    }
+    return depth;
+  }
+
+  function collectFolderIds(folderId, folders) {
+    var ids = [folderId];
+    for (var i = 0; i < folders.length; i++) {
+      if (ids.indexOf(folders[i].parentId) !== -1 && ids.indexOf(folders[i].folderId) === -1) {
+        ids.push(folders[i].folderId);
+        i = -1;
+      }
+    }
+    return ids;
+  }
+
   async function putChat(chat) {
     if (!chat || !chat.chatId) throw new Error('chatId is required');
     return withTransaction(['chats'], 'readwrite', async function(transaction) {
@@ -143,6 +167,90 @@ function createVaultDAO(options) {
         if (chatCompare !== 0) return chatCompare;
         return (a.index || 0) - (b.index || 0);
       });
+    });
+  }
+
+  async function putFolder(folder) {
+    if (!folder || !folder.folderId) throw new Error('folderId is required');
+    if (!folder.name) throw new Error('folder name is required');
+    return withTransaction(['folders'], 'readwrite', async function(transaction) {
+      var store = transaction.objectStore('folders');
+      var folders = await requestToPromise(store.getAll());
+      var foldersById = {};
+      folders.forEach(function(row) {
+        foldersById[row.folderId] = row;
+      });
+      if (folder.parentId && !foldersById[folder.parentId]) throw new Error('parent folder not found');
+      var record = Object.assign({
+        parentId: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }, folder);
+      if (folderDepth(record, foldersById) > 3) throw new Error('folders can only be nested up to 3 levels');
+      await requestToPromise(store.put(record));
+      return record;
+    });
+  }
+
+  async function listFolders() {
+    return withTransaction(['folders'], 'readonly', async function(transaction) {
+      var rows = await requestToPromise(transaction.objectStore('folders').getAll());
+      return rows.sort(function(a, b) {
+        return String(a.name || '').localeCompare(String(b.name || ''));
+      });
+    });
+  }
+
+  async function renameFolder(folderId, name) {
+    if (!folderId) throw new Error('folderId is required');
+    if (!name) throw new Error('folder name is required');
+    return withTransaction(['folders'], 'readwrite', async function(transaction) {
+      var store = transaction.objectStore('folders');
+      var folder = await requestToPromise(store.get(folderId));
+      if (!folder) return null;
+      folder.name = name;
+      folder.updatedAt = new Date().toISOString();
+      await requestToPromise(store.put(folder));
+      return folder;
+    });
+  }
+
+  async function deleteFolder(folderId) {
+    if (!folderId) throw new Error('folderId is required');
+    return withTransaction(['folders', 'chats'], 'readwrite', async function(transaction) {
+      var folderStore = transaction.objectStore('folders');
+      var folders = await requestToPromise(folderStore.getAll());
+      if (!folders.some(function(folder) { return folder.folderId === folderId; })) return false;
+      var ids = collectFolderIds(folderId, folders);
+      for (var i = 0; i < ids.length; i++) folderStore.delete(ids[i]);
+
+      var chatStore = transaction.objectStore('chats');
+      var chats = await requestToPromise(chatStore.getAll());
+      for (var j = 0; j < chats.length; j++) {
+        if (ids.indexOf(chats[j].folderId) !== -1) {
+          delete chats[j].folderId;
+          chatStore.put(chats[j]);
+        }
+      }
+      return true;
+    });
+  }
+
+  async function setChatFolder(chatId, folderId) {
+    if (!chatId) throw new Error('chatId is required');
+    return withTransaction(['chats', 'folders'], 'readwrite', async function(transaction) {
+      var chatStore = transaction.objectStore('chats');
+      var chat = await requestToPromise(chatStore.get(chatId));
+      if (!chat) return null;
+      if (folderId) {
+        var folder = await requestToPromise(transaction.objectStore('folders').get(folderId));
+        if (!folder) throw new Error('folder not found');
+        chat.folderId = folderId;
+      } else {
+        delete chat.folderId;
+      }
+      await requestToPromise(chatStore.put(chat));
+      return chat;
     });
   }
 
@@ -240,6 +348,11 @@ function createVaultDAO(options) {
     putMessages: putMessages,
     listMessages: listMessages,
     listAllMessages: listAllMessages,
+    putFolder: putFolder,
+    listFolders: listFolders,
+    renameFolder: renameFolder,
+    deleteFolder: deleteFolder,
+    setChatFolder: setChatFolder,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,

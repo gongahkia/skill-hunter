@@ -19,9 +19,15 @@
 
       <section class="nav-group" aria-label="Folders">
         <h2>Folders</h2>
-        <button class="nav-row active" type="button"><span>All chats</span><strong id="vault-count">0</strong></button>
+        <button id="allChatsFolder" class="nav-row active" type="button"><span>All chats</span><strong id="vault-count">0</strong></button>
         <button class="nav-row" type="button"><span>Pinned</span><strong>0</strong></button>
         <button class="nav-row" type="button"><span>Archived</span><strong>0</strong></button>
+        <div class="folder-actions">
+          <button id="folderAdd" class="btn btn-secondary" type="button">New</button>
+          <button id="folderRename" class="btn btn-secondary" type="button">Rename</button>
+          <button id="folderDelete" class="btn btn-ghost" type="button">Delete</button>
+        </div>
+        <div id="folderTree" class="folder-tree"></div>
       </section>
 
       <section class="nav-group" aria-label="Tags">
@@ -205,6 +211,7 @@
   <script src="vault/dao.js"></script>
   <script src="vault/search.js"></script>
   <script src="options/filters.js"></script>
+  <script src="options/folders.js"></script>
   <script src="options/chat-list.js"></script>
   <script src="options/chat-detail.js"></script>
   <script src="options.js"></script>

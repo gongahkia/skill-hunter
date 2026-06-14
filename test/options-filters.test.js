@@ -50,6 +50,12 @@ describe('OptionsFilters', () => {
     expect(result.map((chat) => chat.chatId)).toEqual(['chat-1']);
   });
 
+  it('filters by folder id', () => {
+    const OptionsFilters = loadFilters();
+    const rows = chats().map((chat, index) => Object.assign({}, chat, { folderId: index === 1 ? 'folder-2' : 'folder-1' }));
+    expect(OptionsFilters.apply(rows, { folderId: 'folder-2', datePreset: 'all' }).map((chat) => chat.chatId)).toEqual(['chat-2']);
+  });
+
   it('filters by date presets and custom ranges', () => {
     const OptionsFilters = loadFilters();
     const now = new Date('2026-06-14T12:00:00.000Z').getTime();
