@@ -3,6 +3,7 @@ var StorageManager = {
     defaultFormat: 'json',
     filenameTemplate: '{platform}_{title}_{date}.{ext}',
     darkMode: 'system',
+    colorscheme: 'gruvbox',
     showPreview: true,
     autoExportInterval: 0,
     lastAutoExportStatus: {

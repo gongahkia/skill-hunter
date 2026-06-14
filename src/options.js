@@ -7,6 +7,7 @@
     defaultFormat: document.getElementById('defaultFormat'),
     filenameTemplate: document.getElementById('filenameTemplate'),
     darkMode: document.getElementById('darkMode'),
+    colorscheme: document.getElementById('colorscheme'),
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
@@ -72,6 +73,26 @@
     }
   }
 
+  function normalizeColorscheme(id) {
+    if (typeof OwlColorschemes === 'undefined') return id || 'gruvbox';
+    return OwlColorschemes.get(id).id;
+  }
+
+  function populateColorschemes() {
+    if (!els.colorscheme || typeof OwlColorschemes === 'undefined' || els.colorscheme.options.length) return;
+    OwlColorschemes.all().forEach(function(scheme) {
+      var option = document.createElement('option');
+      option.value = scheme.id;
+      option.textContent = scheme.name;
+      els.colorscheme.appendChild(option);
+    });
+  }
+
+  function applyColorscheme(id) {
+    if (typeof OwlColorschemes === 'undefined') return;
+    OwlColorschemes.apply(document, normalizeColorscheme(id));
+  }
+
   function normalizeDefaultFormat(format) {
     return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
   }
@@ -86,6 +107,7 @@
       defaultFormat: 'json',
       filenameTemplate: '{platform}_{title}_{date}.{ext}',
       darkMode: 'system',
+      colorscheme: 'gruvbox',
       showPreview: true,
       autoExportInterval: 0,
       lastAutoExportStatus: null,
@@ -214,16 +236,19 @@
 
     try {
       var darkMode = els.darkMode.value;
+      var colorscheme = normalizeColorscheme(els.colorscheme ? els.colorscheme.value : 'gruvbox');
       var payload = {
         defaultFormat: normalizeDefaultFormat(els.defaultFormat.value),
         filenameTemplate: els.filenameTemplate.value,
         darkMode: darkMode,
+        colorscheme: colorscheme,
         showPreview: !!els.showPreview.checked,
         autoExportInterval: parseInt(els.autoExportInterval.value, 10) || 0
       };
 
       await StorageManager.setAll(payload);
       applyTheme(darkMode);
+      applyColorscheme(colorscheme);
 
       if (els.saveStatus) {
         els.saveStatus.textContent = 'Saved';
@@ -287,14 +312,22 @@
     if (els.clearDiagnostics) els.clearDiagnostics.addEventListener('click', clearDiagnostics);
     if (els.downloadHistory) els.downloadHistory.addEventListener('click', downloadHistory);
     if (els.clearHistory) els.clearHistory.addEventListener('click', clearHistory);
+    if (els.colorscheme) {
+      els.colorscheme.addEventListener('change', function() {
+        applyColorscheme(els.colorscheme.value);
+      });
+    }
   }
 
   function renderSettings(settings) {
+    populateColorschemes();
     applyTheme(settings.darkMode);
+    applyColorscheme(settings.colorscheme);
 
     if (els.defaultFormat) els.defaultFormat.value = normalizeDefaultFormat(settings.defaultFormat);
     if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
     if (els.darkMode) els.darkMode.value = settings.darkMode;
+    if (els.colorscheme) els.colorscheme.value = normalizeColorscheme(settings.colorscheme);
     if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
     if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
 
@@ -305,6 +338,7 @@
   function bindThemeWatcher() {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
       applyTheme((els.darkMode && els.darkMode.value) || 'system');
+      applyColorscheme(els.colorscheme ? els.colorscheme.value : 'gruvbox');
     });
   }
 
@@ -490,6 +524,7 @@
 
       log('info', 'options.init.complete', {
         defaultFormat: settings.defaultFormat,
+        colorscheme: normalizeColorscheme(settings.colorscheme),
         showPreview: !!settings.showPreview,
         autoExportInterval: settings.autoExportInterval
       });

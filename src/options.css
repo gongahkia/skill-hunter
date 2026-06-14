@@ -10,8 +10,18 @@
   --primary: #0a7ca5;
   --primary-strong: #075d7d;
   --secondary: #e6843f;
+  --secondary-strong: #c96a28;
   --success: #238a58;
+  --success-strong: #1b7048;
   --danger: #c8404a;
+  --error: #c8404a;
+  --error-strong: #9f3038;
+  --revision: #8e5db7;
+  --on-primary: #fff;
+  --on-secondary: #172232;
+  --on-success: #fff;
+  --on-danger: #fff;
+  --on-error: #fff;
   --shadow: rgba(15, 35, 55, 0.08);
 }
 
@@ -27,8 +37,18 @@
   --primary: #32addf;
   --primary-strong: #228fb9;
   --secondary: #f2a05d;
+  --secondary-strong: #f5b987;
   --success: #45ba7e;
+  --success-strong: #69c997;
   --danger: #f37680;
+  --error: #f37680;
+  --error-strong: #f6969e;
+  --revision: #c4a7e7;
+  --on-primary: #11202c;
+  --on-secondary: #11202c;
+  --on-success: #11202c;
+  --on-danger: #11202c;
+  --on-error: #11202c;
   --shadow: rgba(0, 0, 0, 0.24);
 }
 
@@ -229,7 +249,7 @@ small {
 .tag-grid button[aria-pressed="true"] {
   border-color: var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 label {
@@ -650,7 +670,7 @@ select[multiple] {
 
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .btn-primary:hover,
@@ -703,7 +723,7 @@ select[multiple] {
 .log-level {
   border-radius: 999px;
   padding: 2px 7px;
-  color: #fff;
+  color: var(--on-primary);
   font-size: 0.66rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -716,10 +736,12 @@ select[multiple] {
 
 .log-level.warn {
   background: var(--secondary);
+  color: var(--on-secondary);
 }
 
 .log-level.error {
   background: var(--danger);
+  color: var(--on-danger);
 }
 
 @media (max-width: 1120px) {

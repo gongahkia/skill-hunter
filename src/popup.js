@@ -65,6 +65,12 @@
     }
   }
 
+  function applyColorscheme(id) {
+    if (typeof OwlColorschemes !== 'undefined') {
+      OwlColorschemes.apply(document, id || OwlColorschemes.defaultId);
+    }
+  }
+
   function setPill(stateName, text) {
     if (!els.contextPill) return;
     els.contextPill.className = 'context-pill ' + stateName;
@@ -501,6 +507,7 @@
     try {
       state.settings = await StorageManager.getAll();
       applyTheme(state.settings.darkMode);
+      applyColorscheme(state.settings.colorscheme);
       renderCaptureStatus(state.settings.lastCaptureStatus);
       updateQuickFormat();
       wireEvents();
@@ -508,10 +515,12 @@
       await detectCurrentTabContext();
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
         applyTheme(state.settings.darkMode);
+        applyColorscheme(state.settings.colorscheme);
       });
 
       log('info', 'popup.init.complete', {
         defaultFormat: state.settings.defaultFormat,
+        colorscheme: state.settings.colorscheme,
         showPreview: !!state.settings.showPreview
       });
     } catch (error) {

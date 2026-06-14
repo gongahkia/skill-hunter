@@ -11,10 +11,22 @@
   --primary: #0b7fab;
   --primary-strong: #075f82;
   --secondary: #f07f3e;
+  --secondary-strong: #f9b261;
   --success: #218a57;
+  --success-strong: #5dcf98;
   --error: #c5323b;
+  --error-strong: #ff8f98;
+  --danger: #c5323b;
+  --revision: #8e5db7;
+  --on-primary: #fff;
+  --on-secondary: #172232;
+  --on-success: #fff;
+  --on-danger: #fff;
+  --on-error: #fff;
   --shadow: rgba(8, 33, 57, 0.16);
   --soft-shadow: rgba(8, 33, 57, 0.08);
+  --wash-primary: rgba(49, 180, 234, 0.26);
+  --wash-secondary: rgba(240, 127, 62, 0.26);
 }
 
 [data-theme="dark"] {
@@ -30,10 +42,22 @@
   --primary: #31b4ea;
   --primary-strong: #2497c5;
   --secondary: #ff9b5a;
+  --secondary-strong: #ffb986;
   --success: #41b67b;
+  --success-strong: #68ca99;
   --error: #ff7a84;
+  --error-strong: #ffa1a8;
+  --danger: #ff7a84;
+  --revision: #c4a7e7;
+  --on-primary: #111d27;
+  --on-secondary: #111d27;
+  --on-success: #111d27;
+  --on-danger: #111d27;
+  --on-error: #111d27;
   --shadow: rgba(0, 0, 0, 0.35);
   --soft-shadow: rgba(0, 0, 0, 0.22);
+  --wash-primary: rgba(49, 180, 234, 0.26);
+  --wash-secondary: rgba(255, 155, 90, 0.26);
 }
 
 * {
@@ -47,8 +71,8 @@ body {
   color: var(--ink);
   font-family: 'Trebuchet MS', 'Gill Sans', 'Segoe UI Variable Text', sans-serif;
   background:
-    radial-gradient(circle at 18% -8%, rgba(240, 127, 62, 0.26), transparent 42%),
-    radial-gradient(circle at 85% 12%, rgba(49, 180, 234, 0.26), transparent 44%),
+    radial-gradient(circle at 18% -8%, var(--wash-secondary), transparent 42%),
+    radial-gradient(circle at 85% 12%, var(--wash-primary), transparent 44%),
     linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
 }
 
@@ -119,19 +143,21 @@ h1 {
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #fff;
 }
 
 .context-pill.loading {
-  background: linear-gradient(90deg, var(--secondary), #f9b261);
+  background: linear-gradient(90deg, var(--secondary), var(--secondary-strong));
+  color: var(--on-secondary);
 }
 
 .context-pill.supported {
-  background: linear-gradient(90deg, var(--success), #5dcf98);
+  background: linear-gradient(90deg, var(--success), var(--success-strong));
+  color: var(--on-success);
 }
 
 .context-pill.unsupported {
-  background: linear-gradient(90deg, var(--error), #ff8f98);
+  background: linear-gradient(90deg, var(--error), var(--error-strong));
+  color: var(--on-error);
 }
 
 .context-grid {
@@ -239,7 +265,7 @@ h1 {
 
 .btn-primary {
   background: linear-gradient(130deg, var(--primary), var(--primary-strong));
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .btn-secondary {
@@ -365,14 +391,14 @@ h1 {
 }
 
 .status.success {
-  color: #fff;
-  background: linear-gradient(110deg, var(--success), #56c790);
+  color: var(--on-success);
+  background: linear-gradient(110deg, var(--success), var(--success-strong));
   border-color: transparent;
 }
 
 .status.error {
-  color: #fff;
-  background: linear-gradient(110deg, var(--error), #ff8f98);
+  color: var(--on-error);
+  background: linear-gradient(110deg, var(--error), var(--error-strong));
   border-color: transparent;
 }
 
