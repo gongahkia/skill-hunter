@@ -13,6 +13,12 @@
     autoExportStatus: document.getElementById('autoExportStatus'),
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
+    statsTotalChats: document.getElementById('statsTotalChats'),
+    statsTotalMessages: document.getElementById('statsTotalMessages'),
+    statsStorageUsed: document.getElementById('statsStorageUsed'),
+    statsOldestChat: document.getElementById('statsOldestChat'),
+    statsNewestChat: document.getElementById('statsNewestChat'),
+    statsPlatformBreakdown: document.getElementById('statsPlatformBreakdown'),
     vaultSearch: document.getElementById('vaultSearch'),
     allChatsFolder: document.getElementById('allChatsFolder'),
     folderTree: document.getElementById('folderTree'),
@@ -143,6 +149,60 @@
     var timestamp = status.timestamp ? new Date(status.timestamp).toLocaleString() : '';
     var traceId = status.traceId ? ' | trace: ' + status.traceId : '';
     els.autoExportStatus.textContent = prefix + ': ' + status.message + (timestamp ? ' (' + timestamp + ')' : '') + traceId;
+  }
+
+  function defaultStats() {
+    return {
+      totalChats: 0,
+      totalMessages: 0,
+      oldestChat: null,
+      newestChat: null,
+      perPlatform: []
+    };
+  }
+
+  function formatNumber(value) {
+    return String(Number(value || 0).toLocaleString());
+  }
+
+  function formatMB(value) {
+    return (Math.round(Number(value || 0) * 100) / 100).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }) + ' MB';
+  }
+
+  function chatStatLabel(chat) {
+    if (!chat) return 'None';
+    return String(chat.title || chat.chatId || 'Untitled chat');
+  }
+
+  function renderStats(stats, quota) {
+    if (!els.statsTotalChats) return;
+    stats = stats || defaultStats();
+    quota = quota || {};
+    els.statsTotalChats.textContent = formatNumber(stats.totalChats);
+    els.statsTotalMessages.textContent = formatNumber(stats.totalMessages);
+    els.statsStorageUsed.textContent = formatMB(quota.usageMB);
+    els.statsOldestChat.textContent = chatStatLabel(stats.oldestChat);
+    els.statsNewestChat.textContent = chatStatLabel(stats.newestChat);
+    if (els.statsPlatformBreakdown) {
+      var rows = Array.isArray(stats.perPlatform) ? stats.perPlatform : [];
+      els.statsPlatformBreakdown.textContent = rows.length ? rows.map(function(row) {
+        return String(row.platform || 'unknown') + ': ' + formatNumber(row.chats) + ' chats, ' + formatNumber(row.messages) + ' messages';
+      }).join(' | ') : 'None';
+    }
+  }
+
+  async function refreshVaultStats() {
+    try {
+      var stats = typeof VaultDAO !== 'undefined' && VaultDAO.getStats ? await VaultDAO.getStats() : defaultStats();
+      var quota = typeof VaultQuota !== 'undefined' && VaultQuota.getQuotaUsage ? await VaultQuota.getQuotaUsage() : { usageMB: 0 };
+      renderStats(stats, quota);
+    } catch (error) {
+      log('error', 'options.stats.refresh.failed', { error: serializeError(error) });
+      renderStats(defaultStats(), { usageMB: 0 });
+    }
   }
 
   function makeBlobDownload(filename, content, mime) {
@@ -350,7 +410,9 @@
 
   async function initVaultViews() {
     var detail = null;
-    var refreshVault = function() {};
+    var refreshVault = async function() {
+      await refreshVaultStats();
+    };
     if (els.chatDetail && typeof OptionsChatDetail !== 'undefined') {
       detail = OptionsChatDetail.create({
         root: els.chatDetail,
@@ -368,7 +430,7 @@
       });
     }
 
-    if (!els.chatList || typeof OptionsChatList === 'undefined') return;
+    if (!els.chatList || typeof OptionsChatList === 'undefined') return refreshVault;
     var list = OptionsChatList.create({
       root: els.chatList,
       summaryEl: els.chatListSummary,
@@ -388,13 +450,17 @@
         var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });
         list.setChats(await search.load());
         refreshVault = bindVaultControls(search, list);
-        return;
+        return refreshVault;
       } catch (error) {
         log('warn', 'options.search.init.failed', { error: serializeError(error) });
       }
     }
 
     await list.load();
+    return async function() {
+      await list.load();
+      await refreshVaultStats();
+    };
   }
 
   function selectedOptions(select) {
@@ -517,7 +583,20 @@
     return async function(reload) {
       if (reload) await search.load();
       await refresh();
+      await refreshVaultStats();
     };
+  }
+
+  function bindCaptureRefresh(refreshVault) {
+    if (typeof api === 'undefined' || !api.storage || !api.storage.onChanged || !api.storage.onChanged.addListener) return;
+    api.storage.onChanged.addListener(function(changes, areaName) {
+      if (areaName && areaName !== 'local') return;
+      if (!changes.lastCaptureStatus) return;
+      renderCaptureStatus(changes.lastCaptureStatus.newValue);
+      Promise.resolve(refreshVault ? refreshVault(true) : refreshVaultStats()).catch(function(error) {
+        log('error', 'options.capture_refresh.failed', { error: serializeError(error) });
+      });
+    });
   }
 
   async function init() {
@@ -526,9 +605,11 @@
       renderSettings(settings);
       await refreshDiagnostics();
       await refreshHistorySummary();
-      await initVaultViews();
+      var refreshVault = await initVaultViews();
+      await refreshVaultStats();
       wireEvents();
       bindThemeWatcher();
+      bindCaptureRefresh(refreshVault);
 
       log('info', 'options.init.complete', {
         defaultFormat: settings.defaultFormat,
@@ -542,9 +623,11 @@
         renderSettings(defaults);
         renderDiagnostics([]);
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
-        await initVaultViews();
+        var localRefreshVault = await initVaultViews();
+        await refreshVaultStats();
         wireEvents();
         bindThemeWatcher();
+        bindCaptureRefresh(localRefreshVault);
         log('info', 'options.init.local_storage_unavailable', { error: serializeError(error) });
         return;
       }

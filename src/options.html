@@ -108,6 +108,33 @@
         </div>
       </header>
 
+      <section class="vault-stats" aria-label="Vault stats">
+        <div class="stat-item">
+          <span>Total chats</span>
+          <strong id="statsTotalChats">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>Total messages</span>
+          <strong id="statsTotalMessages">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>Storage used</span>
+          <strong id="statsStorageUsed">0 MB</strong>
+        </div>
+        <div class="stat-item">
+          <span>Oldest chat</span>
+          <strong id="statsOldestChat">None</strong>
+        </div>
+        <div class="stat-item">
+          <span>Newest chat</span>
+          <strong id="statsNewestChat">None</strong>
+        </div>
+        <div class="stat-platforms">
+          <span>Platforms</span>
+          <p id="statsPlatformBreakdown">None</p>
+        </div>
+      </section>
+
       <section class="vault-content">
         <section class="chat-list-pane" aria-label="Chat list">
           <div class="pane-heading">
@@ -224,6 +251,7 @@
   <script src="history.js"></script>
   <script src="vault/db.js"></script>
   <script src="vault/dao.js"></script>
+  <script src="vault/quota.js"></script>
   <script src="vault/search.js"></script>
   <script src="options/filters.js"></script>
   <script src="options/folders.js"></script>

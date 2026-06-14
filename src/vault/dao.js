@@ -287,6 +287,43 @@ function createVaultDAO(options) {
     });
   }
 
+  async function getStats() {
+    return withTransaction(['chats'], 'readonly', async function(transaction) {
+      var rows = await requestToPromise(transaction.objectStore('chats').getAll());
+      var platformMap = {};
+      var stats = {
+        totalChats: rows.length,
+        totalMessages: 0,
+        oldestChat: null,
+        newestChat: null,
+        perPlatform: []
+      };
+
+      rows.forEach(function(chat) {
+        var messageCount = Number(chat.messageCount || 0);
+        var platform = chat.platform || 'unknown';
+        stats.totalMessages += messageCount;
+        if (!platformMap[platform]) platformMap[platform] = { platform: platform, chats: 0, messages: 0 };
+        platformMap[platform].chats++;
+        platformMap[platform].messages += messageCount;
+
+        var dateValue = chat.lastUpdatedAt || chat.capturedAt || '';
+        var oldestValue = stats.oldestChat ? (stats.oldestChat.lastUpdatedAt || stats.oldestChat.capturedAt || '') : '';
+        var newestValue = stats.newestChat ? (stats.newestChat.lastUpdatedAt || stats.newestChat.capturedAt || '') : '';
+        if (!stats.oldestChat || String(dateValue).localeCompare(String(oldestValue)) < 0) stats.oldestChat = chat;
+        if (!stats.newestChat || String(dateValue).localeCompare(String(newestValue)) > 0) stats.newestChat = chat;
+      });
+
+      stats.perPlatform = Object.keys(platformMap).map(function(key) {
+        return platformMap[key];
+      }).sort(function(a, b) {
+        if (b.chats !== a.chats) return b.chats - a.chats;
+        return a.platform.localeCompare(b.platform);
+      });
+      return stats;
+    });
+  }
+
   async function putOpenThreads(threads) {
     if (!Array.isArray(threads)) throw new Error('threads must be an array');
     return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
@@ -388,6 +425,7 @@ function createVaultDAO(options) {
     setChatFolder: setChatFolder,
     setChatTags: setChatTags,
     setChatPinned: setChatPinned,
+    getStats: getStats,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,

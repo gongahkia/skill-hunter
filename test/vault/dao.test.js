@@ -180,6 +180,54 @@ describe('VaultDAO', () => {
     await expect(dao.setChatPinned('missing', true)).resolves.toBeNull();
   });
 
+  it('summarizes vault stats by chat, message, date, and platform', async () => {
+    const dao = makeDAO(dbName());
+    await dao.putChat({
+      chatId: 'old',
+      platform: 'chatgpt',
+      title: 'Old chat',
+      capturedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      messageCount: 2,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+    await dao.putChat({
+      chatId: 'new',
+      platform: 'claude',
+      title: 'New chat',
+      capturedAt: '2026-01-03T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-03T00:00:00.000Z',
+      messageCount: 5,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+    await dao.putChat({
+      chatId: 'middle',
+      platform: 'chatgpt',
+      title: 'Middle chat',
+      capturedAt: '2026-01-02T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+      messageCount: 3,
+      pinned: false,
+      archived: false,
+      tags: []
+    });
+
+    await expect(dao.getStats()).resolves.toMatchObject({
+      totalChats: 3,
+      totalMessages: 10,
+      oldestChat: { chatId: 'old' },
+      newestChat: { chatId: 'new' },
+      perPlatform: [
+        { platform: 'chatgpt', chats: 2, messages: 5 },
+        { platform: 'claude', chats: 1, messages: 5 }
+      ]
+    });
+  });
+
   it('creates nested folders, moves chats, and deletes folder subtrees', async () => {
     const dao = makeDAO(dbName());
     await dao.putChat({

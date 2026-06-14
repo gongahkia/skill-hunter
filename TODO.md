@@ -240,7 +240,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M3.T11` — Add light/dark mode toggle (independent of colorscheme — most schemes have a dark BACKGROUND; light mode swaps to a generated light variant). **Success:** toggle inverts UI; persistence works.
 - [x] `M3.T12` — Add "Send to new chat" primer button in chat detail: copies a structured preamble of the chat to clipboard, opens the chosen platform's new-chat URL. **Success:** clicking the button on a Claude chat copies a multi-line preamble and opens `https://claude.ai/new`.
 - [x] `M3.T13` — Add "Restore to clipboard" button: full chat as Markdown to clipboard. **Success:** button click copies Markdown; pasting into a notes app preserves headings + roles.
-- [ ] `M3.T14` — Add "Vault stats" card on dashboard: total chats, total messages, MB used, oldest chat, newest chat, per-platform breakdown. **Success:** stats refresh on dashboard load and after any capture.
+- [x] `M3.T14` — Add "Vault stats" card on dashboard: total chats, total messages, MB used, oldest chat, newest chat, per-platform breakdown. **Success:** stats refresh on dashboard load and after any capture.
 
 ## M4 — Open-threads layer (user-applied tagging + opportunistic scan)
 
