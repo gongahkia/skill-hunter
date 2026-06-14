@@ -19,7 +19,8 @@
     "validate": "npm run build && npm test && npm run check:manifests && npm run check:permissions && npm run lint"
   },
   "devDependencies": {
-    "vitest": "^3.0.0",
-    "jsdom": "^25.0.0"
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^25.0.0",
+    "vitest": "^3.0.0"
   }
 }
