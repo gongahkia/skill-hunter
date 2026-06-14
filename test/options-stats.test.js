@@ -28,7 +28,7 @@ function makeApi(onChanged, storage) {
   };
 }
 
-async function loadOptions({ statsQueue, quota, onChanged }) {
+async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
   const storage = {};
   const dom = new JSDOM(loadSrc('options.html'), { url: 'https://extension.test/options.html', pretendToBeVisual: true });
   dom.window.matchMedia = () => ({
@@ -36,7 +36,7 @@ async function loadOptions({ statsQueue, quota, onChanged }) {
     addEventListener() {},
     removeEventListener() {}
   });
-  const vaultDAO = {
+  const defaultVaultDAO = {
     getStats: async () => statsQueue.shift() || statsQueue[0],
     listChats: async () => []
   };
@@ -54,10 +54,11 @@ async function loadOptions({ statsQueue, quota, onChanged }) {
     'var AppLogger = { getRecent: async function() { return []; }, clear: async function() {}, serializeError: function(error) { return { message: error && error.message ? error.message : String(error) }; }, info: function() {}, warn: function() {}, error: function() {} };',
     loadSrc('storage.js'),
     loadSrc('ui/colorschemes.js'),
+    loadSrc('threads/scanner.js'),
     loadSrc('options.js')
   ].join('\n');
   const fn = new Function('window', 'document', code);
-  fn.call({ _api: makeApi(onChanged, storage), _vaultDAO: vaultDAO, _vaultQuota: vaultQuota }, dom.window, dom.window.document);
+  fn.call({ _api: makeApi(onChanged, storage), _vaultDAO: Object.assign(defaultVaultDAO, vaultDAO || {}), _vaultQuota: vaultQuota }, dom.window, dom.window.document);
   await flush();
   return dom;
 }
@@ -108,5 +109,45 @@ describe('options vault stats', () => {
     expect(dom.window.document.getElementById('statsTotalMessages').textContent).toBe('12');
     expect(dom.window.document.getElementById('statsNewestChat').textContent).toBe('Captured now');
     expect(dom.window.document.getElementById('capture-status-text').textContent).toBe('Captured 5 messages.');
+  });
+
+  it('rescans all messages without duplicating existing thread keys', async () => {
+    const onChanged = {};
+    const written = [];
+    const existing = [
+      { threadId: 'existing-1', chatId: 'chat-1', messageId: 'msg-1', tag: 'TODO', text: 'ping Alice', source: 'explicit', subSource: 'scan', status: 'open' }
+    ];
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 1,
+        totalMessages: 1,
+        oldestChat: { title: 'Tagged chat' },
+        newestChat: { title: 'Tagged chat' },
+        perPlatform: [{ platform: 'chatgpt', chats: 1, messages: 1 }]
+      }],
+      quota: { usageMB: 1 },
+      onChanged,
+      vaultDAO: {
+        listAllMessages: async () => [
+          { chatId: 'chat-1', messageId: 'msg-1', content: 'TODO: ping Alice\nREF: source doc', timestamp: '2026-01-01T00:00:00.000Z' }
+        ],
+        listOpenThreads: async () => existing.slice(),
+        putOpenThreads: async (rows) => {
+          written.push(...rows);
+          existing.push(...rows);
+          return rows;
+        }
+      }
+    });
+
+    dom.window.document.getElementById('rescanThreads').click();
+    await flush();
+    expect(written.map((row) => row.tag)).toEqual(['REF']);
+    expect(dom.window.document.getElementById('rescanStatus').textContent).toBe('Added 1 threads');
+
+    dom.window.document.getElementById('rescanThreads').click();
+    await flush();
+    expect(written).toHaveLength(1);
+    expect(dom.window.document.getElementById('rescanStatus').textContent).toBe('Added 0 threads');
   });
 });

@@ -13,6 +13,8 @@
     autoExportStatus: document.getElementById('autoExportStatus'),
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
+    rescanThreads: document.getElementById('rescanThreads'),
+    rescanStatus: document.getElementById('rescanStatus'),
     statsTotalChats: document.getElementById('statsTotalChats'),
     statsTotalMessages: document.getElementById('statsTotalMessages'),
     statsStorageUsed: document.getElementById('statsStorageUsed'),
@@ -194,6 +196,53 @@
     }
   }
 
+  function threadKey(thread) {
+    return [thread.messageId || '', thread.tag || '', thread.text || ''].join('\n');
+  }
+
+  async function rescanThreads(refreshVault) {
+    if (!els.rescanThreads) return;
+    var previous = els.rescanThreads.textContent;
+    els.rescanThreads.disabled = true;
+    els.rescanThreads.textContent = 'Scanning';
+    if (els.rescanStatus) els.rescanStatus.textContent = 'Scanning...';
+
+    try {
+      if (typeof ThreadScanner === 'undefined' || !ThreadScanner.scanMessage) throw new Error('Thread scanner is unavailable');
+      if (typeof VaultDAO === 'undefined' || !VaultDAO.listAllMessages || !VaultDAO.listOpenThreads || !VaultDAO.putOpenThreads) {
+        throw new Error('Vault thread store is unavailable');
+      }
+
+      var existing = await VaultDAO.listOpenThreads();
+      var seen = {};
+      existing.forEach(function(thread) {
+        seen[threadKey(thread)] = true;
+      });
+
+      var rows = [];
+      var messages = await VaultDAO.listAllMessages();
+      messages.forEach(function(message) {
+        ThreadScanner.scanMessage(message).forEach(function(thread) {
+          var key = threadKey(thread);
+          if (seen[key]) return;
+          seen[key] = true;
+          rows.push(thread);
+        });
+      });
+      if (rows.length) await VaultDAO.putOpenThreads(rows);
+      if (els.rescanStatus) els.rescanStatus.textContent = 'Added ' + rows.length + ' threads';
+      if (refreshVault) await refreshVault(true);
+      else await refreshVaultStats();
+      log('info', 'options.threads.rescan.success', { addedThreads: rows.length, scannedMessages: messages.length });
+    } catch (error) {
+      if (els.rescanStatus) els.rescanStatus.textContent = 'Rescan failed';
+      log('error', 'options.threads.rescan.failed', { error: serializeError(error) });
+    } finally {
+      els.rescanThreads.disabled = false;
+      els.rescanThreads.textContent = previous;
+    }
+  }
+
   async function refreshVaultStats() {
     try {
       var stats = typeof VaultDAO !== 'undefined' && VaultDAO.getStats ? await VaultDAO.getStats() : defaultStats();
@@ -369,12 +418,17 @@
     }
   }
 
-  function wireEvents() {
+  function wireEvents(refreshVault) {
     if (els.form) els.form.addEventListener('submit', handleSave);
     if (els.downloadDiagnostics) els.downloadDiagnostics.addEventListener('click', downloadDiagnostics);
     if (els.clearDiagnostics) els.clearDiagnostics.addEventListener('click', clearDiagnostics);
     if (els.downloadHistory) els.downloadHistory.addEventListener('click', downloadHistory);
     if (els.clearHistory) els.clearHistory.addEventListener('click', clearHistory);
+    if (els.rescanThreads) {
+      els.rescanThreads.addEventListener('click', function() {
+        rescanThreads(refreshVault);
+      });
+    }
     if (els.colorscheme) {
       els.colorscheme.addEventListener('change', function() {
         applyColorscheme(els.colorscheme.value, document.documentElement.dataset.themeMode);
@@ -607,7 +661,7 @@
       await refreshHistorySummary();
       var refreshVault = await initVaultViews();
       await refreshVaultStats();
-      wireEvents();
+      wireEvents(refreshVault);
       bindThemeWatcher();
       bindCaptureRefresh(refreshVault);
 
@@ -625,7 +679,7 @@
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
         var localRefreshVault = await initVaultViews();
         await refreshVaultStats();
-        wireEvents();
+        wireEvents(localRefreshVault);
         bindThemeWatcher();
         bindCaptureRefresh(localRefreshVault);
         log('info', 'options.init.local_storage_unavailable', { error: serializeError(error) });

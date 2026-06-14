@@ -342,6 +342,22 @@ select[multiple] {
   margin-top: 0;
 }
 
+.vault-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: end;
+  gap: 8px;
+}
+
+.rescan-status {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
 .capture-status {
   display: flex;
   align-items: center;
@@ -997,6 +1013,7 @@ select[multiple] {
     padding: 10px;
   }
 
+  .vault-actions,
   .capture-status {
     margin-top: 10px;
     min-width: 0;

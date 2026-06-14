@@ -102,9 +102,13 @@
           <span>Search</span>
           <input id="vaultSearch" type="search" placeholder="Search chats and messages">
         </label>
-        <div id="capture-status" class="capture-status red">
-          <span class="capture-dot"></span>
-          <span id="capture-status-text">No captures yet.</span>
+        <div class="vault-actions">
+          <button id="rescanThreads" class="btn btn-secondary" type="button">Rescan threads</button>
+          <span id="rescanStatus" class="rescan-status"></span>
+          <div id="capture-status" class="capture-status red">
+            <span class="capture-dot"></span>
+            <span id="capture-status-text">No captures yet.</span>
+          </div>
         </div>
       </header>
 
@@ -253,6 +257,7 @@
   <script src="vault/dao.js"></script>
   <script src="vault/quota.js"></script>
   <script src="vault/search.js"></script>
+  <script src="threads/scanner.js"></script>
   <script src="options/filters.js"></script>
   <script src="options/folders.js"></script>
   <script src="options/chat-list.js"></script>
