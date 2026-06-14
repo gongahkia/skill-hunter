@@ -258,7 +258,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M4.T05` — Create `src/threads/scanner.js` with `scanMessage(message): OpenThread[]` that matches the 7 tag prefixes (case-insensitive, must be at start of line OR line that contains only the tag + colon + text). **Success:** unit test covers all 7 tags, mixed case, multi-line messages, false-positives (e.g., "TODOLIST" must NOT match TODO).
 - [x] `M4.T06` — Wire scanner into capture pipeline: after `handleCapture` writes messages, scan all messages, write detected threads into `openThreads` store with `source: 'explicit'`, sub-source `'scan'`. **Success:** capturing a chat where user pasted notes containing `TODO: ping Alice` produces an `openThreads` row with that text + sub-source=`scan`.
 - [x] `M4.T07` — Implement re-scan on demand: button in vault dashboard rescans entire vault. Re-scan does not duplicate existing scan-sourced threads (idempotent by `messageId + tag + text`). **Success:** running re-scan twice produces same thread set, no duplicates.
-- [ ] `M4.T08` — Document in `docs/extraction-architecture.md`: the scanner's primary value is for M9+ prose adapters, not chats. For chats, it's a low-yield fallback that catches pasted-prose edge cases. **Success:** doc explains both paths and rationale.
+- [x] `M4.T08` — Document in `docs/extraction-architecture.md`: the scanner's primary value is for M9+ prose adapters, not chats. For chats, it's a low-yield fallback that catches pasted-prose edge cases. **Success:** doc explains both paths and rationale.
 
 ### Dashboard + workflow
 
