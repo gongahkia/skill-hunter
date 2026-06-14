@@ -1,6 +1,9 @@
 (function() {
   var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
+  var DEFAULT_THREAD_TAG_PRIORITY = ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'];
   var currentFolderId = '';
+  var currentThreadTagPriority = DEFAULT_THREAD_TAG_PRIORITY.slice();
+  var threadPane = null;
 
   var els = {
     form: document.getElementById('options-form'),
@@ -8,6 +11,7 @@
     filenameTemplate: document.getElementById('filenameTemplate'),
     darkMode: document.getElementById('darkMode'),
     colorscheme: document.getElementById('colorscheme'),
+    tagPriorityList: document.getElementById('tagPriorityList'),
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
@@ -119,6 +123,75 @@
     return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
   }
 
+  function normalizeThreadTagPriority(priority) {
+    var seen = {};
+    var tags = [];
+    (Array.isArray(priority) ? priority : []).forEach(function(tag) {
+      tag = String(tag || '').toUpperCase();
+      if (DEFAULT_THREAD_TAG_PRIORITY.indexOf(tag) === -1 || seen[tag]) return;
+      seen[tag] = true;
+      tags.push(tag);
+    });
+    DEFAULT_THREAD_TAG_PRIORITY.forEach(function(tag) {
+      if (seen[tag]) return;
+      seen[tag] = true;
+      tags.push(tag);
+    });
+    return tags;
+  }
+
+  function moveThreadTagPriority(index, delta) {
+    var nextIndex = index + delta;
+    if (nextIndex < 0 || nextIndex >= currentThreadTagPriority.length) return;
+    var next = currentThreadTagPriority.slice();
+    var tag = next[index];
+    next[index] = next[nextIndex];
+    next[nextIndex] = tag;
+    renderThreadTagPriority(next);
+    if (threadPane && threadPane.setTagPriority) threadPane.setTagPriority(currentThreadTagPriority);
+  }
+
+  function renderThreadTagPriority(priority) {
+    currentThreadTagPriority = normalizeThreadTagPriority(priority);
+    if (!els.tagPriorityList) return;
+    els.tagPriorityList.innerHTML = '';
+    currentThreadTagPriority.forEach(function(tag, index) {
+      var item = document.createElement('li');
+      item.className = 'tag-priority-row';
+      item.dataset.tag = tag;
+      var label = document.createElement('strong');
+      label.textContent = tag;
+      item.appendChild(label);
+
+      var actions = document.createElement('div');
+      actions.className = 'tag-priority-actions';
+      var up = document.createElement('button');
+      up.type = 'button';
+      up.className = 'btn btn-ghost';
+      up.textContent = 'Up';
+      up.disabled = index === 0;
+      up.setAttribute('aria-label', 'Move ' + tag + ' up');
+      up.addEventListener('click', function() {
+        moveThreadTagPriority(index, -1);
+      });
+      actions.appendChild(up);
+
+      var down = document.createElement('button');
+      down.type = 'button';
+      down.className = 'btn btn-ghost';
+      down.textContent = 'Down';
+      down.disabled = index === currentThreadTagPriority.length - 1;
+      down.setAttribute('aria-label', 'Move ' + tag + ' down');
+      down.addEventListener('click', function() {
+        moveThreadTagPriority(index, 1);
+      });
+      actions.appendChild(down);
+
+      item.appendChild(actions);
+      els.tagPriorityList.appendChild(item);
+    });
+  }
+
   function isStorageUnavailable(error) {
     return !!(error && error.message === 'Browser storage API is unavailable');
   }
@@ -130,6 +203,7 @@
       filenameTemplate: '{platform}_{title}_{date}.{ext}',
       darkMode: 'system',
       colorscheme: 'gruvbox',
+      threadTagPriority: DEFAULT_THREAD_TAG_PRIORITY.slice(),
       showPreview: true,
       autoExportInterval: 0,
       lastAutoExportStatus: null,
@@ -365,6 +439,7 @@
         filenameTemplate: els.filenameTemplate.value,
         darkMode: darkMode,
         colorscheme: colorscheme,
+        threadTagPriority: currentThreadTagPriority.slice(),
         showPreview: !!els.showPreview.checked,
         autoExportInterval: parseInt(els.autoExportInterval.value, 10) || 0
       };
@@ -459,6 +534,7 @@
     if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
     if (els.darkMode) els.darkMode.value = settings.darkMode;
     if (els.colorscheme) els.colorscheme.value = normalizeColorscheme(settings.colorscheme);
+    renderThreadTagPriority(settings.threadTagPriority);
     if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
     if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
     applyAppearance();
@@ -475,7 +551,7 @@
 
   async function initVaultViews() {
     var detail = null;
-    var threadPane = null;
+    threadPane = null;
     async function refreshThreads() {
       if (threadPane) await threadPane.load();
     }
@@ -504,6 +580,7 @@
         root: els.openThreadsList,
         summaryEl: els.threadListSummary,
         archiveButton: els.archiveSelectedThreads,
+        tagPriority: currentThreadTagPriority,
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         filters: {
           tag: els.threadTagFilter,

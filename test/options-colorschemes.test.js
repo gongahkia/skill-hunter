@@ -147,4 +147,20 @@ describe('options colorscheme settings', () => {
     expect(style.getPropertyValue('--tag-unresolved')).toBe('#f7768e');
     expect(style.getPropertyValue('--tag-prompt')).toBe('#9ece6a');
   });
+
+  it('renders, reorders, and saves tag priority settings', async () => {
+    const storage = {
+      threadTagPriority: ['PROMPT', 'REF', 'FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV']
+    };
+    const dom = await loadOptions(storage);
+    const rows = () => [...dom.window.document.querySelectorAll('#tagPriorityList [data-tag]')].map((row) => row.dataset.tag);
+
+    expect(rows()).toEqual(['PROMPT', 'REF', 'FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV']);
+    dom.window.document.querySelector('#tagPriorityList [data-tag="PROMPT"] button[aria-label="Move PROMPT down"]').click();
+    expect(rows()).toEqual(['REF', 'PROMPT', 'FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV']);
+
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+    expect(storage.threadTagPriority).toEqual(['REF', 'PROMPT', 'FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV']);
+  });
 });

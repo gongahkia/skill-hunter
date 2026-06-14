@@ -4,6 +4,7 @@ var StorageManager = {
     filenameTemplate: '{platform}_{title}_{date}.{ext}',
     darkMode: 'system',
     colorscheme: 'gruvbox',
+    threadTagPriority: ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'],
     showPreview: true,
     autoExportInterval: 0,
     lastAutoExportStatus: {

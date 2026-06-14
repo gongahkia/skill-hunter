@@ -1,4 +1,5 @@
 var OptionsOpenThreads = (function() {
+  var DEFAULT_TAG_PRIORITY = ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'];
   var TAG_PRIORITY = {
     FIXME: 1,
     TODO: 2,
@@ -31,8 +32,26 @@ var OptionsOpenThreads = (function() {
     return String(value);
   }
 
-  function priority(tag) {
-    return TAG_PRIORITY[text(tag).toUpperCase()] || 99;
+  function normalizeTagPriority(priority) {
+    var seen = {};
+    var result = [];
+    (Array.isArray(priority) ? priority : []).forEach(function(tag) {
+      tag = text(tag).toUpperCase();
+      if (!TAG_PRIORITY[tag] || seen[tag]) return;
+      seen[tag] = true;
+      result.push(tag);
+    });
+    DEFAULT_TAG_PRIORITY.forEach(function(tag) {
+      if (seen[tag]) return;
+      seen[tag] = true;
+      result.push(tag);
+    });
+    return result;
+  }
+
+  function priority(tag, tagPriority) {
+    var index = (Array.isArray(tagPriority) ? tagPriority : DEFAULT_TAG_PRIORITY).indexOf(text(tag).toUpperCase());
+    return index === -1 ? 99 : index + 1;
   }
 
   function platformLabel(platform) {
@@ -80,12 +99,13 @@ var OptionsOpenThreads = (function() {
     return true;
   }
 
-  function sortRows(rows, sort) {
+  function sortRows(rows, sort, tagPriority) {
+    var order = normalizeTagPriority(tagPriority);
     return rows.slice().sort(function(a, b) {
       if (sort === 'newest') return text(b.createdAt).localeCompare(text(a.createdAt));
       if (sort === 'oldest') return text(a.createdAt).localeCompare(text(b.createdAt));
-      if (sort === 'chat') return text(a.chatTitle).localeCompare(text(b.chatTitle)) || priority(a.tag) - priority(b.tag);
-      return priority(a.tag) - priority(b.tag) || text(a.createdAt).localeCompare(text(b.createdAt));
+      if (sort === 'chat') return text(a.chatTitle).localeCompare(text(b.chatTitle)) || priority(a.tag, order) - priority(b.tag, order);
+      return priority(a.tag, order) - priority(b.tag, order) || text(a.createdAt).localeCompare(text(b.createdAt));
     });
   }
 
@@ -190,7 +210,8 @@ var OptionsOpenThreads = (function() {
       onSelect: typeof options.onSelect === 'function' ? options.onSelect : function() {},
       rows: [],
       filteredRows: [],
-      selected: {}
+      selected: {},
+      tagPriority: normalizeTagPriority(options.tagPriority)
     };
 
     function filterState() {
@@ -221,7 +242,7 @@ var OptionsOpenThreads = (function() {
       var filters = filterState();
       state.filteredRows = sortRows(state.rows.filter(function(row) {
         return matches(row, filters);
-      }), filters.sort);
+      }), filters.sort, state.tagPriority);
       root.innerHTML = '';
       root.appendChild(makeHeader(document));
       if (!state.filteredRows.length) {
@@ -303,11 +324,17 @@ var OptionsOpenThreads = (function() {
       },
       getRows: function() {
         return state.filteredRows.slice();
+      },
+      setTagPriority: function(priority) {
+        state.tagPriority = normalizeTagPriority(priority);
+        render();
+        return state.filteredRows.slice();
       }
     };
   }
 
   return {
+    DEFAULT_TAG_PRIORITY: DEFAULT_TAG_PRIORITY.slice(),
     TAG_PRIORITY: TAG_PRIORITY,
     create: create
   };

@@ -267,7 +267,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M4.T11` — Status workflow: each thread has `open|done|archived`; UI provides toggle buttons. Done threads collapse by default; "show done" toggle reveals them. **Success:** marking done updates `openThreads.status` and `resolvedAt`; collapsed view hides them by default; toggle restores visibility.
 - [x] `M4.T12` — Bulk archive: select multiple done threads, "Archive selected" moves them to status=archived. **Success:** selected threads disappear from default view; "Show archived" filter restores them.
 - [x] `M4.T13` — Inline tag highlighting in chat detail: when rendering message content, wrap recognized tag prefixes in a colored span using the active colorscheme (this handles the scan-sourced threads; user-applied threads are shown via chips per M4.T02). **Success:** a message containing `TODO: ping Alice` renders with `TODO` colored per scheme.
-- [ ] `M4.T14` — Add tag-priority configuration UI: user can reorder tag priority in settings. Persist in `chrome.storage.local`. **Success:** reordering priorities reorders the dashboard's default sort.
+- [x] `M4.T14` — Add tag-priority configuration UI: user can reorder tag priority in settings. Persist in `chrome.storage.local`. **Success:** reordering priorities reorders the dashboard's default sort.
 - [ ] `M4.T15` — Add custom-tag support: users can register their own tag string + color. Stored in `chrome.storage.local`. Both UI-tag popover and scanner pick them up. **Success:** adding tag `WAITING` then applying via popover yields a `WAITING`-tagged thread; pasting `WAITING: vendor reply` into a chat also captures one via scan.
 
 ## M5 — Local LLM extraction (transformers.js)

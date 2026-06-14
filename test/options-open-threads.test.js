@@ -88,6 +88,53 @@ describe('OptionsOpenThreads', () => {
     expect(dom.window.document.getElementById('summary').textContent).toBe('50 threads');
   });
 
+  it('uses configured tag priority for default sort', async () => {
+    const { dom, root } = createDom();
+    const OptionsOpenThreads = loadOpenThreads(dom);
+    const pane = OptionsOpenThreads.create({
+      root,
+      summaryEl: dom.window.document.getElementById('summary'),
+      tagPriority: ['PROMPT', 'REF', 'REV', 'FOLLOWUP', 'UNRESOLVED', 'TODO', 'FIXME'],
+      filters: {
+        tag: dom.window.document.getElementById('tag'),
+        chat: dom.window.document.getElementById('chat'),
+        platform: dom.window.document.getElementById('platform'),
+        status: dom.window.document.getElementById('status'),
+        showDone: dom.window.document.getElementById('showDone'),
+        source: dom.window.document.getElementById('source'),
+        subSource: dom.window.document.getElementById('subSource'),
+        sort: dom.window.document.getElementById('sort')
+      },
+      dao: {
+        listOpenThreads: async () => threads(7),
+        listChats: async () => chats()
+      },
+      window: dom.window
+    });
+
+    await pane.load();
+    expect([...root.querySelectorAll('.thread-row-data .thread-tag')].map((cell) => cell.textContent)).toEqual([
+      'PROMPT',
+      'REF',
+      'REV',
+      'FOLLOWUP',
+      'UNRESOLVED',
+      'TODO',
+      'FIXME'
+    ]);
+
+    pane.setTagPriority(['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT']);
+    expect([...root.querySelectorAll('.thread-row-data .thread-tag')].map((cell) => cell.textContent)).toEqual([
+      'FIXME',
+      'TODO',
+      'UNRESOLVED',
+      'FOLLOWUP',
+      'REV',
+      'REF',
+      'PROMPT'
+    ]);
+  });
+
   it('filters by sub-source', async () => {
     const { dom, root } = createDom();
     const OptionsOpenThreads = loadOpenThreads(dom);

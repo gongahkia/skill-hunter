@@ -1080,6 +1080,41 @@ select[multiple] {
   line-height: 1.35;
 }
 
+.tag-priority-list {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-priority-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.tag-priority-row strong {
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.tag-priority-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.tag-priority-actions .btn {
+  min-height: 26px;
+  padding: 3px 7px;
+  font-size: 0.72rem;
+}
+
 .form-actions {
   gap: 9px;
   margin-top: 12px;
