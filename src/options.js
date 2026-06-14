@@ -13,6 +13,8 @@
     captureStatusText: document.getElementById('capture-status-text'),
     chatList: document.getElementById('chat-list'),
     chatListSummary: document.getElementById('chat-list-summary'),
+    chatDetail: document.getElementById('chat-detail'),
+    openOriginal: document.getElementById('open-original'),
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
@@ -289,12 +291,23 @@
     });
   }
 
-  async function initChatList() {
+  async function initVaultViews() {
+    var detail = null;
+    if (els.chatDetail && typeof OptionsChatDetail !== 'undefined') {
+      detail = OptionsChatDetail.create({
+        root: els.chatDetail,
+        openLink: els.openOriginal
+      });
+    }
+
     if (!els.chatList || typeof OptionsChatList === 'undefined') return;
     var list = OptionsChatList.create({
       root: els.chatList,
       summaryEl: els.chatListSummary,
-      countEl: els.vaultCount
+      countEl: els.vaultCount,
+      onSelect: function(chat) {
+        if (detail) detail.load(chat);
+      }
     });
     await list.load();
   }
@@ -305,7 +318,7 @@
       renderSettings(settings);
       await refreshDiagnostics();
       await refreshHistorySummary();
-      await initChatList();
+      await initVaultViews();
       wireEvents();
       bindThemeWatcher();
 
@@ -320,7 +333,7 @@
         renderSettings(defaults);
         renderDiagnostics([]);
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
-        await initChatList();
+        await initVaultViews();
         wireEvents();
         bindThemeWatcher();
         log('info', 'options.init.local_storage_unavailable', { error: serializeError(error) });

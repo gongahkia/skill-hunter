@@ -293,6 +293,11 @@ input[type="search"] {
   white-space: nowrap;
 }
 
+.pane-heading a[aria-disabled="true"] {
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
 .chat-table {
   height: calc(100vh - 122px);
   overflow: auto;
@@ -363,6 +368,11 @@ input[type="search"] {
   font-size: 0.86rem;
 }
 
+.chat-detail-body {
+  height: calc(100vh - 122px);
+  overflow: auto;
+}
+
 .detail-empty h3 {
   color: var(--ink);
   font-size: 1rem;
@@ -371,6 +381,80 @@ input[type="search"] {
 .detail-empty p {
   margin-top: 8px;
   line-height: 1.4;
+}
+
+.detail-summary {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.detail-summary h3 {
+  font-size: 1rem;
+}
+
+.detail-summary p,
+.panel-note {
+  margin-top: 6px;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.message-list {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.message-card {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: 7px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.message-card.user {
+  border-left-color: var(--primary);
+}
+
+.message-card.assistant {
+  border-left-color: var(--success);
+}
+
+.message-card.system,
+.message-card.tool {
+  border-left-color: var(--secondary);
+}
+
+.message-meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+}
+
+.message-meta strong {
+  color: var(--ink);
+}
+
+.copy-message {
+  min-height: 28px;
+  padding: 4px 8px;
+}
+
+.message-content {
+  white-space: pre-wrap;
+  padding: 10px;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .panel {
@@ -547,7 +631,8 @@ input[type="search"] {
     margin-top: 10px;
   }
 
-  .chat-table {
+  .chat-table,
+  .chat-detail-body {
     height: auto;
     max-height: 420px;
   }

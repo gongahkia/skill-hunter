@@ -84,7 +84,8 @@ var OptionsChatList = (function() {
     if (!root) throw new Error('chat list root is required');
 
     var document = root.ownerDocument;
-    var win = options.window || document.defaultView || window;
+    var fallbackWindow = typeof window !== 'undefined' ? window : { setTimeout: setTimeout, clearTimeout: clearTimeout };
+    var win = options.window || document.defaultView || fallbackWindow;
     var state = {
       root: root,
       summaryEl: options.summaryEl || null,

@@ -86,9 +86,11 @@
             <h2>Detail</h2>
             <a id="open-original" href="#" aria-disabled="true">Open original</a>
           </div>
-          <div class="detail-empty">
-            <h3>Select a chat</h3>
-            <p id="history-summary">No exports captured yet.</p>
+          <div id="chat-detail" class="chat-detail-body">
+            <div class="detail-empty">
+              <h3>Select a chat</h3>
+              <p>No captured chat selected.</p>
+            </div>
           </div>
         </section>
       </section>
@@ -164,6 +166,7 @@
             <button id="clear-history" class="btn btn-ghost" type="button">Clear</button>
           </div>
         </div>
+        <p id="history-summary" class="panel-note">No exports captured yet.</p>
       </section>
     </aside>
   </main>
@@ -175,6 +178,7 @@
   <script src="vault/db.js"></script>
   <script src="vault/dao.js"></script>
   <script src="options/chat-list.js"></script>
+  <script src="options/chat-detail.js"></script>
   <script src="options.js"></script>
 </body>
 </html>
