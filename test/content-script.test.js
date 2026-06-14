@@ -15,7 +15,8 @@ const existingPlatforms = [
   { id: 'poe', file: 'platforms/poe.js', fixture: 'fixtures/platforms/poe-primary.html', url: 'https://poe.com/chat/thread-123' },
   { id: 'kimi', file: 'platforms/kimi.js', fixture: 'fixtures/platforms/kimi-primary.html', url: 'https://kimi.com/chat/thread-123' },
   { id: 'qwen', file: 'platforms/qwen.js', fixture: 'fixtures/platforms/qwen-primary.html', url: 'https://chat.qwen.ai/c/thread-123' },
-  { id: 'chatglm', file: 'platforms/chatglm.js', fixture: 'fixtures/platforms/chatglm-primary.html', url: 'https://chatglm.cn/main/thread-123' }
+  { id: 'chatglm', file: 'platforms/chatglm.js', fixture: 'fixtures/platforms/chatglm-primary.html', url: 'https://chatglm.cn/main/thread-123' },
+  { id: 'doubao', file: 'platforms/doubao.js', fixture: 'fixtures/platforms/doubao-primary.html', url: 'https://www.doubao.com/chat/thread-123' }
 ];
 
 function runContentAction({ fixture, url, platformFiles, action }) {

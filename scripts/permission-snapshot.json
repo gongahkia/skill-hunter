@@ -10,6 +10,7 @@
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://copilot.microsoft.com/*",
+      "https://doubao.com/*",
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
@@ -17,6 +18,7 @@
       "https://poe.com/*",
       "https://tongyi.aliyun.com/*",
       "https://perplexity.ai/*",
+      "https://www.doubao.com/*",
       "https://www.perplexity.ai/*"
     ]
   },
@@ -31,6 +33,7 @@
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://copilot.microsoft.com/*",
+      "https://doubao.com/*",
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
@@ -38,6 +41,7 @@
       "https://poe.com/*",
       "https://tongyi.aliyun.com/*",
       "https://perplexity.ai/*",
+      "https://www.doubao.com/*",
       "https://www.perplexity.ai/*"
     ]
   },
@@ -52,6 +56,7 @@
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://copilot.microsoft.com/*",
+      "https://doubao.com/*",
       "https://gemini.google.com/*",
       "https://grok.com/*",
       "https://huggingface.co/chat/*",
@@ -59,6 +64,7 @@
       "https://poe.com/*",
       "https://tongyi.aliyun.com/*",
       "https://perplexity.ai/*",
+      "https://www.doubao.com/*",
       "https://www.perplexity.ai/*"
     ]
   }

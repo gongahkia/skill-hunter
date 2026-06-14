@@ -90,6 +90,13 @@ const scenarios = [
     url: 'https://chatglm.cn/main/thread-123',
     fixtures: ['fixtures/platforms/chatglm-primary.html', 'fixtures/platforms/chatglm-variant.html'],
     expectedModel: 'GLM-4.6'
+  },
+  {
+    id: 'doubao',
+    file: 'platforms/doubao.js',
+    url: 'https://www.doubao.com/chat/thread-123',
+    fixtures: ['fixtures/platforms/doubao-primary.html', 'fixtures/platforms/doubao-variant.html'],
+    expectedModel: 'Doubao 1.5 Pro'
   }
 ];
 
