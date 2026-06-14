@@ -80,16 +80,15 @@ For detailed installation and configuration instructions, see [`INSTRUCTIONS.md`
 
 ## Deployment 
 
-| Editor platform | Status | Link | 
-| :--- | :--- | :--- |  
-| [Google Docs](./src/docs/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [docs.google](https://docs.google.com) |
-| [Google Sheets](./src/sheets/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [sheets.google](https://sheets.google.com) |
-| [Google Slides](./src/slides/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [slides.google](https://slides.google.com) |
-| [Vim Plugin](./src/vim/) | ![](https://img.shields.io/badge/Status-%20Up-green) | [vim.org](https://www.vim.org/) |
+Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
 
-## Disclaimer
+## Origins
 
-The `Owl` extension is provided "as is" and without any warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement.
+Owl history was merged into Rakuzaichi on 2026-06-14 via merge commit `51e556a66bdd4901386c078bebab4a9a1f270ca3`; Owl's tree was not imported.
+
+## Reference
+
+The name `Rakuzaichi` is in reference to the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家 ), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of the ongoing manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
 
 By using this extension, you acknowledge and agree to the following:
 
@@ -116,4 +115,34 @@ By using this extension, you acknowledge and agree to the following:
 
 The name `Owl` is in reference to the [second technique](https://kagurabachi.fandom.com/wiki/Seiichi_Samura#Techniques) of [Tobimune](https://kagurabachi.fandom.com/wiki/Enchanted_Blade#Tobimune) (飛宗), the [enchanted blade](https://kagurabachi.fandom.com/wiki/Enchanted_Blade) wielded by the contracted sword bearer [Seiichi Samura](https://kagurabachi.fandom.com/wiki/Seiichi_Samura) (座村清市) during the [Seitei War](https://kagurabachi.fandom.com/wiki/Seitei_War). [Owl](https://kagurabachi.fandom.com/wiki/Seiichi_Samura#Techniques) first appears during the [Sword Bearer Assassination arc](https://kagurabachi.fandom.com/wiki/Sword_Bearer_Assassination_Arc) of the manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
 
-![](./asset/logo/owl.png)
+### Intellectual Property
+
+Users are responsible for ensuring they have the necessary rights to export and use chat conversations processed through Rakuzaichi. The extension does not claim ownership of user-accessed content, but users grant Rakuzaichi the right to process and convert such content for the purpose of providing export services.
+
+### Third-Party Services
+
+Rakuzaichi interacts with third-party services including but not limited to various AI chatbot platforms. The use of these services is subject to their respective terms and conditions. Rakuzaichi's creators are not responsible for the performance, availability, or policies of these third-party services.
+
+### Data Privacy
+
+Information processed through Rakuzaichi may be temporarily handled within the extension's operation. By using Rakuzaichi, you acknowledge that:
+* The extension processes conversation data that may contain personal information
+* You have the right to export the data you're accessing
+* Exported data becomes your responsibility to store and handle securely
+* Users should review the terms of service of the original chat platforms regarding data export permissions
+
+### Limitation of Liability
+
+Under no circumstances shall Rakuzaichi's creators or contributors be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the extension. Rakuzaichi is not liable for any decisions made or actions taken based on the exported data provided.
+
+### Compliance with Terms of Service
+
+Users are responsible for ensuring their use of Rakuzaichi complies with the terms of service of the AI chat platforms from which they export data. Rakuzaichi does not encourage or support circumventing any restrictions placed by these platforms.
+
+### Changes to Disclaimer
+
+This disclaimer may be updated from time to time without notice. It is your responsibility to review this disclaimer periodically for changes.
+
+### Termination of Service
+
+Rakuzaichi reserves the right to modify, suspend, or discontinue the extension or any part thereof at any time without prior notice or liability.

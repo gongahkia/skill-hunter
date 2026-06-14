@@ -171,7 +171,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [x] `M0.T07` — Verify tree unchanged: `git diff pre-owl-merge HEAD -- .` produces zero output. **Success:** command exits 0 with empty stdout.
 - [x] `M0.T08` — Defensive follow-up commit (per user instruction, even though `-s ours` should be a no-op): `git checkout pre-owl-merge -- .` then `git commit --allow-empty -m "Restore Rakuzaichi pre-merge file tree (defensive no-op verification)"`. **Success:** `git diff pre-owl-merge HEAD -- .` is empty; HEAD shows the new restore commit as latest.
 - [x] `M0.T09` — Verify Owl commits reachable: pick 3 Owl commits at random (oldest, mid, newest by Owl date) and confirm each is reachable via `git merge-base --is-ancestor <owl-sha> HEAD`. **Success:** all three exit 0.
-- [ ] `M0.T10` — Update Rakuzaichi `README.md` to add an "Origins" section noting Owl history merged on YYYY-MM-DD with the merge commit SHA. **Success:** `grep -c "Origins" README.md` returns ≥1.
+- [x] `M0.T10` — Update Rakuzaichi `README.md` to add an "Origins" section noting Owl history merged on YYYY-MM-DD with the merge commit SHA. **Success:** `grep -c "Origins" README.md` returns ≥1.
 - [ ] `M0.T11` — Remove `owl` remote (it was a local scratch tool): `git remote remove owl`. **Success:** `git remote -v` no longer lists `owl`.
 - [ ] `M0.T12` — In Owl repo (separate working tree), append a deprecation banner to its README pointing to Rakuzaichi v3, then commit + push. **Success:** Owl `README.md` has the deprecation pointer; Owl repo description on GitHub updated to "Archived — merged into Rakuzaichi v3."
 - [ ] `M0.T13` — Archive Owl repo on GitHub (Settings → Archive). **Success:** GitHub shows the archived banner on the Owl repo.
