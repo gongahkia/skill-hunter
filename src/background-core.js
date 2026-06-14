@@ -183,6 +183,17 @@ var BackgroundRuntime = (function() {
     return captureTab(tabId, tabUrl, trace('capture'));
   }
 
+  async function runCaptureSweep() {
+    var tabs = await api.tabs.query({ active: true, currentWindow: true });
+    if (!tabs.length || (tabs[0].id !== 0 && !tabs[0].id)) {
+      return { skipped: true, reason: 'no-active-tab' };
+    }
+    if (!isSupportedPlatformUrl(tabs[0].url || '')) {
+      return { skipped: true, reason: 'unsupported-tab' };
+    }
+    return captureTab(tabs[0].id, tabs[0].url, trace('sweep'));
+  }
+
   async function handleDownload(request) {
     var traceId = request && request.traceId ? request.traceId : trace('download');
     try {
@@ -326,8 +337,15 @@ var BackgroundRuntime = (function() {
     });
 
     api.alarms.onAlarm.addListener(function(alarm) {
-      if (alarm.name !== 'auto-export') return;
-      runAutoExport();
+      if (alarm.name === 'auto-export') {
+        runAutoExport();
+        return;
+      }
+      if (alarm.name === 'capture-sweep') {
+        runCaptureSweep().catch(function(error) {
+          log('error', 'background.capture.sweep.failed', { error: serializeError(error) });
+        });
+      }
     });
 
     if (api.tabs && api.tabs.onUpdated && api.tabs.onUpdated.addListener) {
@@ -348,6 +366,7 @@ var BackgroundRuntime = (function() {
     updateAutoExport().catch(function(error) {
       log('error', 'background.init.schedule.failed', { error: serializeError(error) });
     });
+    api.alarms.create('capture-sweep', { periodInMinutes: 10 });
 
     log('info', 'background.init.complete', {});
   }
@@ -358,6 +377,7 @@ var BackgroundRuntime = (function() {
     handleCapture: handleCapture,
     handleTabUpdated: handleTabUpdated,
     isSupportedPlatformUrl: isSupportedPlatformUrl,
+    runCaptureSweep: runCaptureSweep,
     updateAutoExport: updateAutoExport,
     runAutoExport: runAutoExport
   };

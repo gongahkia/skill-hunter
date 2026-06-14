@@ -100,4 +100,39 @@ describe('BackgroundRuntime.handleCapture', () => {
     expect(await VaultDAO.listMessages('chatgpt:thread-123')).toHaveLength(2);
     await expect(VaultDAO.listExtractionRuns({ chatId: 'chatgpt:thread-123' })).resolves.toHaveLength(1);
   });
+
+  it('sweeps the active supported tab and skips unsupported active tabs', async () => {
+    let sends = 0;
+    const api = {
+      storage: {
+        local: { get: async (defaults) => defaults, set: async () => {} },
+        onChanged: { addListener() {} }
+      },
+      runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+      downloads: { download: async () => {} },
+      alarms: { create() {}, clear: async () => {}, onAlarm: { addListener() {} } },
+      tabs: {
+        activeUrl: 'https://chatgpt.com/c/thread-123',
+        query: async function() {
+          return [{ id: 11, url: this.activeUrl }];
+        },
+        onUpdated: { addListener() {} },
+        sendMessage: async () => {
+          sends++;
+          return { data: snapshot([
+            { messageId: 'msg-1', role: 'user', content: 'Q', index: 0 }
+          ]) };
+        }
+      }
+    };
+    const { BackgroundRuntime, VaultDAO } = loadRuntime(api);
+
+    await expect(BackgroundRuntime.runCaptureSweep()).resolves.toMatchObject({ success: true });
+    expect(sends).toBe(1);
+    await expect(VaultDAO.listMessages('chatgpt:thread-123')).resolves.toHaveLength(1);
+
+    api.tabs.activeUrl = 'https://example.com/';
+    await expect(BackgroundRuntime.runCaptureSweep()).resolves.toEqual({ skipped: true, reason: 'unsupported-tab' });
+    expect(sends).toBe(1);
+  });
 });
