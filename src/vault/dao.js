@@ -254,6 +254,26 @@ function createVaultDAO(options) {
     });
   }
 
+  async function setChatTags(chatId, tags) {
+    if (!chatId) throw new Error('chatId is required');
+    if (!Array.isArray(tags)) throw new Error('tags must be an array');
+    return withTransaction(['chats'], 'readwrite', async function(transaction) {
+      var store = transaction.objectStore('chats');
+      var chat = await requestToPromise(store.get(chatId));
+      if (!chat) return null;
+      var seen = {};
+      chat.tags = tags.map(function(tag) {
+        return String(tag || '').trim();
+      }).filter(function(tag) {
+        if (!tag || seen[tag]) return false;
+        seen[tag] = true;
+        return true;
+      });
+      await requestToPromise(store.put(chat));
+      return chat;
+    });
+  }
+
   async function putOpenThreads(threads) {
     if (!Array.isArray(threads)) throw new Error('threads must be an array');
     return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
@@ -353,6 +373,7 @@ function createVaultDAO(options) {
     renameFolder: renameFolder,
     deleteFolder: deleteFolder,
     setChatFolder: setChatFolder,
+    setChatTags: setChatTags,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
     setThreadStatus: setThreadStatus,

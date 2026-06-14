@@ -24,6 +24,7 @@
     dateStart: document.getElementById('dateStart'),
     dateEnd: document.getElementById('dateEnd'),
     tagFilter: document.getElementById('tagFilter'),
+    tagQuery: document.getElementById('tagQuery'),
     pinnedOnly: document.getElementById('pinnedOnly'),
     clearFilters: document.getElementById('clearFilters'),
     chatList: document.getElementById('chat-list'),
@@ -308,10 +309,15 @@
 
   async function initVaultViews() {
     var detail = null;
+    var refreshVault = function() {};
     if (els.chatDetail && typeof OptionsChatDetail !== 'undefined') {
       detail = OptionsChatDetail.create({
         root: els.chatDetail,
-        openLink: els.openOriginal
+        openLink: els.openOriginal,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        onTagsChanged: function() {
+          refreshVault(true);
+        }
       });
     }
 
@@ -328,7 +334,7 @@
       try {
         var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });
         list.setChats(await search.load());
-        bindVaultControls(search, list);
+        refreshVault = bindVaultControls(search, list);
         return;
       } catch (error) {
         log('warn', 'options.search.init.failed', { error: serializeError(error) });
@@ -346,10 +352,15 @@
   }
 
   function selectedTags() {
-    if (!els.tagFilter) return [];
-    return Array.prototype.slice.call(els.tagFilter.querySelectorAll('button[aria-pressed="true"]')).map(function(button) {
+    var tags = els.tagFilter ? Array.prototype.slice.call(els.tagFilter.querySelectorAll('button[aria-pressed="true"]')).map(function(button) {
       return button.dataset.tag;
-    }).filter(Boolean);
+    }).filter(Boolean) : [];
+    if (els.tagQuery && els.tagQuery.value.trim()) {
+      tags = tags.concat(els.tagQuery.value.split(',').map(function(tag) {
+        return tag.trim();
+      }).filter(Boolean));
+    }
+    return tags;
   }
 
   function filterState() {
@@ -374,6 +385,7 @@
     if (els.dateFilter) els.dateFilter.value = 'all';
     if (els.dateStart) els.dateStart.value = '';
     if (els.dateEnd) els.dateEnd.value = '';
+    if (els.tagQuery) els.tagQuery.value = '';
     if (els.pinnedOnly) els.pinnedOnly.checked = false;
     if (els.tagFilter) {
       Array.prototype.forEach.call(els.tagFilter.querySelectorAll('button'), function(button) {
@@ -413,6 +425,7 @@
     }
     if (els.dateStart) els.dateStart.addEventListener('change', refresh);
     if (els.dateEnd) els.dateEnd.addEventListener('change', refresh);
+    if (els.tagQuery) els.tagQuery.addEventListener('input', refresh);
     if (els.pinnedOnly) els.pinnedOnly.addEventListener('change', refresh);
     if (els.tagFilter) {
       els.tagFilter.addEventListener('click', function(event) {
@@ -448,6 +461,10 @@
       });
     }
     syncCustomDateVisibility();
+    return async function(reload) {
+      if (reload) await search.load();
+      await refresh();
+    };
   }
 
   async function init() {

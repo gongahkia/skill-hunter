@@ -171,7 +171,10 @@ describe('VaultDAO', () => {
     await expect(dao.listFolders()).resolves.toHaveLength(3);
     await expect(dao.renameFolder('folder-2', 'Client A')).resolves.toMatchObject({ name: 'Client A' });
     await expect(dao.setChatFolder('chat-1', 'folder-3')).resolves.toMatchObject({ folderId: 'folder-3' });
+    await expect(dao.setChatTags('chat-1', ['custom', 'custom', ' REF '])).resolves.toMatchObject({ tags: ['custom', 'REF'] });
     await expect(dao.setChatFolder('missing', 'folder-3')).resolves.toBeNull();
+    await expect(dao.setChatTags('missing', ['custom'])).resolves.toBeNull();
+    await expect(dao.setChatTags('chat-1', null)).rejects.toThrow('tags must be an array');
     await expect(dao.setChatFolder('chat-1', 'missing')).rejects.toThrow('folder not found');
 
     await expect(dao.deleteFolder('folder-1')).resolves.toBe(true);

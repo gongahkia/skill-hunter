@@ -78,6 +78,40 @@ describe('OptionsChatDetail', () => {
     expect(copied).toEqual(['Use the latest vault snapshot.']);
   });
 
+  it('adds and removes free-form chat tags', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const saved = [];
+    const changed = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: {
+        listMessages: async () => messages(),
+        setChatTags: async (chatId, tags) => {
+          saved.push({ chatId, tags });
+          return Object.assign(chat(), { tags });
+        }
+      },
+      onTagsChanged: (updated) => changed.push(updated.tags),
+      window: dom.window
+    });
+
+    await detail.load(Object.assign(chat(), { tags: [] }));
+    const input = dom.window.document.querySelector('.tag-add input');
+    input.value = 'research';
+    dom.window.document.querySelector('.tag-add button').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+    dom.window.document.querySelector('.tag-chip').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(saved).toEqual([
+      { chatId: 'claude:thread-1', tags: ['research'] },
+      { chatId: 'claude:thread-1', tags: [] }
+    ]);
+    expect(changed).toEqual([['research'], []]);
+  });
+
   it('opens detail when a chat-list row is clicked', async () => {
     const { dom, listRoot } = createDom();
     const { OptionsChatList, OptionsChatDetail } = loadOptionsModules(dom);

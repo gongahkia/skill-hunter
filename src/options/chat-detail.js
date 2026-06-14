@@ -114,6 +114,7 @@ var OptionsChatDetail = (function() {
     var fallbackWindow = typeof window !== 'undefined' ? window : { setTimeout: setTimeout, clearTimeout: clearTimeout };
     var win = options.window || document.defaultView || fallbackWindow;
     var dao = options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null);
+    var onTagsChanged = typeof options.onTagsChanged === 'function' ? options.onTagsChanged : function() {};
     var copyText = options.copyText || function(value) {
       return defaultCopy(document, win, value);
     };
@@ -129,6 +130,69 @@ var OptionsChatDetail = (function() {
       empty.appendChild(heading);
       empty.appendChild(copy);
       return empty;
+    }
+
+    async function saveTags(chat, tags, messages) {
+      if (!dao || typeof dao.setChatTags !== 'function') return;
+      var updated = await dao.setChatTags(chat.chatId, tags);
+      if (!updated) return;
+      chat.tags = updated.tags || [];
+      render(chat, messages);
+      onTagsChanged(chat);
+    }
+
+    function makeTagEditor(chat, messages) {
+      var editor = document.createElement('section');
+      editor.className = 'tag-editor';
+
+      var chips = document.createElement('div');
+      chips.className = 'tag-chips';
+      (Array.isArray(chat.tags) ? chat.tags : []).forEach(function(tag) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'tag-chip';
+        chip.textContent = tag;
+        chip.title = 'Remove tag';
+        chip.addEventListener('click', function() {
+          saveTags(chat, chat.tags.filter(function(value) { return value !== tag; }), messages);
+        });
+        chips.appendChild(chip);
+      });
+      if (!chips.childNodes.length) {
+        var empty = document.createElement('span');
+        empty.className = 'panel-note';
+        empty.textContent = 'No tags.';
+        chips.appendChild(empty);
+      }
+      editor.appendChild(chips);
+
+      var add = document.createElement('div');
+      add.className = 'tag-add';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Add tag';
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-secondary';
+      button.textContent = 'Add';
+      function submit() {
+        var tag = input.value.trim();
+        if (!tag) return;
+        var tags = Array.isArray(chat.tags) ? chat.tags.slice() : [];
+        if (tags.indexOf(tag) === -1) tags.push(tag);
+        input.value = '';
+        saveTags(chat, tags, messages);
+      }
+      button.addEventListener('click', submit);
+      input.addEventListener('keydown', function(event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        submit();
+      });
+      add.appendChild(input);
+      add.appendChild(button);
+      editor.appendChild(add);
+      return editor;
     }
 
     function renderEmpty(title, message) {
@@ -155,6 +219,7 @@ var OptionsChatDetail = (function() {
       ].filter(Boolean).join(' | ');
       summary.appendChild(meta);
       root.appendChild(summary);
+      root.appendChild(makeTagEditor(chat, messages));
 
       if (!messages.length) {
         root.appendChild(makeEmpty('No messages', 'No messages captured for this chat.'));
