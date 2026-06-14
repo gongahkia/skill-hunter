@@ -44,6 +44,7 @@
     sendToNewChat: document.getElementById('sendToNewChat'),
     restoreClipboard: document.getElementById('restoreClipboard'),
     openThreadsList: document.getElementById('openThreadsList'),
+    archiveSelectedThreads: document.getElementById('archiveSelectedThreads'),
     threadListSummary: document.getElementById('threadListSummary'),
     threadTagFilter: document.getElementById('threadTagFilter'),
     threadChatFilter: document.getElementById('threadChatFilter'),
@@ -502,6 +503,7 @@
       threadPane = OptionsOpenThreads.create({
         root: els.openThreadsList,
         summaryEl: els.threadListSummary,
+        archiveButton: els.archiveSelectedThreads,
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         filters: {
           tag: els.threadTagFilter,

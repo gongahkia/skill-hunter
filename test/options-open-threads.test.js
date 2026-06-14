@@ -21,6 +21,7 @@ function createDom() {
       <select id="source"><option value="">All</option><option value="explicit">Explicit</option></select>
       <select id="subSource"><option value="">All</option><option value="user">User</option><option value="scan">Scan</option></select>
       <select id="sort"><option value="priority">Priority</option></select>
+      <button id="archive" type="button">Archive selected</button>
       <span id="summary"></span>
       <div id="threads"></div>
     </main>
@@ -170,5 +171,60 @@ describe('OptionsOpenThreads', () => {
     showDone.dispatchEvent(new dom.window.Event('change'));
     expect(root.querySelectorAll('.thread-row-data')).toHaveLength(2);
     expect(dom.window.document.getElementById('summary').textContent).toBe('2 threads');
+  });
+
+  it('bulk archives selected done threads', async () => {
+    const { dom, root } = createDom();
+    const OptionsOpenThreads = loadOpenThreads(dom);
+    const showDone = dom.window.document.getElementById('showDone');
+    showDone.checked = true;
+    const status = dom.window.document.getElementById('status');
+    const rows = [
+      { threadId: 'done-1', chatId: 'chat-a', messageId: 'msg-1', tag: 'TODO', text: 'done one', source: 'explicit', subSource: 'user', status: 'done', createdAt: '2026-01-01T00:00:00.000Z' },
+      { threadId: 'done-2', chatId: 'chat-a', messageId: 'msg-2', tag: 'REF', text: 'done two', source: 'explicit', subSource: 'scan', status: 'done', createdAt: '2026-01-01T00:01:00.000Z' }
+    ];
+    const calls = [];
+    const pane = OptionsOpenThreads.create({
+      root,
+      summaryEl: dom.window.document.getElementById('summary'),
+      archiveButton: dom.window.document.getElementById('archive'),
+      filters: {
+        tag: dom.window.document.getElementById('tag'),
+        chat: dom.window.document.getElementById('chat'),
+        platform: dom.window.document.getElementById('platform'),
+        status,
+        showDone,
+        source: dom.window.document.getElementById('source'),
+        subSource: dom.window.document.getElementById('subSource'),
+        sort: dom.window.document.getElementById('sort')
+      },
+      dao: {
+        listOpenThreads: async () => rows,
+        listChats: async () => chats(),
+        setThreadStatus: async (threadId, nextStatus) => {
+          calls.push({ threadId, status: nextStatus });
+          rows.find((row) => row.threadId === threadId).status = nextStatus;
+        }
+      },
+      window: dom.window
+    });
+
+    await pane.load();
+    root.querySelectorAll('.thread-select').forEach((checkbox) => {
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new dom.window.Event('change'));
+    });
+    dom.window.document.getElementById('archive').click();
+    await flush(dom.window);
+
+    expect(calls).toEqual([
+      { threadId: 'done-1', status: 'archived' },
+      { threadId: 'done-2', status: 'archived' }
+    ]);
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(0);
+
+    status.value = 'archived';
+    status.dispatchEvent(new dom.window.Event('change'));
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(2);
   });
 });

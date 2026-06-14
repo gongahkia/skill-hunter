@@ -102,7 +102,7 @@ var OptionsOpenThreads = (function() {
     var header = document.createElement('div');
     header.className = 'thread-row thread-row-head';
     header.setAttribute('role', 'row');
-    ['Tag', 'Status', 'Source', 'Chat', 'Text', 'Actions'].forEach(function(label) {
+    ['Select', 'Tag', 'Status', 'Source', 'Chat', 'Text', 'Actions'].forEach(function(label) {
       appendCell(header, label);
     });
     return header;
@@ -131,7 +131,27 @@ var OptionsOpenThreads = (function() {
     return actions;
   }
 
-  function makeRow(document, row, onSelect, setStatus) {
+  function makeSelectCell(document, row, selected, syncSelection) {
+    var cell = document.createElement('span');
+    cell.setAttribute('role', 'cell');
+    var checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'thread-select';
+    checkbox.checked = !!selected[row.threadId];
+    checkbox.setAttribute('aria-label', 'Select thread');
+    checkbox.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+    checkbox.addEventListener('change', function() {
+      if (checkbox.checked) selected[row.threadId] = true;
+      else delete selected[row.threadId];
+      syncSelection();
+    });
+    cell.appendChild(checkbox);
+    return cell;
+  }
+
+  function makeRow(document, row, onSelect, setStatus, selected, syncSelection) {
     var item = document.createElement('div');
     item.className = 'thread-row thread-row-data';
     item.setAttribute('role', 'row');
@@ -145,6 +165,7 @@ var OptionsOpenThreads = (function() {
       event.preventDefault();
       onSelect(row);
     });
+    item.appendChild(makeSelectCell(document, row, selected, syncSelection));
     appendCell(item, text(row.tag, 'THREAD'), 'thread-tag');
     appendCell(item, text(row.status, 'open'));
     appendCell(item, [text(row.source, 'explicit'), text(row.subSource)].filter(Boolean).join(' / '));
@@ -164,10 +185,12 @@ var OptionsOpenThreads = (function() {
       root: root,
       summaryEl: options.summaryEl || null,
       filters: options.filters || {},
+      archiveButton: options.archiveButton || null,
       dao: options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null),
       onSelect: typeof options.onSelect === 'function' ? options.onSelect : function() {},
       rows: [],
-      filteredRows: []
+      filteredRows: [],
+      selected: {}
     };
 
     function filterState() {
@@ -187,6 +210,11 @@ var OptionsOpenThreads = (function() {
       if (!state.summaryEl) return;
       var count = state.filteredRows.length;
       state.summaryEl.textContent = count + (count === 1 ? ' thread' : ' threads');
+      if (state.archiveButton) {
+        state.archiveButton.disabled = !state.rows.some(function(row) {
+          return state.selected[row.threadId] && row.status === 'done';
+        });
+      }
     }
 
     function render() {
@@ -206,7 +234,7 @@ var OptionsOpenThreads = (function() {
         return;
       }
       state.filteredRows.forEach(function(row) {
-        root.appendChild(makeRow(document, row, state.onSelect, setStatus));
+        root.appendChild(makeRow(document, row, state.onSelect, setStatus, state.selected, updateSummary));
       });
       updateSummary();
     }
@@ -223,8 +251,22 @@ var OptionsOpenThreads = (function() {
     async function setStatus(row, status) {
       if (!state.dao || !state.dao.setThreadStatus) return;
       await state.dao.setThreadStatus(row.threadId, status);
+      delete state.selected[row.threadId];
       await load();
       if (typeof options.onChange === 'function') options.onChange(row, status);
+    }
+
+    async function archiveSelected() {
+      if (!state.dao || !state.dao.setThreadStatus) return;
+      var rows = state.rows.filter(function(row) {
+        return state.selected[row.threadId] && row.status === 'done';
+      });
+      for (var i = 0; i < rows.length; i++) {
+        await state.dao.setThreadStatus(rows[i].threadId, 'archived');
+        delete state.selected[rows[i].threadId];
+      }
+      await load();
+      if (rows.length && typeof options.onChange === 'function') options.onChange(null, 'archived');
     }
 
     async function load() {
@@ -246,6 +288,10 @@ var OptionsOpenThreads = (function() {
     root.setAttribute('role', 'table');
     root.setAttribute('aria-label', root.getAttribute('aria-label') || 'Open threads');
     bindFilters();
+    if (state.archiveButton) {
+      state.archiveButton.addEventListener('click', archiveSelected);
+      state.archiveButton.disabled = true;
+    }
     render();
 
     return {
