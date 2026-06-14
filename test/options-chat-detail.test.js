@@ -21,6 +21,7 @@ function createDom() {
       <a id="open-original" href="#" aria-disabled="true">Open original</a>
       <button id="detail-pin" type="button"></button>
       <button id="send-new-chat" type="button"></button>
+      <button id="restore-clipboard" type="button"></button>
       <div id="chat-detail"></div>
       <span id="chat-list-summary">0 captured</span>
       <strong id="vault-count">0</strong>
@@ -167,6 +168,36 @@ describe('OptionsChatDetail', () => {
     expect(copied[0]).toContain('\n\nUse this transcript as context.');
     expect(copied[0]).toContain('[1] User');
     expect(copied[0]).toContain('How should I restore this?');
+  });
+
+  it('copies the full chat as Markdown with headings and roles', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const copied = [];
+    const restoreButton = dom.window.document.getElementById('restore-clipboard');
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      restoreButton,
+      dao: { listMessages: async () => messages() },
+      copyText: async (value) => copied.push(value),
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    restoreButton.click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(restoreButton.textContent).toBe('Copied');
+    expect(copied).toHaveLength(1);
+    expect(copied[0]).toContain('# Restore plan');
+    expect(copied[0]).toContain('- Platform: Claude');
+    expect(copied[0]).toContain('## User');
+    expect(copied[0]).toContain('How should I restore this?');
+    expect(copied[0]).toContain('## Assistant');
+    expect(copied[0]).toContain('Use the latest vault snapshot.');
+    expect(copied[0]).toContain('## System');
+    expect(copied[0]).toContain('Keep source links.');
   });
 
   it('opens detail when a chat-list row is clicked', async () => {

@@ -34,6 +34,7 @@
     openOriginal: document.getElementById('open-original'),
     detailPin: document.getElementById('detailPin'),
     sendToNewChat: document.getElementById('sendToNewChat'),
+    restoreClipboard: document.getElementById('restoreClipboard'),
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
@@ -356,6 +357,7 @@
         openLink: els.openOriginal,
         pinButton: els.detailPin,
         sendButton: els.sendToNewChat,
+        restoreButton: els.restoreClipboard,
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         onTagsChanged: function() {
           refreshVault(true);

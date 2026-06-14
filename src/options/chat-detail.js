@@ -176,6 +176,33 @@ var OptionsChatDetail = (function() {
     return lines.join('\n');
   }
 
+  function oneLine(value, fallback) {
+    return text(value, fallback).replace(/\s+/g, ' ').trim();
+  }
+
+  function buildMarkdown(chat, messages) {
+    var lines = [
+      '# ' + oneLine(chat.title, 'Untitled chat'),
+      '',
+      '- Platform: ' + platformLabel(chat.platform),
+      '- Source URL: ' + text(chat.url, 'n/a'),
+      '- Model: ' + text(chat.model, 'n/a'),
+      '- Message count: ' + String(messages.length || chat.messageCount || 0)
+    ];
+    if (chat.lastUpdatedAt) lines.push('- Last updated: ' + formatTimestamp(chat.lastUpdatedAt));
+    lines.push('');
+
+    messages.forEach(function(message) {
+      lines.push('## ' + roleLabel(message.role));
+      if (message.timestamp) lines.push('`' + message.timestamp + '`');
+      lines.push('');
+      lines.push(text(message.content, '(empty)'));
+      lines.push('');
+    });
+
+    return lines.join('\n').trim() + '\n';
+  }
+
   function create(options) {
     options = options || {};
     var root = options.root;
@@ -189,6 +216,7 @@ var OptionsChatDetail = (function() {
     var onPinChanged = typeof options.onPinChanged === 'function' ? options.onPinChanged : function() {};
     var pinButton = options.pinButton || null;
     var sendButton = options.sendButton || null;
+    var restoreButton = options.restoreButton || null;
     var currentChat = null;
     var currentMessages = [];
     var copyText = options.copyText || function(value) {
@@ -228,6 +256,12 @@ var OptionsChatDetail = (function() {
       if (!sendButton) return;
       sendButton.disabled = !(chat && chat.chatId);
       sendButton.textContent = 'Send to new chat';
+    }
+
+    function syncRestoreButton(chat) {
+      if (!restoreButton) return;
+      restoreButton.disabled = !(chat && chat.chatId);
+      restoreButton.textContent = 'Restore to clipboard';
     }
 
     async function saveTags(chat, tags, messages) {
@@ -299,6 +333,7 @@ var OptionsChatDetail = (function() {
       currentMessages = [];
       syncPinButton(null);
       syncSendButton(null);
+      syncRestoreButton(null);
       var empty = makeEmpty(title, message);
       root.appendChild(empty);
     }
@@ -310,6 +345,7 @@ var OptionsChatDetail = (function() {
       setOriginalLink(openLink, chat);
       syncPinButton(chat);
       syncSendButton(chat);
+      syncRestoreButton(chat);
 
       var summary = document.createElement('section');
       summary.className = 'detail-summary';
@@ -389,6 +425,22 @@ var OptionsChatDetail = (function() {
       });
     }
 
+    if (restoreButton) {
+      restoreButton.addEventListener('click', async function() {
+        if (!currentChat) return;
+        var previous = restoreButton.textContent;
+        try {
+          await copyText(buildMarkdown(currentChat, currentMessages));
+          restoreButton.textContent = 'Copied';
+          win.setTimeout(function() {
+            restoreButton.textContent = previous;
+          }, 1600);
+        } catch (error) {
+          restoreButton.textContent = 'Copy failed';
+        }
+      });
+    }
+
     setOriginalLink(openLink, null);
     renderEmpty('Select a chat', 'No captured chat selected.');
 
@@ -399,6 +451,7 @@ var OptionsChatDetail = (function() {
 
   return {
     create: create,
+    buildMarkdown: buildMarkdown,
     newChatUrl: newChatUrl
   };
 })();
