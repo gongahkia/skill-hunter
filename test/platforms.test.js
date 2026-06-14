@@ -62,6 +62,13 @@ const scenarios = [
     url: 'https://huggingface.co/chat/conversation/example',
     fixtures: ['fixtures/platforms/huggingchat-primary.html', 'fixtures/platforms/huggingchat-variant.html'],
     expectedModel: 'Mixtral 8x7B'
+  },
+  {
+    id: 'poe',
+    file: 'platforms/poe.js',
+    url: 'https://poe.com/chat/thread-123',
+    fixtures: ['fixtures/platforms/poe-primary.html', 'fixtures/platforms/poe-variant.html'],
+    expectedModel: 'Assistant Bot'
   }
 ];
 

@@ -11,7 +11,8 @@ const existingPlatforms = [
   { id: 'grok', file: 'platforms/grok.js', fixture: 'fixtures/platforms/grok-primary.html', url: 'https://grok.com/chat/thread-123' },
   { id: 'copilot', file: 'platforms/copilot.js', fixture: 'fixtures/platforms/copilot-primary.html', url: 'https://copilot.microsoft.com/chats/thread-123' },
   { id: 'mistral', file: 'platforms/mistral.js', fixture: 'fixtures/platforms/mistral-primary.html', url: 'https://chat.mistral.ai/chat/thread-123' },
-  { id: 'huggingchat', file: 'platforms/huggingchat.js', fixture: 'fixtures/platforms/huggingchat-primary.html', url: 'https://huggingface.co/chat/conversation/thread-123' }
+  { id: 'huggingchat', file: 'platforms/huggingchat.js', fixture: 'fixtures/platforms/huggingchat-primary.html', url: 'https://huggingface.co/chat/conversation/thread-123' },
+  { id: 'poe', file: 'platforms/poe.js', fixture: 'fixtures/platforms/poe-primary.html', url: 'https://poe.com/chat/thread-123' }
 ];
 
 function runContentAction({ fixture, url, platformFiles, action }) {

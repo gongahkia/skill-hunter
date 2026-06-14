@@ -21,7 +21,8 @@
     "https://grok.com/*",
     "https://copilot.microsoft.com/*",
     "https://chat.mistral.ai/*",
-    "https://huggingface.co/chat/*"
+    "https://huggingface.co/chat/*",
+    "https://poe.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -47,7 +48,8 @@
       "https://grok.com/*",
       "https://copilot.microsoft.com/*",
       "https://chat.mistral.ai/*",
-      "https://huggingface.co/chat/*"
+      "https://huggingface.co/chat/*",
+      "https://poe.com/*"
     ],
     "js": [
       "compat.js",
@@ -63,6 +65,7 @@
       "platforms/copilot.js",
       "platforms/mistral.js",
       "platforms/huggingchat.js",
+      "platforms/poe.js",
       "platforms/registry.js",
       "content-script.js"
     ],
