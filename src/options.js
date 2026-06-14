@@ -9,6 +9,8 @@
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
+    captureStatus: document.getElementById('capture-status'),
+    captureStatusText: document.getElementById('capture-status-text'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
     downloadDiagnostics: document.getElementById('download-diagnostics'),
@@ -50,6 +52,37 @@
 
   function normalizeDefaultFormat(format) {
     return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
+  }
+
+  function isStorageUnavailable(error) {
+    return !!(error && error.message === 'Browser storage API is unavailable');
+  }
+
+  function getDefaultSettings() {
+    if (typeof StorageManager !== 'undefined' && StorageManager.defaults) return StorageManager.defaults;
+    return {
+      defaultFormat: 'json',
+      filenameTemplate: '{platform}_{title}_{date}.{ext}',
+      darkMode: 'system',
+      showPreview: true,
+      autoExportInterval: 0,
+      lastAutoExportStatus: null,
+      lastCaptureStatus: null
+    };
+  }
+
+  function renderCaptureStatus(status) {
+    if (!els.captureStatus || !els.captureStatusText) return;
+    status = status || {};
+    var kind = 'red';
+    if (status.state === 'success' && status.timestamp) {
+      var age = Date.now() - new Date(status.timestamp).getTime();
+      if (age < 5 * 60 * 1000) kind = 'green';
+      else if (age < 30 * 60 * 1000) kind = 'amber';
+    }
+    if (status.state === 'error') kind = 'red';
+    els.captureStatus.className = 'capture-status ' + kind;
+    els.captureStatusText.textContent = status.message || 'No captures yet.';
   }
 
   function renderAutoExportStatus(status) {
@@ -234,25 +267,33 @@
     if (els.clearHistory) els.clearHistory.addEventListener('click', clearHistory);
   }
 
+  function renderSettings(settings) {
+    applyTheme(settings.darkMode);
+
+    if (els.defaultFormat) els.defaultFormat.value = normalizeDefaultFormat(settings.defaultFormat);
+    if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
+    if (els.darkMode) els.darkMode.value = settings.darkMode;
+    if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
+    if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
+
+    renderAutoExportStatus(settings.lastAutoExportStatus);
+    renderCaptureStatus(settings.lastCaptureStatus);
+  }
+
+  function bindThemeWatcher() {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+      applyTheme((els.darkMode && els.darkMode.value) || 'system');
+    });
+  }
+
   async function init() {
     try {
       var settings = await StorageManager.getAll();
-      applyTheme(settings.darkMode);
-
-      if (els.defaultFormat) els.defaultFormat.value = normalizeDefaultFormat(settings.defaultFormat);
-      if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
-      if (els.darkMode) els.darkMode.value = settings.darkMode;
-      if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
-      if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
-
-      renderAutoExportStatus(settings.lastAutoExportStatus);
+      renderSettings(settings);
       await refreshDiagnostics();
       await refreshHistorySummary();
       wireEvents();
-
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
-        applyTheme((els.darkMode && els.darkMode.value) || 'system');
-      });
+      bindThemeWatcher();
 
       log('info', 'options.init.complete', {
         defaultFormat: settings.defaultFormat,
@@ -260,6 +301,16 @@
         autoExportInterval: settings.autoExportInterval
       });
     } catch (error) {
+      if (isStorageUnavailable(error)) {
+        var defaults = getDefaultSettings();
+        renderSettings(defaults);
+        renderDiagnostics([]);
+        if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
+        wireEvents();
+        bindThemeWatcher();
+        log('info', 'options.init.local_storage_unavailable', { error: serializeError(error) });
+        return;
+      }
       log('error', 'options.init.failed', { error: serializeError(error) });
       if (els.saveStatus) els.saveStatus.textContent = 'Initialization failed';
     }

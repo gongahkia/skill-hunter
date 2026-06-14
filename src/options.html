@@ -3,88 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <title>Rakuzaichi Settings</title>
+  <link rel="icon" href="./icon/48.png">
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <main class="options-shell">
-    <header class="options-hero">
-      <h1>Rakuzaichi Control Center</h1>
-      <p>Tune export behavior, review runtime health, and keep diagnostics local.</p>
-    </header>
+  <main class="vault-shell">
+    <aside class="vault-sidebar" aria-label="Vault navigation">
+      <header class="brand-strip">
+        <img src="./icon/48.png" alt="Rakuzaichi logo">
+        <div>
+          <h1>Rakuzaichi</h1>
+          <p>Local vault</p>
+        </div>
+      </header>
 
-    <section class="panel" aria-label="Export settings">
-      <h2>Export preferences</h2>
-      <form id="options-form" class="settings-form">
+      <section class="nav-group" aria-label="Folders">
+        <h2>Folders</h2>
+        <button class="nav-row active" type="button"><span>All chats</span><strong id="vault-count">0</strong></button>
+        <button class="nav-row" type="button"><span>Pinned</span><strong>0</strong></button>
+        <button class="nav-row" type="button"><span>Archived</span><strong>0</strong></button>
+      </section>
+
+      <section class="nav-group" aria-label="Tags">
+        <h2>Tags</h2>
+        <div class="tag-grid">
+          <button type="button">TODO</button>
+          <button type="button">FIXME</button>
+          <button type="button">UNRESOLVED</button>
+          <button type="button">FOLLOWUP</button>
+          <button type="button">REF</button>
+          <button type="button">PROMPT</button>
+        </div>
+      </section>
+
+      <section class="nav-group" aria-label="Filters">
+        <h2>Filters</h2>
         <label>
-          Default format
-          <select id="defaultFormat">
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
-            <option value="csv">CSV</option>
-            <option value="tsv">TSV</option>
+          Platform
+          <select id="platformFilter">
+            <option value="all">All platforms</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option>
+            <option value="gemini">Gemini</option>
+            <option value="qwen">Qwen Chat</option>
           </select>
         </label>
-
         <label>
-          Filename template
-          <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
-          <small>Variables: {platform}, {title}, {date}, {time}, {format}, {ext}</small>
-        </label>
-
-        <label>
-          Theme
-          <select id="darkMode">
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+          Date
+          <select id="dateFilter">
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
           </select>
         </label>
+      </section>
+    </aside>
 
-        <label class="checkbox-label">
-          <input type="checkbox" id="showPreview" checked>
-          Show preview confirmation before exporting
+    <section class="vault-main" aria-label="Vault browser">
+      <header class="vault-topbar">
+        <label class="search-box">
+          <span>Search</span>
+          <input id="vaultSearch" type="search" placeholder="Search chats and messages">
         </label>
+        <div id="capture-status" class="capture-status red">
+          <span class="capture-dot"></span>
+          <span id="capture-status-text">No captures yet.</span>
+        </div>
+      </header>
 
-        <label>
-          Auto-export interval (minutes, 0 disables)
-          <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
-          <small>Auto-export still opens the browser save flow. Nothing is silently uploaded.</small>
-        </label>
-
-        <section class="subpanel" aria-label="Auto-export status">
-          <h3>Last auto-export result</h3>
-          <p id="autoExportStatus">Auto-export has not run yet.</p>
+      <section class="vault-content">
+        <section class="chat-list-pane" aria-label="Chat list">
+          <div class="pane-heading">
+            <h2>Chats</h2>
+            <span id="chat-list-summary">0 captured</span>
+          </div>
+          <div class="chat-table" role="table" aria-label="Captured chats">
+            <div class="chat-row chat-row-head" role="row">
+              <span>Date</span>
+              <span>Platform</span>
+              <span>Title</span>
+              <span>Messages</span>
+              <span>Tags</span>
+            </div>
+            <div class="chat-empty" role="row">No captured chats yet.</div>
+          </div>
         </section>
 
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save settings</button>
-          <span id="save-status"></span>
-        </div>
-      </form>
+        <section class="chat-detail-pane" aria-label="Chat detail">
+          <div class="pane-heading">
+            <h2>Detail</h2>
+            <a id="open-original" href="#" aria-disabled="true">Open original</a>
+          </div>
+          <div class="detail-empty">
+            <h3>Select a chat</h3>
+            <p id="history-summary">No exports captured yet.</p>
+          </div>
+        </section>
+      </section>
     </section>
 
-    <section class="panel" aria-label="Diagnostics">
-      <div class="panel-heading">
-        <h2>Diagnostics</h2>
-        <div class="button-row">
-          <button id="download-diagnostics" class="btn btn-secondary" type="button">Download JSON</button>
-          <button id="clear-diagnostics" class="btn btn-ghost" type="button">Clear logs</button>
-        </div>
-      </div>
-      <p class="panel-note">Recent runtime events are kept locally to make debugging easier.</p>
-      <ul id="diagnostics-list" class="log-list"></ul>
-    </section>
+    <aside class="vault-inspector" aria-label="Settings and diagnostics">
+      <section class="panel" aria-label="Export settings">
+        <h2>Export preferences</h2>
+        <form id="options-form" class="settings-form">
+          <label>
+            Default format
+            <select id="defaultFormat">
+              <option value="json">JSON</option>
+              <option value="markdown">Markdown</option>
+              <option value="csv">CSV</option>
+              <option value="tsv">TSV</option>
+            </select>
+          </label>
 
-    <section class="panel" aria-label="Export history">
-      <div class="panel-heading">
-        <h2>Export history</h2>
-        <div class="button-row">
-          <button id="download-history" class="btn btn-secondary" type="button">Download history</button>
-          <button id="clear-history" class="btn btn-ghost" type="button">Clear history</button>
+          <label>
+            Filename template
+            <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
+            <small>{platform}, {title}, {date}, {time}, {format}, {ext}</small>
+          </label>
+
+          <label>
+            Theme
+            <select id="darkMode">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="showPreview" checked>
+            Show preview confirmation
+          </label>
+
+          <label>
+            Auto-export interval
+            <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
+          </label>
+
+          <section class="subpanel" aria-label="Auto-export status">
+            <h3>Auto-export</h3>
+            <p id="autoExportStatus">Auto-export has not run yet.</p>
+          </section>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <span id="save-status"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-label="Diagnostics">
+        <div class="panel-heading">
+          <h2>Diagnostics</h2>
+          <div class="button-row">
+            <button id="download-diagnostics" class="btn btn-secondary" type="button">Download</button>
+            <button id="clear-diagnostics" class="btn btn-ghost" type="button">Clear</button>
+          </div>
         </div>
-      </div>
-      <p id="history-summary" class="panel-note">No exports captured yet.</p>
-    </section>
+        <ul id="diagnostics-list" class="log-list"></ul>
+      </section>
+
+      <section class="panel" aria-label="Export history">
+        <div class="panel-heading">
+          <h2>Export history</h2>
+          <div class="button-row">
+            <button id="download-history" class="btn btn-secondary" type="button">Download</button>
+            <button id="clear-history" class="btn btn-ghost" type="button">Clear</button>
+          </div>
+        </div>
+      </section>
+    </aside>
   </main>
 
   <script src="compat.js"></script>
