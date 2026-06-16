@@ -5,6 +5,7 @@ import { loadSrc } from './helpers.js';
 function loadOptionsModules(dom) {
   const code = [
     'var module = undefined;',
+    loadSrc('threads/scanner.js'),
     loadSrc('options/chat-list.js'),
     loadSrc('options/chat-detail.js'),
     'this.result = { OptionsChatList, OptionsChatDetail };'
@@ -258,6 +259,36 @@ describe('OptionsChatDetail', () => {
     });
     expect(created[0].threadId).toMatch(/^thread:/);
     expect(created[0].createdAt).toBeTruthy();
+  });
+
+  it('applies custom open-thread tags from the popover', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const created = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      customThreadTags: [{ tag: 'WAITING', color: '#123456' }],
+      dao: {
+        listMessages: async () => [{ messageId: 'm1', role: 'user', content: 'WAITING: vendor reply', index: 0 }],
+        putOpenThreads: async (threads) => {
+          created.push(...threads);
+          return threads;
+        }
+      },
+      window: dom.window
+    });
+
+    await detail.load(Object.assign(chat(), { messageCount: 1 }));
+    const customPrefix = dom.window.document.querySelector('.message-tag-prefix[data-tag="WAITING"]');
+    dom.window.document.querySelector('.tag-message').click();
+    dom.window.document.querySelector('.thread-tag-grid button[data-tag="WAITING"]').click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(customPrefix).toBeTruthy();
+    expect(customPrefix.style.color).toBe('rgb(18, 52, 86)');
+    expect(created).toHaveLength(1);
+    expect(created[0]).toMatchObject({ tag: 'WAITING', source: 'explicit', subSource: 'user' });
   });
 
   it('renders per-message open-thread chips and opens the thread record', async () => {

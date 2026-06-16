@@ -46,6 +46,17 @@ describe('ThreadScanner', () => {
     expect(rows.map((row) => row.text)).toEqual(['ping Alice', 'repair parser']);
   });
 
+  it('scans configured custom tag prefixes', () => {
+    const scanner = loadScanner();
+    const rows = scanner.scanMessage(message('waiting: vendor reply\nTODO: built in'), {
+      customTags: [{ tag: 'WAITING', color: '#123456' }]
+    });
+
+    expect(rows.map((row) => row.tag)).toEqual(['WAITING', 'TODO']);
+    expect(rows.map((row) => row.text)).toEqual(['vendor reply', 'built in']);
+    expect(rows[0].threadId).toMatch(/^scan:chat-1:msg-1:0:WAITING:/);
+  });
+
   it('scans tag lines inside multi-line messages', () => {
     const scanner = loadScanner();
     const rows = scanner.scanMessage(message('intro\n  REF: source doc\nmiddle\nUNRESOLVED: confirm status'));

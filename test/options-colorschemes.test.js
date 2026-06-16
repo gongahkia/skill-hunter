@@ -163,4 +163,22 @@ describe('options colorscheme settings', () => {
     await flush();
     expect(storage.threadTagPriority).toEqual(['REF', 'PROMPT', 'FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV']);
   });
+
+  it('registers, prioritizes, filters, and saves custom thread tags', async () => {
+    const storage = {};
+    const dom = await loadOptions(storage);
+    dom.window.document.getElementById('customThreadTagName').value = 'waiting';
+    dom.window.document.getElementById('customThreadTagColor').value = '#123456';
+    dom.window.document.getElementById('customThreadTagAdd').click();
+
+    const rows = () => [...dom.window.document.querySelectorAll('#tagPriorityList [data-tag]')].map((row) => row.dataset.tag);
+    expect(dom.window.document.querySelector('#customThreadTagsList [data-tag="WAITING"]')).toBeTruthy();
+    expect(rows()).toContain('WAITING');
+    expect([...dom.window.document.querySelectorAll('#threadTagFilter option')].map((option) => option.value)).toContain('WAITING');
+
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+    expect(storage.customThreadTags).toEqual([{ tag: 'WAITING', color: '#123456' }]);
+    expect(storage.threadTagPriority).toContain('WAITING');
+  });
 });

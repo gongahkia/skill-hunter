@@ -227,9 +227,28 @@
     });
   }
 
+  function renderThreadTagFilter() {
+    if (!els.threadTagFilter) return;
+    var selected = els.threadTagFilter.value;
+    els.threadTagFilter.innerHTML = '';
+    var all = document.createElement('option');
+    all.value = '';
+    all.textContent = 'All tags';
+    els.threadTagFilter.appendChild(all);
+    allThreadTags().forEach(function(tag) {
+      var option = document.createElement('option');
+      option.value = tag;
+      option.textContent = tag;
+      els.threadTagFilter.appendChild(option);
+    });
+    els.threadTagFilter.value = allThreadTags().indexOf(selected) === -1 ? '' : selected;
+  }
+
   function renderCustomThreadTags(tags) {
     currentCustomThreadTags = normalizeCustomThreadTags(tags);
     renderThreadTagPriority(currentThreadTagPriority);
+    renderThreadTagFilter();
+    if (threadPane && threadPane.setTagPriority) threadPane.setTagPriority(currentThreadTagPriority);
     if (!els.customThreadTagsList) return;
     els.customThreadTagsList.innerHTML = '';
     if (!currentCustomThreadTags.length) {

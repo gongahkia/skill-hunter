@@ -18,6 +18,24 @@ function loadRuntime(api) {
   return evalSrc('vault/db.js', 'vault/dao.js', 'threads/scanner.js', 'background-core.js', api ? { api } : {});
 }
 
+function loadRuntimeWithStorage(storage) {
+  const api = {
+    storage: {
+      local: {
+        get: async (defaults) => ({ ...defaults, ...storage }),
+        set: async () => {}
+      },
+      onChanged: { addListener() {} }
+    },
+    runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+    downloads: { download: async () => {} },
+    alarms: { create() {}, clear: async () => {}, onAlarm: { addListener() {} } },
+    tabs: { query: async () => [], sendMessage: async () => ({}), onUpdated: { addListener() {} } }
+  };
+  globalThis.indexedDB = indexedDB;
+  return evalSrc('storage.js', 'vault/db.js', 'vault/dao.js', 'threads/scanner.js', 'background-core.js', { api });
+}
+
 function snapshot(messages) {
   return {
     chatId: 'chatgpt:thread-123',
@@ -89,6 +107,21 @@ describe('BackgroundRuntime.handleCapture', () => {
       subSource: 'scan',
       status: 'open'
     });
+  });
+
+  it('scans captured configured custom tag prefixes', async () => {
+    const { BackgroundRuntime, VaultDAO } = loadRuntimeWithStorage({
+      customThreadTags: [{ tag: 'WAITING', color: '#123456' }]
+    });
+    const taggedMessages = [
+      { messageId: 'msg-1', role: 'user', content: 'WAITING: vendor reply', index: 0, timestamp: '2026-01-01T00:00:00.000Z' }
+    ];
+
+    const result = await BackgroundRuntime.handleCapture(snapshot(taggedMessages));
+    const rows = await VaultDAO.listOpenThreads({ chatId: 'chatgpt:thread-123' });
+
+    expect(result.openThreadCount).toBe(1);
+    expect(rows[0]).toMatchObject({ tag: 'WAITING', text: 'vendor reply', subSource: 'scan' });
   });
 
   it('captures supported completed tab updates once per throttle window', async () => {

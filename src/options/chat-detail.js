@@ -178,7 +178,7 @@ var OptionsChatDetail = (function() {
       if (tagStart > index) root.appendChild(document.createTextNode(content.slice(index, tagStart)));
       var tag = document.createElement('span');
       tag.className = 'message-tag-prefix';
-      tag.dataset.tag = match[3].toUpperCase();
+      tag.dataset.tag = normalizeTagName(match[3]);
       var customColor = customTagColor(customTags, tag.dataset.tag);
       if (customColor) tag.style.color = customColor;
       tag.textContent = content.slice(tagStart, tagEnd);

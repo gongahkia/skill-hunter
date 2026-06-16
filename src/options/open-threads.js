@@ -36,8 +36,8 @@ var OptionsOpenThreads = (function() {
     var seen = {};
     var result = [];
     (Array.isArray(priority) ? priority : []).forEach(function(tag) {
-      tag = text(tag).toUpperCase();
-      if (!TAG_PRIORITY[tag] || seen[tag]) return;
+      tag = text(tag).toUpperCase().replace(/[^A-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+      if (!tag || seen[tag]) return;
       seen[tag] = true;
       result.push(tag);
     });
