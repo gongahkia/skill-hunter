@@ -1,0 +1,356 @@
+{
+  "version": 1,
+  "description": "Local hand-labeled extraction eval set for implicit open threads.",
+  "chats": [
+    {
+      "chat": {
+        "chatId": "eval-chat-01",
+        "platform": "chatgpt",
+        "title": "Firefox sync packaging",
+        "url": "https://chatgpt.com/c/eval-chat-01",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-01-u1",
+          "role": "user",
+          "content": "Can we confirm whether Firefox supports direct Obsidian sync before writing the docs?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-01-a1",
+          "role": "assistant",
+          "content": "I can also add a zip export fallback if you want.",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "UNRESOLVED",
+          "messageId": "eval-01-u1",
+          "text": "Confirm whether Firefox supports direct Obsidian sync before writing docs."
+        },
+        {
+          "tag": "FOLLOWUP",
+          "messageId": "eval-01-a1",
+          "text": "Decide whether to add a zip export fallback."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-02",
+        "platform": "claude",
+        "title": "Security review",
+        "url": "https://claude.ai/chat/eval-chat-02",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-02-a1",
+          "role": "assistant",
+          "content": "I am not sure that SQL query is safe because it concatenates user input.",
+          "index": 0
+        },
+        {
+          "messageId": "eval-02-u1",
+          "role": "user",
+          "content": "Can you replace it with a parameterized query before shipping?",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "FIXME",
+          "messageId": "eval-02-a1",
+          "text": "Verify and replace the unsafe SQL query that concatenates user input."
+        },
+        {
+          "tag": "TODO",
+          "messageId": "eval-02-u1",
+          "text": "Replace the SQL example with a parameterized query before shipping."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-03",
+        "platform": "gemini",
+        "title": "Launch materials",
+        "url": "https://gemini.google.com/app/eval-chat-03",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-03-u1",
+          "role": "user",
+          "content": "Can you keep https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code as the reference for MV3?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-03-u2",
+          "role": "user",
+          "content": "Can you turn these notes into a reusable prompt for launch checklists?",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "REF",
+          "messageId": "eval-03-u1",
+          "text": "Keep Chrome MV3 remote-hosted-code docs as a reference."
+        },
+        {
+          "tag": "PROMPT",
+          "messageId": "eval-03-u2",
+          "text": "Turn the notes into a reusable prompt for launch checklists."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-04",
+        "platform": "perplexity",
+        "title": "Pricing decision",
+        "url": "https://www.perplexity.ai/search/eval-chat-04",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-04-u1",
+          "role": "user",
+          "content": "Can we revisit the pricing page after the beta usage numbers are real?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-04-a1",
+          "role": "assistant",
+          "content": "Happy to draft the comparison table next.",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "REV",
+          "messageId": "eval-04-u1",
+          "text": "Revisit the pricing page after beta usage numbers are real."
+        },
+        {
+          "tag": "FOLLOWUP",
+          "messageId": "eval-04-a1",
+          "text": "Decide whether to draft the comparison table next."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-05",
+        "platform": "deepseek",
+        "title": "Browser support",
+        "url": "https://chat.deepseek.com/a/chat/s/eval-chat-05",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-05-a1",
+          "role": "assistant",
+          "content": "This might be wrong: I may be mixing up Safari and Firefox support for showDirectoryPicker.",
+          "index": 0
+        },
+        {
+          "messageId": "eval-05-u1",
+          "role": "user",
+          "content": "Can you cite MDN's showDirectoryPicker compatibility page for that note?",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "FIXME",
+          "messageId": "eval-05-a1",
+          "text": "Verify Safari and Firefox support for showDirectoryPicker."
+        },
+        {
+          "tag": "REF",
+          "messageId": "eval-05-u1",
+          "text": "Keep MDN showDirectoryPicker compatibility docs as a reference."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-06",
+        "platform": "mistral",
+        "title": "Export UX",
+        "url": "https://chat.mistral.ai/chat/eval-chat-06",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-06-u1",
+          "role": "user",
+          "content": "What happens if pinned chats alone exceed the quota?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-06-a1",
+          "role": "assistant",
+          "content": "Would you like me to add a warning banner for that case?",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "UNRESOLVED",
+          "messageId": "eval-06-u1",
+          "text": "Clarify quota behavior when pinned chats alone exceed the quota."
+        },
+        {
+          "tag": "FOLLOWUP",
+          "messageId": "eval-06-a1",
+          "text": "Decide whether to add a warning banner for pinned chats exceeding quota."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-07",
+        "platform": "poe",
+        "title": "Docs cleanup",
+        "url": "https://poe.com/chat/eval-chat-07",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-07-u1",
+          "role": "user",
+          "content": "Can you update the README install section after the package command works?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-07-a1",
+          "role": "assistant",
+          "content": "Let me know if you want the same treatment for Safari.",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "TODO",
+          "messageId": "eval-07-u1",
+          "text": "Update the README install section after the package command works."
+        },
+        {
+          "tag": "FOLLOWUP",
+          "messageId": "eval-07-a1",
+          "text": "Decide whether Safari needs the same treatment."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-08",
+        "platform": "qwen",
+        "title": "Prompt reuse",
+        "url": "https://chat.qwen.ai/c/eval-chat-08",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-08-u1",
+          "role": "user",
+          "content": "Can you save this as a reusable prompt: act as a skeptical reviewer and list blocker bugs first?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-08-a1",
+          "role": "assistant",
+          "content": "It depends on whether you want severity-only or severity plus suggested fixes.",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "PROMPT",
+          "messageId": "eval-08-u1",
+          "text": "Save a reusable prompt to act as a skeptical reviewer and list blocker bugs first."
+        },
+        {
+          "tag": "UNRESOLVED",
+          "messageId": "eval-08-a1",
+          "text": "Decide whether review output should be severity-only or include suggested fixes."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-09",
+        "platform": "kimi",
+        "title": "Release checklist",
+        "url": "https://kimi.com/chat/eval-chat-09",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-09-u1",
+          "role": "user",
+          "content": "Can we review the onboarding copy after the screenshots are regenerated?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-09-u2",
+          "role": "user",
+          "content": "Can you run the Firefox package command before submission?",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "REV",
+          "messageId": "eval-09-u1",
+          "text": "Review onboarding copy after screenshots are regenerated."
+        },
+        {
+          "tag": "TODO",
+          "messageId": "eval-09-u2",
+          "text": "Run the Firefox package command before submission."
+        }
+      ]
+    },
+    {
+      "chat": {
+        "chatId": "eval-chat-10",
+        "platform": "notebooklm",
+        "title": "Source notes",
+        "url": "https://notebooklm.google.com/notebook/eval-chat-10",
+        "model": "eval"
+      },
+      "messages": [
+        {
+          "messageId": "eval-10-u1",
+          "role": "user",
+          "content": "Can you keep the Transformers.js dtype guide as the reference for q4 notes?",
+          "index": 0
+        },
+        {
+          "messageId": "eval-10-a1",
+          "role": "assistant",
+          "content": "I am not sure the q4f16 size note is correct.",
+          "index": 1
+        }
+      ],
+      "labels": [
+        {
+          "tag": "REF",
+          "messageId": "eval-10-u1",
+          "text": "Keep the Transformers.js dtype guide as a reference for q4 notes."
+        },
+        {
+          "tag": "FIXME",
+          "messageId": "eval-10-a1",
+          "text": "Verify the q4f16 model size note."
+        }
+      ]
+    }
+  ]
+}
