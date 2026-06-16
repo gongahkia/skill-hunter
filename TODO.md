@@ -306,7 +306,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 > Goal: All 6 final formats work for per-chat and bulk export. Obsidian-vault sync works on Chromium; download fallback on Firefox/Safari. Per-chat shareable HTML is a single offline file.
 
-- [ ] `M6.T01` — Implement `FormatConverter.toMarkdown` for chat-level (refine existing) and add `toMarkdownBulk(chats)` producing one file with chats separated by `---`. **Success:** export of 3 chats produces a Markdown file readable in Obsidian with correct headings and roles.
+- [x] `M6.T01` — Implement `FormatConverter.toMarkdown` for chat-level (refine existing) and add `toMarkdownBulk(chats)` producing one file with chats separated by `---`. **Success:** export of 3 chats produces a Markdown file readable in Obsidian with correct headings and roles.
+  - 2026-06-16: refined per-chat Markdown headings/metadata/role labels and added `FormatConverter.toMarkdownBulk(chats)` with `---` separators. Converter tests cover a 3-chat bulk export with user/assistant sections.
 - [ ] `M6.T02` — Implement `toHTML(chat)` producing a single-file self-contained HTML with inline CSS, no JS, no external assets. Include open-threads list inline. **Success:** opening the HTML file in a fresh browser tab without network connectivity renders the chat with correct styling.
 - [ ] `M6.T03` — Implement PDF export via `window.print()` against a hidden iframe loaded with the HTML output. Add print-only CSS to remove UI chrome. **Success:** "Export as PDF" triggers the browser print dialog with print preview matching the HTML; user can save as PDF.
 - [ ] `M6.T04` — Add bulk export UI: multi-select chats in vault list → "Export selected as..." dropdown of 6 formats. **Success:** selecting 5 chats and exporting Markdown produces a single .md or a .zip of 5 .md per UX setting.
