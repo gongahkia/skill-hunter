@@ -118,11 +118,57 @@ var OptionsOpenThreads = (function() {
     return cell;
   }
 
+  function confidenceValue(row) {
+    var value = Number(row && row.confidence);
+    if (!isFinite(value)) return null;
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function makeSourceCell(document, row) {
+    var cell = document.createElement('span');
+    cell.setAttribute('role', 'cell');
+    cell.className = 'thread-source';
+    if (row.source === 'extracted') {
+      var badge = document.createElement('span');
+      badge.className = 'thread-source-icon';
+      badge.setAttribute('aria-label', 'AI extracted');
+      badge.textContent = 'AI';
+      cell.appendChild(badge);
+    }
+    var label = document.createElement('span');
+    label.textContent = [text(row.source, 'explicit'), text(row.subSource)].filter(Boolean).join(' / ');
+    cell.appendChild(label);
+    return cell;
+  }
+
+  function makeConfidenceCell(document, row) {
+    var cell = document.createElement('span');
+    cell.setAttribute('role', 'cell');
+    cell.className = 'thread-confidence';
+    var confidence = confidenceValue(row);
+    if (confidence === null) {
+      cell.textContent = '-';
+      return cell;
+    }
+    var bar = document.createElement('span');
+    bar.className = 'thread-confidence-bar';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', 'Extraction confidence');
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', '100');
+    bar.setAttribute('aria-valuenow', String(Math.round(confidence * 100)));
+    var fill = document.createElement('span');
+    fill.style.width = String(Math.round(confidence * 100)) + '%';
+    bar.appendChild(fill);
+    cell.appendChild(bar);
+    return cell;
+  }
+
   function makeHeader(document) {
     var header = document.createElement('div');
     header.className = 'thread-row thread-row-head';
     header.setAttribute('role', 'row');
-    ['Select', 'Tag', 'Status', 'Source', 'Chat', 'Text', 'Actions'].forEach(function(label) {
+    ['Select', 'Tag', 'Status', 'Source', 'Confidence', 'Chat', 'Text', 'Actions'].forEach(function(label) {
       appendCell(header, label);
     });
     return header;
@@ -174,6 +220,8 @@ var OptionsOpenThreads = (function() {
   function makeRow(document, row, onSelect, setStatus, selected, syncSelection) {
     var item = document.createElement('div');
     item.className = 'thread-row thread-row-data';
+    if (row.source === 'extracted') item.className += ' thread-row-extracted';
+    if (row.source === 'extracted' && confidenceValue(row) !== null && confidenceValue(row) < 0.5) item.className += ' thread-row-low-confidence';
     item.setAttribute('role', 'row');
     item.tabIndex = 0;
     item.dataset.threadId = row.threadId || '';
@@ -188,7 +236,8 @@ var OptionsOpenThreads = (function() {
     item.appendChild(makeSelectCell(document, row, selected, syncSelection));
     appendCell(item, text(row.tag, 'THREAD'), 'thread-tag');
     appendCell(item, text(row.status, 'open'));
-    appendCell(item, [text(row.source, 'explicit'), text(row.subSource)].filter(Boolean).join(' / '));
+    item.appendChild(makeSourceCell(document, row));
+    item.appendChild(makeConfidenceCell(document, row));
     appendCell(item, platformLabel(row.platform) + ' | ' + text(row.chatTitle, row.chatId));
     appendCell(item, text(row.text, '(empty)'), 'thread-text');
     item.appendChild(makeActions(document, row, setStatus));

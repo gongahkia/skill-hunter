@@ -18,8 +18,8 @@ function createDom() {
       <select id="platform"><option value="">All</option><option value="claude">Claude</option></select>
       <select id="status"><option value="open">Open</option><option value="">All</option><option value="archived">Archived</option></select>
       <label><input id="showDone" type="checkbox">Show done</label>
-      <select id="source"><option value="">All</option><option value="explicit">Explicit</option></select>
-      <select id="subSource"><option value="">All</option><option value="user">User</option><option value="scan">Scan</option></select>
+      <select id="source"><option value="">All</option><option value="explicit">Explicit</option><option value="extracted">Extracted</option></select>
+      <select id="subSource"><option value="">All</option><option value="user">User</option><option value="scan">Scan</option><option value="llm">LLM</option></select>
       <select id="sort"><option value="priority">Priority</option></select>
       <button id="archive" type="button">Archive selected</button>
       <span id="summary"></span>
@@ -167,6 +167,47 @@ describe('OptionsOpenThreads', () => {
     expect(rows).toHaveLength(10);
     expect(rows.every((row) => row.textContent.includes('explicit / user'))).toBe(true);
     expect(dom.window.document.getElementById('summary').textContent).toBe('10 threads');
+  });
+
+  it('renders extracted threads with AI badge and confidence bar', async () => {
+    const { dom, root } = createDom();
+    const OptionsOpenThreads = loadOpenThreads(dom);
+    const pane = OptionsOpenThreads.create({
+      root,
+      summaryEl: dom.window.document.getElementById('summary'),
+      filters: {
+        tag: dom.window.document.getElementById('tag'),
+        chat: dom.window.document.getElementById('chat'),
+        platform: dom.window.document.getElementById('platform'),
+        status: dom.window.document.getElementById('status'),
+        showDone: dom.window.document.getElementById('showDone'),
+        source: dom.window.document.getElementById('source'),
+        subSource: dom.window.document.getElementById('subSource'),
+        sort: dom.window.document.getElementById('sort')
+      },
+      dao: {
+        listOpenThreads: async () => [
+          { threadId: 'extracted-low', chatId: 'chat-a', messageId: 'msg-1', tag: 'UNRESOLVED', text: 'low confidence', source: 'extracted', subSource: 'llm', status: 'open', confidence: 0.42, createdAt: '2026-01-01T00:00:00.000Z' },
+          { threadId: 'explicit', chatId: 'chat-a', messageId: 'msg-2', tag: 'TODO', text: 'manual item', source: 'explicit', subSource: 'user', status: 'open', createdAt: '2026-01-01T00:01:00.000Z' }
+        ],
+        listChats: async () => chats()
+      },
+      window: dom.window
+    });
+
+    await pane.load();
+    const extracted = root.querySelector('.thread-row-data[data-thread-id="extracted-low"]');
+    const explicit = root.querySelector('.thread-row-data[data-thread-id="explicit"]');
+    const bar = extracted.querySelector('.thread-confidence-bar');
+
+    expect(extracted.className).toContain('thread-row-extracted');
+    expect(extracted.className).toContain('thread-row-low-confidence');
+    expect(extracted.querySelector('.thread-source-icon').textContent).toBe('AI');
+    expect(extracted.querySelector('.thread-source-icon').getAttribute('aria-label')).toBe('AI extracted');
+    expect(bar.getAttribute('aria-valuenow')).toBe('42');
+    expect(bar.firstElementChild.style.width).toBe('42%');
+    expect(explicit.querySelector('.thread-source-icon')).toBeNull();
+    expect(explicit.querySelector('.thread-confidence').textContent).toBe('-');
   });
 
   it('marks threads done and reveals them with show done', async () => {
