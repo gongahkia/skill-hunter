@@ -6,6 +6,7 @@ var StorageManager = {
     colorscheme: 'gruvbox',
     threadTagPriority: ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'],
     customThreadTags: [],
+    extractionModel: 'qwen2.5-0.5b-q4',
     showPreview: true,
     autoExportInterval: 0,
     lastAutoExportStatus: {

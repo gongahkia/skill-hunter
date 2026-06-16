@@ -147,8 +147,10 @@ var ExtractionRunner = (function() {
     if (typeof loadModel !== 'function') throw new Error('Extraction model loader is unavailable');
     emit(onProgress, { status: 'model-load' });
     return loadModel(options.modelId || DEFAULT_MODEL_ID, {
+      task: options.task,
       quantization: options.quantization || 'q4',
       backend: options.backend,
+      useExternalDataFormat: options.useExternalDataFormat,
       onProgress: function(event) {
         emit(onProgress, { status: 'model-progress', event: event });
       }

@@ -116,4 +116,35 @@ describe('ExtractionRunner', () => {
     expect(runs).toHaveLength(1);
     expect(runs[0]).toMatchObject({ chatId: 'chat-1', threadCount: 0 });
   });
+
+  it('forwards selected model options to the model loader', async () => {
+    const runner = loadRunner();
+    let captured = null;
+    const modelLoader = {
+      loadModel: async (modelId, options) => {
+        captured = { modelId, options };
+        return async () => '[]';
+      }
+    };
+
+    await runner.runChatExtraction(chat(), [
+      { messageId: 'm-1', role: 'user', content: 'Can we confirm model switching?', index: 0 }
+    ], {
+      modelLoader,
+      modelId: 'onnx-community/Phi-3.5-mini-instruct-onnx-web',
+      modelName: 'Phi-3.5-mini-Q4',
+      modelVersion: 'q4f16',
+      quantization: 'q4f16',
+      backend: 'webgpu',
+      useExternalDataFormat: true
+    });
+
+    expect(captured.modelId).toBe('onnx-community/Phi-3.5-mini-instruct-onnx-web');
+    expect(captured.options).toMatchObject({
+      quantization: 'q4f16',
+      backend: 'webgpu',
+      useExternalDataFormat: true
+    });
+    expect(typeof captured.options.onProgress).toBe('function');
+  });
 });

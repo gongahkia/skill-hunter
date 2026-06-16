@@ -105,6 +105,22 @@ describe('options colorscheme settings', () => {
     expect(reloaded.window.document.documentElement.style.getPropertyValue('--bg')).not.toBe('#ffffff');
   });
 
+  it('renders and persists the extraction model setting', async () => {
+    const storage = { extractionModel: 'phi-3.5-mini-q4' };
+    const dom = await loadOptions(storage);
+    const select = dom.window.document.getElementById('extractionModel');
+
+    expect([...select.options].map((option) => option.value)).toEqual(['qwen2.5-0.5b-q4', 'phi-3.5-mini-q4', 'gemma-3-1b-q4']);
+    expect(select.value).toBe('phi-3.5-mini-q4');
+
+    select.value = 'gemma-3-1b-q4';
+    select.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+
+    expect(storage.extractionModel).toBe('gemma-3-1b-q4');
+  });
+
   it('applies the saved colorscheme in popup UI', async () => {
     const dom = await loadPopup({ colorscheme: 'rose-pine', darkMode: 'dark' });
 

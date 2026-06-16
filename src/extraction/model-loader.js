@@ -8,11 +8,36 @@ var ExtractionModelLoader = (function() {
   var WASM_MJS_PATH = 'vendor/transformers/ort-wasm-simd-threaded.jsep.mjs';
   var WASM_BINARY_PATH = 'vendor/transformers/ort-wasm-simd-threaded.jsep.wasm';
   var VALID_DTYPES = ['fp32', 'fp16', 'q8', 'int8', 'uint8', 'q4', 'bnb4', 'q4f16'];
+  var MODEL_PRESETS = [
+    {
+      id: 'qwen2.5-0.5b-q4',
+      label: 'Qwen2.5-0.5B-Instruct-Q4',
+      modelId: REQUESTED_QWEN_MODEL_ID,
+      quantization: 'q4'
+    },
+    {
+      id: 'phi-3.5-mini-q4',
+      label: 'Phi-3.5-mini-Q4',
+      modelId: 'onnx-community/Phi-3.5-mini-instruct-onnx-web',
+      quantization: 'q4f16',
+      backend: 'webgpu',
+      useExternalDataFormat: true
+    },
+    {
+      id: 'gemma-3-1b-q4',
+      label: 'Gemma-3-1B-Q4',
+      modelId: 'onnx-community/gemma-3-1b-it-ONNX',
+      quantization: 'q4'
+    }
+  ];
   var MODEL_ALIASES = {};
   var loadedPipelines = {};
   var transformersModulePromise = null;
 
   MODEL_ALIASES[REQUESTED_QWEN_MODEL_ID] = DEFAULT_MODEL_ID;
+  MODEL_PRESETS.forEach(function(preset) {
+    MODEL_ALIASES[preset.id] = preset.modelId;
+  });
 
   function globalRef() {
     return typeof globalThis !== 'undefined' ? globalThis : {};
@@ -39,6 +64,18 @@ var ExtractionModelLoader = (function() {
 
   function resolveModelId(modelId) {
     return MODEL_ALIASES[modelId] || modelId;
+  }
+
+  function modelPresets() {
+    return MODEL_PRESETS.map(function(preset) {
+      return Object.assign({}, preset);
+    });
+  }
+
+  function modelPreset(id) {
+    return modelPresets().filter(function(preset) {
+      return preset.id === id;
+    })[0] || modelPresets()[0];
   }
 
   function assertValidDtype(dtype) {
@@ -70,6 +107,7 @@ var ExtractionModelLoader = (function() {
       device: device,
       revision: options.revision || 'main',
       subfolder: options.subfolder || 'onnx',
+      useExternalDataFormat: !!(options.use_external_data_format || options.useExternalDataFormat),
       localFilesOnly: !!options.local_files_only,
       cacheKey: options.cacheKey || DEFAULT_CACHE_KEY
     };
@@ -155,6 +193,7 @@ var ExtractionModelLoader = (function() {
       }
     };
     if (request.device) pipelineOptions.device = request.device;
+    if (request.useExternalDataFormat) pipelineOptions.use_external_data_format = true;
     var pipe = await transformers.pipeline(request.task, request.modelId, pipelineOptions);
     emitProgress(options.onProgress, request, { status: 'ready', task: request.task, model: request.modelId });
     return pipe;
@@ -191,6 +230,8 @@ var ExtractionModelLoader = (function() {
     },
     resolveExtensionUrl: resolveExtensionUrl,
     resolveModelId: resolveModelId,
+    modelPresets: modelPresets,
+    modelPreset: modelPreset,
     normalizeLoadRequest: normalizeLoadRequest,
     configureTransformers: configureTransformers,
     importTransformers: importTransformers,

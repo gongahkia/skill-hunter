@@ -5,6 +5,7 @@
   var currentFolderId = '';
   var currentThreadTagPriority = DEFAULT_THREAD_TAG_PRIORITY.slice();
   var currentCustomThreadTags = [];
+  var currentExtractionModel = 'qwen2.5-0.5b-q4';
   var threadPane = null;
 
   var els = {
@@ -18,6 +19,7 @@
     customThreadTagName: document.getElementById('customThreadTagName'),
     customThreadTagColor: document.getElementById('customThreadTagColor'),
     customThreadTagAdd: document.getElementById('customThreadTagAdd'),
+    extractionModel: document.getElementById('extractionModel'),
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
@@ -154,6 +156,39 @@
       result.push({ tag: tag, color: normalizeColor(entry && entry.color) });
     });
     return result;
+  }
+
+  function extractionModelPresets() {
+    if (typeof ExtractionModelLoader !== 'undefined' && ExtractionModelLoader.modelPresets) return ExtractionModelLoader.modelPresets();
+    return [
+      { id: 'qwen2.5-0.5b-q4', label: 'Qwen2.5-0.5B-Instruct-Q4', modelId: 'Qwen/Qwen2.5-0.5B-Instruct', quantization: 'q4' },
+      { id: 'phi-3.5-mini-q4', label: 'Phi-3.5-mini-Q4', modelId: 'onnx-community/Phi-3.5-mini-instruct-onnx-web', quantization: 'q4f16', backend: 'webgpu', useExternalDataFormat: true },
+      { id: 'gemma-3-1b-q4', label: 'Gemma-3-1B-Q4', modelId: 'onnx-community/gemma-3-1b-it-ONNX', quantization: 'q4' }
+    ];
+  }
+
+  function extractionModelPreset(id) {
+    var presets = extractionModelPresets();
+    return presets.filter(function(preset) {
+      return preset.id === id;
+    })[0] || presets[0];
+  }
+
+  function normalizeExtractionModel(id) {
+    return extractionModelPreset(id).id;
+  }
+
+  function populateExtractionModels() {
+    if (!els.extractionModel || els.extractionModel.options.length > 3) return;
+    var selected = els.extractionModel.value;
+    els.extractionModel.innerHTML = '';
+    extractionModelPresets().forEach(function(preset) {
+      var option = document.createElement('option');
+      option.value = preset.id;
+      option.textContent = preset.label;
+      els.extractionModel.appendChild(option);
+    });
+    els.extractionModel.value = normalizeExtractionModel(selected || currentExtractionModel);
   }
 
   function allThreadTags() {
@@ -316,6 +351,7 @@
       customThreadTags: [],
       showPreview: true,
       autoExportInterval: 0,
+      extractionModel: 'qwen2.5-0.5b-q4',
       lastAutoExportStatus: null,
       lastCaptureStatus: null
     };
@@ -460,8 +496,16 @@
   async function runExtractionForChat(chat, messages, onProgress) {
     if (typeof ExtractionRunner === 'undefined' || !ExtractionRunner.runChatExtraction) throw new Error('Extraction runner is unavailable');
     if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
+    var preset = extractionModelPreset(currentExtractionModel);
     return ExtractionRunner.runChatExtraction(chat, messages, {
       dao: VaultDAO,
+      modelId: preset.modelId,
+      modelName: preset.label,
+      modelVersion: preset.quantization,
+      quantization: preset.quantization,
+      backend: preset.backend,
+      task: preset.task,
+      useExternalDataFormat: preset.useExternalDataFormat,
       onProgress: onProgress
     });
   }
@@ -651,11 +695,13 @@
         colorscheme: colorscheme,
         threadTagPriority: currentThreadTagPriority.slice(),
         customThreadTags: currentCustomThreadTags.slice(),
+        extractionModel: normalizeExtractionModel(els.extractionModel ? els.extractionModel.value : currentExtractionModel),
         showPreview: !!els.showPreview.checked,
         autoExportInterval: parseInt(els.autoExportInterval.value, 10) || 0
       };
 
       await StorageManager.setAll(payload);
+      currentExtractionModel = payload.extractionModel;
       applyTheme(darkMode);
       applyColorscheme(colorscheme, document.documentElement.dataset.themeMode);
 
@@ -749,15 +795,24 @@
         applyAppearance();
       });
     }
+    if (els.extractionModel) {
+      els.extractionModel.addEventListener('change', function() {
+        currentExtractionModel = normalizeExtractionModel(els.extractionModel.value);
+        els.extractionModel.value = currentExtractionModel;
+      });
+    }
   }
 
   function renderSettings(settings) {
     populateColorschemes();
+    populateExtractionModels();
 
     if (els.defaultFormat) els.defaultFormat.value = normalizeDefaultFormat(settings.defaultFormat);
     if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
     if (els.darkMode) els.darkMode.value = settings.darkMode;
     if (els.colorscheme) els.colorscheme.value = normalizeColorscheme(settings.colorscheme);
+    currentExtractionModel = normalizeExtractionModel(settings.extractionModel);
+    if (els.extractionModel) els.extractionModel.value = currentExtractionModel;
     renderCustomThreadTags(settings.customThreadTags);
     renderThreadTagPriority(settings.threadTagPriority);
     if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
