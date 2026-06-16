@@ -378,30 +378,180 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 ## Post-v3 roadmap (M9+ — DO NOT BUILD IN v3)
 
-> Each becomes its own pivot doc when work starts. Listed here so the adapter pattern below is designed from day one.
+> Strict guardrail: this section is research/spec only during v3. Do not build, test-implement, scaffold, request store permissions for, or mark any M9+ item complete before v3 is fully shipped. Each milestone below must become its own pivot doc before code starts.
 
-- **M9 — Notion adapter.** User pastes a Notion integration token; backend (still zero-server — uses Notion's REST API directly from extension) pulls pages from selected workspaces; pages flow into the same vault via a `KnowledgeBaseAdapter` interface. Tag scanner + extractor reused.
-- **M10 — Google Docs adapter.** Either (a) salvage Owl's Apps Script approach (per-user manual install of an Apps Script bound to the user's Drive) or (b) use Drive REST API with OAuth (requires verification or accepts "unsafe" warning). Decision deferred until M9 is shipped.
-- **M11 — Google Keep adapter.** Keep has no official API. Options: (1) require user to export Keep notes via Google Takeout → drop folder into vault; (2) screen-scrape Keep web UI. Decision: Takeout path only — scraping fights Google.
-- **M12 — Slack / Discord adapters.** Personal data export ingestion only; never live-API. User uploads exported `.zip`; vault ingests channels and DMs they participated in.
-- **M13 — Email adapter (IMAP / Gmail Takeout).** Read-only ingest of starred/labeled mail. OAuth or IMAP credentials stored locally.
-- **M14 — Twitter/X bookmarks.** Takeout-based.
-- **M15 — Local RAG over vault.** Embed all messages with a small embedding model (e.g., `all-MiniLM-L6-v2`, ~90MB), enable "ask your past conversations." UI: a chat box at the top of vault dashboard.
-- **M16 — Cross-LLM primer generator.** Given a chat, output a condensed preamble suitable as the opening message to a different LLM. Reuse `toMarkdown` + small summarization model.
-- **M17 — Mobile PWA read-only.** Static-rendered vault export bundle hostable on a phone. No new capture path.
+Default posture for M9+: export-first, read-only, zero-server. Prefer user-supplied archives and narrow per-file grants over broad OAuth. Use live APIs only when the permission burden is narrow, the user intent is explicit, and the integration can remain local-only. No scraping unless a pivot doc explicitly accepts the maintenance and ToS risk; current default is "do not scrape."
 
-Adapter interface to lock in M2:
+Future task labels use `P` instead of `[ ]` because these are not active v3 TODOs.
+
+### M9 - Notion adapter
+
+Objective: import selected Notion pages into the vault as prose snapshots. Scanner is primary; local LLM extraction is optional augmenter.
+
+Default path: Notion API from the extension using a user-provided PAT or internal connection token first. Public OAuth is a later distribution step. Research verified 2026-06-16: Notion documents internal connections, public OAuth connections, and personal access tokens; PATs act with the creator's workspace/page permissions. Notion recommends starting with an internal connection for simple API work. Request limits are documented as an average of 3 requests/second per connection; handle `429`, `529`, and `Retry-After`.
+
+Deferred decisions: whether v1 supports PAT only, internal-token only, or both; whether public OAuth is worth the listing/security-review surface; whether comments/databases are in scope or pages-only.
+
+- `M9.P01` - Write `docs/pivots/m9-notion-adapter.md` before code. **Success:** doc states auth mode, supported Notion object types, rate-limit behavior, sample fixtures, and non-goals.
+- `M9.P02` - Define `KnowledgeBaseAdapter` import contract for prose documents without changing vault/search/thread schemas. **Success:** Notion page blocks normalize into the same snapshot/message shape as captured chats.
+- `M9.P03` - Build a sample fixture pack from exported/synthetic Notion page JSON. **Success:** fixtures cover headings, paragraphs, bullets, checkboxes, code blocks, links, timestamps, and empty blocks.
+- `M9.P04` - Implement read-only page fetch with pagination, progress, cancel, and retry/backoff. **Success:** large page tree imports without exceeding Notion limits; rate-limit responses resume cleanly.
+- `M9.P05` - Preserve provenance. **Success:** every imported message records source adapter, Notion page/block IDs where available, page title, original URL, importedAt, and token type without storing token plaintext in export files.
+- `M9.P06` - Run `ThreadScanner.scanMessage` before LLM extraction. **Success:** explicit `TODO:`/`FIXME:` markers in Notion prose become `openThreads` rows with `source: "explicit"` and `subSource: "scan"`.
+- `M9.P07` - Add user-facing error states for missing page permission, revoked token, workspace admin PAT restrictions, 429/529, and network failure. **Success:** each failure says what user action can resolve it.
+- `M9.P08` - Decide whether Notion databases are flattened in M9 or deferred. **Default:** defer databases unless sample users prove pages-only is inadequate.
+
+### M10 - Google Docs adapter
+
+Objective: import selected Google Docs into the vault as prose snapshots without broad Drive access by default.
+
+Default path: export-first. First support user-supplied Takeout/Drive-exported files. If live Drive access is added, prefer Google Picker + `drive.file` for explicit user-selected files. Avoid broad `drive.readonly`/restricted scopes unless a pivot doc accepts Google OAuth verification and possible security-assessment burden. Research verified 2026-06-16: Drive restricted scopes require restricted-scope OAuth verification; `files.export` exports Google Workspace docs to requested MIME types and is limited to 10 MB exported content; Google Picker can support `drive.file` for user-selected files.
+
+Deferred decisions: whether Owl's Apps Script flow is still worth salvage; whether extension OAuth is via `chrome.identity`; whether HTML, DOCX, Markdown, or plain text is the canonical importer input.
+
+- `M10.P01` - Write `docs/pivots/m10-google-docs-adapter.md`. **Success:** doc chooses Takeout/export-first vs Picker/OAuth, states scopes, and lists verification consequences.
+- `M10.P02` - Collect representative exported Google Docs fixtures. **Success:** fixtures cover plain docs, headings, comments resolved/unresolved if exported, tables, lists, links, images-as-placeholders, and long docs.
+- `M10.P03` - Implement local file import first. **Success:** user can drop exported Docs files/folders and get normalized snapshots with provenance.
+- `M10.P04` - If live API is accepted, use per-file selection and avoid global Drive crawls. **Success:** user explicitly chooses documents; no background crawl of Drive.
+- `M10.P05` - Document and test export-size handling. **Success:** docs over the API export limit fail with a clear instruction to use local export/Takeout instead.
+- `M10.P06` - Re-evaluate Owl Apps Script only after M9 ships. **Success:** decision records whether Owl code is reused, rewritten, or discarded.
+- `M10.P07` - Keep scanner primary. **Success:** inline prose tags in Docs create open threads before any local model runs.
+
+### M11 - Google Keep adapter
+
+Objective: import Keep notes into the vault without scraping Keep web UI.
+
+Default path: Google Takeout/local archive import only. Correction to old roadmap: Google does have an official Keep API, but Google documents it for enterprise/security use cases, including Workspace/domain administration patterns. It is not the default consumer path for this extension. Scraping remains out of scope.
+
+Deferred decisions: exact Takeout file shapes; whether notes with images/audio are skipped, linked, or imported as attachments; whether the enterprise Keep API is ever worth supporting.
+
+- `M11.P01` - Write `docs/pivots/m11-google-keep-adapter.md`. **Success:** doc states Takeout-only default, API caveat, attachment policy, and no-scraping rule.
+- `M11.P02` - Obtain real user-owned Keep Takeout fixtures. **Success:** fixtures document actual JSON/HTML fields, labels, colors, timestamps, checklists, pinned/archive state, and attachments. I cannot verify the exact current Keep Takeout schema without a sample archive.
+- `M11.P03` - Implement local Takeout parser. **Success:** imported notes become one snapshot per note, with paragraphs/checklist items normalized as messages.
+- `M11.P04` - Preserve note metadata. **Success:** title, labels, color, created/updated timestamps, archived/pinned/deleted state if present, and original Takeout path are retained.
+- `M11.P05` - Reject unsupported live sources. **Success:** Keep URLs or browser pages are not scraped; UI points users to Takeout import.
+- `M11.P06` - Run scanner before LLM extraction. **Success:** checklist/prose markers become open threads deterministically.
+
+### M12 - Slack / Discord adapters
+
+Objective: ingest user-owned communication exports. Never use live APIs for Slack or Discord in this roadmap.
+
+Default path: local ZIP import only. Research verified 2026-06-16: Slack workspace exports are ZIP downloads and export scope depends on workspace plan/admin permissions; some Enterprise exports can include public channels, private channels, and DMs in JSON. Discord data package is a user-requested ZIP of JSON files and Discord says delivery can take up to 30 days.
+
+Deferred decisions: whether Slack and Discord ship together or separately; whether messages are grouped by channel/thread/DM; how to handle missing participants, deleted messages, reactions, and attachments.
+
+- `M12.P01` - Write `docs/pivots/m12-slack-discord-adapters.md`. **Success:** doc states export-only, channel/DM grouping, privacy copy, fixture policy, and no live API.
+- `M12.P02` - Build Slack fixture set. **Success:** fixtures cover public channel export, thread replies, reactions, files/links, user maps, and missing private/DM data.
+- `M12.P03` - Build Discord fixture set. **Success:** fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, and package metadata.
+- `M12.P04` - Implement ZIP streaming import with progress/cancel. **Success:** large exports do not block the UI and can be aborted.
+- `M12.P05` - Preserve conversation provenance. **Success:** each imported message records platform, workspace/server, channel/DM, original message ID, author display/name ID when present, timestamp, and export package hash.
+- `M12.P06` - Scope privacy UX tightly. **Success:** import UI states that Slack/Discord exports may include other people's messages and should stay local.
+- `M12.P07` - Run scanner before local LLM extraction. **Success:** explicit tasks in channel messages produce open threads.
+
+### M13 - Email adapter
+
+Objective: import email into the vault as read-only knowledge snapshots, starting with Gmail Takeout/MBOX.
+
+Default path: Gmail Takeout/MBOX local import first. IMAP/OAuth is a later path only if local import is insufficient. Research verified 2026-06-16: Google Takeout lets users export Email/Documents and create ZIP/TGZ archives; Gmail labels are preserved in an `X-Gmail-Labels` header in exported mail. Google Takeout does not support exporting Gmail by timeframe.
+
+Deferred decisions: Gmail-only vs generic MBOX; whether IMAP credentials are acceptable in local storage; how to handle attachments and HTML sanitization.
+
+- `M13.P01` - Write `docs/pivots/m13-email-adapter.md`. **Success:** doc chooses MBOX-first, states attachment policy, explains local credential risk if IMAP is ever added, and defines supported mailboxes/labels.
+- `M13.P02` - Build MBOX fixtures. **Success:** fixtures cover plain text, HTML, multipart, attachments, labels, forwarded/replied threads, duplicate Message-IDs, and malformed headers.
+- `M13.P03` - Implement local MBOX parser. **Success:** messages normalize into snapshots grouped by thread or label according to pivot decision.
+- `M13.P04` - Sanitize HTML email. **Success:** imported content strips scripts/remote tracking pixels before storage/render.
+- `M13.P05` - Preserve provenance. **Success:** Message-ID, From/To/Cc/Bcc where present, subject, date, labels, mailbox path, and import package hash are retained.
+- `M13.P06` - Defer IMAP/OAuth. **Success:** no password/OAuth UI ships until a separate threat model exists.
+
+### M14 - Twitter/X bookmarks
+
+Objective: import saved/bookmarked X posts into the vault without scraping.
+
+Default path: export/archive-first if the user's account archive contains enough bookmark data; otherwise evaluate official X API bookmark endpoints. Research verified 2026-06-16: X documents `GET /2/users/{id}/bookmarks` and bookmark-folder endpoints for the authenticated user. X also documents user access to account data archives. API access level/cost can change, so revalidate before implementation.
+
+Deferred decisions: whether X API pricing/limits make official API viable; whether account archives include bookmark payloads in a parseable current format; whether to call this `Twitter/X` or `X` in UI.
+
+- `M14.P01` - Write `docs/pivots/m14-x-bookmarks.md`. **Success:** doc chooses archive vs API, states auth/cost assumptions, and bans internal GraphQL/scraping.
+- `M14.P02` - Verify account archive contents with a real sample. **Success:** sample proves whether bookmarks are present and which fields are available. I cannot verify current archive bookmark schema without a user archive.
+- `M14.P03` - If archive path works, implement local archive parser. **Success:** bookmarked posts import with author, text, URL, createdAt, media placeholders, and bookmark folder where present.
+- `M14.P04` - If API path is accepted, implement OAuth flow only against official endpoints. **Success:** no cookies, private web GraphQL, or page scraping are used.
+- `M14.P05` - Preserve dead-link context. **Success:** imported post text survives even if the post later disappears from the web.
+
+### M15 - Local RAG over vault
+
+Objective: let users ask questions over their local vault without sending vault contents to a server.
+
+Default path: local embeddings plus local retrieval UI. Start with a small embedding model and explicit opt-in model download, following the M5 local-model privacy posture.
+
+Deferred decisions: embedding model, index library, chunk size, reranking, citation UI, and whether RAG runs in the extension, a sandboxed page, or an optional local companion process.
+
+- `M15.P01` - Write `docs/pivots/m15-local-rag.md`. **Success:** doc states model, storage budget, runtime surface, privacy copy, and expected latency.
+- `M15.P02` - Define chunking policy across chats and M9+ prose imports. **Success:** chunk IDs map back to chat/message/source records.
+- `M15.P03` - Prototype local embedding index on a copied fixture vault. **Success:** no production schema migration before latency/storage numbers are measured.
+- `M15.P04` - Add opt-in model lifecycle UX. **Success:** user can download, pause, clear model cache, and rebuild index.
+- `M15.P05` - Add answer citations. **Success:** every generated answer links to source chats/docs/messages; unsupported answers are allowed to say no result.
+- `M15.P06` - Add eval set. **Success:** fixtures cover exact recall, semantic recall, stale/deleted source handling, and hallucination checks.
+
+### M16 - Cross-LLM primer generator
+
+Objective: turn a chat or selected vault subset into a compact preamble for starting work in another LLM.
+
+Default path: reuse `FormatConverter.toMarkdown` plus local summarization/extraction. Output is user-reviewed text, not auto-posted to any LLM.
+
+Deferred decisions: whether primer generation is rule-based first, local-model first, or hybrid; max token target presets; whether output includes citations.
+
+- `M16.P01` - Write `docs/pivots/m16-primer-generator.md`. **Success:** doc defines input scope, output templates, privacy copy, and eval criteria.
+- `M16.P02` - Add primer output formats. **Success:** user can generate `handoff`, `bug-context`, `research-brief`, and `continuation-prompt` styles.
+- `M16.P03` - Keep user in control. **Success:** generated primer is editable/copyable/exportable and never sent automatically.
+- `M16.P04` - Preserve source links. **Success:** primer sections can cite original chats/messages/docs where available.
+- `M16.P05` - Add quality evals. **Success:** fixtures check factual retention, omission of irrelevant chat noise, and no invented constraints.
+
+### M17 - Mobile PWA read-only
+
+Objective: provide a static, read-only vault bundle that can be opened on a phone. No mobile capture path.
+
+Default path: static export bundle generated from the desktop extension. No server, no sync account, no background refresh.
+
+Deferred decisions: export package format, search implementation, encryption/password UX, and whether the PWA is served from local files, user hosting, or a static host.
+
+- `M17.P01` - Write `docs/pivots/m17-mobile-pwa-readonly.md`. **Success:** doc states read-only scope, no mobile capture, bundle format, and privacy/storage limits.
+- `M17.P02` - Define static vault bundle format. **Success:** bundle contains index, metadata, messages, open threads, search index, and assets with a version marker.
+- `M17.P03` - Build read-only UI from exported data only. **Success:** mobile can browse/search/filter chats and open threads without extension APIs.
+- `M17.P04` - Decide encryption. **Default:** if encrypted export is on, require passphrase entry before indexing; otherwise warn that static bundle is plaintext.
+- `M17.P05` - Add offline behavior. **Success:** PWA loads without network once installed/opened from its bundle.
+- `M17.P06` - Add size/perf gates. **Success:** representative large vault loads acceptably on a midrange phone before release.
+
+Adapter interface to preserve:
 
 ```ts
 interface KnowledgeBaseAdapter {
   id: string;
   displayName: string;
-  capture(opts): Promise<NormalizedSnapshot>;
-  // NormalizedSnapshot is the same shape as today's chat-snapshot.
+  capture(opts): Promise<NormalizedSnapshot>; // same shape as today's chat snapshot
 }
 ```
 
-If M9+ adapters conform to this, the vault, search, threads, and extraction layers don't change.
+Adapter requirements:
+
+- Read-only by default. Imports must not mutate source systems.
+- Emit the existing normalized snapshot/message shape so vault, search, threads, export, and extraction layers do not change.
+- Store provenance on every imported record: adapter ID, source object ID/path where available, original URL/path where available, importedAt, and import package hash for file imports.
+- Chunk large imports, expose progress/cancel, and fail fast with actionable errors.
+- Run deterministic scanner before local LLM extraction. For prose, scanner is primary.
+- Never store OAuth tokens/API tokens in export files. If credentials are stored locally, the pivot doc must define storage, revoke, and wipe behavior.
+- Do not scrape web UIs unless a future pivot doc explicitly reverses the default no-scraping rule.
+
+References revalidated 2026-06-16:
+
+- Notion connection types / auth overview: `https://developers.notion.com/guides/get-started/overview`, `https://developers.notion.com/guides/get-started/authorization`
+- Notion request limits: `https://developers.notion.com/reference/request-limits`, `https://developers.notion.com/reference/status-codes`
+- Google Drive scopes / Picker / export: `https://developers.google.com/workspace/drive/api/guides/api-specific-auth`, `https://developers.google.com/workspace/drive/picker/guides/overview`, `https://developers.google.com/workspace/drive/api/reference/rest/v3/files/export`
+- Google Keep API caveat: `https://developers.google.com/workspace/keep/api/guides`, `https://developers.google.com/workspace/keep/api/reference/rest`
+- Slack exports: `https://slack.com/help/articles/201658943-Export-your-workspace-data`
+- Discord data package: `https://support.discord.com/hc/en-us/articles/360004957991-Your-Discord-Data-Package`
+- Google Takeout: `https://support.google.com/accounts/answer/3024190?hl=en`
+- X bookmarks / account archive: `https://docs.x.com/x-api/users/get-bookmarks`, `https://help.x.com/en/managing-your-account/accessing-your-x-data`
+- Chrome extension OAuth helper: `https://developer.chrome.com/docs/extensions/reference/api/identity`
 
 ---
 
