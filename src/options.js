@@ -56,6 +56,9 @@
     clearFilters: document.getElementById('clearFilters'),
     chatList: document.getElementById('chat-list'),
     chatListSummary: document.getElementById('chat-list-summary'),
+    bulkExportSummary: document.getElementById('bulkExportSummary'),
+    bulkExportFormat: document.getElementById('bulkExportFormat'),
+    bulkExportSelected: document.getElementById('bulkExportSelected'),
     chatDetail: document.getElementById('chat-detail'),
     openOriginal: document.getElementById('open-original'),
     detailPin: document.getElementById('detailPin'),
@@ -628,6 +631,200 @@
     }, 1200);
   }
 
+  function normalizeBulkExportFormat(format) {
+    if (typeof FormatConverter === 'undefined' || !FormatConverter.formats) return 'markdown';
+    return FormatConverter.formats[format] ? format : 'markdown';
+  }
+
+  function bulkExportFilename(format) {
+    var formatInfo = FormatConverter.formats[format];
+    if (typeof FilenameBuilder !== 'undefined') {
+      return FilenameBuilder.build('rakuzaichi_bulk_{date}.{ext}', {
+        platform: 'multiple',
+        title: 'bulk',
+        format: format,
+        ext: formatInfo.ext
+      });
+    }
+    return 'rakuzaichi_bulk_' + new Date().toISOString().slice(0, 10) + '.' + formatInfo.ext;
+  }
+
+  function updateBulkExportSelection(selectedChats) {
+    selectedChats = Array.isArray(selectedChats) ? selectedChats : [];
+    if (els.bulkExportSummary) els.bulkExportSummary.textContent = selectedChats.length + ' selected';
+    if (els.bulkExportSelected) els.bulkExportSelected.disabled = !selectedChats.length;
+  }
+
+  function bulkMessage(chat, message, index) {
+    message = message || {};
+    var copied = Object.assign({}, message);
+    copied.chatId = copied.chatId || chat.chatId || '';
+    copied.chatTitle = copied.chatTitle || chat.title || chat.chatTitle || 'Untitled chat';
+    copied.platform = copied.platform || chat.platform || 'unknown';
+    copied.model = copied.model || chat.model || '';
+    copied.index = typeof copied.index === 'number' ? copied.index : index;
+    return copied;
+  }
+
+  function chatExportEnvelope(chat, messages, openThreads) {
+    messages = Array.isArray(messages) ? messages : [];
+    return {
+      exportVersion: '2.1',
+      exportedAt: new Date().toISOString(),
+      chatId: chat.chatId || '',
+      platform: chat.platform || 'unknown',
+      chatTitle: chat.title || chat.chatTitle || 'Untitled chat',
+      title: chat.title || chat.chatTitle || 'Untitled chat',
+      url: chat.url || chat.sourceUrl || '',
+      model: chat.model || '',
+      messageCount: messages.length,
+      messages: messages,
+      openThreads: Array.isArray(openThreads) ? openThreads : [],
+      capturedAt: chat.capturedAt || '',
+      lastUpdatedAt: chat.lastUpdatedAt || '',
+      tags: Array.isArray(chat.tags) ? chat.tags.slice() : []
+    };
+  }
+
+  async function loadBulkExportEnvelopes(chats) {
+    if (typeof VaultDAO === 'undefined' || !VaultDAO.listMessages) throw new Error('Vault DAO is unavailable');
+    var envelopes = [];
+    for (var i = 0; i < chats.length; i++) {
+      var chat = chats[i];
+      var messages = await VaultDAO.listMessages(chat.chatId);
+      var openThreads = [];
+      if (VaultDAO.listOpenThreads) openThreads = await VaultDAO.listOpenThreads({ chatId: chat.chatId });
+      envelopes.push(chatExportEnvelope(chat, messages, openThreads));
+    }
+    return envelopes;
+  }
+
+  function mergedBulkEnvelope(envelopes) {
+    var messages = [];
+    var openThreads = [];
+    envelopes.forEach(function(envelope) {
+      (envelope.messages || []).forEach(function(message, index) {
+        messages.push(bulkMessage(envelope, message, index));
+      });
+      (envelope.openThreads || []).forEach(function(thread) {
+        var copied = Object.assign({}, thread);
+        copied.chatId = copied.chatId || envelope.chatId || '';
+        copied.chatTitle = copied.chatTitle || envelope.chatTitle || envelope.title || 'Untitled chat';
+        openThreads.push(copied);
+      });
+    });
+    return {
+      exportVersion: '2.1',
+      exportedAt: new Date().toISOString(),
+      chatId: 'bulk',
+      platform: 'multiple',
+      chatTitle: 'Bulk export',
+      title: 'Bulk export',
+      messageCount: messages.length,
+      messages: messages,
+      openThreads: openThreads
+    };
+  }
+
+  function convertBulkExport(format, envelopes) {
+    if (format === 'markdown') return FormatConverter.toMarkdownBulk(envelopes);
+    if (format === 'json') return JSON.stringify(envelopes, null, 2);
+    var merged = mergedBulkEnvelope(envelopes);
+    if (format === 'csv') return FormatConverter.toCSV(merged);
+    if (format === 'tsv') return FormatConverter.toTSV(merged);
+    if (format === 'html' || format === 'pdf') return FormatConverter.toHTML(merged);
+    throw new Error('Unsupported format: ' + format);
+  }
+
+  function loadPrintFrame(iframe, html) {
+    return new Promise(function(resolve) {
+      var settled = false;
+      function finish() {
+        if (settled) return;
+        settled = true;
+        resolve(iframe.contentWindow);
+      }
+      iframe.onload = finish;
+      iframe.srcdoc = html;
+      setTimeout(finish, 50);
+    });
+  }
+
+  async function printBulkExport(html) {
+    var iframe = document.createElement('iframe');
+    iframe.hidden = true;
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+    try {
+      var printWindow = await loadPrintFrame(iframe, html);
+      if (!printWindow || typeof printWindow.print !== 'function') throw new Error('Print API is unavailable');
+      if (printWindow.focus) printWindow.focus();
+      printWindow.print();
+    } finally {
+      setTimeout(function() {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 1200);
+    }
+  }
+
+  async function runBulkExport(list) {
+    if (!list || !els.bulkExportSelected || els.bulkExportSelected.disabled) return;
+    var selectedChats = list.getSelectedChats ? list.getSelectedChats() : [];
+    if (!selectedChats.length) return;
+    var previous = els.bulkExportSelected.textContent;
+    var format = 'markdown';
+    els.bulkExportSelected.disabled = true;
+    els.bulkExportSelected.textContent = 'Exporting';
+    try {
+      if (typeof FormatConverter === 'undefined') throw new Error('Format converter is unavailable');
+      format = normalizeBulkExportFormat(els.bulkExportFormat && els.bulkExportFormat.value);
+      var envelopes = await loadBulkExportEnvelopes(selectedChats);
+      var output = convertBulkExport(format, envelopes);
+      var filename = bulkExportFilename(format);
+      if (format === 'pdf') await printBulkExport(output);
+      else makeBlobDownload(filename, output, FormatConverter.formats[format].mime + ';charset=utf-8');
+      if (typeof ExportHistory !== 'undefined' && ExportHistory.add) {
+        await ExportHistory.add({
+          platform: 'multiple',
+          format: format,
+          messageCount: mergedBulkEnvelope(envelopes).messageCount,
+          chatTitle: 'Bulk export',
+          filename: filename
+        });
+        await refreshHistorySummary();
+      }
+      if (els.bulkExportSummary) els.bulkExportSummary.textContent = 'Exported ' + envelopes.length + (envelopes.length === 1 ? ' chat' : ' chats');
+      if (list.clearSelection) list.clearSelection();
+      log('info', 'options.bulk_export.success', { format: format, chats: envelopes.length, filename: filename });
+    } catch (error) {
+      log('error', 'options.bulk_export.failed', { error: serializeError(error), format: format });
+      if (els.bulkExportSummary) els.bulkExportSummary.textContent = 'Export failed';
+    } finally {
+      els.bulkExportSelected.textContent = previous;
+      updateBulkExportSelection(list.getSelectedChats ? list.getSelectedChats() : []);
+    }
+  }
+
+  function bindBulkExportControls(list) {
+    updateBulkExportSelection([]);
+    if (els.bulkExportFormat) {
+      els.bulkExportFormat.addEventListener('change', function() {
+        els.bulkExportFormat.value = normalizeBulkExportFormat(els.bulkExportFormat.value);
+      });
+    }
+    if (els.bulkExportSelected) {
+      els.bulkExportSelected.addEventListener('click', function() {
+        runBulkExport(list);
+      });
+    }
+  }
+
   function renderDiagnostics(logs) {
     if (!els.diagnosticsList) return;
     els.diagnosticsList.innerHTML = '';
@@ -983,6 +1180,7 @@
       onSelect: function(chat) {
         if (detail) detail.load(chat);
       },
+      onSelectionChange: updateBulkExportSelection,
       onPinToggle: async function(chat, pinned) {
         if (typeof VaultDAO === 'undefined' || !VaultDAO.setChatPinned) return null;
         var updated = await VaultDAO.setChatPinned(chat.chatId, pinned);
@@ -990,6 +1188,7 @@
         return updated;
       }
     });
+    bindBulkExportControls(list);
     if (typeof VaultSearch !== 'undefined') {
       try {
         var search = VaultSearch.create({ dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null });

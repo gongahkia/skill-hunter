@@ -528,10 +528,10 @@ select[multiple] {
 
 .chat-row {
   display: grid;
-  grid-template-columns: 36px 110px 110px minmax(180px, 1fr) 80px 120px;
+  grid-template-columns: 34px 36px 110px 110px minmax(180px, 1fr) 80px 120px;
   gap: 10px;
   align-items: center;
-  min-width: 640px;
+  min-width: 700px;
   min-height: 42px;
   padding: 0 12px;
   border-bottom: 1px solid var(--line);
@@ -570,6 +570,15 @@ select[multiple] {
 .chat-row-data.selected {
   background: var(--surface-soft);
   color: var(--ink);
+}
+
+.chat-row-data.bulk-selected {
+  box-shadow: inset 3px 0 0 var(--secondary);
+}
+
+.chat-select {
+  width: 16px;
+  height: 16px;
 }
 
 .chat-row-head {

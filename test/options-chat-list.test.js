@@ -120,4 +120,31 @@ describe('OptionsChatList', () => {
     expect(toggles).toEqual([{ chatId: 'chat-0', pinned: true }]);
     expect(root.querySelector('.pin-toggle').textContent).toBe('★');
   });
+
+  it('multi-selects chats without opening the detail row', async () => {
+    const { dom, root } = createDom();
+    const OptionsChatList = loadChatList(dom);
+    const selectedRows = [];
+    const selections = [];
+    const list = OptionsChatList.create({
+      root,
+      onSelect: (chat) => selectedRows.push(chat.chatId),
+      onSelectionChange: (chats) => selections.push(chats.map((chat) => chat.chatId)),
+      window: dom.window
+    });
+
+    list.setChats(makeChats(3));
+    root.querySelector('[data-chat-id="chat-0"] .chat-select').click();
+    root.querySelector('[data-chat-id="chat-2"] .chat-select').click();
+
+    expect(selectedRows).toEqual([]);
+    expect(list.getSelectedChats().map((chat) => chat.chatId)).toEqual(['chat-0', 'chat-2']);
+    expect(selections.at(-1)).toEqual(['chat-0', 'chat-2']);
+    expect(root.querySelector('[data-chat-id="chat-0"]').className).toContain('bulk-selected');
+    expect(root.querySelector('[data-chat-id="chat-2"]').className).toContain('bulk-selected');
+
+    list.clearSelection();
+    expect(list.getSelectedChats()).toEqual([]);
+    expect(root.querySelector('[data-chat-id="chat-0"]').className).not.toContain('bulk-selected');
+  });
 });

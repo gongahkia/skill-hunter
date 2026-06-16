@@ -44,6 +44,25 @@ var OptionsChatList = (function() {
     row.appendChild(cell);
   }
 
+  function appendSelectCell(row, chat, selectedIds, onToggleSelected) {
+    var cell = row.ownerDocument.createElement('span');
+    cell.setAttribute('role', 'cell');
+    var input = row.ownerDocument.createElement('input');
+    input.type = 'checkbox';
+    input.className = 'chat-select';
+    input.checked = !!selectedIds[chat.chatId];
+    input.setAttribute('aria-label', 'Select ' + text(chat.title, 'chat'));
+    input.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+    input.addEventListener('change', function(event) {
+      event.stopPropagation();
+      onToggleSelected(chat, input.checked);
+    });
+    cell.appendChild(input);
+    row.appendChild(cell);
+  }
+
   function appendPinCell(row, chat, onPinToggle) {
     var cell = row.ownerDocument.createElement('span');
     cell.setAttribute('role', 'cell');
@@ -64,15 +83,15 @@ var OptionsChatList = (function() {
     var header = document.createElement('div');
     header.className = 'chat-row chat-row-head';
     header.setAttribute('role', 'row');
-    ['Pin', 'Date', 'Platform', 'Title', 'Messages', 'Tags'].forEach(function(label) {
+    ['Select', 'Pin', 'Date', 'Platform', 'Title', 'Messages', 'Tags'].forEach(function(label) {
       appendCell(header, label);
     });
     return header;
   }
 
-  function makeRow(document, chat, index, top, selectedChatId, onSelect, onPinToggle, draggable) {
+  function makeRow(document, chat, index, top, selectedChatId, selectedIds, onSelect, onPinToggle, onToggleSelected, draggable) {
     var row = document.createElement('div');
-    row.className = 'chat-row chat-row-data' + (chat.chatId === selectedChatId ? ' selected' : '');
+    row.className = 'chat-row chat-row-data' + (chat.chatId === selectedChatId ? ' selected' : '') + (selectedIds[chat.chatId] ? ' bulk-selected' : '');
     row.setAttribute('role', 'row');
     row.tabIndex = 0;
     row.draggable = draggable;
@@ -93,6 +112,7 @@ var OptionsChatList = (function() {
       event.dataTransfer.setData('application/x-rakuzaichi-chat-id', chat.chatId || '');
     });
 
+    appendSelectCell(row, chat, selectedIds, onToggleSelected);
     appendPinCell(row, chat, onPinToggle);
     appendCell(row, formatDate(chat.lastUpdatedAt || chat.capturedAt));
     appendCell(row, platformLabel(chat.platform));
@@ -116,9 +136,11 @@ var OptionsChatList = (function() {
       countEl: options.countEl || null,
       dao: options.dao || (typeof VaultDAO !== 'undefined' ? VaultDAO : null),
       onSelect: typeof options.onSelect === 'function' ? options.onSelect : function() {},
+      onSelectionChange: typeof options.onSelectionChange === 'function' ? options.onSelectionChange : function() {},
       onPinToggle: typeof options.onPinToggle === 'function' ? options.onPinToggle : function() {},
       draggable: options.draggable !== false,
       chats: [],
+      selectedIds: {},
       selectedChatId: '',
       frame: 0,
       start: -1,
@@ -173,7 +195,7 @@ var OptionsChatList = (function() {
 
       var fragment = document.createDocumentFragment();
       for (var i = start; i < end; i++) {
-        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, select, togglePinned, state.draggable));
+        fragment.appendChild(makeRow(document, state.chats[i], i, (i - start) * ROW_HEIGHT, state.selectedChatId, state.selectedIds, select, togglePinned, toggleSelected, state.draggable));
       }
       state.window.appendChild(fragment);
     }
@@ -197,8 +219,36 @@ var OptionsChatList = (function() {
       render(true);
     }
 
+    function selectedChats() {
+      return state.chats.filter(function(chat) {
+        return !!state.selectedIds[chat.chatId];
+      });
+    }
+
+    function emitSelectionChange() {
+      state.onSelectionChange(selectedChats());
+    }
+
+    function toggleSelected(chat, selected) {
+      if (!chat || !chat.chatId) return;
+      if (selected) state.selectedIds[chat.chatId] = true;
+      else delete state.selectedIds[chat.chatId];
+      emitSelectionChange();
+      render(true);
+    }
+
+    function reconcileSelection() {
+      var keep = {};
+      state.chats.forEach(function(chat) {
+        if (state.selectedIds[chat.chatId]) keep[chat.chatId] = true;
+      });
+      state.selectedIds = keep;
+      emitSelectionChange();
+    }
+
     function setChats(chats) {
       state.chats = Array.isArray(chats) ? chats.slice() : [];
+      reconcileSelection();
       state.empty.textContent = 'No captured chats yet.';
       state.root.scrollTop = 0;
       render(true);
@@ -273,6 +323,12 @@ var OptionsChatList = (function() {
       },
       getChats: function() {
         return state.chats.slice();
+      },
+      getSelectedChats: selectedChats,
+      clearSelection: function() {
+        state.selectedIds = {};
+        emitSelectionChange();
+        render(true);
       }
     };
   }

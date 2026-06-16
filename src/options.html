@@ -146,7 +146,19 @@
         <section class="chat-list-pane" aria-label="Chat list">
           <div class="pane-heading">
             <h2>Chats</h2>
-            <span id="chat-list-summary">0 captured</span>
+            <div class="pane-actions">
+              <span id="chat-list-summary">0 captured</span>
+              <span id="bulkExportSummary">0 selected</span>
+              <select id="bulkExportFormat" aria-label="Bulk export format">
+                <option value="markdown">Markdown</option>
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="tsv">TSV</option>
+                <option value="html">HTML</option>
+                <option value="pdf">PDF</option>
+              </select>
+              <button id="bulkExportSelected" class="btn btn-secondary" type="button" disabled>Export selected</button>
+            </div>
           </div>
           <div id="chat-list" class="chat-table" role="table" aria-label="Captured chats"></div>
         </section>
@@ -382,6 +394,8 @@
   <script src="compat.js"></script>
   <script src="logger.js"></script>
   <script src="storage.js"></script>
+  <script src="converters.js"></script>
+  <script src="filename.js"></script>
   <script src="ui/colorschemes.js"></script>
   <script src="history.js"></script>
   <script src="vault/db.js"></script>
