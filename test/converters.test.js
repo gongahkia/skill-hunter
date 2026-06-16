@@ -6,12 +6,14 @@ const { FormatConverter } = evalSrc('converters.js');
 const envelope = {
   exportVersion: '2.0',
   exportedAt: '2026-01-01T00:00:00.000Z',
+  chatId: 'chatgpt:test-chat',
   platform: 'chatgpt',
   chatTitle: 'Test Chat',
+  url: 'https://chatgpt.com/c/test-chat',
   model: 'gpt-4',
   messageCount: 2,
   messages: [
-    { role: 'user', content: 'Hello', id: 'msg-1', timestamp: '', model: 'gpt-4', platform: 'chatgpt', index: 0, metadata: {} },
+    { role: 'user', content: 'Hello', id: 'msg-1', timestamp: '2026-01-01T00:00:01.000Z', model: 'gpt-4', platform: 'chatgpt', index: 0, metadata: {} },
     { role: 'assistant', content: 'Hi there!', id: 'msg-2', timestamp: '', model: 'gpt-4', platform: 'chatgpt', index: 1, metadata: {} }
   ]
 };
@@ -56,9 +58,33 @@ describe('FormatConverter', () => {
   it('toMarkdown produces readable sections', () => {
     const result = FormatConverter.toMarkdown(envelope);
     expect(result).toContain('# Test Chat');
-    expect(result).toContain('## USER');
-    expect(result).toContain('## ASSISTANT');
+    expect(result).toContain('- Chat ID: chatgpt:test-chat');
+    expect(result).toContain('- Source: https://chatgpt.com/c/test-chat');
+    expect(result).toContain('## User');
+    expect(result).toContain('`2026-01-01T00:00:01.000Z | msg-1`');
+    expect(result).toContain('## Assistant');
     expect(result).toContain('Hello');
+  });
+
+  it('toMarkdownBulk separates three chats for Obsidian import', () => {
+    const chats = [1, 2, 3].map((index) => ({
+      ...envelope,
+      chatId: 'chat-' + index,
+      chatTitle: 'Chat ' + index,
+      messages: [
+        { role: 'user', content: 'Question ' + index, id: 'm-' + index + '-1', index: 0 },
+        { role: 'assistant', content: 'Answer ' + index, id: 'm-' + index + '-2', index: 1 }
+      ],
+      messageCount: 2
+    }));
+    const result = FormatConverter.toMarkdownBulk(chats);
+    const sections = result.trim().split('\n\n---\n\n');
+
+    expect(sections).toHaveLength(3);
+    expect(sections[0]).toContain('# Chat 1');
+    expect(sections[1]).toContain('Question 2');
+    expect(sections[2]).toContain('## Assistant');
+    expect(result.match(/\n\n---\n\n/g)).toHaveLength(2);
   });
 
   it('convert dispatches to correct method', () => {

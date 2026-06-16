@@ -1,4 +1,25 @@
 var FormatConverter = {
+  _text(value) {
+    if (value === undefined || value === null) return '';
+    return String(value);
+  },
+  _oneLine(value) {
+    return this._text(value).replace(/\s+/g, ' ').trim();
+  },
+  _roleLabel(role) {
+    role = this._oneLine(role || 'unknown').toLowerCase();
+    return role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Unknown';
+  },
+  _messageId(message) {
+    return this._text(message.messageId || message.id || '');
+  },
+  _chatTitle(envelope) {
+    return this._oneLine(envelope.chatTitle || envelope.title || 'Untitled Conversation') || 'Untitled Conversation';
+  },
+  _appendMeta(lines, label, value) {
+    value = this._oneLine(value);
+    if (value) lines.push('- ' + label + ': ' + value);
+  },
   _escapeCSV(s) {
     return '"' + String(s).replace(/"/g, '""') + '"';
   },
@@ -25,26 +46,40 @@ var FormatConverter = {
     return [headers].concat(rows).join('\n');
   },
   toMarkdown(envelope) {
+    envelope = envelope || {};
+    var messages = Array.isArray(envelope.messages) ? envelope.messages : [];
     var lines = [];
-    var title = envelope.chatTitle || 'Untitled Conversation';
+    var title = this._chatTitle(envelope);
     lines.push('# ' + title);
     lines.push('');
-    lines.push('- Export version: ' + (envelope.exportVersion || '2.0'));
-    lines.push('- Exported at: ' + (envelope.exportedAt || ''));
-    lines.push('- Platform: ' + (envelope.platform || 'unknown'));
-    lines.push('- Model: ' + (envelope.model || ''));
-    lines.push('- Message count: ' + (typeof envelope.messageCount === 'number' ? envelope.messageCount : (envelope.messages || []).length));
+    this._appendMeta(lines, 'Chat ID', envelope.chatId);
+    this._appendMeta(lines, 'Platform', envelope.platform || 'unknown');
+    this._appendMeta(lines, 'Model', envelope.model);
+    this._appendMeta(lines, 'Source', envelope.url || envelope.sourceUrl);
+    this._appendMeta(lines, 'Exported', envelope.exportedAt || envelope.capturedAt);
+    this._appendMeta(lines, 'Updated', envelope.lastUpdatedAt);
+    lines.push('- Message count: ' + (typeof envelope.messageCount === 'number' ? envelope.messageCount : messages.length));
     lines.push('');
 
-    for (var i = 0; i < envelope.messages.length; i++) {
-      var m = envelope.messages[i];
-      lines.push('## ' + String(m.role || 'unknown').toUpperCase());
-      if (m.timestamp) lines.push('`' + m.timestamp + '`');
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i] || {};
+      lines.push('## ' + this._roleLabel(m.role));
+      var meta = [];
+      if (m.timestamp) meta.push(this._text(m.timestamp));
+      var messageId = this._messageId(m);
+      if (messageId) meta.push(messageId);
+      if (meta.length) lines.push('`' + meta.join(' | ') + '`');
       lines.push('');
-      lines.push(m.content || '');
+      lines.push(this._text(m.content).trim() || '(empty)');
       lines.push('');
     }
     return lines.join('\n').trim() + '\n';
+  },
+  toMarkdownBulk(chats) {
+    if (!Array.isArray(chats)) throw new Error('chats must be an array');
+    return chats.map(function(chat) {
+      return FormatConverter.toMarkdown(chat).trim();
+    }).join('\n\n---\n\n') + '\n';
   },
   toPDF() {
     throw new Error('not implemented — see M6');
