@@ -90,7 +90,12 @@
     chooseObsidianVault: document.getElementById('chooseObsidianVault'),
     syncObsidianVault: document.getElementById('syncObsidianVault'),
     obsidianFallbackNote: document.getElementById('obsidianFallbackNote'),
-    obsidianSyncStatus: document.getElementById('obsidianSyncStatus')
+    obsidianSyncStatus: document.getElementById('obsidianSyncStatus'),
+    backupPassword: document.getElementById('backupPassword'),
+    exportBackup: document.getElementById('exportBackup'),
+    importBackup: document.getElementById('importBackup'),
+    backupFile: document.getElementById('backupFile'),
+    backupStatus: document.getElementById('backupStatus')
   };
 
   function serializeError(error) {
@@ -932,6 +937,72 @@
     }
   }
 
+  function backupPassword() {
+    return els.backupPassword ? els.backupPassword.value || '' : '';
+  }
+
+  function setBackupStatus(message) {
+    if (els.backupStatus) els.backupStatus.textContent = message;
+  }
+
+  async function exportVaultBackup() {
+    if (!els.exportBackup || els.exportBackup.disabled) return;
+    var previous = els.exportBackup.textContent;
+    els.exportBackup.disabled = true;
+    els.exportBackup.textContent = 'Exporting';
+    setBackupStatus('Exporting...');
+    try {
+      if (typeof VaultBackup === 'undefined') throw new Error('Backup module is unavailable');
+      var settings = typeof StorageManager !== 'undefined' && StorageManager.getAll ? await StorageManager.getAll() : {};
+      var result = await VaultBackup.create({ dao: VaultDAO, settings: settings, password: backupPassword() });
+      makeBlobDownload(result.filename, result.blob, 'application/zip');
+      if (typeof ExportHistory !== 'undefined' && ExportHistory.add) {
+        await ExportHistory.add({
+          platform: 'vault',
+          format: result.encrypted ? 'encrypted-backup' : 'backup',
+          messageCount: result.snapshot && result.snapshot.messages ? result.snapshot.messages.length : 0,
+          chatTitle: 'Vault backup',
+          filename: result.filename
+        });
+        await refreshHistorySummary();
+      }
+      setBackupStatus('Exported ' + result.filename + '.');
+      log('info', 'options.backup.export.success', { filename: result.filename, encrypted: result.encrypted });
+    } catch (error) {
+      setBackupStatus('Backup export failed.');
+      log('error', 'options.backup.export.failed', { error: serializeError(error) });
+    } finally {
+      els.exportBackup.textContent = previous;
+      els.exportBackup.disabled = false;
+    }
+  }
+
+  async function importVaultBackup(file, refreshVault) {
+    if (!file || !els.importBackup || els.importBackup.disabled) return;
+    var previous = els.importBackup.textContent;
+    els.importBackup.disabled = true;
+    els.importBackup.textContent = 'Importing';
+    setBackupStatus('Importing...');
+    try {
+      if (typeof VaultBackup === 'undefined') throw new Error('Backup module is unavailable');
+      var data = await VaultBackup.read(file, backupPassword());
+      var result = await VaultBackup.restore(data, { dao: VaultDAO, storageManager: StorageManager });
+      if (data.settings) renderSettings(data.settings);
+      if (refreshVault) await refreshVault(true);
+      await refreshVaultStats();
+      await refreshHistorySummary();
+      setBackupStatus('Imported ' + result.chats + (result.chats === 1 ? ' chat' : ' chats') + '.');
+      log('info', 'options.backup.import.success', result);
+    } catch (error) {
+      setBackupStatus('Backup import failed.');
+      log('error', 'options.backup.import.failed', { error: serializeError(error) });
+    } finally {
+      els.importBackup.textContent = previous;
+      els.importBackup.disabled = false;
+      if (els.backupFile) els.backupFile.value = '';
+    }
+  }
+
   function renderDiagnostics(logs) {
     if (!els.diagnosticsList) return;
     els.diagnosticsList.innerHTML = '';
@@ -1172,6 +1243,15 @@
     }
     if (els.chooseObsidianVault) els.chooseObsidianVault.addEventListener('click', pickObsidianVault);
     if (els.syncObsidianVault) els.syncObsidianVault.addEventListener('click', runObsidianSync);
+    if (els.exportBackup) els.exportBackup.addEventListener('click', exportVaultBackup);
+    if (els.importBackup && els.backupFile) {
+      els.importBackup.addEventListener('click', function() {
+        els.backupFile.click();
+      });
+      els.backupFile.addEventListener('change', function() {
+        importVaultBackup(els.backupFile.files && els.backupFile.files[0], refreshVault);
+      });
+    }
     if (els.colorscheme) {
       els.colorscheme.addEventListener('change', function() {
         applyColorscheme(els.colorscheme.value, document.documentElement.dataset.themeMode);

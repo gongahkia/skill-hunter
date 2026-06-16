@@ -363,6 +363,20 @@
             <p id="obsidianSyncStatus">No Obsidian vault selected.</p>
           </section>
 
+          <section class="subpanel" aria-label="Backup vault">
+            <h3>Backup vault</h3>
+            <label>
+              Backup password
+              <input id="backupPassword" type="password" autocomplete="new-password" placeholder="Optional">
+            </label>
+            <div class="button-row">
+              <button id="exportBackup" class="btn btn-secondary" type="button">Export backup</button>
+              <button id="importBackup" class="btn btn-ghost" type="button">Import backup</button>
+              <input id="backupFile" type="file" accept=".zip,.rakuzaichi-backup.zip,application/zip" hidden>
+            </div>
+            <p id="backupStatus">No backup run yet.</p>
+          </section>
+
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Save</button>
             <span id="save-status"></span>
@@ -407,6 +421,7 @@
   <script src="converters.js"></script>
   <script src="filename.js"></script>
   <script src="zip.js"></script>
+  <script src="backup.js"></script>
   <script src="obsidian-sync.js"></script>
   <script src="ui/colorschemes.js"></script>
   <script src="history.js"></script>

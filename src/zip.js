@@ -144,8 +144,34 @@ var ZipWriter = (function() {
     return new Blob([concat(localParts.concat(centralParts).concat([end]), total)], { type: 'application/zip' });
   }
 
+  async function read(input) {
+    var data = input instanceof Uint8Array
+      ? input
+      : new Uint8Array(input instanceof ArrayBuffer ? input : await input.arrayBuffer());
+    var view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    var decoder = new TextDecoder();
+    var entries = {};
+    var offset = 0;
+    while (offset + 30 <= data.length && view.getUint32(offset, true) === 0x04034b50) {
+      var method = view.getUint16(offset + 8, true);
+      if (method !== 0) throw new Error('Unsupported ZIP compression method: ' + method);
+      var compressedSize = view.getUint32(offset + 18, true);
+      var nameLength = view.getUint16(offset + 26, true);
+      var extraLength = view.getUint16(offset + 28, true);
+      var nameStart = offset + 30;
+      var dataStart = nameStart + nameLength + extraLength;
+      var dataEnd = dataStart + compressedSize;
+      if (dataEnd > data.length) throw new Error('Invalid ZIP entry size');
+      var name = decoder.decode(data.slice(nameStart, nameStart + nameLength));
+      entries[name] = data.slice(dataStart, dataEnd);
+      offset = dataEnd;
+    }
+    return entries;
+  }
+
   return {
     create: create,
+    read: read,
     crc32: crc32
   };
 })();

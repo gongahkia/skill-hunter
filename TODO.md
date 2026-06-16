@@ -320,7 +320,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
   - 2026-06-16: added dependency-free stored ZIP generation, reused Obsidian Markdown note generation for fallback archives, and switched unsupported browsers to a "Download ZIP" sync mode with an explainer banner. Tests verify ZIP structure/CRC, fallback archive contents, and options-page ZIP download behavior without `showDirectoryPicker`.
 - [x] `M6.T07` — Add filename templating UI in settings: user can configure `{platform}_{title}_{date}.{ext}` etc. (already exists; verify still works post-M1). **Success:** generated filename matches template; `{title}` sanitized to filesystem-safe chars.
   - 2026-06-16: verified the existing settings UI persists custom filename templates and added a background download regression proving generated filenames follow `{platform}/{title}/{format}_{date}.{ext}` while sanitizing unsafe title characters.
-- [ ] `M6.T08` — Add encrypted backup-vault export: dump entire IDB as a single `.rakuzaichi-backup.zip` with optional password (Web Crypto API, AES-GCM). **Success:** export + import round-trip restores all chats, messages, threads, folders, tags identically.
+- [x] `M6.T08` — Add encrypted backup-vault export: dump entire IDB as a single `.rakuzaichi-backup.zip` with optional password (Web Crypto API, AES-GCM). **Success:** export + import round-trip restores all chats, messages, threads, folders, tags identically.
+  - 2026-06-16: added `.rakuzaichi-backup.zip` export/import with optional AES-GCM encryption via Web Crypto PBKDF2-derived keys, backup UI controls, ZIP read support, and vault clear/restore support. Tests cover encrypted and plaintext backup reads plus round-trip restore of chats, messages, open threads, folders, chat tags, extraction runs, and custom tag settings.
 
 ## M7 — Polish, demo assets, repo presentation
 

@@ -29,10 +29,12 @@ describe('ZipWriter', () => {
       { name: 'Rakuzaichi/Claude.md', content: 'hello' }
     ]);
     const entries = await readStoredEntries(blob);
+    const readEntries = await ZipWriter.read(blob);
 
     expect(blob.type).toBe('application/zip');
     expect(entries['Rakuzaichi/Chat 1.md']).toBe('# Chat 1\n');
     expect(entries['Rakuzaichi/Claude.md']).toBe('hello');
+    expect(new TextDecoder().decode(readEntries['Rakuzaichi/Chat 1.md'])).toBe('# Chat 1\n');
   });
 
   it('computes standard CRC-32 values', () => {

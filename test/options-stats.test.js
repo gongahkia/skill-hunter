@@ -59,6 +59,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO, showDirecto
     loadSrc('converters.js'),
     loadSrc('filename.js'),
     loadSrc('zip.js'),
+    loadSrc('backup.js'),
     loadSrc('obsidian-sync.js'),
     loadSrc('ui/colorschemes.js'),
     loadSrc('threads/scanner.js'),
@@ -410,5 +411,42 @@ describe('options vault stats', () => {
     expect(name).toMatch(/^Rakuzaichi\/claude_Fallback_Sync_fallback-1.*\.md$/);
     expect(entries[name]).toContain('Fallback note');
     expect(doc.getElementById('obsidianSyncStatus').textContent).toBe('Downloaded ZIP with 1 chat.');
+  });
+
+  it('exports an encrypted vault backup from the options UI', async () => {
+    const chat = { chatId: 'chat-1', platform: 'chatgpt', title: 'Backup UI', messageCount: 1, tags: ['TODO'] };
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 1,
+        totalMessages: 1,
+        oldestChat: chat,
+        newestChat: chat,
+        perPlatform: [{ platform: 'chatgpt', chats: 1, messages: 1 }]
+      }],
+      quota: { usageMB: 1 },
+      onChanged: {},
+      vaultDAO: {
+        listChats: async () => [chat],
+        listAllMessages: async () => [{ messageId: 'msg-1', chatId: 'chat-1', role: 'user', content: 'Backup me', index: 0 }],
+        listOpenThreads: async () => [],
+        listFolders: async () => [],
+        listExtractionRuns: async () => []
+      }
+    });
+
+    const doc = dom.window.document;
+    doc.getElementById('backupPassword').value = 'secret';
+    doc.getElementById('exportBackup').click();
+    for (let i = 0; i < 80 && !dom._downloads.blob; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    expect(dom._downloads.blob).toBeTruthy();
+    const entries = await readStoredEntries(dom._downloads.blob);
+    const manifest = JSON.parse(entries['manifest.json']);
+
+    expect(dom._downloads.download).toMatch(/\.rakuzaichi-backup\.zip$/);
+    expect(manifest.encrypted).toBe(true);
+    expect(manifest.payload).toBe('vault.json.aesgcm');
+    expect(doc.getElementById('backupStatus').textContent).toContain('Exported');
   });
 });

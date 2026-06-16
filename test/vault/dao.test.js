@@ -289,6 +289,34 @@ describe('VaultDAO', () => {
     expect(await dao.listOpenThreads({ chatId: 'chat-1' })).toEqual([]);
   });
 
+  it('clears all vault stores while preserving schema metadata', async () => {
+    const dao = makeDAO(dbName());
+    await dao.putChat({
+      chatId: 'chat-1',
+      platform: 'chatgpt',
+      title: 'Clear me',
+      capturedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      messageCount: 1,
+      pinned: false,
+      archived: false,
+      tags: ['TODO']
+    });
+    await dao.putMessages('chat-1', [{ messageId: 'msg-1', role: 'user', content: 'Q', index: 0 }]);
+    await dao.putFolder({ folderId: 'folder-1', name: 'Work' });
+    await dao.putOpenThreads([{ threadId: 'thread-1', chatId: 'chat-1', messageId: 'msg-1', tag: 'TODO', text: 'x', source: 'explicit', status: 'open' }]);
+    await dao.setMeta('custom', { value: true });
+
+    await expect(dao.clearAll()).resolves.toBe(true);
+
+    expect(await dao.listChats()).toEqual([]);
+    expect(await dao.listAllMessages()).toEqual([]);
+    expect(await dao.listFolders()).toEqual([]);
+    expect(await dao.listOpenThreads()).toEqual([]);
+    expect(await dao.getMeta('custom')).toBeNull();
+    expect(await dao.getMeta('schemaVersion')).toBe(1);
+  });
+
   it('opens and closes a fresh database connection per DAO call', async () => {
     const name = dbName();
     let opens = 0;

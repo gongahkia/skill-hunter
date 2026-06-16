@@ -425,6 +425,21 @@ function createVaultDAO(options) {
     });
   }
 
+  async function clearAll() {
+    return withTransaction(['chats', 'messages', 'openThreads', 'folders', 'extractionRuns', 'meta'], 'readwrite', async function(transaction) {
+      var stores = ['chats', 'messages', 'openThreads', 'folders', 'extractionRuns', 'meta'];
+      for (var i = 0; i < stores.length; i++) {
+        await requestToPromise(transaction.objectStore(stores[i]).clear());
+      }
+      await requestToPromise(transaction.objectStore('meta').put({
+        key: 'schemaVersion',
+        value: dbModule.schemaVersion || 1,
+        updatedAt: new Date().toISOString()
+      }));
+      return true;
+    });
+  }
+
   return {
     putChat: putChat,
     getChat: getChat,
@@ -448,7 +463,8 @@ function createVaultDAO(options) {
     putExtractionRun: putExtractionRun,
     listExtractionRuns: listExtractionRuns,
     getMeta: getMeta,
-    setMeta: setMeta
+    setMeta: setMeta,
+    clearAll: clearAll
   };
 }
 
