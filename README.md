@@ -10,6 +10,8 @@ Rakuzaichi adds an open-threads layer over your vault, surfacing TODO/FIXME/REF/
 
 Everything lives on-device in IndexedDB, with Obsidian sync, encrypted backups, and offline exports for 15 LLM platforms.
 
+![Rakuzaichi demo](./asset/reference/demo.gif)
+
 ## Rationale
 
 Since I started taking law modules in August 2023, I've found it necessary to flag specific cases, rulings and analysis for later review, rework, or revision.
