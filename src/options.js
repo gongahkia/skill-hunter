@@ -7,6 +7,7 @@
   var currentCustomThreadTags = [];
   var currentExtractionModel = 'qwen2.5-0.5b-q4';
   var currentPromptApiAvailability = { status: 'unknown', available: false, api: 'none' };
+  var currentBatchExtractionController = null;
   var threadPane = null;
 
   var els = {
@@ -28,6 +29,7 @@
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
     runExtractionAll: document.getElementById('runExtractionAll'),
+    stopExtractionAll: document.getElementById('stopExtractionAll'),
     extractionStatus: document.getElementById('extractionStatus'),
     rescanThreads: document.getElementById('rescanThreads'),
     rescanStatus: document.getElementById('rescanStatus'),
@@ -58,6 +60,7 @@
     openOriginal: document.getElementById('open-original'),
     detailPin: document.getElementById('detailPin'),
     runExtractionChat: document.getElementById('runExtractionChat'),
+    stopExtractionChat: document.getElementById('stopExtractionChat'),
     detailExtractionStatus: document.getElementById('detailExtractionStatus'),
     sendToNewChat: document.getElementById('sendToNewChat'),
     restoreClipboard: document.getElementById('restoreClipboard'),
@@ -534,11 +537,19 @@
     event = event || {};
     if (event.status === 'model-load' || event.status === 'model-progress') return 'Model load';
     if (event.status === 'chunk-processing') return 'Chunk ' + String((event.index || 0) + 1) + '/' + String(event.total || 1);
+    if (event.status === 'cancelled') return 'Stopped';
     if (event.status === 'done') return 'Done';
     return String(event.status || 'Running');
   }
 
-  async function runExtractionForChat(chat, messages, onProgress) {
+  function syncStopButton(button, running) {
+    if (!button) return;
+    button.hidden = !running;
+    button.disabled = !running;
+  }
+
+  async function runExtractionForChat(chat, messages, onProgress, runOptions) {
+    runOptions = runOptions || {};
     if (typeof ExtractionRunner === 'undefined' || !ExtractionRunner.runChatExtraction) throw new Error('Extraction runner is unavailable');
     if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
     var preset = await effectiveExtractionPreset(extractionModelPreset(currentExtractionModel));
@@ -552,6 +563,7 @@
       backendType: preset.backendType,
       task: preset.task,
       useExternalDataFormat: preset.useExternalDataFormat,
+      signal: runOptions.signal,
       onProgress: onProgress
     };
     if (preset.backendType === 'prompt-api' && typeof ExtractionPromptApiBackend !== 'undefined') {
@@ -563,14 +575,18 @@
   async function runExtractionAll(refreshVault) {
     if (!els.runExtractionAll || els.runExtractionAll.disabled) return;
     var previous = els.runExtractionAll.textContent;
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    currentBatchExtractionController = controller;
     els.runExtractionAll.disabled = true;
     els.runExtractionAll.textContent = 'Model load';
+    syncStopButton(els.stopExtractionAll, !!controller);
     if (els.extractionStatus) els.extractionStatus.textContent = 'Model load';
     try {
       if (typeof VaultDAO === 'undefined' || !VaultDAO.listChats || !VaultDAO.listMessages) throw new Error('Vault DAO is unavailable');
       var chats = await VaultDAO.listChats();
       var totalThreads = 0;
       for (var i = 0; i < chats.length; i++) {
+        if (controller && controller.signal.aborted) break;
         var chat = chats[i];
         if (els.extractionStatus) els.extractionStatus.textContent = String(i + 1) + '/' + String(chats.length) + ': ' + (chat.title || chat.chatId);
         var messages = await VaultDAO.listMessages(chat.chatId);
@@ -578,10 +594,13 @@
           var label = extractionProgressLabel(event);
           els.runExtractionAll.textContent = label;
           if (els.extractionStatus) els.extractionStatus.textContent = String(i + 1) + '/' + String(chats.length) + ': ' + label;
-        });
+        }, { signal: controller && controller.signal });
         totalThreads += result.threadCount || 0;
+        if (result.cancelled) break;
       }
-      if (els.extractionStatus) els.extractionStatus.textContent = 'Done: ' + String(totalThreads) + ' threads';
+      if (els.extractionStatus) {
+        els.extractionStatus.textContent = controller && controller.signal.aborted ? 'Stopped: ' + String(totalThreads) + ' threads' : 'Done: ' + String(totalThreads) + ' threads';
+      }
       await refreshExtractionRuns();
       if (refreshVault) await refreshVault(true);
       else await refreshVaultStats();
@@ -591,6 +610,9 @@
     } finally {
       els.runExtractionAll.disabled = false;
       els.runExtractionAll.textContent = previous;
+      currentBatchExtractionController = null;
+      if (els.stopExtractionAll) els.stopExtractionAll.textContent = 'Stop';
+      syncStopButton(els.stopExtractionAll, false);
     }
   }
 
@@ -835,6 +857,15 @@
         runExtractionAll(refreshVault);
       });
     }
+    if (els.stopExtractionAll) {
+      els.stopExtractionAll.addEventListener('click', function() {
+        if (els.stopExtractionAll.disabled) return;
+        els.stopExtractionAll.disabled = true;
+        els.stopExtractionAll.textContent = 'Stopping';
+        if (currentBatchExtractionController) currentBatchExtractionController.abort();
+        if (els.extractionStatus) els.extractionStatus.textContent = 'Stopping';
+      });
+    }
     if (els.colorscheme) {
       els.colorscheme.addEventListener('change', function() {
         applyColorscheme(els.colorscheme.value, document.documentElement.dataset.themeMode);
@@ -896,6 +927,7 @@
         openLink: els.openOriginal,
         pinButton: els.detailPin,
         extractionButton: els.runExtractionChat,
+        stopExtractionButton: els.stopExtractionChat,
         extractionStatus: els.detailExtractionStatus,
         sendButton: els.sendToNewChat,
         restoreButton: els.restoreClipboard,
@@ -909,8 +941,8 @@
         onPinChanged: function() {
           refreshVault(true);
         },
-        onRunExtraction: async function(chat, messages, onProgress) {
-          var result = await runExtractionForChat(chat, messages, onProgress);
+        onRunExtraction: async function(chat, messages, onProgress, runOptions) {
+          var result = await runExtractionForChat(chat, messages, onProgress, runOptions);
           await refreshExtractionRuns();
           await refreshVault(true);
           return result;

@@ -104,6 +104,7 @@
         </label>
         <div class="vault-actions">
           <button id="runExtractionAll" class="btn btn-primary" type="button">Run on all</button>
+          <button id="stopExtractionAll" class="btn btn-ghost" type="button" hidden disabled>Stop</button>
           <span id="extractionStatus" class="extraction-status"></span>
           <button id="rescanThreads" class="btn btn-secondary" type="button">Rescan threads</button>
           <span id="rescanStatus" class="rescan-status"></span>
@@ -155,6 +156,7 @@
             <h2>Detail</h2>
             <div class="pane-actions">
               <button id="runExtractionChat" class="btn btn-primary" type="button" disabled>Run extraction</button>
+              <button id="stopExtractionChat" class="btn btn-ghost" type="button" hidden disabled>Stop</button>
               <span id="detailExtractionStatus" class="extraction-status"></span>
               <button id="detailPin" class="pin-toggle" type="button" disabled aria-label="Pin chat">☆</button>
               <button id="sendToNewChat" class="btn btn-secondary" type="button" disabled>Send to new chat</button>

@@ -181,4 +181,68 @@ describe('ExtractionRunner', () => {
       threadCount: 1
     });
   });
+
+  it('cancels after the current chunk and keeps partial saved threads', async () => {
+    const runner = loadRunner();
+    const controller = new AbortController();
+    const written = [];
+    const runs = [];
+    const progress = [];
+    let calls = 0;
+    const prompt = {
+      buildExtractionPrompt: (messages) => [{ role: 'user', content: messages[0].messageId }],
+      parseExtractionOutput: (output) => JSON.parse(output)
+    };
+    const candidates = {
+      buildCandidateWindows: (rows) => rows.map((message, index) => ({
+        id: 'candidate-' + String(index),
+        messages: [message],
+        candidateMessageIds: [message.messageId],
+        candidates: [message]
+      }))
+    };
+    const chunker = {
+      buildSlidingWindows: (rows) => [{ id: rows[0].messageId, messages: rows }],
+      dedupeThreads: (threads) => threads
+    };
+    const generator = async (builtPrompt) => {
+      calls += 1;
+      if (calls === 1) {
+        controller.abort();
+        return JSON.stringify([{ tag: 'TODO', text: 'Keep partial result', messageId: 'm-1', confidence: 0.8 }]);
+      }
+      return JSON.stringify([{ tag: 'TODO', text: 'Should not run', messageId: builtPrompt[0].content, confidence: 0.8 }]);
+    };
+
+    const result = await runner.runChatExtraction(chat(), [
+      { messageId: 'm-1', role: 'user', content: 'TODO: keep partial result', index: 0 },
+      { messageId: 'm-2', role: 'user', content: 'TODO: should not run', index: 1 }
+    ], {
+      generator,
+      prompt,
+      candidates,
+      chunker,
+      signal: controller.signal,
+      dao: {
+        listOpenThreads: async () => [],
+        putOpenThreads: async (threads) => {
+          written.push(...threads);
+          return threads;
+        },
+        putExtractionRun: async (run) => {
+          runs.push(run);
+          return run;
+        }
+      },
+      onProgress: (event) => progress.push(event.status)
+    });
+
+    expect(calls).toBe(1);
+    expect(written).toHaveLength(1);
+    expect(written[0]).toMatchObject({ messageId: 'm-1', text: 'Keep partial result' });
+    expect(result).toMatchObject({ cancelled: true, threadCount: 1, rawThreadCount: 1 });
+    expect(runs[0]).toMatchObject({ cancelled: true, threadCount: 1 });
+    expect(progress).toContain('cancelled');
+    expect(progress).not.toContain('done');
+  });
 });

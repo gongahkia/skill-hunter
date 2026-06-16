@@ -36,6 +36,14 @@ var ExtractionRunner = (function() {
     if (typeof callback === 'function') callback(event);
   }
 
+  function signalAborted(signal) {
+    return !!(signal && signal.aborted);
+  }
+
+  function isAbortError(error) {
+    return !!(error && (error.name === 'AbortError' || error.code === 'ABORT_ERR'));
+  }
+
   function requireDependency(value, name) {
     if (!value) throw new Error(name + ' is unavailable');
     return value;
@@ -151,6 +159,7 @@ var ExtractionRunner = (function() {
       quantization: options.quantization || 'q4',
       backend: options.backend,
       useExternalDataFormat: options.useExternalDataFormat,
+      signal: options.signal,
       onProgress: function(event) {
         emit(onProgress, { status: 'model-progress', event: event });
       }
@@ -167,30 +176,69 @@ var ExtractionRunner = (function() {
     var startedAt = now();
     var createdAt = isoNow();
     var onProgress = options.onProgress;
+    var signal = options.signal || null;
     var windows = buildWindows(messages, deps, options);
     var generator = null;
     var rawThreads = [];
+    var savedThreads = [];
+    var existingThreads = null;
+    var cancelled = signalAborted(signal);
 
-    if (windows.length) generator = await loadGenerator(deps, options, onProgress);
+    async function existingRows() {
+      if (existingThreads !== null) return existingThreads;
+      if (options.dao && typeof options.dao.listOpenThreads === 'function') {
+        existingThreads = await options.dao.listOpenThreads({ chatId: chat.chatId });
+      } else {
+        existingThreads = [];
+      }
+      return existingThreads;
+    }
+
+    async function persistDiscoveredThreads() {
+      var deduped = chunker.dedupeThreads(rawThreads);
+      if (!options.dao || typeof options.dao.putOpenThreads !== 'function') {
+        if (options.dao && typeof options.dao.listOpenThreads === 'function') {
+          return filterExistingThreads(deduped, await existingRows());
+        }
+        return deduped;
+      }
+      var pending = filterExistingThreads(deduped, (await existingRows()).concat(savedThreads));
+      if (pending.length) {
+        await options.dao.putOpenThreads(pending);
+        savedThreads = savedThreads.concat(pending);
+      }
+      return savedThreads.slice();
+    }
+
+    if (windows.length && !cancelled) generator = await loadGenerator(deps, options, onProgress);
     for (var i = 0; i < windows.length; i++) {
+      if (signalAborted(signal)) {
+        cancelled = true;
+        break;
+      }
       emit(onProgress, { status: 'chunk-processing', index: i, total: windows.length, window: windows[i] });
       var builtPrompt = prompt.buildExtractionPrompt(windows[i].messages, options.promptOptions || {});
-      var output = await runGenerator(generator, builtPrompt, options);
+      var output = '';
+      try {
+        output = await runGenerator(generator, builtPrompt, options);
+      } catch (error) {
+        if (isAbortError(error) || signalAborted(signal)) {
+          cancelled = true;
+          break;
+        }
+        throw error;
+      }
       var rows = prompt.parseExtractionOutput(output, {
         allowedMessageIds: allowedMessageIds(windows[i].messages)
       });
       rows.forEach(function(row) {
         rawThreads.push(makeThread(chat, row, createdAt));
       });
+      await persistDiscoveredThreads();
     }
 
-    var threads = chunker.dedupeThreads(rawThreads);
-    if (options.dao && typeof options.dao.listOpenThreads === 'function') {
-      threads = filterExistingThreads(threads, await options.dao.listOpenThreads({ chatId: chat.chatId }));
-    }
-    if (threads.length && options.dao && typeof options.dao.putOpenThreads === 'function') {
-      await options.dao.putOpenThreads(threads);
-    }
+    if (signalAborted(signal)) cancelled = true;
+    var threads = options.dao && typeof options.dao.putOpenThreads === 'function' ? savedThreads.slice() : await persistDiscoveredThreads();
 
     var result = {
       chatId: chat.chatId,
@@ -198,6 +246,7 @@ var ExtractionRunner = (function() {
       rawThreadCount: rawThreads.length,
       threadCount: threads.length,
       threads: threads,
+      cancelled: cancelled,
       durationMs: now() - startedAt
     };
     if (options.dao && typeof options.dao.putExtractionRun === 'function') {
@@ -208,10 +257,11 @@ var ExtractionRunner = (function() {
         modelVersion: modelVersion(options),
         completedAt: isoNow(),
         threadCount: result.threadCount,
+        cancelled: cancelled,
         durationMs: result.durationMs
       });
     }
-    emit(onProgress, { status: 'done', result: result });
+    emit(onProgress, { status: cancelled ? 'cancelled' : 'done', result: result });
     return result;
   }
 

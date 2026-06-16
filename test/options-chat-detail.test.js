@@ -22,6 +22,7 @@ function createDom() {
       <a id="open-original" href="#" aria-disabled="true">Open original</a>
       <button id="detail-pin" type="button"></button>
       <button id="run-extraction-chat" type="button"></button>
+      <button id="stop-extraction-chat" type="button" hidden disabled>Stop</button>
       <span id="detail-extraction-status"></span>
       <button id="send-new-chat" type="button"></button>
       <button id="restore-clipboard" type="button"></button>
@@ -263,6 +264,54 @@ describe('OptionsChatDetail', () => {
     expect(extractionButton.textContent).toBe('Run extraction');
     expect(extractionStatus.textContent).toBe('Done: 1 threads');
     expect(dom.window.document.querySelector('.chat-thread-link[data-message-id="m1"]').textContent).toContain('UNRESOLVED');
+  });
+
+  it('stops a running per-chat extraction and returns controls to idle', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const extractionButton = dom.window.document.getElementById('run-extraction-chat');
+    const stopButton = dom.window.document.getElementById('stop-extraction-chat');
+    const extractionStatus = dom.window.document.getElementById('detail-extraction-status');
+    let capturedSignal = null;
+    let finishRun = null;
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      extractionButton,
+      stopExtractionButton: stopButton,
+      extractionStatus,
+      dao: {
+        listMessages: async () => messages(),
+        listOpenThreads: async () => []
+      },
+      onRunExtraction: async (selectedChat, selectedMessages, onProgress, runOptions) => {
+        capturedSignal = runOptions.signal;
+        onProgress({ status: 'chunk-processing', index: 0, total: 2 });
+        return new Promise((resolve) => {
+          finishRun = () => resolve({ threadCount: 1, cancelled: capturedSignal.aborted });
+        });
+      },
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    extractionButton.click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+    expect(extractionButton.disabled).toBe(true);
+    expect(stopButton.hidden).toBe(false);
+    expect(stopButton.disabled).toBe(false);
+
+    stopButton.click();
+    expect(capturedSignal.aborted).toBe(true);
+    expect(stopButton.textContent).toBe('Stopping');
+    finishRun();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(extractionButton.disabled).toBe(false);
+    expect(extractionButton.textContent).toBe('Run extraction');
+    expect(stopButton.hidden).toBe(true);
+    expect(extractionStatus.textContent).toBe('Stopped: 1 threads');
   });
 
   it('creates explicit user open-thread rows from per-message tag popover', async () => {

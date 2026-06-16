@@ -100,7 +100,9 @@ var ExtractionPromptApiBackend = (function() {
   async function promptSession(session, prompt, options, resolved) {
     if (!session || typeof session.prompt !== 'function') throw new Error('Chrome Prompt API session is unavailable');
     var input = resolved.type === 'window-ai' ? promptText(prompt) : prompt;
-    return session.prompt(input, options && options.promptOptions ? options.promptOptions : undefined);
+    var promptOptions = Object.assign({}, options && options.promptOptions ? options.promptOptions : {});
+    if (options && options.signal) promptOptions.signal = options.signal;
+    return session.prompt(input, Object.keys(promptOptions).length ? promptOptions : undefined);
   }
 
   async function loadModel(modelId, options) {
@@ -114,7 +116,7 @@ var ExtractionPromptApiBackend = (function() {
     return async function(prompt, generationOptions) {
       var session = await createSession(resolved, options);
       try {
-        return await promptSession(session, prompt, { promptOptions: options.promptOptions, generationOptions: generationOptions }, resolved);
+        return await promptSession(session, prompt, { promptOptions: options.promptOptions, generationOptions: generationOptions, signal: options.signal }, resolved);
       } finally {
         if (session && typeof session.destroy === 'function') session.destroy();
       }

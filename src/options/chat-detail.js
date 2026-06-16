@@ -113,6 +113,10 @@ var OptionsChatDetail = (function() {
     return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
   }
 
+  function isAbortError(error) {
+    return !!(error && (error.name === 'AbortError' || error.code === 'ABORT_ERR'));
+  }
+
   function normalizeTagName(value) {
     if (typeof ThreadScanner !== 'undefined' && ThreadScanner.normalizeTagName) return ThreadScanner.normalizeTagName(value);
     return text(value).trim().toUpperCase().replace(/[^A-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
@@ -530,12 +534,14 @@ var OptionsChatDetail = (function() {
     var sendButton = options.sendButton || null;
     var restoreButton = options.restoreButton || null;
     var extractionButton = options.extractionButton || null;
+    var stopExtractionButton = options.stopExtractionButton || null;
     var extractionStatus = options.extractionStatus || null;
     var onRunExtraction = typeof options.onRunExtraction === 'function' ? options.onRunExtraction : null;
     var currentChat = null;
     var currentMessages = [];
     var currentThreads = [];
     var extractionRunning = false;
+    var extractionController = null;
     function configuredCustomTags() {
       return normalizeCustomTags(typeof options.getCustomThreadTags === 'function' ? options.getCustomThreadTags() : options.customThreadTags);
     }
@@ -591,6 +597,13 @@ var OptionsChatDetail = (function() {
       if (!extractionRunning) extractionButton.textContent = 'Run extraction';
     }
 
+    function syncStopExtractionButton() {
+      if (!stopExtractionButton) return;
+      stopExtractionButton.hidden = !extractionRunning;
+      stopExtractionButton.disabled = !extractionRunning || !extractionController;
+      if (!extractionRunning) stopExtractionButton.textContent = 'Stop';
+    }
+
     function setExtractionStatus(value) {
       if (extractionStatus) extractionStatus.textContent = value || '';
     }
@@ -599,6 +612,7 @@ var OptionsChatDetail = (function() {
       event = event || {};
       if (event.status === 'model-load' || event.status === 'model-progress') return 'Model load';
       if (event.status === 'chunk-processing') return 'Chunk ' + String((event.index || 0) + 1) + '/' + String(event.total || 1);
+      if (event.status === 'cancelled') return 'Stopped';
       if (event.status === 'done') return 'Done';
       return text(event.status, 'Running');
     }
@@ -606,7 +620,9 @@ var OptionsChatDetail = (function() {
     async function runCurrentExtraction() {
       if (!currentChat || !currentChat.chatId || !onRunExtraction || extractionRunning) return;
       extractionRunning = true;
+      extractionController = typeof AbortController !== 'undefined' ? new AbortController() : null;
       syncExtractionButton(currentChat);
+      syncStopExtractionButton();
       if (extractionButton) extractionButton.textContent = 'Model load';
       setExtractionStatus('Model load');
       try {
@@ -614,18 +630,38 @@ var OptionsChatDetail = (function() {
           var label = extractionProgressLabel(event);
           if (extractionButton) extractionButton.textContent = label;
           setExtractionStatus(label);
-        });
-        setExtractionStatus('Done: ' + String(result && typeof result.threadCount === 'number' ? result.threadCount : 0) + ' threads');
+        }, { signal: extractionController && extractionController.signal });
+        if (result && result.cancelled) {
+          setExtractionStatus('Stopped: ' + String(typeof result.threadCount === 'number' ? result.threadCount : 0) + ' threads');
+        } else {
+          setExtractionStatus('Done: ' + String(result && typeof result.threadCount === 'number' ? result.threadCount : 0) + ' threads');
+        }
         await load(currentChat);
       } catch (error) {
+        if (isAbortError(error)) {
+          setExtractionStatus('Stopped: 0 threads');
+          return;
+        }
         setExtractionStatus('Extraction failed');
         if (typeof AppLogger !== 'undefined') {
           AppLogger.error('options.chat_detail.extraction.failed', { error: AppLogger.serializeError(error), chatId: currentChat.chatId });
         }
       } finally {
         extractionRunning = false;
+        extractionController = null;
         syncExtractionButton(currentChat);
+        syncStopExtractionButton();
       }
+    }
+
+    function stopCurrentExtraction() {
+      if (!extractionRunning || !extractionController) return;
+      extractionController.abort();
+      if (stopExtractionButton) {
+        stopExtractionButton.disabled = true;
+        stopExtractionButton.textContent = 'Stopping';
+      }
+      setExtractionStatus('Stopping');
     }
 
     async function createThread(chat, message, tag, note) {
@@ -745,6 +781,7 @@ var OptionsChatDetail = (function() {
       syncSendButton(null);
       syncRestoreButton(null);
       syncExtractionButton(null);
+      syncStopExtractionButton();
       setExtractionStatus('');
       var empty = makeEmpty(title, message);
       root.appendChild(empty);
@@ -762,6 +799,7 @@ var OptionsChatDetail = (function() {
       syncSendButton(chat);
       syncRestoreButton(chat);
       syncExtractionButton(chat);
+      syncStopExtractionButton();
 
       var summary = document.createElement('section');
       summary.className = 'detail-summary';
@@ -869,6 +907,12 @@ var OptionsChatDetail = (function() {
     if (extractionButton) {
       extractionButton.addEventListener('click', function() {
         runCurrentExtraction();
+      });
+    }
+
+    if (stopExtractionButton) {
+      stopExtractionButton.addEventListener('click', function() {
+        stopCurrentExtraction();
       });
     }
 
