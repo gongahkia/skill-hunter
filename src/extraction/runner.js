@@ -132,6 +132,14 @@ var ExtractionRunner = (function() {
     });
   }
 
+  function modelName(options) {
+    return options.modelName || options.modelId || DEFAULT_MODEL_ID;
+  }
+
+  function modelVersion(options) {
+    return options.modelVersion || options.quantization || 'q4';
+  }
+
   async function loadGenerator(deps, options, onProgress) {
     if (options.generator) return options.generator;
     var loader = requireDependency(deps.modelLoader, 'Extraction model loader');
@@ -190,6 +198,17 @@ var ExtractionRunner = (function() {
       threads: threads,
       durationMs: now() - startedAt
     };
+    if (options.dao && typeof options.dao.putExtractionRun === 'function') {
+      await options.dao.putExtractionRun({
+        runId: ['extract', idPart(chat.chatId), String(startedAt), stableHash(createdAt)].join(':'),
+        chatId: chat.chatId,
+        modelName: modelName(options),
+        modelVersion: modelVersion(options),
+        completedAt: isoNow(),
+        threadCount: result.threadCount,
+        durationMs: result.durationMs
+      });
+    }
     emit(onProgress, { status: 'done', result: result });
     return result;
   }

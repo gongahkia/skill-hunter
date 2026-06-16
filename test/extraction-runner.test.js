@@ -27,6 +27,7 @@ describe('ExtractionRunner', () => {
     const runner = loadRunner();
     const prompts = [];
     const written = [];
+    const runs = [];
     const progress = [];
     const messages = [
       { messageId: 'm-1', role: 'user', content: 'Routine update.', index: 0 },
@@ -42,12 +43,18 @@ describe('ExtractionRunner', () => {
       putOpenThreads: async (threads) => {
         written.push(...threads);
         return threads;
+      },
+      putExtractionRun: async (run) => {
+        runs.push(run);
+        return run;
       }
     };
 
     const result = await runner.runChatExtraction(chat(), messages, {
       generator,
       dao,
+      modelName: 'test-model',
+      modelVersion: 'q4-test',
       onProgress: (event) => progress.push(event.status)
     });
 
@@ -67,6 +74,15 @@ describe('ExtractionRunner', () => {
       confidence: 0.82
     });
     expect(written[0].threadId).toMatch(/^extracted:chat-1:m-2:UNRESOLVED:/);
+    expect(runs).toHaveLength(1);
+    expect(runs[0]).toMatchObject({
+      chatId: 'chat-1',
+      modelName: 'test-model',
+      modelVersion: 'q4-test',
+      threadCount: 1
+    });
+    expect(runs[0].runId).toMatch(/^extract:chat-1:/);
+    expect(typeof runs[0].durationMs).toBe('number');
     expect(progress).toContain('chunk-processing');
     expect(progress).toContain('done');
   });
@@ -74,6 +90,7 @@ describe('ExtractionRunner', () => {
   it('skips model load and writes nothing when no candidate windows exist', async () => {
     const runner = loadRunner();
     let called = false;
+    const runs = [];
     const result = await runner.runChatExtraction(chat(), [
       { messageId: 'm-1', role: 'user', content: 'Thanks, all set.', index: 0 }
     ], {
@@ -85,6 +102,10 @@ describe('ExtractionRunner', () => {
         listOpenThreads: async () => [],
         putOpenThreads: async () => {
           throw new Error('should not write');
+        },
+        putExtractionRun: async (run) => {
+          runs.push(run);
+          return run;
         }
       }
     });
@@ -92,5 +113,7 @@ describe('ExtractionRunner', () => {
     expect(called).toBe(false);
     expect(result.threadCount).toBe(0);
     expect(result.windows).toEqual([]);
+    expect(runs).toHaveLength(1);
+    expect(runs[0]).toMatchObject({ chatId: 'chat-1', threadCount: 0 });
   });
 });

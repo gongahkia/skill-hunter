@@ -71,6 +71,7 @@
     vaultCount: document.getElementById('vault-count'),
     saveStatus: document.getElementById('save-status'),
     diagnosticsList: document.getElementById('diagnostics-list'),
+    extractionRunsList: document.getElementById('extraction-runs-list'),
     downloadDiagnostics: document.getElementById('download-diagnostics'),
     clearDiagnostics: document.getElementById('clear-diagnostics'),
     historySummary: document.getElementById('history-summary'),
@@ -487,6 +488,7 @@
         totalThreads += result.threadCount || 0;
       }
       if (els.extractionStatus) els.extractionStatus.textContent = 'Done: ' + String(totalThreads) + ' threads';
+      await refreshExtractionRuns();
       if (refreshVault) await refreshVault(true);
       else await refreshVaultStats();
     } catch (error) {
@@ -560,6 +562,55 @@
     } catch (error) {
       log('error', 'options.diagnostics.refresh.failed', { error: serializeError(error) });
       renderDiagnostics([]);
+    }
+  }
+
+  function renderExtractionRuns(runs) {
+    if (!els.extractionRunsList) return;
+    els.extractionRunsList.innerHTML = '';
+    if (!runs.length) {
+      var empty = document.createElement('li');
+      empty.textContent = 'No extraction runs yet.';
+      els.extractionRunsList.appendChild(empty);
+      return;
+    }
+
+    runs.slice(0, 25).forEach(function(run) {
+      var item = document.createElement('li');
+      var meta = document.createElement('div');
+      meta.className = 'log-meta';
+
+      var model = document.createElement('strong');
+      model.textContent = run.modelName || 'unknown model';
+      meta.appendChild(model);
+
+      var version = document.createElement('span');
+      version.textContent = run.modelVersion || 'unknown version';
+      meta.appendChild(version);
+
+      var when = document.createElement('span');
+      when.textContent = run.completedAt ? new Date(run.completedAt).toLocaleString() : '';
+      meta.appendChild(when);
+      item.appendChild(meta);
+
+      var details = document.createElement('div');
+      details.textContent = [
+        run.chatId || 'unknown chat',
+        String(run.threadCount || 0) + ' threads',
+        String(run.durationMs || 0) + 'ms'
+      ].join(' | ');
+      item.appendChild(details);
+      els.extractionRunsList.appendChild(item);
+    });
+  }
+
+  async function refreshExtractionRuns() {
+    try {
+      var runs = typeof VaultDAO !== 'undefined' && VaultDAO.listExtractionRuns ? await VaultDAO.listExtractionRuns() : [];
+      renderExtractionRuns(runs);
+    } catch (error) {
+      log('error', 'options.extraction_runs.refresh.failed', { error: serializeError(error) });
+      renderExtractionRuns([]);
     }
   }
 
@@ -754,6 +805,7 @@
         },
         onRunExtraction: async function(chat, messages, onProgress) {
           var result = await runExtractionForChat(chat, messages, onProgress);
+          await refreshExtractionRuns();
           await refreshVault(true);
           return result;
         }
@@ -963,6 +1015,7 @@
       var settings = await StorageManager.getAll();
       renderSettings(settings);
       await refreshDiagnostics();
+      await refreshExtractionRuns();
       await refreshHistorySummary();
       var refreshVault = await initVaultViews();
       await refreshVaultStats();
@@ -981,6 +1034,7 @@
         var defaults = getDefaultSettings();
         renderSettings(defaults);
         renderDiagnostics([]);
+        renderExtractionRuns([]);
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
         var localRefreshVault = await initVaultViews();
         await refreshVaultStats();

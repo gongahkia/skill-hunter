@@ -38,7 +38,8 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
   });
   const defaultVaultDAO = {
     getStats: async () => statsQueue.shift() || statsQueue[0],
-    listChats: async () => []
+    listChats: async () => [],
+    listExtractionRuns: async () => []
   };
   const vaultQuota = {
     getQuotaUsage: async () => quota
@@ -149,5 +150,37 @@ describe('options vault stats', () => {
     await flush();
     expect(written).toHaveLength(1);
     expect(dom.window.document.getElementById('rescanStatus').textContent).toBe('Added 0 threads');
+  });
+
+  it('renders recent extraction runs in the debug pane', async () => {
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 1,
+        totalMessages: 2,
+        oldestChat: { title: 'Eval chat' },
+        newestChat: { title: 'Eval chat' },
+        perPlatform: [{ platform: 'chatgpt', chats: 1, messages: 2 }]
+      }],
+      quota: { usageMB: 1 },
+      onChanged: {},
+      vaultDAO: {
+        listExtractionRuns: async () => [
+          {
+            runId: 'run-1',
+            chatId: 'chat-1',
+            modelName: 'Qwen/Qwen2.5-0.5B-Instruct',
+            modelVersion: 'q4',
+            completedAt: '2026-06-16T01:02:03.000Z',
+            threadCount: 3,
+            durationMs: 42
+          }
+        ]
+      }
+    });
+
+    const text = dom.window.document.getElementById('extraction-runs-list').textContent;
+    expect(text).toContain('Qwen/Qwen2.5-0.5B-Instruct');
+    expect(text).toContain('q4');
+    expect(text).toContain('chat-1 | 3 threads | 42ms');
   });
 });
