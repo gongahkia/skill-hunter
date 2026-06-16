@@ -28,7 +28,7 @@ function makeApi(onChanged, storage) {
   };
 }
 
-async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
+async function loadOptions({ statsQueue, quota, onChanged, vaultDAO, showDirectoryPicker }) {
   const storage = {};
   const dom = new JSDOM(loadSrc('options.html'), { url: 'https://extension.test/options.html', pretendToBeVisual: true });
   dom.window.matchMedia = () => ({
@@ -36,6 +36,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
     addEventListener() {},
     removeEventListener() {}
   });
+  if (showDirectoryPicker) dom.window.showDirectoryPicker = showDirectoryPicker;
   const defaultVaultDAO = {
     getStats: async () => statsQueue.shift() || statsQueue[0],
     listChats: async () => [],
@@ -57,6 +58,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
     loadSrc('storage.js'),
     loadSrc('converters.js'),
     loadSrc('filename.js'),
+    loadSrc('obsidian-sync.js'),
     loadSrc('ui/colorschemes.js'),
     loadSrc('threads/scanner.js'),
     loadSrc('options/chat-list.js'),
@@ -89,6 +91,48 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO }) {
   await flush();
   dom._downloads = captured;
   return dom;
+}
+
+function makeDirectoryHandle(name, permission = 'granted') {
+  const handle = {
+    name,
+    permission,
+    directories: {},
+    files: {},
+    async queryPermission() {
+      return handle.permission;
+    },
+    async requestPermission() {
+      handle.permission = 'granted';
+      return handle.permission;
+    },
+    async getDirectoryHandle(childName, options) {
+      if (!handle.directories[childName]) {
+        if (!options || !options.create) throw new Error('directory not found');
+        handle.directories[childName] = makeDirectoryHandle(childName, handle.permission);
+      }
+      return handle.directories[childName];
+    },
+    async getFileHandle(fileName, options) {
+      if (!handle.files[fileName]) {
+        if (!options || !options.create) throw new Error('file not found');
+        const file = { content: '' };
+        handle.files[fileName] = {
+          file,
+          async createWritable() {
+            return {
+              async write(content) {
+                file.content = content;
+              },
+              async close() {}
+            };
+          }
+        };
+      }
+      return handle.files[fileName];
+    }
+  };
+  return handle;
 }
 
 describe('options vault stats', () => {
@@ -258,5 +302,53 @@ describe('options vault stats', () => {
     expect(markdown).toContain('Question from chat-4');
     expect((markdown.match(/\n---\n/g) || [])).toHaveLength(4);
     expect(doc.getElementById('bulkExportSummary').textContent).toBe('0 selected');
+  });
+
+  it('picks an Obsidian vault and syncs Markdown notes from the options UI', async () => {
+    const root = makeDirectoryHandle('Obsidian');
+    const meta = {};
+    const chat = { chatId: 'chatgpt:sync-1', platform: 'chatgpt', title: 'Sync Me', model: 'gpt-4', messageCount: 1 };
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 1,
+        totalMessages: 1,
+        oldestChat: chat,
+        newestChat: chat,
+        perPlatform: [{ platform: 'chatgpt', chats: 1, messages: 1 }]
+      }],
+      quota: { usageMB: 1 },
+      onChanged: {},
+      showDirectoryPicker: async () => root,
+      vaultDAO: {
+        getMeta: async (key) => meta[key] || null,
+        setMeta: async (key, value) => {
+          meta[key] = value;
+          return value;
+        },
+        listChats: async () => [chat],
+        listMessages: async () => [
+          { messageId: 'm1', role: 'user', content: 'Write this note', index: 0 }
+        ],
+        listOpenThreads: async () => []
+      }
+    });
+
+    const doc = dom.window.document;
+    expect(doc.getElementById('obsidianSyncStatus').textContent).toBe('No Obsidian vault selected.');
+
+    doc.getElementById('chooseObsidianVault').click();
+    await flush();
+    expect(doc.getElementById('obsidianSyncStatus').textContent).toBe('Vault selected: Obsidian');
+    expect(doc.getElementById('syncObsidianVault').disabled).toBe(false);
+
+    doc.getElementById('syncObsidianVault').click();
+    await flush();
+    const folder = root.directories.Rakuzaichi;
+    const fileName = Object.keys(folder.files)[0];
+
+    expect(doc.getElementById('obsidianSyncStatus').textContent).toBe('Synced 1 chat to Rakuzaichi.');
+    expect(fileName).toMatch(/^chatgpt_Sync_Me_sync-1.*\.md$/);
+    expect(folder.files[fileName].file.content).toContain('# Sync Me');
+    expect(folder.files[fileName].file.content).toContain('Write this note');
   });
 });

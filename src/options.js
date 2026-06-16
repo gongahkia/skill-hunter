@@ -86,7 +86,10 @@
     clearDiagnostics: document.getElementById('clear-diagnostics'),
     historySummary: document.getElementById('history-summary'),
     downloadHistory: document.getElementById('download-history'),
-    clearHistory: document.getElementById('clear-history')
+    clearHistory: document.getElementById('clear-history'),
+    chooseObsidianVault: document.getElementById('chooseObsidianVault'),
+    syncObsidianVault: document.getElementById('syncObsidianVault'),
+    obsidianSyncStatus: document.getElementById('obsidianSyncStatus')
   };
 
   function serializeError(error) {
@@ -825,6 +828,94 @@
     }
   }
 
+  function setObsidianSyncStatus(message) {
+    if (els.obsidianSyncStatus) els.obsidianSyncStatus.textContent = message;
+  }
+
+  function hasObsidianSyncSupport() {
+    return typeof ObsidianSync !== 'undefined' && ObsidianSync.isSupported(window);
+  }
+
+  async function refreshObsidianSyncStatus() {
+    if (!els.obsidianSyncStatus) return;
+    if (!hasObsidianSyncSupport()) {
+      if (els.chooseObsidianVault) els.chooseObsidianVault.disabled = true;
+      if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
+      setObsidianSyncStatus('Direct sync unavailable in this browser.');
+      return;
+    }
+    if (typeof VaultDAO === 'undefined' || !VaultDAO.getMeta || !VaultDAO.setMeta) {
+      if (els.chooseObsidianVault) els.chooseObsidianVault.disabled = true;
+      if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
+      setObsidianSyncStatus('Vault store unavailable.');
+      return;
+    }
+    if (els.chooseObsidianVault) els.chooseObsidianVault.disabled = false;
+    try {
+      var handle = await ObsidianSync.storedVault(VaultDAO);
+      if (els.syncObsidianVault) els.syncObsidianVault.disabled = !handle;
+      setObsidianSyncStatus(handle ? 'Vault selected: ' + (handle.name || 'selected directory') : 'No Obsidian vault selected.');
+    } catch (error) {
+      if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
+      setObsidianSyncStatus('Unable to load saved vault.');
+      log('warn', 'options.obsidian.status.failed', { error: serializeError(error) });
+    }
+  }
+
+  async function pickObsidianVault() {
+    if (!els.chooseObsidianVault || !hasObsidianSyncSupport()) return;
+    var previous = els.chooseObsidianVault.textContent;
+    var finalStatus = '';
+    els.chooseObsidianVault.disabled = true;
+    if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
+    els.chooseObsidianVault.textContent = 'Choosing';
+    setObsidianSyncStatus('Choosing vault...');
+    try {
+      var handle = await ObsidianSync.chooseVault({ dao: VaultDAO, window: window });
+      setObsidianSyncStatus('Vault selected: ' + (handle.name || 'selected directory'));
+      log('info', 'options.obsidian.vault_selected', { name: handle.name || '' });
+    } catch (error) {
+      var cancelled = error && (error.name === 'AbortError' || error.message === 'The user aborted a request.');
+      finalStatus = cancelled ? 'Vault selection cancelled.' : 'Vault selection failed.';
+      setObsidianSyncStatus(finalStatus);
+      log(cancelled ? 'warn' : 'error', 'options.obsidian.vault_select.failed', { error: serializeError(error) });
+    } finally {
+      els.chooseObsidianVault.textContent = previous;
+      await refreshObsidianSyncStatus();
+      if (finalStatus) setObsidianSyncStatus(finalStatus);
+    }
+  }
+
+  async function runObsidianSync() {
+    if (!els.syncObsidianVault || els.syncObsidianVault.disabled) return;
+    var previous = els.syncObsidianVault.textContent;
+    els.syncObsidianVault.disabled = true;
+    els.syncObsidianVault.textContent = 'Syncing';
+    setObsidianSyncStatus('Syncing...');
+    try {
+      if (typeof ObsidianSync === 'undefined') throw new Error('Obsidian sync is unavailable');
+      var result = await ObsidianSync.syncAll({ dao: VaultDAO, converter: FormatConverter });
+      if (typeof ExportHistory !== 'undefined' && ExportHistory.add) {
+        await ExportHistory.add({
+          platform: 'multiple',
+          format: 'markdown',
+          messageCount: result.messageCount,
+          chatTitle: 'Obsidian sync',
+          filename: result.subfolderName
+        });
+        await refreshHistorySummary();
+      }
+      setObsidianSyncStatus('Synced ' + result.chatCount + (result.chatCount === 1 ? ' chat' : ' chats') + ' to ' + result.subfolderName + '.');
+      log('info', 'options.obsidian.sync.success', { chats: result.chatCount, messages: result.messageCount, folder: result.subfolderName });
+    } catch (error) {
+      setObsidianSyncStatus('Sync failed.');
+      log('error', 'options.obsidian.sync.failed', { error: serializeError(error) });
+    } finally {
+      els.syncObsidianVault.textContent = previous;
+      els.syncObsidianVault.disabled = false;
+    }
+  }
+
   function renderDiagnostics(logs) {
     if (!els.diagnosticsList) return;
     els.diagnosticsList.innerHTML = '';
@@ -1063,6 +1154,8 @@
         if (els.extractionStatus) els.extractionStatus.textContent = 'Stopping';
       });
     }
+    if (els.chooseObsidianVault) els.chooseObsidianVault.addEventListener('click', pickObsidianVault);
+    if (els.syncObsidianVault) els.syncObsidianVault.addEventListener('click', runObsidianSync);
     if (els.colorscheme) {
       els.colorscheme.addEventListener('change', function() {
         applyColorscheme(els.colorscheme.value, document.documentElement.dataset.themeMode);
@@ -1355,6 +1448,7 @@
       await refreshDiagnostics();
       await refreshExtractionRuns();
       await refreshHistorySummary();
+      await refreshObsidianSyncStatus();
       var refreshVault = await initVaultViews();
       await refreshVaultStats();
       wireEvents(refreshVault);
@@ -1375,6 +1469,7 @@
         renderDiagnostics([]);
         renderExtractionRuns([]);
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';
+        await refreshObsidianSyncStatus();
         var localRefreshVault = await initVaultViews();
         await refreshVaultStats();
         wireEvents(localRefreshVault);
