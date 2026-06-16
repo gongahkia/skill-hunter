@@ -38,7 +38,7 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 - [ ] `rakuzaichi-chrome.zip`
 - [ ] `rakuzaichi-firefox.xpi`
 - [ ] `rakuzaichi-firefox-source.zip`
-- [ ] Safari binary/archive: not available yet.
+- [ ] `rakuzaichi-safari.zip` (unsigned local macOS Safari app ZIP; not an App Store/TestFlight artifact).
 
 ## Verification Before Publishing
 
@@ -59,6 +59,7 @@ git push origin main
 git tag v3.0.0
 git push origin v3.0.0
 gh release create v3.0.0 rakuzaichi-chrome.zip rakuzaichi-firefox.xpi rakuzaichi-firefox-source.zip --title "Rakuzaichi v3.0.0 - local AI-chat memory vault" --notes-file docs/launch/release-v3.0.0.md --draft
+gh release upload v3.0.0 rakuzaichi-safari.zip
 ```
 
-Do not run the release command until the Safari artifact decision is made.
+Do not publish the draft release until the Safari artifact decision is made.

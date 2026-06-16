@@ -13,6 +13,7 @@
     "package": "npm run build && node scripts/package.mjs",
     "package:firefox": "npm run build:firefox && node scripts/package-firefox.mjs",
     "package:firefox-source": "node scripts/package-firefox-source.mjs",
+    "package:safari-local": "node scripts/package-safari.mjs",
     "safari:convert": "npm run build:safari && node scripts/convert-safari.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
