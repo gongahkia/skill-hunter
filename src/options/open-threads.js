@@ -174,26 +174,39 @@ var OptionsOpenThreads = (function() {
     return header;
   }
 
-  function makeActions(document, row, setStatus) {
+  function nowIso() {
+    return new Date().toISOString();
+  }
+
+  function makeActions(document, row, setStatus, updateThread, editThread) {
     var actions = document.createElement('span');
     actions.className = 'thread-actions';
     actions.setAttribute('role', 'cell');
 
-    function add(label, status) {
+    function add(label, handler) {
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'btn btn-ghost';
       button.textContent = label;
       button.addEventListener('click', function(event) {
         event.stopPropagation();
-        setStatus(row, status);
+        handler(row);
       });
       actions.appendChild(button);
     }
 
-    if (row.status === 'done') add('Reopen', 'open');
-    else add('Done', 'done');
-    if (row.status !== 'archived') add('Archive', 'archived');
+    if (row.source === 'extracted' && row.status !== 'archived') {
+      if (!row.accepted) add('Accept', function() {
+        updateThread(row, { accepted: true, acceptedAt: nowIso() });
+      });
+      add('Reject', function() {
+        setStatus(row, 'archived', { rejected: true, rejectedAt: nowIso() });
+      });
+      add('Edit', editThread);
+    }
+    if (row.status === 'done') add('Reopen', function() { setStatus(row, 'open'); });
+    else if (row.status !== 'archived') add('Done', function() { setStatus(row, 'done'); });
+    if (row.source !== 'extracted' && row.status !== 'archived') add('Archive', function() { setStatus(row, 'archived'); });
     return actions;
   }
 
@@ -217,7 +230,7 @@ var OptionsOpenThreads = (function() {
     return cell;
   }
 
-  function makeRow(document, row, onSelect, setStatus, selected, syncSelection) {
+  function makeRow(document, row, onSelect, setStatus, updateThread, editThread, selected, syncSelection) {
     var item = document.createElement('div');
     item.className = 'thread-row thread-row-data';
     if (row.source === 'extracted') item.className += ' thread-row-extracted';
@@ -240,7 +253,7 @@ var OptionsOpenThreads = (function() {
     item.appendChild(makeConfidenceCell(document, row));
     appendCell(item, platformLabel(row.platform) + ' | ' + text(row.chatTitle, row.chatId));
     appendCell(item, text(row.text, '(empty)'), 'thread-text');
-    item.appendChild(makeActions(document, row, setStatus));
+    item.appendChild(makeActions(document, row, setStatus, updateThread, editThread));
     return item;
   }
 
@@ -250,6 +263,7 @@ var OptionsOpenThreads = (function() {
     if (!root) throw new Error('open threads root is required');
 
     var document = root.ownerDocument;
+    var win = options.window || document.defaultView || (typeof window !== 'undefined' ? window : null);
     var state = {
       root: root,
       summaryEl: options.summaryEl || null,
@@ -279,7 +293,10 @@ var OptionsOpenThreads = (function() {
     function updateSummary() {
       if (!state.summaryEl) return;
       var count = state.filteredRows.length;
-      state.summaryEl.textContent = count + (count === 1 ? ' thread' : ' threads');
+      var rejected = state.rows.filter(function(row) {
+        return row.rejected;
+      }).length;
+      state.summaryEl.textContent = count + (count === 1 ? ' thread' : ' threads') + (rejected ? ' | ' + rejected + ' rejected' : '');
       if (state.archiveButton) {
         state.archiveButton.disabled = !state.rows.some(function(row) {
           return state.selected[row.threadId] && row.status === 'done';
@@ -304,7 +321,7 @@ var OptionsOpenThreads = (function() {
         return;
       }
       state.filteredRows.forEach(function(row) {
-        root.appendChild(makeRow(document, row, state.onSelect, setStatus, state.selected, updateSummary));
+        root.appendChild(makeRow(document, row, state.onSelect, setStatus, updateThread, editThread, state.selected, updateSummary));
       });
       updateSummary();
     }
@@ -318,12 +335,29 @@ var OptionsOpenThreads = (function() {
       });
     }
 
-    async function setStatus(row, status) {
+    async function setStatus(row, status, patch) {
       if (!state.dao || !state.dao.setThreadStatus) return;
-      await state.dao.setThreadStatus(row.threadId, status);
+      await state.dao.setThreadStatus(row.threadId, status, patch);
       delete state.selected[row.threadId];
       await load();
       if (typeof options.onChange === 'function') options.onChange(row, status);
+    }
+
+    async function updateThread(row, patch) {
+      if (!state.dao) return;
+      if (state.dao.updateOpenThread) await state.dao.updateOpenThread(row.threadId, patch);
+      else if (state.dao.setThreadStatus) await state.dao.setThreadStatus(row.threadId, row.status, patch);
+      await load();
+      if (typeof options.onChange === 'function') options.onChange(row, 'updated');
+    }
+
+    async function editThread(row) {
+      if (!win || typeof win.prompt !== 'function') return;
+      var next = win.prompt('Edit extracted thread', text(row.text));
+      if (next === null) return;
+      next = text(next).trim();
+      if (!next) return;
+      await updateThread(row, { text: next, edited: true, editedAt: nowIso() });
     }
 
     async function archiveSelected() {

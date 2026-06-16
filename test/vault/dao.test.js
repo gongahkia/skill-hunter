@@ -110,9 +110,14 @@ describe('VaultDAO', () => {
       }
     ]);
     expect(await dao.listOpenThreads({ chatId: 'chat-1', status: 'open' })).toHaveLength(1);
+    await expect(dao.updateOpenThread('thread-2', { text: 'source edited', accepted: true })).resolves.toMatchObject({
+      text: 'source edited',
+      accepted: true
+    });
 
-    const updated = await dao.setThreadStatus('thread-1', 'done');
+    const updated = await dao.setThreadStatus('thread-1', 'done', { rejected: true });
     expect(updated.status).toBe('done');
+    expect(updated.rejected).toBe(true);
     expect(updated.resolvedAt).toBeTruthy();
 
     await seedExtractionRun(name, {
@@ -138,6 +143,7 @@ describe('VaultDAO', () => {
     await expect(dao.putChat({ title: 'missing id' })).rejects.toThrow('chatId is required');
     await expect(dao.putMessages('', [])).rejects.toThrow('chatId is required');
     await expect(dao.putOpenThreads(null)).rejects.toThrow('threads must be an array');
+    await expect(dao.updateOpenThread('', {})).rejects.toThrow('threadId is required');
     await expect(dao.setThreadStatus('', 'done')).rejects.toThrow('threadId is required');
     await expect(dao.deleteChat('')).rejects.toThrow('chatId is required');
 

@@ -344,7 +344,20 @@ function createVaultDAO(options) {
     });
   }
 
-  async function setThreadStatus(threadId, status) {
+  async function updateOpenThread(threadId, patch) {
+    if (!threadId) throw new Error('threadId is required');
+    if (!patch || typeof patch !== 'object') throw new Error('thread patch is required');
+    return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
+      var store = transaction.objectStore('openThreads');
+      var thread = await requestToPromise(store.get(threadId));
+      if (!thread) return null;
+      Object.assign(thread, patch);
+      await requestToPromise(store.put(thread));
+      return thread;
+    });
+  }
+
+  async function setThreadStatus(threadId, status, patch) {
     if (!threadId) throw new Error('threadId is required');
     if (!status) throw new Error('status is required');
     return withTransaction(['openThreads'], 'readwrite', async function(transaction) {
@@ -353,6 +366,7 @@ function createVaultDAO(options) {
       if (!thread) return null;
       thread.status = status;
       thread.resolvedAt = status === 'done' ? new Date().toISOString() : null;
+      if (patch && typeof patch === 'object') Object.assign(thread, patch);
       await requestToPromise(store.put(thread));
       return thread;
     });
@@ -428,6 +442,7 @@ function createVaultDAO(options) {
     getStats: getStats,
     putOpenThreads: putOpenThreads,
     listOpenThreads: listOpenThreads,
+    updateOpenThread: updateOpenThread,
     setThreadStatus: setThreadStatus,
     deleteChat: deleteChat,
     putExtractionRun: putExtractionRun,

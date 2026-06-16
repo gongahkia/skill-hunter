@@ -210,6 +210,66 @@ describe('OptionsOpenThreads', () => {
     expect(explicit.querySelector('.thread-confidence').textContent).toBe('-');
   });
 
+  it('accepts, edits, and rejects extracted threads', async () => {
+    const { dom, root } = createDom();
+    const OptionsOpenThreads = loadOpenThreads(dom);
+    const rows = [
+      { threadId: 'extracted-1', chatId: 'chat-a', messageId: 'msg-1', tag: 'UNRESOLVED', text: 'original text', source: 'extracted', subSource: 'llm', status: 'open', confidence: 0.7, createdAt: '2026-01-01T00:00:00.000Z' }
+    ];
+    const updates = [];
+    const statuses = [];
+    dom.window.prompt = () => 'edited text';
+    const pane = OptionsOpenThreads.create({
+      root,
+      summaryEl: dom.window.document.getElementById('summary'),
+      filters: {
+        tag: dom.window.document.getElementById('tag'),
+        chat: dom.window.document.getElementById('chat'),
+        platform: dom.window.document.getElementById('platform'),
+        status: dom.window.document.getElementById('status'),
+        showDone: dom.window.document.getElementById('showDone'),
+        source: dom.window.document.getElementById('source'),
+        subSource: dom.window.document.getElementById('subSource'),
+        sort: dom.window.document.getElementById('sort')
+      },
+      dao: {
+        listOpenThreads: async () => rows,
+        listChats: async () => chats(),
+        updateOpenThread: async (threadId, patch) => {
+          updates.push({ threadId, patch });
+          Object.assign(rows.find((row) => row.threadId === threadId), patch);
+        },
+        setThreadStatus: async (threadId, status, patch) => {
+          statuses.push({ threadId, status, patch });
+          Object.assign(rows.find((row) => row.threadId === threadId), { status }, patch || {});
+        }
+      },
+      window: dom.window
+    });
+
+    await pane.load();
+    expect([...root.querySelectorAll('.thread-actions button')].map((button) => button.textContent)).toEqual(['Accept', 'Reject', 'Edit', 'Done']);
+
+    root.querySelector('.thread-actions button').click();
+    await flush(dom.window);
+    expect(updates[0].threadId).toBe('extracted-1');
+    expect(updates[0].patch.accepted).toBe(true);
+    expect(root.querySelectorAll('.thread-actions button')[0].textContent).toBe('Reject');
+
+    root.querySelectorAll('.thread-actions button')[1].click();
+    await flush(dom.window);
+    expect(updates[1]).toMatchObject({ threadId: 'extracted-1', patch: { text: 'edited text', edited: true } });
+    expect(root.querySelector('.thread-text').textContent).toBe('edited text');
+
+    root.querySelector('.thread-actions button').click();
+    await flush(dom.window);
+    expect(statuses[0].threadId).toBe('extracted-1');
+    expect(statuses[0].status).toBe('archived');
+    expect(statuses[0].patch.rejected).toBe(true);
+    expect(root.querySelectorAll('.thread-row-data')).toHaveLength(0);
+    expect(dom.window.document.getElementById('summary').textContent).toBe('0 threads | 1 rejected');
+  });
+
   it('marks threads done and reveals them with show done', async () => {
     const { dom, root } = createDom();
     const OptionsOpenThreads = loadOpenThreads(dom);

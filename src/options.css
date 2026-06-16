@@ -698,10 +698,10 @@ select[multiple] {
 
 .thread-row {
   display: grid;
-  grid-template-columns: 58px 82px 76px 126px 92px minmax(170px, 0.9fr) minmax(220px, 1.2fr) 150px;
+  grid-template-columns: 58px 82px 76px 126px 92px minmax(170px, 0.9fr) minmax(220px, 1.2fr) 220px;
   gap: 10px;
   align-items: center;
-  min-width: 880px;
+  min-width: 960px;
   min-height: 38px;
   padding: 0 12px;
   border: 0;
