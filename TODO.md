@@ -354,9 +354,11 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 - [ ] `M8.T01` — Create Chrome Web Store developer account (US$5 one-time, ~24h verification). **Success:** account confirmed at `https://chrome.google.com/webstore/devconsole`.
 - [ ] `M8.T02` — Build production Chrome bundle: `npm run package` then upload as a draft to CWS. Fill listing: title, summary, description (≤16k chars), screenshots (5x), category. **Success:** CWS draft listing populated; "Submit for review" is the only remaining action.
+  - 2026-06-16: local `npm run package` succeeded and produced ignored artifacts `rakuzaichi-chrome.zip` and `rakuzaichi-firefox.xpi`; CWS upload/listing population is not done because no CWS account access is available here.
 - [ ] `M8.T03` — Submit to CWS. **Success:** review status visible in dev console. [Inference] Expect 3-21 day review per 2026 surge data.
 - [ ] `M8.T04` — Create Mozilla Add-Ons developer account. **Success:** account confirmed at `https://addons.mozilla.org/developers/`.
 - [ ] `M8.T05` — Build Firefox bundle + source bundle: `npm run package:firefox` and `npm run package:firefox-source`. Submit. **Success:** AMO listing accepted into review queue.
+  - 2026-06-16: fixed `scripts/package-firefox-source.mjs` to stage under ignored `dist/firefox-source` and include existing repo files; local `npm run package:firefox-source` succeeded and produced ignored artifact `rakuzaichi-firefox-source.zip`. AMO submission is not done because no AMO account access is available here.
 - [ ] `M8.T06` — Apple Developer account verified (US$99/yr; user already has?). **Success:** developer.apple.com shows active membership.
 - [ ] `M8.T07` — Convert and package for Safari: `npm run safari:convert` (uses existing build pipeline). Open the generated Xcode project, configure signing, archive, submit to App Store Connect. **Success:** Safari extension listed in TestFlight or App Store review.
 - [ ] `M8.T08` — Add per-store listing copy to `docs/launch/store-listings.md`. **Success:** doc contains 3 listing payloads matching what was submitted.
