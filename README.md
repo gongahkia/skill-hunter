@@ -52,15 +52,11 @@ With these considerations in mind, I created [`Owl`](https://github.com/gongahki
 
 ## Tags
 
-The below tags are currently supported.
+## Usage
 
-| Tag | Purpose | Example |
-| :--- | :--- | :--- |
-| `TODO` | Task to be completed in the future | ![](./asset/screenshot/todo.png) |
-| `FIXME` | Signposts areas that require explicit urgent attention  | ![](./asset/screenshot/fixme.png) |
-| `REV` | Signposts areas that require less urgent revision | ![](./asset/screenshot/rev.png) |
-| `TEMP` | Denotes temporary placeholder text | ![](./asset/screenshot/temp.png) |
-| `REF` | Points to a reference, generally to more detailed documentation, resources or bibliography | ![](./asset/screenshot/ref.png) |
+> [!IMPORTANT]
+> Read the [legal disclaimer](#legal-disclaimer) before using `Rakuzaichi`.
+> Read the [privacy policy](./PRIVACY.md) for local storage, model-download, and host-permission details.
 
 > [!TIP]  
 > More tags *(or custom tags)* might be added in the future. Open an issue to feedback!
