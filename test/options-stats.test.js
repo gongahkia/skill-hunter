@@ -58,6 +58,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO, showDirecto
     loadSrc('storage.js'),
     loadSrc('converters.js'),
     loadSrc('filename.js'),
+    loadSrc('zip.js'),
     loadSrc('obsidian-sync.js'),
     loadSrc('ui/colorschemes.js'),
     loadSrc('threads/scanner.js'),
@@ -133,6 +134,25 @@ function makeDirectoryHandle(name, permission = 'granted') {
     }
   };
   return handle;
+}
+
+async function readStoredEntries(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  const view = new DataView(bytes.buffer);
+  const decoder = new TextDecoder();
+  const entries = {};
+  let offset = 0;
+  while (view.getUint32(offset, true) === 0x04034b50) {
+    const compressedSize = view.getUint32(offset + 18, true);
+    const nameLength = view.getUint16(offset + 26, true);
+    const extraLength = view.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const dataStart = nameStart + nameLength + extraLength;
+    const name = decoder.decode(bytes.slice(nameStart, nameStart + nameLength));
+    entries[name] = decoder.decode(bytes.slice(dataStart, dataStart + compressedSize));
+    offset = dataStart + compressedSize;
+  }
+  return entries;
 }
 
 describe('options vault stats', () => {
@@ -350,5 +370,45 @@ describe('options vault stats', () => {
     expect(fileName).toMatch(/^chatgpt_Sync_Me_sync-1.*\.md$/);
     expect(folder.files[fileName].file.content).toContain('# Sync Me');
     expect(folder.files[fileName].file.content).toContain('Write this note');
+  });
+
+  it('downloads an Obsidian ZIP fallback when direct sync is unavailable', async () => {
+    const chat = { chatId: 'claude:fallback-1', platform: 'claude', title: 'Fallback Sync', model: 'claude', messageCount: 1 };
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 1,
+        totalMessages: 1,
+        oldestChat: chat,
+        newestChat: chat,
+        perPlatform: [{ platform: 'claude', chats: 1, messages: 1 }]
+      }],
+      quota: { usageMB: 1 },
+      onChanged: {},
+      vaultDAO: {
+        listChats: async () => [chat],
+        listMessages: async () => [
+          { messageId: 'm1', role: 'assistant', content: 'Fallback note', index: 0 }
+        ],
+        listOpenThreads: async () => []
+      }
+    });
+
+    const doc = dom.window.document;
+    expect(doc.getElementById('chooseObsidianVault').hidden).toBe(true);
+    expect(doc.getElementById('obsidianFallbackNote').hidden).toBe(false);
+    expect(doc.getElementById('obsidianFallbackNote').textContent).toContain('Direct sync unavailable');
+    expect(doc.getElementById('syncObsidianVault').textContent).toBe('Download ZIP');
+    expect(doc.getElementById('syncObsidianVault').disabled).toBe(false);
+
+    doc.getElementById('syncObsidianVault').click();
+    await flush();
+    const entries = await readStoredEntries(dom._downloads.blob);
+    const name = Object.keys(entries)[0];
+
+    expect(dom._downloads.download).toMatch(/^rakuzaichi_obsidian_\d{4}-\d{2}-\d{2}\.zip$/);
+    expect(dom._downloads.blob.type).toBe('application/zip');
+    expect(name).toMatch(/^Rakuzaichi\/claude_Fallback_Sync_fallback-1.*\.md$/);
+    expect(entries[name]).toContain('Fallback note');
+    expect(doc.getElementById('obsidianSyncStatus').textContent).toBe('Downloaded ZIP with 1 chat.');
   });
 });

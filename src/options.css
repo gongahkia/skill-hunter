@@ -1156,6 +1156,13 @@ select[multiple] {
   line-height: 1.35;
 }
 
+.sync-fallback-banner {
+  padding: 8px;
+  border: 1px solid var(--secondary);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
 .tag-priority-list {
   display: grid;
   gap: 6px;

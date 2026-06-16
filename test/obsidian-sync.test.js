@@ -1,7 +1,26 @@
 import { describe, expect, it, vi } from 'vitest';
 import { evalSrc } from './helpers.js';
 
-const { FormatConverter, ObsidianSync } = evalSrc('filename.js', 'converters.js', 'obsidian-sync.js');
+const { FormatConverter, ObsidianSync } = evalSrc('filename.js', 'converters.js', 'zip.js', 'obsidian-sync.js');
+
+async function readStoredEntries(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  const view = new DataView(bytes.buffer);
+  const decoder = new TextDecoder();
+  const entries = {};
+  let offset = 0;
+  while (view.getUint32(offset, true) === 0x04034b50) {
+    const compressedSize = view.getUint32(offset + 18, true);
+    const nameLength = view.getUint16(offset + 26, true);
+    const extraLength = view.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const dataStart = nameStart + nameLength + extraLength;
+    const name = decoder.decode(bytes.slice(nameStart, nameStart + nameLength));
+    entries[name] = decoder.decode(bytes.slice(dataStart, dataStart + compressedSize));
+    offset = dataStart + compressedSize;
+  }
+  return entries;
+}
 
 function makeDirectoryHandle(name, permission = 'granted') {
   const handle = {
@@ -111,5 +130,25 @@ describe('ObsidianSync', () => {
     };
 
     await expect(ObsidianSync.syncAll({ dao, converter: FormatConverter })).rejects.toThrow('Write permission');
+  });
+
+  it('creates a ZIP fallback with one Markdown note per chat', async () => {
+    const rows = chats();
+    const dao = {
+      listChats: async () => rows,
+      listMessages: async (chatId) => [
+        { messageId: `${chatId}:m1`, role: 'user', content: `Zip ${chatId}`, index: 0 }
+      ],
+      listOpenThreads: async () => []
+    };
+
+    const result = await ObsidianSync.createZip({ dao, converter: FormatConverter });
+    const entries = await readStoredEntries(result.blob);
+    const names = Object.keys(entries).sort();
+
+    expect(result.filename).toMatch(/^rakuzaichi_obsidian_\d{4}-\d{2}-\d{2}\.zip$/);
+    expect(result.files).toHaveLength(2);
+    expect(names[0]).toMatch(/^Rakuzaichi\/chatgpt_Deploy_plan_thread-1.*\.md$/);
+    expect(entries[names[0]]).toContain('Zip chatgpt:thread-1');
   });
 });

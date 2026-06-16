@@ -93,18 +93,13 @@ var ObsidianSync = (function() {
     }
   }
 
-  async function syncAll(options) {
+  async function markdownFiles(options) {
     options = options || {};
     var dao = options.dao;
     var converter = options.converter || (typeof FormatConverter !== 'undefined' ? FormatConverter : null);
     if (!dao || !dao.listChats || !dao.listMessages) throw new Error('Vault DAO is unavailable');
     if (!converter || !converter.toMarkdown) throw new Error('Markdown converter is unavailable');
-    var handle = options.handle || await storedVault(dao);
-    if (!handle) throw new Error('No Obsidian vault directory selected');
-    if (!await ensurePermission(handle)) throw new Error('Write permission was not granted');
-
     var subfolderName = sanitizeFilename(options.subfolderName || DEFAULT_SUBFOLDER);
-    var directory = await handle.getDirectoryHandle(subfolderName, { create: true });
     var chats = Array.isArray(options.chats) ? options.chats : await dao.listChats();
     var seen = {};
     var files = [];
@@ -116,17 +111,53 @@ var ObsidianSync = (function() {
       var openThreads = dao.listOpenThreads ? await dao.listOpenThreads({ chatId: chat.chatId }) : [];
       var envelope = chatEnvelope(chat, messages, openThreads);
       var filename = filenameForChat(chat, i, seen);
-      await writeText(directory, filename, converter.toMarkdown(envelope));
-      files.push(filename);
+      files.push({ name: filename, path: subfolderName + '/' + filename, content: converter.toMarkdown(envelope) });
       messageCount += messages.length;
     }
 
     return {
-      vaultName: handle.name || '',
       subfolderName: subfolderName,
       chatCount: chats.length,
       messageCount: messageCount,
       files: files
+    };
+  }
+
+  async function syncAll(options) {
+    options = options || {};
+    var dao = options.dao;
+    if (!dao || !dao.listChats || !dao.listMessages) throw new Error('Vault DAO is unavailable');
+    var handle = options.handle || await storedVault(dao);
+    if (!handle) throw new Error('No Obsidian vault directory selected');
+    if (!await ensurePermission(handle)) throw new Error('Write permission was not granted');
+
+    var prepared = await markdownFiles(options);
+    var directory = await handle.getDirectoryHandle(prepared.subfolderName, { create: true });
+    for (var i = 0; i < prepared.files.length; i++) {
+      await writeText(directory, prepared.files[i].name, prepared.files[i].content);
+    }
+    prepared.vaultName = handle.name || '';
+    prepared.files = prepared.files.map(function(file) {
+      return file.name;
+    });
+    return prepared;
+  }
+
+  async function createZip(options) {
+    if (typeof ZipWriter === 'undefined' || !ZipWriter.create) throw new Error('ZIP writer is unavailable');
+    var prepared = await markdownFiles(options || {});
+    var date = new Date().toISOString().slice(0, 10);
+    return {
+      filename: 'rakuzaichi_obsidian_' + date + '.zip',
+      blob: ZipWriter.create(prepared.files.map(function(file) {
+        return { name: file.path, content: file.content };
+      })),
+      subfolderName: prepared.subfolderName,
+      chatCount: prepared.chatCount,
+      messageCount: prepared.messageCount,
+      files: prepared.files.map(function(file) {
+        return file.path;
+      })
     };
   }
 
@@ -138,7 +169,9 @@ var ObsidianSync = (function() {
     chooseVault: chooseVault,
     storedVault: storedVault,
     filenameForChat: filenameForChat,
-    syncAll: syncAll
+    markdownFiles: markdownFiles,
+    syncAll: syncAll,
+    createZip: createZip
   };
 })();
 

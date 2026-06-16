@@ -89,6 +89,7 @@
     clearHistory: document.getElementById('clear-history'),
     chooseObsidianVault: document.getElementById('chooseObsidianVault'),
     syncObsidianVault: document.getElementById('syncObsidianVault'),
+    obsidianFallbackNote: document.getElementById('obsidianFallbackNote'),
     obsidianSyncStatus: document.getElementById('obsidianSyncStatus')
   };
 
@@ -623,7 +624,9 @@
   }
 
   function makeBlobDownload(filename, content, mime) {
-    var blob = new Blob([content], { type: mime || 'application/json;charset=utf-8' });
+    var blob = content && typeof content.arrayBuffer === 'function' && typeof content.type === 'string'
+      ? content
+      : new Blob([content], { type: mime || 'application/json;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;
@@ -832,6 +835,12 @@
     if (els.obsidianSyncStatus) els.obsidianSyncStatus.textContent = message;
   }
 
+  function setObsidianFallbackMode(enabled) {
+    if (els.obsidianFallbackNote) els.obsidianFallbackNote.hidden = !enabled;
+    if (els.chooseObsidianVault) els.chooseObsidianVault.hidden = !!enabled;
+    if (els.syncObsidianVault) els.syncObsidianVault.textContent = enabled ? 'Download ZIP' : 'Sync now';
+  }
+
   function hasObsidianSyncSupport() {
     return typeof ObsidianSync !== 'undefined' && ObsidianSync.isSupported(window);
   }
@@ -839,11 +848,14 @@
   async function refreshObsidianSyncStatus() {
     if (!els.obsidianSyncStatus) return;
     if (!hasObsidianSyncSupport()) {
+      setObsidianFallbackMode(true);
       if (els.chooseObsidianVault) els.chooseObsidianVault.disabled = true;
-      if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
-      setObsidianSyncStatus('Direct sync unavailable in this browser.');
+      var fallbackReady = typeof VaultDAO !== 'undefined' && VaultDAO.listChats && VaultDAO.listMessages && typeof ObsidianSync !== 'undefined' && typeof ZipWriter !== 'undefined';
+      if (els.syncObsidianVault) els.syncObsidianVault.disabled = !fallbackReady;
+      setObsidianSyncStatus(fallbackReady ? 'ZIP fallback ready.' : 'ZIP fallback unavailable.');
       return;
     }
+    setObsidianFallbackMode(false);
     if (typeof VaultDAO === 'undefined' || !VaultDAO.getMeta || !VaultDAO.setMeta) {
       if (els.chooseObsidianVault) els.chooseObsidianVault.disabled = true;
       if (els.syncObsidianVault) els.syncObsidianVault.disabled = true;
@@ -889,27 +901,31 @@
   async function runObsidianSync() {
     if (!els.syncObsidianVault || els.syncObsidianVault.disabled) return;
     var previous = els.syncObsidianVault.textContent;
+    var fallback = !hasObsidianSyncSupport();
     els.syncObsidianVault.disabled = true;
-    els.syncObsidianVault.textContent = 'Syncing';
-    setObsidianSyncStatus('Syncing...');
+    els.syncObsidianVault.textContent = fallback ? 'Preparing ZIP' : 'Syncing';
+    setObsidianSyncStatus(fallback ? 'Preparing ZIP...' : 'Syncing...');
     try {
       if (typeof ObsidianSync === 'undefined') throw new Error('Obsidian sync is unavailable');
-      var result = await ObsidianSync.syncAll({ dao: VaultDAO, converter: FormatConverter });
+      var result = fallback
+        ? await ObsidianSync.createZip({ dao: VaultDAO, converter: FormatConverter })
+        : await ObsidianSync.syncAll({ dao: VaultDAO, converter: FormatConverter });
+      if (fallback) makeBlobDownload(result.filename, result.blob, 'application/zip');
       if (typeof ExportHistory !== 'undefined' && ExportHistory.add) {
         await ExportHistory.add({
           platform: 'multiple',
-          format: 'markdown',
+          format: fallback ? 'zip' : 'markdown',
           messageCount: result.messageCount,
-          chatTitle: 'Obsidian sync',
-          filename: result.subfolderName
+          chatTitle: fallback ? 'Obsidian ZIP fallback' : 'Obsidian sync',
+          filename: fallback ? result.filename : result.subfolderName
         });
         await refreshHistorySummary();
       }
-      setObsidianSyncStatus('Synced ' + result.chatCount + (result.chatCount === 1 ? ' chat' : ' chats') + ' to ' + result.subfolderName + '.');
-      log('info', 'options.obsidian.sync.success', { chats: result.chatCount, messages: result.messageCount, folder: result.subfolderName });
+      setObsidianSyncStatus((fallback ? 'Downloaded ZIP with ' : 'Synced ') + result.chatCount + (result.chatCount === 1 ? ' chat' : ' chats') + (fallback ? '.' : ' to ' + result.subfolderName + '.'));
+      log('info', fallback ? 'options.obsidian.zip.success' : 'options.obsidian.sync.success', { chats: result.chatCount, messages: result.messageCount, folder: result.subfolderName });
     } catch (error) {
-      setObsidianSyncStatus('Sync failed.');
-      log('error', 'options.obsidian.sync.failed', { error: serializeError(error) });
+      setObsidianSyncStatus(fallback ? 'ZIP download failed.' : 'Sync failed.');
+      log('error', fallback ? 'options.obsidian.zip.failed' : 'options.obsidian.sync.failed', { error: serializeError(error) });
     } finally {
       els.syncObsidianVault.textContent = previous;
       els.syncObsidianVault.disabled = false;
