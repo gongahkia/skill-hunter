@@ -167,6 +167,18 @@ describe('options colorscheme settings', () => {
     expect(storage.extractionModel).toBe('gemma-3-1b-q4');
   });
 
+  it('persists the filename template setting', async () => {
+    const storage = { filenameTemplate: '{platform}_{title}_{date}.{ext}' };
+    const dom = await loadOptions(storage);
+    const input = dom.window.document.getElementById('filenameTemplate');
+
+    input.value = '{platform}/{title}/{format}_{date}.{ext}';
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+
+    expect(storage.filenameTemplate).toBe('{platform}/{title}/{format}_{date}.{ext}');
+  });
+
   it('offers the built-in Prompt API backend when available', async () => {
     const storage = { extractionModel: 'gemini-nano-builtin' };
     const dom = await loadOptions(storage, { includePromptApi: true, promptApiStatus: 'available' });

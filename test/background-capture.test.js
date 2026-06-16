@@ -36,6 +36,28 @@ function loadRuntimeWithStorage(storage) {
   return evalSrc('storage.js', 'vault/db.js', 'vault/dao.js', 'threads/scanner.js', 'background-core.js', { api });
 }
 
+function loadDownloadRuntime(storage, downloads) {
+  const api = {
+    storage: {
+      local: {
+        get: async (defaults) => ({ ...defaults, ...storage }),
+        set: async (payload) => Object.assign(storage, payload)
+      },
+      onChanged: { addListener() {} }
+    },
+    runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+    downloads: {
+      download: async (payload) => {
+        downloads.push(payload);
+        return 1;
+      }
+    },
+    alarms: { create() {}, clear: async () => {}, onAlarm: { addListener() {} } },
+    tabs: { query: async () => [], sendMessage: async () => ({}), onUpdated: { addListener() {} } }
+  };
+  return evalSrc('storage.js', 'converters.js', 'filename.js', 'history.js', 'background-core.js', { api });
+}
+
 function snapshot(messages) {
   return {
     chatId: 'chatgpt:thread-123',
@@ -191,5 +213,29 @@ describe('BackgroundRuntime.handleCapture', () => {
     api.tabs.activeUrl = 'https://example.com/';
     await expect(BackgroundRuntime.runCaptureSweep()).resolves.toEqual({ skipped: true, reason: 'unsupported-tab' });
     expect(sends).toBe(1);
+  });
+
+  it('uses the saved filename template and sanitized title for downloads', async () => {
+    const downloads = [];
+    const storage = {
+      filenameTemplate: '{platform}/{title}/{format}_{date}.{ext}',
+      exportHistory: []
+    };
+    const { BackgroundRuntime } = loadDownloadRuntime(storage, downloads);
+    const result = await BackgroundRuntime.handleDownload({
+      format: 'json',
+      data: {
+        platform: 'chatgpt',
+        chatTitle: 'Unsafe / Name?',
+        messageCount: 1,
+        messages: [{ role: 'user', content: 'Q', index: 0 }]
+      },
+      traceId: 'download-test'
+    });
+
+    expect(result.filename).toMatch(/^chatgpt\/Unsafe___Name_\/json_\d{4}-\d{2}-\d{2}\.json$/);
+    expect(downloads[0].filename).toBe(result.filename);
+    expect(downloads[0].filename).not.toMatch(/[<>:"\\|?*]/);
+    expect(storage.exportHistory[0]).toMatchObject({ filename: result.filename, format: 'json' });
   });
 });
