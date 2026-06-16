@@ -345,7 +345,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
   - 2026-06-16: added `docs/launch/hn-post.md` with a 53-character title, 172-word body, and first-comment Q&A covering zero-server design, model fetches, Qwen default, OpenAI-export comparison, host permissions, and remaining launch gaps.
 - [x] `M7.T09` — Soft-launch list: 3 niche subreddits (r/ChatGPT, r/LocalLLaMA, r/PrivacyTools) + tweet thread. Draft the post for each in `docs/launch/`. **Success:** four draft posts exist; tweet thread is ≤5 tweets.
   - 2026-06-16: added `docs/launch/reddit-chatgpt.md`, `docs/launch/reddit-localllama.md`, `docs/launch/reddit-privacytools.md`, and `docs/launch/tweet-thread.md`; verified all four files exist and tweet thread has exactly 5 tweets.
-- [ ] `M7.T10` — Pre-launch checklist in `docs/launch/checklist.md` covering: domain DNS live, CWS approved, AMO approved, Safari TestFlight available, README updated, GIF embedded, PRIVACY.md linked, HN post drafted, friends notified. **Success:** all checklist items boxable; each has a "verify by" command or URL.
+- [x] `M7.T10` — Pre-launch checklist in `docs/launch/checklist.md` covering: domain DNS live, CWS approved, AMO approved, Safari TestFlight available, README updated, GIF embedded, PRIVACY.md linked, HN post drafted, friends notified. **Success:** all checklist items boxable; each has a "verify by" command or URL.
+  - 2026-06-16: added `docs/launch/checklist.md` with 10 boxable items covering DNS, CWS, AMO, Safari TestFlight, README, demo GIF, privacy policy link, HN draft, soft-launch drafts, and friends notified; each item has a `Verify by:` command or URL.
 
 ## M8 — Distribution
 
