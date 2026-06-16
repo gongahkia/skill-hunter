@@ -91,7 +91,7 @@ body {
 
 .vault-main {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   min-width: 0;
 }
 
@@ -454,6 +454,114 @@ select[multiple] {
   line-height: 1.35;
 }
 
+.wrapped-stats {
+  padding: 10px 14px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.wrapped-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wrapped-heading h2 {
+  color: var(--ink);
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.wrapped-heading p,
+.wrapped-status {
+  color: var(--ink-muted);
+  font-size: 0.74rem;
+}
+
+.wrapped-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wrapped-card {
+  min-width: 0;
+  min-height: 92px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.wrapped-card span {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.wrapped-card strong {
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.96rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wrapped-card p {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wrapped-topic-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.wrapped-topic {
+  max-width: 100%;
+  min-height: 24px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  color: var(--primary-strong);
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wrapped-topic:nth-child(even) {
+  border-color: color-mix(in srgb, var(--secondary) 38%, var(--line));
+  background: color-mix(in srgb, var(--secondary) 12%, var(--surface));
+  color: var(--secondary-strong);
+}
+
+.wrapped-topic.empty {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.wrapped-status {
+  min-height: 16px;
+  margin-top: 6px;
+}
+
 .vault-content {
   display: grid;
   grid-template-columns: minmax(360px, 0.9fr) minmax(280px, 1.1fr);
@@ -522,7 +630,8 @@ select[multiple] {
 }
 
 .chat-table {
-  height: calc(100vh - 122px);
+  height: calc(100vh - 258px);
+  min-height: 320px;
   overflow: auto;
   position: relative;
 }
@@ -613,7 +722,8 @@ select[multiple] {
 }
 
 .chat-detail-body {
-  height: calc(100vh - 122px);
+  height: calc(100vh - 258px);
+  min-height: 320px;
   overflow: auto;
 }
 

@@ -40,6 +40,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO, showDirecto
   const defaultVaultDAO = {
     getStats: async () => statsQueue.shift() || statsQueue[0],
     listChats: async () => [],
+    listOpenThreads: async () => [],
     listExtractionRuns: async () => []
   };
   const vaultQuota = {
@@ -63,6 +64,7 @@ async function loadOptions({ statsQueue, quota, onChanged, vaultDAO, showDirecto
     loadSrc('obsidian-sync.js'),
     loadSrc('ui/colorschemes.js'),
     loadSrc('threads/scanner.js'),
+    loadSrc('options/wrapped-stats.js'),
     loadSrc('options/chat-list.js'),
     loadSrc('options.js')
   ].join('\n');
@@ -202,6 +204,111 @@ describe('options vault stats', () => {
     expect(dom.window.document.getElementById('statsTotalMessages').textContent).toBe('12');
     expect(dom.window.document.getElementById('statsNewestChat').textContent).toBe('Captured now');
     expect(dom.window.document.getElementById('capture-status-text').textContent).toBe('Captured 5 messages.');
+  });
+
+  it('renders wrapped stats and downloads a shareable PNG', async () => {
+    const chats = [
+      {
+        chatId: 'chat-1',
+        platform: 'chatgpt',
+        title: 'Typescript refactor TODO',
+        messageCount: 12,
+        tags: ['typescript'],
+        lastUpdatedAt: '2026-06-15T10:00:00.000Z'
+      },
+      {
+        chatId: 'chat-2',
+        platform: 'claude',
+        title: 'Launch plan',
+        messageCount: 31,
+        tags: ['launch'],
+        lastUpdatedAt: '2026-06-16T12:00:00.000Z'
+      },
+      {
+        chatId: 'chat-3',
+        platform: 'claude',
+        title: 'Long Work Plan',
+        messageCount: 44,
+        tags: ['launch'],
+        lastUpdatedAt: '2026-06-16T13:00:00.000Z'
+      }
+    ];
+    const dom = await loadOptions({
+      statsQueue: [{
+        totalChats: 3,
+        totalMessages: 87,
+        oldestChat: chats[0],
+        newestChat: chats[2],
+        perPlatform: [{ platform: 'claude', chats: 2, messages: 75 }]
+      }],
+      quota: { usageMB: 2 },
+      onChanged: {},
+      vaultDAO: {
+        listChats: async () => chats,
+        listOpenThreads: async () => [
+          { threadId: 't1', tag: 'TODO', text: 'ship launch notes', status: 'open' },
+          { threadId: 't2', tag: 'REF', text: 'typescript references', status: 'open' }
+        ]
+      }
+    });
+    const doc = dom.window.document;
+    expect(doc.getElementById('wrappedMostActivePlatform').textContent).toBe('Claude');
+    expect(doc.getElementById('wrappedBusiestDay').textContent).toContain('2026');
+    expect(doc.getElementById('wrappedLongestChat').textContent).toBe('Long Work Plan');
+    expect(doc.getElementById('wrappedTopTopics').textContent).toContain('launch');
+    expect(doc.getElementById('wrappedRenderTime').textContent).toMatch(/Rendered in \d+ms from 3 chats\./);
+
+    dom.window.HTMLCanvasElement.prototype.getContext = () => ({
+      fillStyle: '',
+      font: '',
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      quadraticCurveTo() {},
+      closePath() {},
+      fill() {},
+      fillRect() {},
+      fillText() {}
+    });
+    dom.window.HTMLCanvasElement.prototype.toBlob = function(callback, type) {
+      callback(new dom.window.Blob(['png'], { type }));
+    };
+    doc.getElementById('wrappedSharePng').click();
+    await flush();
+
+    expect(dom._downloads.download).toMatch(/^rakuzaichi_wrapped_\d{4}-\d{2}-\d{2}\.png$/);
+    expect(dom._downloads.blob.type).toBe('image/png');
+    expect(doc.getElementById('wrappedStatus').textContent).toBe('PNG saved.');
+  });
+
+  it('summarizes a 1000-chat wrapped data set under 500ms', async () => {
+    const module = { exports: {} };
+    const fn = new Function('module', 'exports', loadSrc('options/wrapped-stats.js'));
+    fn(module, module.exports);
+    const wrapped = module.exports;
+    const chats = Array.from({ length: 1000 }, (_, index) => ({
+      chatId: `chat-${index}`,
+      platform: index % 3 === 0 ? 'claude' : index % 3 === 1 ? 'chatgpt' : 'gemini',
+      title: `Topic ${index % 20} planning thread`,
+      messageCount: 1 + (index % 60),
+      tags: [`topic-${index % 10}`],
+      lastUpdatedAt: `2026-06-${String(1 + (index % 28)).padStart(2, '0')}T12:00:00.000Z`
+    }));
+    const threads = Array.from({ length: 300 }, (_, index) => ({
+      threadId: `thread-${index}`,
+      tag: index % 2 ? 'TODO' : 'REF',
+      text: `topic ${index % 12}`,
+      status: 'open'
+    }));
+
+    const start = performance.now();
+    const summary = wrapped.summarize(chats, threads);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(500);
+    expect(summary.totalChats).toBe(1000);
+    expect(summary.longestChat.messageCount).toBe(60);
+    expect(summary.topTopics.length).toBeGreaterThan(0);
   });
 
   it('rescans all messages without duplicating existing thread keys', async () => {

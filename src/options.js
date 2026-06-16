@@ -8,6 +8,7 @@
   var currentExtractionModel = 'qwen2.5-0.5b-q4';
   var currentPromptApiAvailability = { status: 'unknown', available: false, api: 'none' };
   var currentBatchExtractionController = null;
+  var latestWrappedStats = null;
   var threadPane = null;
 
   var els = {
@@ -39,6 +40,17 @@
     statsOldestChat: document.getElementById('statsOldestChat'),
     statsNewestChat: document.getElementById('statsNewestChat'),
     statsPlatformBreakdown: document.getElementById('statsPlatformBreakdown'),
+    wrappedStats: document.getElementById('wrappedStats'),
+    wrappedRenderTime: document.getElementById('wrappedRenderTime'),
+    wrappedSharePng: document.getElementById('wrappedSharePng'),
+    wrappedMostActivePlatform: document.getElementById('wrappedMostActivePlatform'),
+    wrappedMostActivePlatformDetail: document.getElementById('wrappedMostActivePlatformDetail'),
+    wrappedBusiestDay: document.getElementById('wrappedBusiestDay'),
+    wrappedBusiestDayDetail: document.getElementById('wrappedBusiestDayDetail'),
+    wrappedLongestChat: document.getElementById('wrappedLongestChat'),
+    wrappedLongestChatDetail: document.getElementById('wrappedLongestChatDetail'),
+    wrappedTopTopics: document.getElementById('wrappedTopTopics'),
+    wrappedStatus: document.getElementById('wrappedStatus'),
     vaultSearch: document.getElementById('vaultSearch'),
     allChatsFolder: document.getElementById('allChatsFolder'),
     folderTree: document.getElementById('folderTree'),
@@ -470,6 +482,65 @@
     return String(chat.title || chat.chatId || 'Untitled chat');
   }
 
+  function formatDurationMs(value) {
+    return formatNumber(Math.round(Number(value || 0))) + 'ms';
+  }
+
+  function wrappedFilename() {
+    return 'rakuzaichi_wrapped_' + new Date().toISOString().slice(0, 10) + '.png';
+  }
+
+  function setWrappedMetric(valueEl, detailEl, value, detail) {
+    if (valueEl) valueEl.textContent = value;
+    if (detailEl) detailEl.textContent = detail;
+  }
+
+  function renderWrappedStats(summary, durationMs) {
+    if (!els.wrappedStats) return;
+    summary = summary || (typeof OptionsWrappedStats !== 'undefined' ? OptionsWrappedStats.summarize([], []) : null);
+    latestWrappedStats = summary;
+    var platform = summary && summary.mostActivePlatform;
+    var day = summary && summary.busiestDay;
+    var longest = summary && summary.longestChat;
+    setWrappedMetric(
+      els.wrappedMostActivePlatform,
+      els.wrappedMostActivePlatformDetail,
+      platform ? platform.label : 'None',
+      platform ? formatNumber(platform.messages) + ' messages / ' + formatNumber(platform.chats) + ' chats' : '0 messages'
+    );
+    setWrappedMetric(
+      els.wrappedBusiestDay,
+      els.wrappedBusiestDayDetail,
+      day ? day.label : 'None',
+      day ? formatNumber(day.chats) + ' chats / ' + formatNumber(day.messages) + ' messages' : '0 chats'
+    );
+    setWrappedMetric(
+      els.wrappedLongestChat,
+      els.wrappedLongestChatDetail,
+      longest ? longest.title : 'None',
+      longest ? formatNumber(longest.messageCount) + ' messages' : '0 messages'
+    );
+    if (els.wrappedTopTopics) {
+      els.wrappedTopTopics.innerHTML = '';
+      var topics = summary && Array.isArray(summary.topTopics) ? summary.topTopics : [];
+      if (!topics.length) {
+        var empty = document.createElement('span');
+        empty.className = 'wrapped-topic empty';
+        empty.textContent = 'None';
+        els.wrappedTopTopics.appendChild(empty);
+      }
+      topics.forEach(function(topic) {
+        var chip = document.createElement('span');
+        chip.className = 'wrapped-topic';
+        chip.textContent = topic.label + ' ' + formatNumber(topic.count);
+        els.wrappedTopTopics.appendChild(chip);
+      });
+    }
+    if (els.wrappedRenderTime) {
+      els.wrappedRenderTime.textContent = 'Rendered in ' + formatDurationMs(durationMs) + ' from ' + formatNumber(summary ? summary.totalChats : 0) + ' chats.';
+    }
+  }
+
   function renderStats(stats, quota) {
     if (!els.statsTotalChats) return;
     stats = stats || defaultStats();
@@ -484,6 +555,24 @@
       els.statsPlatformBreakdown.textContent = rows.length ? rows.map(function(row) {
         return String(row.platform || 'unknown') + ': ' + formatNumber(row.chats) + ' chats, ' + formatNumber(row.messages) + ' messages';
       }).join(' | ') : 'None';
+    }
+  }
+
+  async function refreshWrappedStats() {
+    if (!els.wrappedStats || typeof OptionsWrappedStats === 'undefined') return;
+    var start = typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+    try {
+      if (typeof VaultDAO === 'undefined' || !VaultDAO.listChats) throw new Error('Vault DAO is unavailable');
+      var chats = await VaultDAO.listChats();
+      var threads = VaultDAO.listOpenThreads ? await VaultDAO.listOpenThreads() : [];
+      var summary = OptionsWrappedStats.summarize(chats, threads);
+      var end = typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+      renderWrappedStats(summary, end - start);
+      if (els.wrappedStatus) els.wrappedStatus.textContent = '';
+    } catch (error) {
+      renderWrappedStats(OptionsWrappedStats.summarize([], []), 0);
+      if (els.wrappedStatus) els.wrappedStatus.textContent = 'Stats unavailable.';
+      log('error', 'options.wrapped_stats.refresh.failed', { error: serializeError(error) });
     }
   }
 
@@ -539,9 +628,11 @@
       var stats = typeof VaultDAO !== 'undefined' && VaultDAO.getStats ? await VaultDAO.getStats() : defaultStats();
       var quota = typeof VaultQuota !== 'undefined' && VaultQuota.getQuotaUsage ? await VaultQuota.getQuotaUsage() : { usageMB: 0 };
       renderStats(stats, quota);
+      await refreshWrappedStats();
     } catch (error) {
       log('error', 'options.stats.refresh.failed', { error: serializeError(error) });
       renderStats(defaultStats(), { usageMB: 0 });
+      await refreshWrappedStats();
     }
   }
 
@@ -833,6 +924,27 @@
       els.bulkExportSelected.addEventListener('click', function() {
         runBulkExport(list);
       });
+    }
+  }
+
+  async function downloadWrappedStatsPng() {
+    if (!els.wrappedSharePng || typeof OptionsWrappedStats === 'undefined') return;
+    var previous = els.wrappedSharePng.textContent;
+    els.wrappedSharePng.disabled = true;
+    els.wrappedSharePng.textContent = 'Rendering';
+    if (els.wrappedStatus) els.wrappedStatus.textContent = 'Rendering PNG...';
+    try {
+      if (!latestWrappedStats) await refreshWrappedStats();
+      var blob = await OptionsWrappedStats.toPngBlob(latestWrappedStats, { document: document, window: window });
+      makeBlobDownload(wrappedFilename(), blob, 'image/png');
+      if (els.wrappedStatus) els.wrappedStatus.textContent = 'PNG saved.';
+      log('info', 'options.wrapped_stats.png.success', { filename: wrappedFilename() });
+    } catch (error) {
+      if (els.wrappedStatus) els.wrappedStatus.textContent = 'PNG failed.';
+      log('error', 'options.wrapped_stats.png.failed', { error: serializeError(error) });
+    } finally {
+      els.wrappedSharePng.textContent = previous;
+      els.wrappedSharePng.disabled = false;
     }
   }
 
@@ -1232,6 +1344,7 @@
         runExtractionAll(refreshVault);
       });
     }
+    if (els.wrappedSharePng) els.wrappedSharePng.addEventListener('click', downloadWrappedStatsPng);
     if (els.stopExtractionAll) {
       els.stopExtractionAll.addEventListener('click', function() {
         if (els.stopExtractionAll.disabled) return;

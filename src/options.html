@@ -142,6 +142,38 @@
         </div>
       </section>
 
+      <section id="wrappedStats" class="wrapped-stats" aria-label="Vault wrapped">
+        <div class="wrapped-heading">
+          <div>
+            <h2>Vault wrapped</h2>
+            <p id="wrappedRenderTime">Waiting for vault data.</p>
+          </div>
+          <button id="wrappedSharePng" class="btn btn-secondary" type="button">Share PNG</button>
+        </div>
+        <div class="wrapped-grid">
+          <div class="wrapped-card">
+            <span>Most active</span>
+            <strong id="wrappedMostActivePlatform">None</strong>
+            <p id="wrappedMostActivePlatformDetail">0 messages</p>
+          </div>
+          <div class="wrapped-card">
+            <span>Busiest day</span>
+            <strong id="wrappedBusiestDay">None</strong>
+            <p id="wrappedBusiestDayDetail">0 chats</p>
+          </div>
+          <div class="wrapped-card">
+            <span>Longest chat</span>
+            <strong id="wrappedLongestChat">None</strong>
+            <p id="wrappedLongestChatDetail">0 messages</p>
+          </div>
+          <div class="wrapped-card wrapped-topics-card">
+            <span>Top topics</span>
+            <div id="wrappedTopTopics" class="wrapped-topic-list"></div>
+          </div>
+        </div>
+        <p id="wrappedStatus" class="wrapped-status"></p>
+      </section>
+
       <section class="vault-content">
         <section class="chat-list-pane" aria-label="Chat list">
           <div class="pane-heading">
@@ -442,6 +474,7 @@
   <script src="options/chat-list.js"></script>
   <script src="options/chat-detail.js"></script>
   <script src="options/open-threads.js"></script>
+  <script src="options/wrapped-stats.js"></script>
   <script src="options.js"></script>
 </body>
 </html>
