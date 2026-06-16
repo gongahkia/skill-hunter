@@ -113,6 +113,36 @@ var OptionsChatDetail = (function() {
     return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
   }
 
+  function normalizeTagName(value) {
+    if (typeof ThreadScanner !== 'undefined' && ThreadScanner.normalizeTagName) return ThreadScanner.normalizeTagName(value);
+    return text(value).trim().toUpperCase().replace(/[^A-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function normalizeCustomTags(customTags) {
+    var seen = {};
+    var result = [];
+    (Array.isArray(customTags) ? customTags : []).forEach(function(entry) {
+      var tag = normalizeTagName(entry && typeof entry === 'object' ? entry.tag : entry);
+      if (!tag || seen[tag] || BUILT_IN_THREAD_TAGS.indexOf(tag) !== -1) return;
+      seen[tag] = true;
+      var color = text(entry && entry.color, '#888888');
+      result.push({ tag: tag, color: /^#[0-9a-f]{6}$/i.test(color) ? color : '#888888' });
+    });
+    return result;
+  }
+
+  function customTagColor(customTags, tag) {
+    tag = normalizeTagName(tag);
+    var match = normalizeCustomTags(customTags).filter(function(entry) {
+      return entry.tag === tag;
+    })[0];
+    return match ? match.color : '';
+  }
+
+  function threadTags(customTags) {
+    return BUILT_IN_THREAD_TAGS.concat(normalizeCustomTags(customTags).map(function(entry) { return entry.tag; }));
+  }
+
   function threadsByMessageId(threads) {
     var grouped = {};
     activeThreads(threads).forEach(function(thread) {
@@ -131,13 +161,15 @@ var OptionsChatDetail = (function() {
     return null;
   }
 
-  function tagPrefixPattern() {
-    return new RegExp('(^|\\n)([ \\t]*)(' + BUILT_IN_THREAD_TAGS.join('|') + ')(\\s*:)', 'gi');
+  function tagPrefixPattern(customTags) {
+    return new RegExp('(^|\\n)([ \\t]*)(' + threadTags(customTags).map(function(tag) {
+      return tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }).join('|') + ')(\\s*:)', 'gi');
   }
 
-  function appendMessageContent(document, root, value) {
+  function appendMessageContent(document, root, value, customTags) {
     var content = text(value, '(empty)');
-    var pattern = tagPrefixPattern();
+    var pattern = tagPrefixPattern(customTags);
     var index = 0;
     var match;
     while ((match = pattern.exec(content))) {
@@ -147,6 +179,8 @@ var OptionsChatDetail = (function() {
       var tag = document.createElement('span');
       tag.className = 'message-tag-prefix';
       tag.dataset.tag = match[3].toUpperCase();
+      var customColor = customTagColor(customTags, tag.dataset.tag);
+      if (customColor) tag.style.color = customColor;
       tag.textContent = content.slice(tagStart, tagEnd);
       root.appendChild(tag);
       index = tagEnd;
@@ -255,7 +289,7 @@ var OptionsChatDetail = (function() {
     return sidebar;
   }
 
-  function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread, archiveThread) {
+  function makeMessage(document, win, chat, message, threads, copyText, createThread, openThread, archiveThread, customTags) {
     var card = document.createElement('article');
     card.className = 'message-card ' + roleClass(message.role);
     card.dataset.messageId = getMessageId(message);
@@ -302,7 +336,7 @@ var OptionsChatDetail = (function() {
 
     var body = document.createElement('div');
     body.className = 'message-content';
-    appendMessageContent(document, body, message.content);
+    appendMessageContent(document, body, message.content, customTags);
 
     card.appendChild(meta);
 
@@ -313,6 +347,8 @@ var OptionsChatDetail = (function() {
         var wrap = document.createElement('span');
         wrap.className = 'thread-chip-wrap';
         wrap.dataset.tag = thread.tag || '';
+        var chipColor = customTagColor(customTags, thread.tag);
+        if (chipColor) wrap.style.borderColor = chipColor;
 
         var chip = document.createElement('button');
         chip.type = 'button';
@@ -381,11 +417,13 @@ var OptionsChatDetail = (function() {
         tagButton.textContent = 'Tag failed';
       }
     }
-    BUILT_IN_THREAD_TAGS.forEach(function(tag) {
+    threadTags(customTags).forEach(function(tag) {
       var button = document.createElement('button');
       button.type = 'button';
       button.dataset.tag = tag;
       button.textContent = tag;
+      var buttonColor = customTagColor(customTags, tag);
+      if (buttonColor) button.style.borderColor = buttonColor;
       button.addEventListener('click', async function() {
         await applyTag(tag);
       });
@@ -494,6 +532,10 @@ var OptionsChatDetail = (function() {
     var currentChat = null;
     var currentMessages = [];
     var currentThreads = [];
+    function configuredCustomTags() {
+      return normalizeCustomTags(typeof options.getCustomThreadTags === 'function' ? options.getCustomThreadTags() : options.customThreadTags);
+    }
+    var currentCustomTags = configuredCustomTags();
     var copyText = options.copyText || function(value) {
       return defaultCopy(document, win, value);
     };
@@ -664,6 +706,7 @@ var OptionsChatDetail = (function() {
       currentChat = chat;
       currentMessages = Array.isArray(messages) ? messages : [];
       currentThreads = activeThreads(threads);
+      currentCustomTags = configuredCustomTags();
       var groupedThreads = threadsByMessageId(currentThreads);
       setOriginalLink(openLink, chat);
       syncPinButton(chat);
@@ -698,7 +741,7 @@ var OptionsChatDetail = (function() {
       var list = document.createElement('div');
       list.className = 'message-list';
       for (var i = 0; i < currentMessages.length; i++) {
-        list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen, archiveThread));
+        list.appendChild(makeMessage(document, win, chat, currentMessages[i], groupedThreads[getMessageId(currentMessages[i])] || [], copyText, createThread, onThreadOpen, archiveThread, currentCustomTags));
       }
       layout.appendChild(list);
       root.appendChild(layout);

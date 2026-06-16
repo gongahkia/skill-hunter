@@ -155,6 +155,16 @@ var BackgroundRuntime = (function() {
     }
   }
 
+  async function customThreadTags() {
+    if (typeof StorageManager === 'undefined' || !StorageManager.get) return [];
+    try {
+      return await StorageManager.get('customThreadTags') || [];
+    } catch (error) {
+      log('warn', 'background.threadTags.load.failed', { error: serializeError(error) });
+      return [];
+    }
+  }
+
   async function scanCapturedMessages(chatId, messages) {
     if (typeof ThreadScanner === 'undefined' ||
         !ThreadScanner.scanMessage ||
@@ -170,8 +180,9 @@ var BackgroundRuntime = (function() {
     });
 
     var rows = [];
+    var customTags = await customThreadTags();
     messages.forEach(function(message) {
-      ThreadScanner.scanMessage(message).forEach(function(thread) {
+      ThreadScanner.scanMessage(message, { customTags: customTags }).forEach(function(thread) {
         if (seen[thread.threadId]) return;
         seen[thread.threadId] = true;
         rows.push(thread);

@@ -5,6 +5,7 @@ var StorageManager = {
     darkMode: 'system',
     colorscheme: 'gruvbox',
     threadTagPriority: ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'],
+    customThreadTags: [],
     showPreview: true,
     autoExportInterval: 0,
     lastAutoExportStatus: {

@@ -1,6 +1,5 @@
 var ThreadScanner = (function() {
   var TAGS = ['TODO', 'FIXME', 'REV', 'REF', 'FOLLOWUP', 'UNRESOLVED', 'PROMPT'];
-  var TAG_PATTERN = new RegExp('^\\s*(' + TAGS.join('|') + ')\\s*:\\s*(.+)$', 'i');
 
   function text(value) {
     if (value === undefined || value === null) return '';
@@ -24,17 +23,43 @@ var ThreadScanner = (function() {
     return text(value).replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'unknown';
   }
 
-  function scanMessage(message) {
+  function normalizeTagName(value) {
+    return text(value).trim().toUpperCase().replace(/[^A-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function normalizeCustomTags(customTags) {
+    var seen = {};
+    var result = [];
+    (Array.isArray(customTags) ? customTags : []).forEach(function(entry) {
+      var tag = normalizeTagName(entry && typeof entry === 'object' ? entry.tag : entry);
+      if (!tag || seen[tag] || TAGS.indexOf(tag) !== -1) return;
+      seen[tag] = true;
+      result.push(tag);
+    });
+    return result;
+  }
+
+  function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function tagPattern(customTags) {
+    return new RegExp('^\\s*(' + TAGS.concat(normalizeCustomTags(customTags)).map(escapeRegExp).join('|') + ')\\s*:\\s*(.+)$', 'i');
+  }
+
+  function scanMessage(message, options) {
     message = message || {};
+    options = options || {};
     var id = messageId(message);
     var rows = [];
     var lines = text(message.content).split(/\r?\n/);
+    var pattern = tagPattern(options.customTags);
     for (var i = 0; i < lines.length; i++) {
-      var match = TAG_PATTERN.exec(lines[i]);
+      var match = pattern.exec(lines[i]);
       if (!match) continue;
       var body = match[2].trim();
       if (!body) continue;
-      var tag = match[1].toUpperCase();
+      var tag = normalizeTagName(match[1]);
       rows.push({
         threadId: ['scan', idPart(message.chatId), idPart(id), String(i), tag, stableHash(body)].join(':'),
         chatId: text(message.chatId),
@@ -52,6 +77,8 @@ var ThreadScanner = (function() {
 
   return {
     TAGS: TAGS.slice(),
+    normalizeTagName: normalizeTagName,
+    normalizeCustomTags: normalizeCustomTags,
     scanMessage: scanMessage
   };
 })();

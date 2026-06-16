@@ -1,8 +1,10 @@
 (function() {
   var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
   var DEFAULT_THREAD_TAG_PRIORITY = ['FIXME', 'TODO', 'UNRESOLVED', 'FOLLOWUP', 'REV', 'REF', 'PROMPT'];
+  var BUILT_IN_THREAD_TAGS = DEFAULT_THREAD_TAG_PRIORITY.slice();
   var currentFolderId = '';
   var currentThreadTagPriority = DEFAULT_THREAD_TAG_PRIORITY.slice();
+  var currentCustomThreadTags = [];
   var threadPane = null;
 
   var els = {
@@ -12,6 +14,10 @@
     darkMode: document.getElementById('darkMode'),
     colorscheme: document.getElementById('colorscheme'),
     tagPriorityList: document.getElementById('tagPriorityList'),
+    customThreadTagsList: document.getElementById('customThreadTagsList'),
+    customThreadTagName: document.getElementById('customThreadTagName'),
+    customThreadTagColor: document.getElementById('customThreadTagColor'),
+    customThreadTagAdd: document.getElementById('customThreadTagAdd'),
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
@@ -123,16 +129,45 @@
     return SELECTABLE_FORMATS.indexOf(format) === -1 ? 'json' : format;
   }
 
+  function normalizeThreadTagName(value) {
+    if (typeof ThreadScanner !== 'undefined' && ThreadScanner.normalizeTagName) return ThreadScanner.normalizeTagName(value);
+    return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function normalizeColor(value) {
+    value = String(value || '').trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value : '#888888';
+  }
+
+  function normalizeCustomThreadTags(tags) {
+    var seen = {};
+    var result = [];
+    (Array.isArray(tags) ? tags : []).forEach(function(entry) {
+      var tag = normalizeThreadTagName(entry && typeof entry === 'object' ? entry.tag : entry);
+      if (!tag || seen[tag] || BUILT_IN_THREAD_TAGS.indexOf(tag) !== -1) return;
+      seen[tag] = true;
+      result.push({ tag: tag, color: normalizeColor(entry && entry.color) });
+    });
+    return result;
+  }
+
+  function allThreadTags() {
+    return DEFAULT_THREAD_TAG_PRIORITY.concat(currentCustomThreadTags.map(function(entry) {
+      return entry.tag;
+    }));
+  }
+
   function normalizeThreadTagPriority(priority) {
     var seen = {};
     var tags = [];
+    var allowed = allThreadTags();
     (Array.isArray(priority) ? priority : []).forEach(function(tag) {
-      tag = String(tag || '').toUpperCase();
-      if (DEFAULT_THREAD_TAG_PRIORITY.indexOf(tag) === -1 || seen[tag]) return;
+      tag = normalizeThreadTagName(tag);
+      if (allowed.indexOf(tag) === -1 || seen[tag]) return;
       seen[tag] = true;
       tags.push(tag);
     });
-    DEFAULT_THREAD_TAG_PRIORITY.forEach(function(tag) {
+    allowed.forEach(function(tag) {
       if (seen[tag]) return;
       seen[tag] = true;
       tags.push(tag);
@@ -192,6 +227,56 @@
     });
   }
 
+  function renderCustomThreadTags(tags) {
+    currentCustomThreadTags = normalizeCustomThreadTags(tags);
+    renderThreadTagPriority(currentThreadTagPriority);
+    if (!els.customThreadTagsList) return;
+    els.customThreadTagsList.innerHTML = '';
+    if (!currentCustomThreadTags.length) {
+      var empty = document.createElement('p');
+      empty.className = 'panel-note';
+      empty.textContent = 'No custom thread tags.';
+      els.customThreadTagsList.appendChild(empty);
+      return;
+    }
+    currentCustomThreadTags.forEach(function(entry) {
+      var row = document.createElement('div');
+      row.className = 'custom-thread-tag-row';
+      row.dataset.tag = entry.tag;
+      var swatch = document.createElement('span');
+      swatch.className = 'custom-thread-tag-swatch';
+      swatch.style.backgroundColor = entry.color;
+      row.appendChild(swatch);
+      var label = document.createElement('strong');
+      label.textContent = entry.tag;
+      row.appendChild(label);
+      var remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'btn btn-ghost';
+      remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', 'Remove custom thread tag ' + entry.tag);
+      remove.addEventListener('click', function() {
+        renderCustomThreadTags(currentCustomThreadTags.filter(function(item) {
+          return item.tag !== entry.tag;
+        }));
+      });
+      row.appendChild(remove);
+      els.customThreadTagsList.appendChild(row);
+    });
+  }
+
+  function addCustomThreadTag() {
+    if (!els.customThreadTagName) return;
+    var tag = normalizeThreadTagName(els.customThreadTagName.value);
+    if (!tag || BUILT_IN_THREAD_TAGS.indexOf(tag) !== -1) return;
+    var tags = currentCustomThreadTags.filter(function(entry) {
+      return entry.tag !== tag;
+    });
+    tags.push({ tag: tag, color: normalizeColor(els.customThreadTagColor && els.customThreadTagColor.value) });
+    els.customThreadTagName.value = '';
+    renderCustomThreadTags(tags);
+  }
+
   function isStorageUnavailable(error) {
     return !!(error && error.message === 'Browser storage API is unavailable');
   }
@@ -204,6 +289,7 @@
       darkMode: 'system',
       colorscheme: 'gruvbox',
       threadTagPriority: DEFAULT_THREAD_TAG_PRIORITY.slice(),
+      customThreadTags: [],
       showPreview: true,
       autoExportInterval: 0,
       lastAutoExportStatus: null,
@@ -307,7 +393,7 @@
       var rows = [];
       var messages = await VaultDAO.listAllMessages();
       messages.forEach(function(message) {
-        ThreadScanner.scanMessage(message).forEach(function(thread) {
+        ThreadScanner.scanMessage(message, { customTags: currentCustomThreadTags }).forEach(function(thread) {
           var key = threadKey(thread);
           if (seen[key]) return;
           seen[key] = true;
@@ -440,6 +526,7 @@
         darkMode: darkMode,
         colorscheme: colorscheme,
         threadTagPriority: currentThreadTagPriority.slice(),
+        customThreadTags: currentCustomThreadTags.slice(),
         showPreview: !!els.showPreview.checked,
         autoExportInterval: parseInt(els.autoExportInterval.value, 10) || 0
       };
@@ -510,6 +597,14 @@
     if (els.clearDiagnostics) els.clearDiagnostics.addEventListener('click', clearDiagnostics);
     if (els.downloadHistory) els.downloadHistory.addEventListener('click', downloadHistory);
     if (els.clearHistory) els.clearHistory.addEventListener('click', clearHistory);
+    if (els.customThreadTagAdd) els.customThreadTagAdd.addEventListener('click', addCustomThreadTag);
+    if (els.customThreadTagName) {
+      els.customThreadTagName.addEventListener('keydown', function(event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        addCustomThreadTag();
+      });
+    }
     if (els.rescanThreads) {
       els.rescanThreads.addEventListener('click', function() {
         rescanThreads(refreshVault);
@@ -534,6 +629,7 @@
     if (els.filenameTemplate) els.filenameTemplate.value = settings.filenameTemplate;
     if (els.darkMode) els.darkMode.value = settings.darkMode;
     if (els.colorscheme) els.colorscheme.value = normalizeColorscheme(settings.colorscheme);
+    renderCustomThreadTags(settings.customThreadTags);
     renderThreadTagPriority(settings.threadTagPriority);
     if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
     if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
@@ -566,6 +662,9 @@
         pinButton: els.detailPin,
         sendButton: els.sendToNewChat,
         restoreButton: els.restoreClipboard,
+        getCustomThreadTags: function() {
+          return currentCustomThreadTags;
+        },
         dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
         onTagsChanged: function() {
           refreshVault(true);

@@ -1115,6 +1115,52 @@ select[multiple] {
   font-size: 0.72rem;
 }
 
+.custom-thread-tags-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.custom-thread-tag-row,
+.custom-thread-tag-add {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.custom-thread-tag-row {
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.custom-thread-tag-row strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+}
+
+.custom-thread-tag-swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+.custom-thread-tag-add {
+  grid-template-columns: minmax(0, 1fr) 36px auto;
+  margin-top: 8px;
+}
+
+.custom-thread-tag-add input[type="color"] {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+}
+
 .form-actions {
   gap: 9px;
   margin-top: 12px;
