@@ -41,15 +41,18 @@ Reason: Chrome MV3 treats remotely loaded JavaScript and WASM as remotely hosted
 Runtime/code strategy:
 
 1. Add `@huggingface/transformers` as an npm dependency when implementing `M5.T03`.
-2. Copy/bundle the required JS and WASM runtime files into `src/vendor/` or the build output.
-3. Configure the loader to use the packaged runtime files.
-4. Fetch `Qwen/Qwen2.5-0.5B-Instruct` quantized model artifacts lazily on first extraction opt-in.
-5. Cache downloaded model artifacts locally using the browser cache/storage path supported by Transformers.js.
+2. Bundle the Transformers.js web runtime and copy required WASM runtime files into `dist/<target>/vendor/transformers/`.
+3. Configure the loader to use the packaged runtime files via extension-local URLs.
+4. Route `Qwen/Qwen2.5-0.5B-Instruct` to `onnx-community/Qwen2.5-0.5B-Instruct`, the Hugging Face ONNX repo tagged for Transformers.js. The source Qwen repo does not expose ONNX artifacts.
+5. Fetch q4 model artifacts lazily on first extraction opt-in. Verified 2026-06-16 via Hugging Face API: `onnx/model_q4.onnx` is 786,156,820 bytes; `onnx/model_q4f16.onnx` is 483,003,582 bytes.
+6. Cache downloaded model artifacts locally using the browser Cache API path supported by Transformers.js.
+
+Chrome MV3 execution note: the packaged ONNX runtime includes WASM and generated JS. Chrome extension pages can enable `wasm-unsafe-eval`, but cannot enable `unsafe-eval`/`new Function`. If the final runner hits that path directly, run it inside a sandboxed extension page and bridge progress/results via `postMessage`; Chrome's extension security docs list sandboxed iframes as the allowed path for code needing `eval` or `new Function`.
 
 Privacy disclosure requirement for this strategy:
 
-- No chat content is sent to Hugging Face, jsDelivr, or any model host.
-- The first extraction run may request model artifact URLs from `https://huggingface.co/` or `https://cdn.jsdelivr.net/`, depending on final loader configuration.
+- No chat content is sent to Hugging Face or any model host.
+- The first extraction run requests model artifact URLs from `https://huggingface.co/`.
 - Those requests reveal normal HTTP metadata to the CDN/model host, such as IP address, user agent, requested model file path, and request time.
 - Extraction runs locally after model artifacts are available.
 

@@ -1,5 +1,6 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
+import { build as bundle } from "esbuild";
 
 const rootDir = resolve(process.cwd());
 const srcDir = resolve(rootDir, "src");
@@ -8,6 +9,17 @@ const requestedTarget = process.argv[2] || "all";
 const targets = requestedTarget === "all" ? ["chrome", "firefox", "safari"] : [requestedTarget];
 
 const baseManifest = JSON.parse(readFileSync(resolve(srcDir, "manifest.json"), "utf8"));
+const transformersRuntimeFiles = [
+  {
+    from: resolve(rootDir, "node_modules", "onnxruntime-web", "dist", "ort-wasm-simd-threaded.jsep.mjs"),
+    to: "vendor/transformers/ort-wasm-simd-threaded.jsep.mjs"
+  },
+  {
+    from: resolve(rootDir, "node_modules", "onnxruntime-web", "dist", "ort-wasm-simd-threaded.jsep.wasm"),
+    to: "vendor/transformers/ort-wasm-simd-threaded.jsep.wasm"
+  }
+];
+const transformersEntry = resolve(rootDir, "node_modules", "@huggingface", "transformers", "dist", "transformers.web.js");
 const firefoxBackgroundScripts = [
   "compat.js",
   "logger.js",
@@ -67,10 +79,40 @@ function writeManifest(target) {
   return manifest;
 }
 
-function buildTarget(target) {
+function copyTransformersRuntime(outDir) {
+  for (const file of transformersRuntimeFiles) {
+    if (!existsSync(file.from)) {
+      throw new Error(`Missing Transformers.js runtime file: ${file.from}`);
+    }
+    const targetPath = resolve(outDir, file.to);
+    mkdirSync(dirname(targetPath), { recursive: true });
+    cpSync(file.from, targetPath);
+  }
+}
+
+async function bundleTransformersRuntime(outDir) {
+  if (!existsSync(transformersEntry)) {
+    throw new Error(`Missing Transformers.js web entry: ${transformersEntry}`);
+  }
+  await bundle({
+    entryPoints: [transformersEntry],
+    outfile: resolve(outDir, "vendor", "transformers", "transformers.bundle.js"),
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    target: "es2022",
+    minify: true,
+    legalComments: "eof",
+    logLevel: "silent"
+  });
+}
+
+async function buildTarget(target) {
   const outDir = resolve(distDir, target);
   ensureCleanDir(outDir);
   cpSync(srcDir, outDir, { recursive: true });
+  copyTransformersRuntime(outDir);
+  await bundleTransformersRuntime(outDir);
   const manifest = writeManifest(target);
   writeFileSync(resolve(outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 }
@@ -84,5 +126,5 @@ for (const target of targets) {
   if (!["chrome", "firefox", "safari"].includes(target)) {
     throw new Error(`Unknown build target: ${target}`);
   }
-  buildTarget(target);
+  await buildTarget(target);
 }

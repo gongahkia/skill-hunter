@@ -10,6 +10,9 @@
     "128": "icon/128.png"
   },
   "permissions": ["downloads", "storage", "alarms"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://chatgpt.com/*",
