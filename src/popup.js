@@ -1,5 +1,5 @@
 (function() {
-  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv'];
+  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv', 'pdf'];
 
   var state = {
     settings: null,
@@ -291,6 +291,10 @@
   }
 
   async function doDownload(format, data, traceId) {
+    if (format === 'pdf') {
+      await printPDF(data, traceId);
+      return;
+    }
     try {
       var response = await api.runtime.sendMessage({
         action: 'download',
@@ -315,6 +319,63 @@
         return;
       }
       throw error;
+    }
+  }
+
+  function loadPrintFrame(iframe, html) {
+    return new Promise(function(resolve) {
+      var settled = false;
+      function finish() {
+        if (settled) return;
+        settled = true;
+        resolve(iframe.contentWindow);
+      }
+      iframe.onload = finish;
+      iframe.srcdoc = html;
+      setTimeout(finish, 50);
+    });
+  }
+
+  async function printPDF(data, traceId) {
+    var formatInfo = FormatConverter.formats.pdf;
+    var filename = FilenameBuilder.build(state.settings.filenameTemplate, {
+      platform: data.platform,
+      title: data.chatTitle,
+      format: 'pdf',
+      ext: formatInfo.ext
+    });
+    var iframe = document.createElement('iframe');
+    iframe.hidden = true;
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    try {
+      var printWindow = await loadPrintFrame(iframe, FormatConverter.toHTML(data));
+      if (!printWindow || typeof printWindow.print !== 'function') throw new Error('Print API is unavailable');
+      if (printWindow.focus) printWindow.focus();
+      printWindow.print();
+
+      await ExportHistory.add({
+        platform: data.platform,
+        format: 'pdf',
+        messageCount: data.messageCount,
+        chatTitle: data.chatTitle,
+        filename: filename
+      });
+
+      showStatus('Print dialog opened. Choose Save as PDF in the browser dialog.', 'success');
+      await renderLastExport();
+      log('info', 'popup.pdf.print.opened', { traceId: traceId, filename: filename, platform: data.platform });
+    } finally {
+      setTimeout(function() {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 1200);
     }
   }
 

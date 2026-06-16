@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { loadSrc } from './helpers.js';
 
-function makeApi(storage) {
+function makeApi(storage, options = {}) {
   return {
     storage: {
       local: {
@@ -16,10 +16,16 @@ function makeApi(storage) {
     },
     tabs: {
       query: async () => [{ id: 1 }],
-      sendMessage: async () => ({ data: { supported: false } })
+      sendMessage: async (tabId, request) => {
+        if (options.sendMessage) return options.sendMessage(tabId, request);
+        return { data: { supported: false } };
+      }
     },
     runtime: {
-      sendMessage: async () => ({}),
+      sendMessage: async (request) => {
+        if (options.runtimeMessage) return options.runtimeMessage(request);
+        return {};
+      },
       openOptionsPage() {}
     }
   };
@@ -63,13 +69,44 @@ async function loadOptions(storage, options = {}) {
   return dom;
 }
 
-async function loadPopup(storage) {
+function installPrintFrame(dom, calls) {
+  const originalCreateElement = dom.window.document.createElement.bind(dom.window.document);
+  dom.window.document.createElement = function(tagName) {
+    const element = originalCreateElement(tagName);
+    if (String(tagName).toLowerCase() === 'iframe') {
+      Object.defineProperty(element, 'srcdoc', {
+        configurable: true,
+        set(html) {
+          calls.printHtml = html;
+          setTimeout(() => {
+            if (typeof element.onload === 'function') element.onload();
+          }, 0);
+        },
+        get() {
+          return calls.printHtml;
+        }
+      });
+      const frameWindow = {
+        document: {},
+        focus() {},
+        print() {
+          calls.prints += 1;
+        }
+      };
+      Object.defineProperty(element, 'contentWindow', { configurable: true, value: frameWindow });
+    }
+    return element;
+  };
+}
+
+async function loadPopup(storage, options = {}) {
   const dom = new JSDOM(loadSrc('popup.html'), { url: 'https://extension.test/popup.html', pretendToBeVisual: true });
   dom.window.matchMedia = () => ({
     matches: false,
     addEventListener() {},
     removeEventListener() {}
   });
+  if (options.printCalls) installPrintFrame(dom, options.printCalls);
 
   const code = [
     'var api = this._api;',
@@ -78,12 +115,14 @@ async function loadPopup(storage) {
     'var module = undefined;',
     'var AppLogger = { createTraceId: function(prefix) { return prefix + "-test"; }, getRecent: async function() { return []; }, clear: async function() {}, serializeError: function(error) { return { message: error && error.message ? error.message : String(error) }; }, info: function() {}, warn: function() {}, error: function() {} };',
     loadSrc('storage.js'),
+    loadSrc('converters.js'),
+    loadSrc('filename.js'),
     loadSrc('history.js'),
     loadSrc('ui/colorschemes.js'),
     loadSrc('popup.js')
   ].join('\n');
   const fn = new Function('window', 'document', code);
-  fn.call({ _api: makeApi(storage) }, dom.window, dom.window.document);
+  fn.call({ _api: makeApi(storage, options) }, dom.window, dom.window.document);
   await flush();
   return dom;
 }
@@ -162,6 +201,59 @@ describe('options colorscheme settings', () => {
     expect(dom.window.document.documentElement.dataset.themeMode).toBe('dark');
     expect(dom.window.document.documentElement.style.getPropertyValue('--bg')).toBe('#191724');
     expect(dom.window.document.documentElement.style.getPropertyValue('--primary')).toBe('#31748f');
+  });
+
+  it('routes popup PDF export through a hidden print iframe', async () => {
+    const storage = {
+      showPreview: false,
+      filenameTemplate: '{platform}_{title}_{date}.{ext}',
+      defaultFormat: 'json',
+      colorscheme: 'github',
+      darkMode: 'light',
+      exportHistory: []
+    };
+    const calls = { prints: 0, printHtml: '' };
+    const envelope = {
+      exportVersion: '2.1',
+      exportedAt: '2026-01-01T00:00:00.000Z',
+      platform: 'chatgpt',
+      chatTitle: 'PDF Test',
+      model: 'gpt-4',
+      messageCount: 1,
+      messages: [{ role: 'user', content: 'Print this chat', id: 'msg-1', timestamp: '2026-01-01T00:00:01.000Z', index: 0 }],
+      openThreads: [{ tag: 'TODO', text: 'Check PDF flow', messageId: 'msg-1', status: 'open' }]
+    };
+    let backgroundDownloads = 0;
+    const dom = await loadPopup(storage, {
+      printCalls: calls,
+      runtimeMessage: async () => {
+        backgroundDownloads += 1;
+        return {};
+      },
+      sendMessage: async (tabId, request) => {
+        if (request.action === 'detectPlatform') {
+          return { data: { supported: true, platform: 'chatgpt', name: 'ChatGPT', messageCount: 1, chatTitle: 'PDF Test', model: 'gpt-4' } };
+        }
+        if (request.action === 'extractChat') return { data: envelope };
+        return { data: {} };
+      }
+    });
+
+    const pdfButton = dom.window.document.querySelector('button[data-format="pdf"]');
+    expect(pdfButton).toBeTruthy();
+    expect(pdfButton.disabled).toBe(false);
+
+    pdfButton.click();
+    await flush();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    expect(backgroundDownloads).toBe(0);
+    expect(calls.prints).toBe(1);
+    expect(calls.printHtml).toContain('<!doctype html>');
+    expect(calls.printHtml).toContain('Check PDF flow');
+    expect(calls.printHtml).toContain('@media print');
+    expect(storage.exportHistory[0]).toMatchObject({ format: 'pdf', filename: expect.stringMatching(/\.pdf$/) });
+    expect(dom.window.document.getElementById('status').textContent).toContain('Print dialog opened');
   });
 
   it('applies and persists theme mode independently of colorscheme', async () => {
