@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rakuzaichi</title>
+  <meta name="description" content="Zero-server browser-extension vault for AI chats, open threads, local extraction, export, and Obsidian sync.">
+  <style>
+    :root {
+      --bg: #f7fafc;
+      --ink: #172232;
+      --muted: #45566a;
+      --line: #cbd5e1;
+      --primary: #0a7ca5;
+      --primary-dark: #075d7d;
+      --soft: #eef7ee;
+      --warm: #fff4e8;
+      --purple: #f4edf9;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; }
+
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      position: relative;
+      overflow: hidden;
+      background: #102333;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(16, 35, 51, 0.92), rgba(16, 35, 51, 0.48) 52%, rgba(16, 35, 51, 0.2)), url("../asset/reference/demo.gif") center / cover no-repeat;
+    }
+
+    .nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px clamp(20px, 5vw, 72px);
+      color: #fff;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: min(980px, calc(100% - 40px));
+      padding: 150px 0 64px;
+      margin-left: clamp(20px, 6vw, 86px);
+      color: #fff;
+    }
+
+    h1 {
+      max-width: 840px;
+      margin: 0;
+      font-size: clamp(3.8rem, 9vw, 8.4rem);
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 700px;
+      margin: 26px 0 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 7px;
+      padding: 10px 14px;
+      background: #fff;
+      color: #102333;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .button.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    main {
+      display: grid;
+      gap: 0;
+    }
+
+    section {
+      padding: 76px clamp(20px, 6vw, 86px);
+    }
+
+    .strip {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .section-head p,
+    .feature p,
+    .platforms,
+    .foot {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature {
+      min-height: 178px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      background: var(--bg);
+    }
+
+    .feature:nth-child(2n) { background: var(--soft); }
+    .feature:nth-child(3n) { background: var(--warm); }
+
+    .feature h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .diagram {
+      width: min(100%, 1120px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: block;
+      background: #fff;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 980px;
+      margin: 24px 0 0;
+    }
+
+    .platforms span {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .foot {
+      border-top: 1px solid var(--line);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 800px) {
+      .hero { min-height: 88vh; }
+      .nav { align-items: flex-start; }
+      .nav-links { display: none; }
+      .hero-inner { margin: 0 20px; padding-bottom: 42px; }
+      .grid { grid-template-columns: 1fr; }
+      section { padding: 52px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="https://github.com/gongahkia/rakuzaichi">
+        <img src="../asset/logo/rakuzaichi.webp" alt="">
+        <span>Rakuzaichi</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#platforms">Platforms</a>
+        <a href="#architecture">Architecture</a>
+      </div>
+    </nav>
+    <div class="hero-inner">
+      <h1>Rakuzaichi</h1>
+      <p class="hero-copy">A zero-server browser-extension vault for AI chats, open threads, local extraction, offline export, and Obsidian sync.</p>
+      <div class="actions" aria-label="Install options">
+        <a class="button" href="https://github.com/gongahkia/rakuzaichi">Source</a>
+        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Chrome</a>
+        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Firefox</a>
+        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Safari</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="features" class="strip">
+      <div class="section-head">
+        <h2>Local memory for every LLM you use.</h2>
+        <p>Capture chats into IndexedDB, search across platforms, and keep unfinished work visible as open threads.</p>
+      </div>
+      <div class="grid">
+        <article class="feature">
+          <h3>Vault browser</h3>
+          <p>Search, filter, tag, pin, and organize captured chats without sending data to a server.</p>
+        </article>
+        <article class="feature">
+          <h3>Open threads</h3>
+          <p>Track TODO, FIXME, REF, PROMPT, and locally extracted follow-ups back to their source messages.</p>
+        </article>
+        <article class="feature">
+          <h3>Portable exports</h3>
+          <p>Save Markdown, JSON, CSV, TSV, offline HTML, PDF, Obsidian notes, ZIP fallbacks, and encrypted backups.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="platforms">
+      <div class="section-head">
+        <h2>15 chat platforms.</h2>
+        <p>One local schema for Western and Chinese LLM chat surfaces.</p>
+      </div>
+      <div class="platforms">
+        <span>ChatGPT</span><span>Claude</span><span>Gemini</span><span>Perplexity</span><span>DeepSeek</span><span>Grok</span><span>Copilot</span><span>Mistral</span><span>HuggingChat</span><span>Poe</span><span>Kimi</span><span>Qwen</span><span>ChatGLM</span><span>Doubao</span><span>NotebookLM</span>
+      </div>
+    </section>
+
+    <section id="architecture" class="strip">
+      <div class="section-head">
+        <h2>Zero-server by design.</h2>
+        <p>Content scripts normalize chats, the background worker writes IndexedDB rows, and the options UI handles vault browsing, local extraction, export, sync, and backup.</p>
+      </div>
+      <img class="diagram" src="../asset/reference/architecture.png" alt="Rakuzaichi architecture diagram">
+    </section>
+  </main>
+
+  <footer class="foot">
+    Rakuzaichi runs locally. No telemetry, no analytics, no Rakuzaichi server.
+  </footer>
+</body>
+</html>
