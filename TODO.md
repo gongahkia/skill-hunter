@@ -327,7 +327,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 
 > Goal: README, landing page, demo gif, privacy policy, and HN post draft are all done before submitting to stores. The demo gif is the launch.
 
-- [ ] `M7.T01` — Rewrite `README.md` to lead with the vault + open-threads framing in the first three lines. Move Kagurabachi/etymology to a footer "Etymology" section. **Success:** opening `README.md` shows a clear value-prop sentence within the first viewport without scrolling.
+- [x] `M7.T01` — Rewrite `README.md` to lead with the vault + open-threads framing in the first three lines. Move Kagurabachi/etymology to a footer "Etymology" section. **Success:** opening `README.md` shows a clear value-prop sentence within the first viewport without scrolling.
+  - 2026-06-16: README now opens with zero-server vault, open-threads, on-device storage/export/sync framing before any rationale, and the Kagurabachi naming note moved to a footer `Etymology` section.
 - [ ] `M7.T02` — Replace `asset/reference/architecture.png` with a new architecture diagram matching §Architecture above. **Success:** new image embedded in README.
 - [ ] `M7.T03` — Generate a 25-second demo GIF: open ChatGPT → capture → switch to Claude → capture → open vault → search across both → click a TODO → jump to source → run extraction → see new threads appear. No voiceover. **Success:** GIF is ≤8MB, ≤25s, embedded at top of README.
 - [ ] `M7.T04` — Build a landing page at `rakuzaichi.<domain>` (single static page; host on Cloudflare Pages or Vercel — yes this is a *web page*, not a server; it serves the binary download and the demo, nothing more). **Success:** landing page live; loads in <1s on cold cache; contains demo GIF, install buttons for Chrome/Firefox/Safari, link to source.

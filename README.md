@@ -2,20 +2,19 @@
 [![](https://img.shields.io/badge/owl_1.0.1-passing-%23228B22)](https://github.com/gongahkia/owl/releases/tag/1.0.1)
 [![](https://img.shields.io/badge/owl_2.0.0-passing-%2390EE90)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
 
-> [!IMPORTANT]  
-> Please read through [this disclaimer](#disclaimer) before using [Owl](https://github.com/gongahkia/owl).  
+# `Rakuzaichi`
 
-# `Owl` 🦉
+Zero-server browser-extension vault for AI chats: capture conversations locally, search them later, and export or sync them without a backend.
 
-[`Owl`](https://github.com/gongahkia/owl) watches your editors.
+Rakuzaichi adds an open-threads layer over your vault, surfacing TODO/FIXME/REF/PROMPT-style follow-ups from explicit tags and local extraction.
 
-A highly [customisable](#colorschemes), [extensible](#configurations) extension that monitors, collates and organises [your tags](#tags) on your google editors *([docs](#docs-owl), [sheets](#sheets-owl) and [slides](#slides-owl))* and within [Vim](#deployment).
+Everything lives on-device in IndexedDB, with Obsidian sync, encrypted backups, and offline exports for 15 LLM platforms.
 
 ## Rationale
 
 Since I started taking law modules in August 2023, I've found it necessary to flag specific cases, rulings and analysis for later review, rework, or revision.
 
-Resultingly, I have more than once found myself wishing for native support for [code annotations](https://docs.github.com/en/contributing/writing-for-github-docs/annotating-code-examples) *(especially [those](https://medium.com/@wcpines/using-comment-annotations-cd06415ef71a) in the TODO, FIXME, NOTE, TBD family)* within the Google editor suite. Another close analogue would be Vim [marks](https://vim.fandom.com/wiki/Using_marks), addressed by the [ThePrimeagen](https://www.youtube.com/c/theprimeagen)'s fantastic marks manager, [Harpoon](https://github.com/ThePrimeagen/harpoon).
+`Rakuzaichi` keeps your chat archive local while making it searchable, syncable, and portable across Markdown, JSON, CSV, TSV, HTML, PDF, Obsidian notes, and encrypted vault backups.
 
 However, the closest I could ever get to replicating that experience in Google Editors was finding with `Ctrl + F`, or commenting with `Ctrl + Alt + M`.
 
@@ -43,8 +42,8 @@ With these considerations in mind, I created [`Owl`](https://github.com/gongahki
 | [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) | Tab-delimited CSV alternative for ease of parsing and storage|
 | [JSON](https://en.wikipedia.org/wiki/JSON) | Human-readable and universally supported storage format|
 | [Markdown](https://en.wikipedia.org/wiki/Markdown) | Portable prose archive for notes and review |
-| [PDF](https://en.wikipedia.org/wiki/PDF) | Printable offline archive *(placeholder until M6)* |
-| [HTML](https://en.wikipedia.org/wiki/HTML) | Shareable offline archive *(placeholder until M6)* |
+| [PDF](https://en.wikipedia.org/wiki/PDF) | Printable offline archive |
+| [HTML](https://en.wikipedia.org/wiki/HTML) | Shareable offline archive |
 
 ![](./asset/screenshot/slidesFilled.png)
 ![](./asset/screenshot/slidesEmpty.png)
@@ -93,13 +92,7 @@ Support for other browsers like Opera, Vivaldi have not been extensively tested,
 
 Owl history was merged into Rakuzaichi on 2026-06-14 via merge commit `51e556a66bdd4901386c078bebab4a9a1f270ca3`; Owl's tree was not imported.
 
-## Reference
-
-The name `Rakuzaichi` is in reference to the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家 ), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of the ongoing manga series [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
-
-By using this extension, you acknowledge and agree to the following:
-
-1. **No Liability for Malfunction**: The developer of the `Owl` extension shall not be liable for any direct, indirect, incidental, special, consequential damages, or any damages whatsoever arising out of or in connection with the use of this extension. This includes but is not limited to:
+## Legal disclaimer
 
     * Data loss
     * Corruption of files
@@ -157,3 +150,9 @@ This disclaimer may be updated from time to time without notice. It is your resp
 ### Termination of Service
 
 Rakuzaichi reserves the right to modify, suspend, or discontinue the extension or any part thereof at any time without prior notice or liability.
+
+## Etymology
+
+The name `Rakuzaichi` references the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
+
+![](./asset/logo/rakuzaichi.webp)
