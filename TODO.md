@@ -356,6 +356,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [ ] `M8.T01` — Create Chrome Web Store developer account (US$5 one-time, ~24h verification). **Success:** account confirmed at `https://chrome.google.com/webstore/devconsole`.
 - [ ] `M8.T02` — Build production Chrome bundle: `npm run package` then upload as a draft to CWS. Fill listing: title, summary, description (≤16k chars), screenshots (5x), category. **Success:** CWS draft listing populated; "Submit for review" is the only remaining action.
   - 2026-06-16: local `npm run package` succeeded and produced ignored artifacts `rakuzaichi-chrome.zip` and `rakuzaichi-firefox.xpi`; CWS upload/listing population is not done because no CWS account access is available here.
+  - 2026-06-16: aligned `package.json`, `package-lock.json`, `src/manifest.json`, and generated Safari manifest to `3.0.0`; rebuilt package artifacts for the release version.
 - [ ] `M8.T03` — Submit to CWS. **Success:** review status visible in dev console. [Inference] Expect 3-21 day review per 2026 surge data.
 - [ ] `M8.T04` — Create Mozilla Add-Ons developer account. **Success:** account confirmed at `https://addons.mozilla.org/developers/`.
 - [ ] `M8.T05` — Build Firefox bundle + source bundle: `npm run package:firefox` and `npm run package:firefox-source`. Submit. **Success:** AMO listing accepted into review queue.
@@ -366,6 +367,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
 - [ ] `M8.T08` — Add per-store listing copy to `docs/launch/store-listings.md`. **Success:** doc contains 3 listing payloads matching what was submitted.
   - 2026-06-16: added draft Chrome Web Store, Firefox AMO, and Safari/App Store Connect listing payloads in `docs/launch/store-listings.md`; not checked because no store submissions exist yet, so the copy cannot be verified as matching submitted payloads.
 - [ ] `M8.T09` — Set up a GitHub Release for `v3.0.0` tag with changelog and binaries attached. **Success:** GitHub release page lists Chrome/Firefox/Safari binaries and a generated changelog.
+  - 2026-06-16: local version metadata now matches `v3.0.0`, but release is not created because branch commits are still local, no tag exists, and no verified Safari release binary/App Store artifact is available.
 - [ ] `M8.T10` — Post-approval: update README badges to point at live store URLs. **Success:** badge URLs return 200; badges render correctly.
 
 ---

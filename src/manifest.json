@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rakuzaichi",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Export LLM chat conversations in multiple formats",
   "icons": {
     "16": "icon/16.png",
