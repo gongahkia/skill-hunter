@@ -96,9 +96,33 @@ describe('FormatConverter', () => {
     expect(md).toContain('# Test Chat');
   });
 
-  it('PDF and HTML stubs throw until M6', () => {
+  it('PDF stub throws until print export is implemented', () => {
     expect(() => FormatConverter.convert('pdf', envelope)).toThrow('not implemented — see M6');
-    expect(() => FormatConverter.convert('html', envelope)).toThrow('not implemented — see M6');
+  });
+
+  it('toHTML produces a single-file offline document with escaped messages', () => {
+    const result = FormatConverter.toHTML({
+      ...envelope,
+      messages: [
+        { role: 'user', content: '<script>alert("x")</script>\nline 2', id: 'msg-1', timestamp: '2026-01-01T00:00:01.000Z' },
+        { role: 'assistant', content: 'Safe reply', id: 'msg-2', timestamp: '' }
+      ],
+      openThreads: [
+        { tag: 'TODO', text: 'Follow up <owner>', messageId: 'msg-1', status: 'open', source: 'extracted', subSource: 'llm', confidence: 0.82 }
+      ]
+    });
+
+    expect(result).toContain('<!doctype html>');
+    expect(result).toContain('<style>');
+    expect(result).not.toContain('<script>alert');
+    expect(result).not.toContain('<script src=');
+    expect(result).not.toContain('<link rel=');
+    expect(result).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;');
+    expect(result).toContain('<section class="threads" aria-label="Open threads">');
+    expect(result).toContain('Follow up &lt;owner&gt;');
+    expect(result).toContain('href="#message-msg-1"');
+    expect(result).toContain('confidence 82%');
+    expect(result).toContain('<article id="message-msg-1" class="message">');
   });
 
   it('convert throws on unknown format', () => {
