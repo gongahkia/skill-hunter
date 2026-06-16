@@ -2,58 +2,479 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rakuzaichi Options</title>
+  <title>Rakuzaichi Settings</title>
+  <link rel="icon" href="./icon/48.png">
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <div class="options-container">
-    <h1>Rakuzaichi Settings</h1>
-    <form id="options-form">
-      <label>
-        Default Format
-        <select id="defaultFormat">
-          <option value="csv">CSV</option>
-          <option value="tsv">TSV</option>
-          <option value="json" selected>JSON</option>
-          <option value="ndjson">NDJSON</option>
-          <option value="xml">XML</option>
-          <option value="yaml">YAML</option>
-        </select>
-      </label>
-      <label>
-        Filename Template
-        <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
-        <small>Variables: {platform}, {title}, {date}, {time}, {format}, {ext}</small>
-      </label>
-      <label>
-        Theme
-        <select id="darkMode">
-          <option value="system">System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="showPreview" checked>
-        Show export preview before download
-      </label>
-      <label>
-        Auto-export interval (minutes, 0 = disabled)
-        <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
-        <small>When enabled, Rakuzaichi periodically exports the active supported tab and opens the browser save flow. It never runs silently in the background.</small>
-      </label>
-      <div class="status-card">
-        <strong>Last auto-export result</strong>
-        <p id="autoExportStatus">Auto-export has not run yet.</p>
-      </div>
-      <div class="form-actions">
-        <button type="submit">Save</button>
-        <span id="save-status"></span>
-      </div>
-    </form>
-  </div>
+  <main class="vault-shell">
+    <aside class="vault-sidebar" aria-label="Vault navigation">
+      <header class="brand-strip">
+        <img src="./icon/48.png" alt="Rakuzaichi logo">
+        <div>
+          <h1>Rakuzaichi</h1>
+          <p>Local vault</p>
+        </div>
+      </header>
+
+      <section class="nav-group" aria-label="Folders">
+        <h2>Folders</h2>
+        <button id="allChatsFolder" class="nav-row active" type="button"><span>All chats</span><strong id="vault-count">0</strong></button>
+        <button class="nav-row" type="button"><span>Pinned</span><strong>0</strong></button>
+        <button class="nav-row" type="button"><span>Archived</span><strong>0</strong></button>
+        <div class="folder-actions">
+          <button id="folderAdd" class="btn btn-secondary" type="button">New</button>
+          <button id="folderRename" class="btn btn-secondary" type="button">Rename</button>
+          <button id="folderDelete" class="btn btn-ghost" type="button">Delete</button>
+        </div>
+        <div id="folderTree" class="folder-tree"></div>
+      </section>
+
+      <section class="nav-group" aria-label="Tags">
+        <h2>Tags</h2>
+        <div id="tagFilter" class="tag-grid">
+          <button type="button" data-tag="TODO" aria-pressed="false">TODO</button>
+          <button type="button" data-tag="FIXME" aria-pressed="false">FIXME</button>
+          <button type="button" data-tag="UNRESOLVED" aria-pressed="false">UNRESOLVED</button>
+          <button type="button" data-tag="FOLLOWUP" aria-pressed="false">FOLLOWUP</button>
+          <button type="button" data-tag="REF" aria-pressed="false">REF</button>
+          <button type="button" data-tag="PROMPT" aria-pressed="false">PROMPT</button>
+        </div>
+        <label>
+          Custom tag
+          <input id="tagQuery" type="text" placeholder="Filter by tag">
+        </label>
+      </section>
+
+      <section class="nav-group" aria-label="Filters">
+        <h2>Filters</h2>
+        <label>
+          Platform
+          <select id="platformFilter" multiple size="6">
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option>
+            <option value="gemini">Gemini</option>
+            <option value="perplexity">Perplexity</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="grok">Grok</option>
+            <option value="copilot">Copilot</option>
+            <option value="mistral">Mistral</option>
+            <option value="huggingchat">HuggingChat</option>
+            <option value="poe">Poe</option>
+            <option value="kimi">Kimi</option>
+            <option value="qwen">Qwen Chat</option>
+            <option value="chatglm">ChatGLM</option>
+            <option value="doubao">Doubao</option>
+            <option value="notebooklm">NotebookLM</option>
+          </select>
+        </label>
+        <label>
+          Date
+          <select id="dateFilter">
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <div id="customDateFields" class="date-grid" hidden>
+          <label>
+            Start
+            <input id="dateStart" type="date">
+          </label>
+          <label>
+            End
+            <input id="dateEnd" type="date">
+          </label>
+        </div>
+        <label class="checkbox-label">
+          <input id="pinnedOnly" type="checkbox">
+          Pinned only
+        </label>
+        <button id="clearFilters" class="btn btn-ghost filter-clear" type="button">Clear filters</button>
+      </section>
+    </aside>
+
+    <section class="vault-main" aria-label="Vault browser">
+      <header class="vault-topbar">
+        <label class="search-box">
+          <span>Search</span>
+          <input id="vaultSearch" type="search" placeholder="Search chats and messages">
+        </label>
+        <div class="vault-actions">
+          <button id="runExtractionAll" class="btn btn-primary" type="button">Run on all</button>
+          <button id="stopExtractionAll" class="btn btn-ghost" type="button" hidden disabled>Stop</button>
+          <span id="extractionStatus" class="extraction-status"></span>
+          <button id="rescanThreads" class="btn btn-secondary" type="button">Rescan threads</button>
+          <span id="rescanStatus" class="rescan-status"></span>
+          <div id="capture-status" class="capture-status red">
+            <span class="capture-dot"></span>
+            <span id="capture-status-text">No captures yet.</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="vault-stats" aria-label="Vault stats">
+        <div class="stat-item">
+          <span>Total chats</span>
+          <strong id="statsTotalChats">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>Total messages</span>
+          <strong id="statsTotalMessages">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>Storage used</span>
+          <strong id="statsStorageUsed">0 MB</strong>
+        </div>
+        <div class="stat-item">
+          <span>Oldest chat</span>
+          <strong id="statsOldestChat">None</strong>
+        </div>
+        <div class="stat-item">
+          <span>Newest chat</span>
+          <strong id="statsNewestChat">None</strong>
+        </div>
+        <div class="stat-platforms">
+          <span>Platforms</span>
+          <p id="statsPlatformBreakdown">None</p>
+        </div>
+      </section>
+
+      <section id="wrappedStats" class="wrapped-stats" aria-label="Vault wrapped">
+        <div class="wrapped-heading">
+          <div>
+            <h2>Vault wrapped</h2>
+            <p id="wrappedRenderTime">Waiting for vault data.</p>
+          </div>
+          <button id="wrappedSharePng" class="btn btn-secondary" type="button">Share PNG</button>
+        </div>
+        <div class="wrapped-grid">
+          <div class="wrapped-card">
+            <span>Most active</span>
+            <strong id="wrappedMostActivePlatform">None</strong>
+            <p id="wrappedMostActivePlatformDetail">0 messages</p>
+          </div>
+          <div class="wrapped-card">
+            <span>Busiest day</span>
+            <strong id="wrappedBusiestDay">None</strong>
+            <p id="wrappedBusiestDayDetail">0 chats</p>
+          </div>
+          <div class="wrapped-card">
+            <span>Longest chat</span>
+            <strong id="wrappedLongestChat">None</strong>
+            <p id="wrappedLongestChatDetail">0 messages</p>
+          </div>
+          <div class="wrapped-card wrapped-topics-card">
+            <span>Top topics</span>
+            <div id="wrappedTopTopics" class="wrapped-topic-list"></div>
+          </div>
+        </div>
+        <p id="wrappedStatus" class="wrapped-status"></p>
+      </section>
+
+      <section class="vault-content">
+        <section class="chat-list-pane" aria-label="Chat list">
+          <div class="pane-heading">
+            <h2>Chats</h2>
+            <div class="pane-actions">
+              <span id="chat-list-summary">0 captured</span>
+              <span id="bulkExportSummary">0 selected</span>
+              <select id="bulkExportFormat" aria-label="Bulk export format">
+                <option value="markdown">Markdown</option>
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="tsv">TSV</option>
+                <option value="html">HTML</option>
+                <option value="pdf">PDF</option>
+              </select>
+              <button id="bulkExportSelected" class="btn btn-secondary" type="button" disabled>Export selected</button>
+            </div>
+          </div>
+          <div id="chat-list" class="chat-table" role="table" aria-label="Captured chats"></div>
+        </section>
+
+        <section class="chat-detail-pane" aria-label="Chat detail">
+          <div class="pane-heading">
+            <h2>Detail</h2>
+            <div class="pane-actions">
+              <button id="runExtractionChat" class="btn btn-primary" type="button" disabled>Run extraction</button>
+              <button id="stopExtractionChat" class="btn btn-ghost" type="button" hidden disabled>Stop</button>
+              <span id="detailExtractionStatus" class="extraction-status"></span>
+              <button id="detailPin" class="pin-toggle" type="button" disabled aria-label="Pin chat">☆</button>
+              <button id="sendToNewChat" class="btn btn-secondary" type="button" disabled>Send to new chat</button>
+              <button id="restoreClipboard" class="btn btn-secondary" type="button" disabled>Restore to clipboard</button>
+              <a id="open-original" href="#" aria-disabled="true">Open original</a>
+            </div>
+          </div>
+          <div id="chat-detail" class="chat-detail-body">
+            <div class="detail-empty">
+              <h3>Select a chat</h3>
+              <p>No captured chat selected.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="threads-pane" aria-label="Open threads">
+        <div class="pane-heading">
+          <h2>Open threads</h2>
+          <div class="pane-actions">
+            <button id="archiveSelectedThreads" class="btn btn-secondary" type="button">Archive selected</button>
+            <span id="threadListSummary">0 threads</span>
+          </div>
+        </div>
+        <div class="thread-filters">
+          <label>
+            Tag
+            <select id="threadTagFilter">
+              <option value="">All tags</option>
+              <option value="FIXME">FIXME</option>
+              <option value="TODO">TODO</option>
+              <option value="UNRESOLVED">UNRESOLVED</option>
+              <option value="FOLLOWUP">FOLLOWUP</option>
+              <option value="REV">REV</option>
+              <option value="REF">REF</option>
+              <option value="PROMPT">PROMPT</option>
+            </select>
+          </label>
+          <label>
+            Chat
+            <input id="threadChatFilter" type="search" placeholder="Chat title or id">
+          </label>
+          <label>
+            Platform
+            <select id="threadPlatformFilter">
+              <option value="">All platforms</option>
+              <option value="chatgpt">ChatGPT</option>
+              <option value="claude">Claude</option>
+              <option value="gemini">Gemini</option>
+              <option value="perplexity">Perplexity</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="grok">Grok</option>
+              <option value="copilot">Copilot</option>
+              <option value="mistral">Mistral</option>
+              <option value="huggingchat">HuggingChat</option>
+              <option value="poe">Poe</option>
+              <option value="kimi">Kimi</option>
+              <option value="qwen">Qwen Chat</option>
+              <option value="chatglm">ChatGLM</option>
+              <option value="doubao">Doubao</option>
+              <option value="notebooklm">NotebookLM</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select id="threadStatusFilter">
+              <option value="open">Open</option>
+              <option value="">All statuses</option>
+              <option value="done">Done</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+          <label class="checkbox-label thread-show-done">
+            <input id="threadShowDone" type="checkbox">
+            Show done
+          </label>
+          <label>
+            Source
+            <select id="threadSourceFilter">
+              <option value="">All sources</option>
+              <option value="explicit">Explicit</option>
+              <option value="extracted">Extracted</option>
+            </select>
+          </label>
+          <label>
+            Sub-source
+            <select id="threadSubSourceFilter">
+              <option value="">All sub-sources</option>
+              <option value="user">User</option>
+              <option value="scan">Scan</option>
+              <option value="llm">LLM</option>
+            </select>
+          </label>
+          <label>
+            Sort
+            <select id="threadSort">
+              <option value="priority">Priority</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="chat">Chat</option>
+            </select>
+          </label>
+        </div>
+        <div id="openThreadsList" class="thread-table" role="table" aria-label="Open threads"></div>
+      </section>
+    </section>
+
+    <aside class="vault-inspector" aria-label="Settings and diagnostics">
+      <section class="panel" aria-label="Export settings">
+        <h2>Export preferences</h2>
+        <form id="options-form" class="settings-form">
+          <label>
+            Default format
+            <select id="defaultFormat">
+              <option value="json">JSON</option>
+              <option value="markdown">Markdown</option>
+              <option value="csv">CSV</option>
+              <option value="tsv">TSV</option>
+            </select>
+          </label>
+
+          <label>
+            Filename template
+            <input type="text" id="filenameTemplate" value="{platform}_{title}_{date}.{ext}">
+            <small>{platform}, {title}, {date}, {time}, {format}, {ext}</small>
+          </label>
+
+          <label>
+            Theme
+            <select id="darkMode">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+
+          <label>
+            Colorscheme
+            <select id="colorscheme"></select>
+          </label>
+
+          <section class="subpanel tag-priority-panel" aria-label="Tag priority">
+            <h3>Tag priority</h3>
+            <ol id="tagPriorityList" class="tag-priority-list"></ol>
+          </section>
+
+          <section class="subpanel custom-thread-tags-panel" aria-label="Custom thread tags">
+            <h3>Custom thread tags</h3>
+            <div id="customThreadTagsList" class="custom-thread-tags-list"></div>
+            <div class="custom-thread-tag-add">
+              <input id="customThreadTagName" type="text" placeholder="WAITING">
+              <input id="customThreadTagColor" type="color" value="#888888" aria-label="Custom thread tag color">
+              <button id="customThreadTagAdd" class="btn btn-secondary" type="button">Add</button>
+            </div>
+          </section>
+
+          <section class="subpanel" aria-label="Extraction model">
+            <h3>Extraction model</h3>
+            <label>
+              Local model
+              <select id="extractionModel">
+                <option value="qwen2.5-0.5b-q4">Qwen2.5-0.5B-Instruct-Q4</option>
+                <option value="phi-3.5-mini-q4">Phi-3.5-mini-Q4</option>
+                <option value="gemma-3-1b-q4">Gemma-3-1B-Q4</option>
+              </select>
+              <small id="extractionBackendStatus">Checking Chrome built-in AI.</small>
+            </label>
+          </section>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="showPreview" checked>
+            Show preview confirmation
+          </label>
+
+          <label>
+            Auto-export interval
+            <input type="number" id="autoExportInterval" value="0" min="0" max="1440">
+          </label>
+
+          <section class="subpanel" aria-label="Auto-export status">
+            <h3>Auto-export</h3>
+            <p id="autoExportStatus">Auto-export has not run yet.</p>
+          </section>
+
+          <section class="subpanel" aria-label="Obsidian sync">
+            <h3>Obsidian sync</h3>
+            <div class="button-row">
+              <button id="chooseObsidianVault" class="btn btn-secondary" type="button">Choose vault</button>
+              <button id="syncObsidianVault" class="btn btn-primary" type="button" disabled>Sync now</button>
+            </div>
+            <p id="obsidianFallbackNote" class="sync-fallback-banner" hidden>Direct sync unavailable. Download ZIP and extract the Rakuzaichi folder into your Obsidian vault.</p>
+            <p id="obsidianSyncStatus">No Obsidian vault selected.</p>
+          </section>
+
+          <section class="subpanel" aria-label="Backup vault">
+            <h3>Backup vault</h3>
+            <label>
+              Backup password
+              <input id="backupPassword" type="password" autocomplete="new-password" placeholder="Optional">
+            </label>
+            <div class="button-row">
+              <button id="exportBackup" class="btn btn-secondary" type="button">Export backup</button>
+              <button id="importBackup" class="btn btn-ghost" type="button">Import backup</button>
+              <input id="backupFile" type="file" accept=".zip,.rakuzaichi-backup.zip,application/zip" hidden>
+            </div>
+            <p id="backupStatus">No backup run yet.</p>
+          </section>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <span id="save-status"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-label="Diagnostics">
+        <div class="panel-heading">
+          <h2>Diagnostics</h2>
+          <div class="button-row">
+            <button id="download-diagnostics" class="btn btn-secondary" type="button">Download</button>
+            <button id="clear-diagnostics" class="btn btn-ghost" type="button">Clear</button>
+          </div>
+        </div>
+        <ul id="diagnostics-list" class="log-list"></ul>
+      </section>
+
+      <section class="panel" aria-label="Extraction runs">
+        <div class="panel-heading">
+          <h2>Extraction runs</h2>
+        </div>
+        <ul id="extraction-runs-list" class="log-list"></ul>
+      </section>
+
+      <section class="panel" aria-label="Export history">
+        <div class="panel-heading">
+          <h2>Export history</h2>
+          <div class="button-row">
+            <button id="download-history" class="btn btn-secondary" type="button">Download</button>
+            <button id="clear-history" class="btn btn-ghost" type="button">Clear</button>
+          </div>
+        </div>
+        <p id="history-summary" class="panel-note">No exports captured yet.</p>
+      </section>
+    </aside>
+  </main>
+
   <script src="compat.js"></script>
+  <script src="logger.js"></script>
   <script src="storage.js"></script>
+  <script src="converters.js"></script>
+  <script src="filename.js"></script>
+  <script src="zip.js"></script>
+  <script src="backup.js"></script>
+  <script src="obsidian-sync.js"></script>
+  <script src="ui/colorschemes.js"></script>
+  <script src="history.js"></script>
+  <script src="vault/db.js"></script>
+  <script src="vault/dao.js"></script>
+  <script src="vault/quota.js"></script>
+  <script src="vault/search.js"></script>
+  <script src="threads/scanner.js"></script>
+  <script src="extraction/runtime.js"></script>
+  <script src="extraction/prompt-api.js"></script>
+  <script src="extraction/model-loader.js"></script>
+  <script src="extraction/prompt.js"></script>
+  <script src="extraction/candidates.js"></script>
+  <script src="extraction/chunks.js"></script>
+  <script src="extraction/runner.js"></script>
+  <script src="options/filters.js"></script>
+  <script src="options/folders.js"></script>
+  <script src="options/chat-list.js"></script>
+  <script src="options/chat-detail.js"></script>
+  <script src="options/open-threads.js"></script>
+  <script src="options/wrapped-stats.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

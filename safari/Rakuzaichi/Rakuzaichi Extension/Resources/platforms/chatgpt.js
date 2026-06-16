@@ -3,6 +3,7 @@ _platforms.push({
   id: 'chatgpt',
   name: 'ChatGPT',
   hostPatterns: ['*://chat.openai.com/*', '*://chatgpt.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       'main [data-message-author-role]',

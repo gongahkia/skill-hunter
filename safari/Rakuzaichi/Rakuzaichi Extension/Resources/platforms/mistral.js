@@ -3,6 +3,7 @@ _platforms.push({
   id: 'mistral',
   name: 'Mistral Le Chat',
   hostPatterns: ['*://chat.mistral.ai/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '[class*="conversation"]',

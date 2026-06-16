@@ -3,6 +3,7 @@ _platforms.push({
   id: 'grok',
   name: 'Grok',
   hostPatterns: ['*://grok.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '[class*="conversation"]',

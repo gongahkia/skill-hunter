@@ -3,6 +3,7 @@ _platforms.push({
   id: 'gemini',
   name: 'Gemini',
   hostPatterns: ['*://gemini.google.com/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '#chat-history',

@@ -3,6 +3,7 @@ _platforms.push({
   id: 'claude',
   name: 'Claude',
   hostPatterns: ['*://claude.ai/*'],
+  chatIdStrategy: 'last-url-path-segment; fallback:first-message-timestamp-hash',
   detect() {
     return !!DomUtils.querySafe(document, [
       '.flex-1.flex.flex-col.gap-3.px-4.max-w-3xl.mx-auto.w-full.pt-1',
