@@ -1,6 +1,8 @@
 # v3.0.0 Release Draft
 
-Status: draft only. Do not publish until store submissions and the Safari release artifact are verified.
+Status: draft created. Do not publish until store submissions and the Safari release artifact are verified.
+
+Draft release is discoverable by tag with `gh release view v3.0.0`.
 
 ## Tag
 
@@ -25,6 +27,8 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 - Chrome/Firefox/Safari packaging paths.
 - Privacy policy, launch copy, store listing drafts, demo GIF, landing-page source, and pre-launch checklist.
 
+**Full Changelog**: `2.0.0...v3.0.0` at `https://github.com/gongahkia/rakuzaichi/compare/2.0.0...v3.0.0`
+
 ### Privacy
 
 - No Rakuzaichi server.
@@ -35,10 +39,10 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 
 ## Assets To Attach
 
-- [ ] `rakuzaichi-chrome.zip`
-- [ ] `rakuzaichi-firefox.xpi`
-- [ ] `rakuzaichi-firefox-source.zip`
-- [ ] `rakuzaichi-safari.zip` (unsigned local macOS Safari app ZIP; not an App Store/TestFlight artifact).
+- [x] `rakuzaichi-chrome.zip`
+- [x] `rakuzaichi-firefox.xpi`
+- [x] `rakuzaichi-firefox-source.zip`
+- [x] `rakuzaichi-safari.zip` (unsigned local macOS Safari app ZIP; not an App Store/TestFlight artifact).
 
 ## Verification Before Publishing
 
@@ -47,10 +51,10 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 - [x] `npm run check:manifests`
 - [x] `npm run check:permissions`
 - [x] `xcodebuild -project safari/Rakuzaichi/Rakuzaichi.xcodeproj -scheme Rakuzaichi -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build`
-- [ ] Main branch pushed to origin.
-- [ ] `v3.0.0` tag pushed.
-- [ ] GitHub Release created.
-- [ ] Chrome/Firefox/Safari binaries attached.
+- [x] Main branch pushed to origin.
+- [x] `v3.0.0` tag pushed.
+- [x] GitHub Release created.
+- [x] Chrome/Firefox/Safari binaries attached.
 
 ## Publish Commands
 
@@ -58,8 +62,7 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 git push origin main
 git tag v3.0.0
 git push origin v3.0.0
-gh release create v3.0.0 rakuzaichi-chrome.zip rakuzaichi-firefox.xpi rakuzaichi-firefox-source.zip --title "Rakuzaichi v3.0.0 - local AI-chat memory vault" --notes-file docs/launch/release-v3.0.0.md --draft
-gh release upload v3.0.0 rakuzaichi-safari.zip
+gh release create v3.0.0 rakuzaichi-chrome.zip rakuzaichi-firefox.xpi rakuzaichi-firefox-source.zip rakuzaichi-safari.zip --title "Rakuzaichi v3.0.0 - local AI-chat memory vault" --notes "$(cat docs/launch/release-v3.0.0.md)" --generate-notes --notes-start-tag 2.0.0 --draft --verify-tag
 ```
 
 Do not publish the draft release until the Safari artifact decision is made.
