@@ -21,6 +21,8 @@ function createDom() {
     <main>
       <a id="open-original" href="#" aria-disabled="true">Open original</a>
       <button id="detail-pin" type="button"></button>
+      <button id="run-extraction-chat" type="button"></button>
+      <span id="detail-extraction-status"></span>
       <button id="send-new-chat" type="button"></button>
       <button id="restore-clipboard" type="button"></button>
       <div id="chat-detail"></div>
@@ -222,6 +224,45 @@ describe('OptionsChatDetail', () => {
     expect(copied[0]).toContain('Use the latest vault snapshot.');
     expect(copied[0]).toContain('## System');
     expect(copied[0]).toContain('Keep source links.');
+  });
+
+  it('runs per-chat extraction and reloads thread rows', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const calls = [];
+    const extractionButton = dom.window.document.getElementById('run-extraction-chat');
+    const extractionStatus = dom.window.document.getElementById('detail-extraction-status');
+    let extractedThreads = [];
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      extractionButton,
+      extractionStatus,
+      dao: {
+        listMessages: async () => messages(),
+        listOpenThreads: async () => extractedThreads
+      },
+      onRunExtraction: async (selectedChat, selectedMessages, onProgress) => {
+        calls.push({ chatId: selectedChat.chatId, messages: selectedMessages.length });
+        onProgress({ status: 'model-load' });
+        onProgress({ status: 'chunk-processing', index: 0, total: 1 });
+        extractedThreads = [
+          { threadId: 'extracted-1', chatId: selectedChat.chatId, messageId: 'm1', tag: 'UNRESOLVED', text: 'confirm restore path', source: 'extracted', subSource: 'llm', status: 'open' }
+        ];
+        return { threadCount: 1 };
+      },
+      window: dom.window
+    });
+
+    await detail.load(chat());
+    extractionButton.click();
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+    await new Promise((resolve) => dom.window.setTimeout(resolve, 0));
+
+    expect(calls).toEqual([{ chatId: 'claude:thread-1', messages: 3 }]);
+    expect(extractionButton.textContent).toBe('Run extraction');
+    expect(extractionStatus.textContent).toBe('Done: 1 threads');
+    expect(dom.window.document.querySelector('.chat-thread-link[data-message-id="m1"]').textContent).toContain('UNRESOLVED');
   });
 
   it('creates explicit user open-thread rows from per-message tag popover', async () => {

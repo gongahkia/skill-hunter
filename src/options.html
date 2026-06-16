@@ -103,6 +103,8 @@
           <input id="vaultSearch" type="search" placeholder="Search chats and messages">
         </label>
         <div class="vault-actions">
+          <button id="runExtractionAll" class="btn btn-primary" type="button">Run on all</button>
+          <span id="extractionStatus" class="extraction-status"></span>
           <button id="rescanThreads" class="btn btn-secondary" type="button">Rescan threads</button>
           <span id="rescanStatus" class="rescan-status"></span>
           <div id="capture-status" class="capture-status red">
@@ -152,6 +154,8 @@
           <div class="pane-heading">
             <h2>Detail</h2>
             <div class="pane-actions">
+              <button id="runExtractionChat" class="btn btn-primary" type="button" disabled>Run extraction</button>
+              <span id="detailExtractionStatus" class="extraction-status"></span>
               <button id="detailPin" class="pin-toggle" type="button" disabled aria-label="Pin chat">☆</button>
               <button id="sendToNewChat" class="btn btn-secondary" type="button" disabled>Send to new chat</button>
               <button id="restoreClipboard" class="btn btn-secondary" type="button" disabled>Restore to clipboard</button>
@@ -362,6 +366,12 @@
   <script src="vault/quota.js"></script>
   <script src="vault/search.js"></script>
   <script src="threads/scanner.js"></script>
+  <script src="extraction/runtime.js"></script>
+  <script src="extraction/model-loader.js"></script>
+  <script src="extraction/prompt.js"></script>
+  <script src="extraction/candidates.js"></script>
+  <script src="extraction/chunks.js"></script>
+  <script src="extraction/runner.js"></script>
   <script src="options/filters.js"></script>
   <script src="options/folders.js"></script>
   <script src="options/chat-list.js"></script>

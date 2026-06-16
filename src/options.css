@@ -358,6 +358,18 @@ select[multiple] {
   font-size: 0.78rem;
 }
 
+.extraction-status {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .capture-status {
   display: flex;
   align-items: center;

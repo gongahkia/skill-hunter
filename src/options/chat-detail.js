@@ -529,9 +529,13 @@ var OptionsChatDetail = (function() {
     var pinButton = options.pinButton || null;
     var sendButton = options.sendButton || null;
     var restoreButton = options.restoreButton || null;
+    var extractionButton = options.extractionButton || null;
+    var extractionStatus = options.extractionStatus || null;
+    var onRunExtraction = typeof options.onRunExtraction === 'function' ? options.onRunExtraction : null;
     var currentChat = null;
     var currentMessages = [];
     var currentThreads = [];
+    var extractionRunning = false;
     function configuredCustomTags() {
       return normalizeCustomTags(typeof options.getCustomThreadTags === 'function' ? options.getCustomThreadTags() : options.customThreadTags);
     }
@@ -579,6 +583,49 @@ var OptionsChatDetail = (function() {
       if (!restoreButton) return;
       restoreButton.disabled = !(chat && chat.chatId);
       restoreButton.textContent = 'Restore to clipboard';
+    }
+
+    function syncExtractionButton(chat) {
+      if (!extractionButton) return;
+      extractionButton.disabled = extractionRunning || !(chat && chat.chatId) || !onRunExtraction;
+      if (!extractionRunning) extractionButton.textContent = 'Run extraction';
+    }
+
+    function setExtractionStatus(value) {
+      if (extractionStatus) extractionStatus.textContent = value || '';
+    }
+
+    function extractionProgressLabel(event) {
+      event = event || {};
+      if (event.status === 'model-load' || event.status === 'model-progress') return 'Model load';
+      if (event.status === 'chunk-processing') return 'Chunk ' + String((event.index || 0) + 1) + '/' + String(event.total || 1);
+      if (event.status === 'done') return 'Done';
+      return text(event.status, 'Running');
+    }
+
+    async function runCurrentExtraction() {
+      if (!currentChat || !currentChat.chatId || !onRunExtraction || extractionRunning) return;
+      extractionRunning = true;
+      syncExtractionButton(currentChat);
+      if (extractionButton) extractionButton.textContent = 'Model load';
+      setExtractionStatus('Model load');
+      try {
+        var result = await onRunExtraction(currentChat, currentMessages, function(event) {
+          var label = extractionProgressLabel(event);
+          if (extractionButton) extractionButton.textContent = label;
+          setExtractionStatus(label);
+        });
+        setExtractionStatus('Done: ' + String(result && typeof result.threadCount === 'number' ? result.threadCount : 0) + ' threads');
+        await load(currentChat);
+      } catch (error) {
+        setExtractionStatus('Extraction failed');
+        if (typeof AppLogger !== 'undefined') {
+          AppLogger.error('options.chat_detail.extraction.failed', { error: AppLogger.serializeError(error), chatId: currentChat.chatId });
+        }
+      } finally {
+        extractionRunning = false;
+        syncExtractionButton(currentChat);
+      }
     }
 
     async function createThread(chat, message, tag, note) {
@@ -697,6 +744,8 @@ var OptionsChatDetail = (function() {
       syncPinButton(null);
       syncSendButton(null);
       syncRestoreButton(null);
+      syncExtractionButton(null);
+      setExtractionStatus('');
       var empty = makeEmpty(title, message);
       root.appendChild(empty);
     }
@@ -712,6 +761,7 @@ var OptionsChatDetail = (function() {
       syncPinButton(chat);
       syncSendButton(chat);
       syncRestoreButton(chat);
+      syncExtractionButton(chat);
 
       var summary = document.createElement('section');
       summary.className = 'detail-summary';
@@ -813,6 +863,12 @@ var OptionsChatDetail = (function() {
         } catch (error) {
           restoreButton.textContent = 'Copy failed';
         }
+      });
+    }
+
+    if (extractionButton) {
+      extractionButton.addEventListener('click', function() {
+        runCurrentExtraction();
       });
     }
 

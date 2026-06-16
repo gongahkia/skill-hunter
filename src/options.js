@@ -23,6 +23,8 @@
     autoExportStatus: document.getElementById('autoExportStatus'),
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
+    runExtractionAll: document.getElementById('runExtractionAll'),
+    extractionStatus: document.getElementById('extractionStatus'),
     rescanThreads: document.getElementById('rescanThreads'),
     rescanStatus: document.getElementById('rescanStatus'),
     statsTotalChats: document.getElementById('statsTotalChats'),
@@ -51,6 +53,8 @@
     chatDetail: document.getElementById('chat-detail'),
     openOriginal: document.getElementById('open-original'),
     detailPin: document.getElementById('detailPin'),
+    runExtractionChat: document.getElementById('runExtractionChat'),
+    detailExtractionStatus: document.getElementById('detailExtractionStatus'),
     sendToNewChat: document.getElementById('sendToNewChat'),
     restoreClipboard: document.getElementById('restoreClipboard'),
     openThreadsList: document.getElementById('openThreadsList'),
@@ -444,6 +448,56 @@
     }
   }
 
+  function extractionProgressLabel(event) {
+    event = event || {};
+    if (event.status === 'model-load' || event.status === 'model-progress') return 'Model load';
+    if (event.status === 'chunk-processing') return 'Chunk ' + String((event.index || 0) + 1) + '/' + String(event.total || 1);
+    if (event.status === 'done') return 'Done';
+    return String(event.status || 'Running');
+  }
+
+  async function runExtractionForChat(chat, messages, onProgress) {
+    if (typeof ExtractionRunner === 'undefined' || !ExtractionRunner.runChatExtraction) throw new Error('Extraction runner is unavailable');
+    if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
+    return ExtractionRunner.runChatExtraction(chat, messages, {
+      dao: VaultDAO,
+      onProgress: onProgress
+    });
+  }
+
+  async function runExtractionAll(refreshVault) {
+    if (!els.runExtractionAll || els.runExtractionAll.disabled) return;
+    var previous = els.runExtractionAll.textContent;
+    els.runExtractionAll.disabled = true;
+    els.runExtractionAll.textContent = 'Model load';
+    if (els.extractionStatus) els.extractionStatus.textContent = 'Model load';
+    try {
+      if (typeof VaultDAO === 'undefined' || !VaultDAO.listChats || !VaultDAO.listMessages) throw new Error('Vault DAO is unavailable');
+      var chats = await VaultDAO.listChats();
+      var totalThreads = 0;
+      for (var i = 0; i < chats.length; i++) {
+        var chat = chats[i];
+        if (els.extractionStatus) els.extractionStatus.textContent = String(i + 1) + '/' + String(chats.length) + ': ' + (chat.title || chat.chatId);
+        var messages = await VaultDAO.listMessages(chat.chatId);
+        var result = await runExtractionForChat(chat, messages, function(event) {
+          var label = extractionProgressLabel(event);
+          els.runExtractionAll.textContent = label;
+          if (els.extractionStatus) els.extractionStatus.textContent = String(i + 1) + '/' + String(chats.length) + ': ' + label;
+        });
+        totalThreads += result.threadCount || 0;
+      }
+      if (els.extractionStatus) els.extractionStatus.textContent = 'Done: ' + String(totalThreads) + ' threads';
+      if (refreshVault) await refreshVault(true);
+      else await refreshVaultStats();
+    } catch (error) {
+      if (els.extractionStatus) els.extractionStatus.textContent = 'Extraction failed';
+      log('error', 'options.extraction.run_all.failed', { error: serializeError(error) });
+    } finally {
+      els.runExtractionAll.disabled = false;
+      els.runExtractionAll.textContent = previous;
+    }
+  }
+
   function makeBlobDownload(filename, content, mime) {
     var blob = new Blob([content], { type: mime || 'application/json;charset=utf-8' });
     var url = URL.createObjectURL(blob);
@@ -629,6 +683,11 @@
         rescanThreads(refreshVault);
       });
     }
+    if (els.runExtractionAll) {
+      els.runExtractionAll.addEventListener('click', function() {
+        runExtractionAll(refreshVault);
+      });
+    }
     if (els.colorscheme) {
       els.colorscheme.addEventListener('change', function() {
         applyColorscheme(els.colorscheme.value, document.documentElement.dataset.themeMode);
@@ -679,6 +738,8 @@
         root: els.chatDetail,
         openLink: els.openOriginal,
         pinButton: els.detailPin,
+        extractionButton: els.runExtractionChat,
+        extractionStatus: els.detailExtractionStatus,
         sendButton: els.sendToNewChat,
         restoreButton: els.restoreClipboard,
         getCustomThreadTags: function() {
@@ -690,6 +751,11 @@
         },
         onPinChanged: function() {
           refreshVault(true);
+        },
+        onRunExtraction: async function(chat, messages, onProgress) {
+          var result = await runExtractionForChat(chat, messages, onProgress);
+          await refreshVault(true);
+          return result;
         }
       });
     }
