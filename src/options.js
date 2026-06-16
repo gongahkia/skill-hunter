@@ -6,6 +6,7 @@
   var currentThreadTagPriority = DEFAULT_THREAD_TAG_PRIORITY.slice();
   var currentCustomThreadTags = [];
   var currentExtractionModel = 'qwen2.5-0.5b-q4';
+  var currentPromptApiAvailability = { status: 'unknown', available: false, api: 'none' };
   var threadPane = null;
 
   var els = {
@@ -20,6 +21,7 @@
     customThreadTagColor: document.getElementById('customThreadTagColor'),
     customThreadTagAdd: document.getElementById('customThreadTagAdd'),
     extractionModel: document.getElementById('extractionModel'),
+    extractionBackendStatus: document.getElementById('extractionBackendStatus'),
     showPreview: document.getElementById('showPreview'),
     autoExportInterval: document.getElementById('autoExportInterval'),
     autoExportStatus: document.getElementById('autoExportStatus'),
@@ -159,12 +161,15 @@
   }
 
   function extractionModelPresets() {
-    if (typeof ExtractionModelLoader !== 'undefined' && ExtractionModelLoader.modelPresets) return ExtractionModelLoader.modelPresets();
-    return [
+    var presets = typeof ExtractionModelLoader !== 'undefined' && ExtractionModelLoader.modelPresets ? ExtractionModelLoader.modelPresets() : [
       { id: 'qwen2.5-0.5b-q4', label: 'Qwen2.5-0.5B-Instruct-Q4', modelId: 'Qwen/Qwen2.5-0.5B-Instruct', quantization: 'q4' },
       { id: 'phi-3.5-mini-q4', label: 'Phi-3.5-mini-Q4', modelId: 'onnx-community/Phi-3.5-mini-instruct-onnx-web', quantization: 'q4f16', backend: 'webgpu', useExternalDataFormat: true },
       { id: 'gemma-3-1b-q4', label: 'Gemma-3-1B-Q4', modelId: 'onnx-community/gemma-3-1b-it-ONNX', quantization: 'q4' }
     ];
+    if (typeof ExtractionPromptApiBackend !== 'undefined' && ExtractionPromptApiBackend.modelPreset) {
+      presets = [ExtractionPromptApiBackend.modelPreset()].concat(presets);
+    }
+    return presets;
   }
 
   function extractionModelPreset(id) {
@@ -179,16 +184,56 @@
   }
 
   function populateExtractionModels() {
-    if (!els.extractionModel || els.extractionModel.options.length > 3) return;
+    if (!els.extractionModel) return;
     var selected = els.extractionModel.value;
     els.extractionModel.innerHTML = '';
     extractionModelPresets().forEach(function(preset) {
       var option = document.createElement('option');
       option.value = preset.id;
       option.textContent = preset.label;
+      if (preset.backendType === 'prompt-api' && (!currentPromptApiAvailability || currentPromptApiAvailability.status !== 'available')) {
+        option.disabled = true;
+      }
       els.extractionModel.appendChild(option);
     });
     els.extractionModel.value = normalizeExtractionModel(selected || currentExtractionModel);
+  }
+
+  function renderPromptApiAvailability() {
+    if (!els.extractionBackendStatus) return;
+    if (typeof ExtractionPromptApiBackend === 'undefined') {
+      els.extractionBackendStatus.textContent = 'Chrome built-in AI not detected; local models will be used.';
+      return;
+    }
+    var status = currentPromptApiAvailability.status || 'unknown';
+    if (status === 'available') {
+      els.extractionBackendStatus.textContent = 'Chrome built-in AI available; Gemini Nano can run without the bundled model download.';
+    } else if (status === 'downloadable' || status === 'downloading') {
+      els.extractionBackendStatus.textContent = 'Chrome built-in AI is not ready; local models will be used.';
+    } else if (status === 'unavailable') {
+      els.extractionBackendStatus.textContent = 'Chrome built-in AI unavailable; local models will be used.';
+    } else {
+      els.extractionBackendStatus.textContent = 'Checking Chrome built-in AI.';
+    }
+  }
+
+  async function refreshPromptApiAvailability() {
+    if (typeof ExtractionPromptApiBackend === 'undefined' || !ExtractionPromptApiBackend.availability) {
+      currentPromptApiAvailability = { status: 'unavailable', available: false, api: 'none' };
+    } else {
+      currentPromptApiAvailability = await ExtractionPromptApiBackend.availability();
+    }
+    populateExtractionModels();
+    renderPromptApiAvailability();
+    return currentPromptApiAvailability;
+  }
+
+  async function effectiveExtractionPreset(preset) {
+    if (!preset || preset.backendType !== 'prompt-api') return preset;
+    var availability = await refreshPromptApiAvailability();
+    if (availability.status === 'available') return preset;
+    log('warn', 'options.extraction.prompt_api.fallback', { availability: availability.status, api: availability.api });
+    return extractionModelPreset('qwen2.5-0.5b-q4');
   }
 
   function allThreadTags() {
@@ -496,18 +541,23 @@
   async function runExtractionForChat(chat, messages, onProgress) {
     if (typeof ExtractionRunner === 'undefined' || !ExtractionRunner.runChatExtraction) throw new Error('Extraction runner is unavailable');
     if (typeof VaultDAO === 'undefined') throw new Error('Vault DAO is unavailable');
-    var preset = extractionModelPreset(currentExtractionModel);
-    return ExtractionRunner.runChatExtraction(chat, messages, {
+    var preset = await effectiveExtractionPreset(extractionModelPreset(currentExtractionModel));
+    var options = {
       dao: VaultDAO,
       modelId: preset.modelId,
-      modelName: preset.label,
-      modelVersion: preset.quantization,
+      modelName: preset.modelName || preset.label,
+      modelVersion: preset.modelVersion || preset.quantization,
       quantization: preset.quantization,
       backend: preset.backend,
+      backendType: preset.backendType,
       task: preset.task,
       useExternalDataFormat: preset.useExternalDataFormat,
       onProgress: onProgress
-    });
+    };
+    if (preset.backendType === 'prompt-api' && typeof ExtractionPromptApiBackend !== 'undefined') {
+      options.modelLoader = ExtractionPromptApiBackend;
+    }
+    return ExtractionRunner.runChatExtraction(chat, messages, options);
   }
 
   async function runExtractionAll(refreshVault) {
@@ -818,6 +868,7 @@
     if (els.showPreview) els.showPreview.checked = !!settings.showPreview;
     if (els.autoExportInterval) els.autoExportInterval.value = settings.autoExportInterval;
     applyAppearance();
+    renderPromptApiAvailability();
 
     renderAutoExportStatus(settings.lastAutoExportStatus);
     renderCaptureStatus(settings.lastCaptureStatus);
@@ -1069,6 +1120,7 @@
     try {
       var settings = await StorageManager.getAll();
       renderSettings(settings);
+      await refreshPromptApiAvailability();
       await refreshDiagnostics();
       await refreshExtractionRuns();
       await refreshHistorySummary();
@@ -1088,6 +1140,7 @@
       if (isStorageUnavailable(error)) {
         var defaults = getDefaultSettings();
         renderSettings(defaults);
+        await refreshPromptApiAvailability();
         renderDiagnostics([]);
         renderExtractionRuns([]);
         if (els.historySummary) els.historySummary.textContent = 'No exports captured yet.';

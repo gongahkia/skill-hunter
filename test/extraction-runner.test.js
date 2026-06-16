@@ -147,4 +147,38 @@ describe('ExtractionRunner', () => {
     });
     expect(typeof captured.options.onProgress).toBe('function');
   });
+
+  it('records Gemini Nano built-in backend runs by model name', async () => {
+    const runner = loadRunner();
+    const runs = [];
+    const modelLoader = {
+      loadModel: async () => async () => '[{"tag":"TODO","text":"Use built-in backend","messageId":"m-1","confidence":0.75}]'
+    };
+
+    const result = await runner.runChatExtraction(chat(), [
+      { messageId: 'm-1', role: 'user', content: 'Can we use built-in Gemini Nano?', index: 0 }
+    ], {
+      modelLoader,
+      modelId: 'gemini-nano-builtin',
+      modelName: 'gemini-nano-builtin',
+      modelVersion: 'builtin',
+      dao: {
+        listOpenThreads: async () => [],
+        putOpenThreads: async () => [],
+        putExtractionRun: async (run) => {
+          runs.push(run);
+          return run;
+        }
+      }
+    });
+
+    expect(result.threadCount).toBe(1);
+    expect(runs).toHaveLength(1);
+    expect(runs[0]).toMatchObject({
+      chatId: 'chat-1',
+      modelName: 'gemini-nano-builtin',
+      modelVersion: 'builtin',
+      threadCount: 1
+    });
+  });
 });

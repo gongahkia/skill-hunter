@@ -31,13 +31,19 @@ async function flush() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-async function loadOptions(storage) {
+async function loadOptions(storage, options = {}) {
   const dom = new JSDOM(loadSrc('options.html'), { url: 'https://extension.test/options.html', pretendToBeVisual: true });
   dom.window.matchMedia = () => ({
     matches: false,
     addEventListener() {},
     removeEventListener() {}
   });
+  if (options.promptApiStatus) {
+    dom.window.LanguageModel = {
+      availability: async () => options.promptApiStatus,
+      create: async () => ({ prompt: async () => '[]', destroy() {} })
+    };
+  }
 
   const code = [
     'var api = this._api;',
@@ -48,6 +54,7 @@ async function loadOptions(storage) {
     'var AppLogger = { getRecent: async function() { return []; }, clear: async function() {}, serializeError: function(error) { return { message: error && error.message ? error.message : String(error) }; }, info: function() {}, warn: function() {}, error: function() {} };',
     loadSrc('storage.js'),
     loadSrc('ui/colorschemes.js'),
+    options.includePromptApi ? loadSrc('extraction/prompt-api.js') : '',
     loadSrc('options.js')
   ].join('\n');
   const fn = new Function('window', 'document', code);
@@ -119,6 +126,33 @@ describe('options colorscheme settings', () => {
     await flush();
 
     expect(storage.extractionModel).toBe('gemma-3-1b-q4');
+  });
+
+  it('offers the built-in Prompt API backend when available', async () => {
+    const storage = { extractionModel: 'gemini-nano-builtin' };
+    const dom = await loadOptions(storage, { includePromptApi: true, promptApiStatus: 'available' });
+    const select = dom.window.document.getElementById('extractionModel');
+    const builtin = [...select.options].find((option) => option.value === 'gemini-nano-builtin');
+
+    expect(builtin).toBeTruthy();
+    expect(builtin.disabled).toBe(false);
+    expect(select.value).toBe('gemini-nano-builtin');
+    expect(dom.window.document.getElementById('extractionBackendStatus').textContent).toContain('available');
+
+    dom.window.document.getElementById('options-form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+    await flush();
+    expect(storage.extractionModel).toBe('gemini-nano-builtin');
+  });
+
+  it('disables the built-in Prompt API backend when unavailable', async () => {
+    const dom = await loadOptions({}, { includePromptApi: true, promptApiStatus: 'unavailable' });
+    const select = dom.window.document.getElementById('extractionModel');
+    const builtin = [...select.options].find((option) => option.value === 'gemini-nano-builtin');
+
+    expect(builtin).toBeTruthy();
+    expect(builtin.disabled).toBe(true);
+    expect(select.value).toBe('qwen2.5-0.5b-q4');
+    expect(dom.window.document.getElementById('extractionBackendStatus').textContent).toContain('unavailable');
   });
 
   it('applies the saved colorscheme in popup UI', async () => {
