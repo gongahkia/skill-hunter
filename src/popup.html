@@ -3,75 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <title>Rakuzaichi</title>
+  <link rel="icon" href="./icon/32.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="popup-app">
-    <header class="hero">
-      <div class="brand-block">
-        <img src="./icon/128.png" alt="Rakuzaichi logo" class="logo">
-        <div>
-          <h1>Rakuzaichi</h1>
-          <p class="hero-subtitle">Local-first AI chat export utility</p>
-        </div>
+    <header class="clipper-topbar">
+      <div class="vault-label">
+        <span class="vault-dot" aria-hidden="true"></span>
+        <span>Local vault</span>
       </div>
       <div id="context-pill" class="context-pill loading">Scanning current tab</div>
     </header>
 
-    <section class="context-grid" aria-label="Current chat context">
-      <article class="context-card">
-        <span class="context-label">Platform</span>
-        <strong id="context-platform">Detecting...</strong>
-      </article>
-      <article class="context-card">
-        <span class="context-label">Messages</span>
-        <strong id="context-messages">-</strong>
-      </article>
-      <article class="context-card context-card-wide">
-        <span class="context-label">Conversation</span>
-        <strong id="context-title">Waiting for page metadata...</strong>
-      </article>
-      <article class="context-card">
-        <span class="context-label">Model</span>
-        <strong id="context-model">Unknown</strong>
-      </article>
+    <section class="document-header" aria-label="Current chat">
+      <h1 id="context-title">Waiting for page metadata...</h1>
     </section>
 
-    <section class="quick-section" aria-label="Quick actions">
-      <div id="capture-status" class="capture-status red">
-        <span class="capture-dot"></span>
-        <span id="capture-status-text">No captures yet.</span>
-      </div>
-      <button id="capture-now" class="btn btn-secondary">Capture this chat now</button>
-      <button id="quick-export" class="btn btn-primary">Quick export as <span id="quick-format">JSON</span></button>
-      <button id="open-options" class="btn btn-secondary">Settings &amp; diagnostics</button>
+    <section class="properties-panel" aria-label="Chat properties">
+      <button class="properties-title" type="button">Properties</button>
+      <dl class="property-list">
+        <div class="property-row">
+          <dt><span class="row-icon">=</span>title</dt>
+          <dd id="context-title-prop">Waiting for page metadata...</dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">-</span>source</dt>
+          <dd id="context-url">Current tab</dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">#</span>platform</dt>
+          <dd id="context-platform">Detecting...</dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">~</span>model</dt>
+          <dd id="context-model">Unknown</dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">+</span>messages</dt>
+          <dd id="context-messages">-</dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">*</span>capture</dt>
+          <dd id="capture-status" class="capture-status red"><span class="capture-dot"></span><span id="capture-status-text">No captures yet.</span></dd>
+        </div>
+        <div class="property-row">
+          <dt><span class="row-icon">></span>format</dt>
+          <dd><span id="quick-format">JSON</span></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="content-preview" aria-label="Conversation preview">
+      <p id="context-preview">Open a supported chat tab to preview the conversation before capture.</p>
     </section>
 
     <section class="format-section" aria-label="Export formats">
-      <div class="section-header">
-        <h2>Format toolbox</h2>
-        <p>Choose based on where this data goes next.</p>
-      </div>
+      <label class="format-label">Export format</label>
       <div class="format-grid">
         <button data-format="json" class="format-card">
           <span class="format-name">JSON</span>
-          <span class="format-note">Automation and APIs</span>
         </button>
         <button data-format="markdown" class="format-card">
-          <span class="format-name">Markdown</span>
-          <span class="format-note">Docs and notes</span>
+          <span class="format-name">MD</span>
         </button>
         <button data-format="csv" class="format-card">
           <span class="format-name">CSV</span>
-          <span class="format-note">Spreadsheet analysis</span>
         </button>
         <button data-format="tsv" class="format-card">
           <span class="format-name">TSV</span>
-          <span class="format-note">Safer plain-text tables</span>
+        </button>
+        <button data-format="html" class="format-card">
+          <span class="format-name">HTML</span>
         </button>
         <button data-format="pdf" class="format-card">
           <span class="format-name">PDF</span>
-          <span class="format-note">Print or save as PDF</span>
         </button>
       </div>
     </section>
@@ -86,15 +92,15 @@
       </div>
     </section>
 
-    <section class="history-panel" aria-label="Export summary">
-      <h2>Latest export</h2>
-      <p id="last-export">No exports yet.</p>
-    </section>
-
     <div id="status" class="status hidden" role="status" aria-live="polite"></div>
 
-    <footer class="footer-note">
-      Chat content is processed locally in your browser context.
+    <footer class="action-bar" aria-label="Actions">
+      <div class="secondary-actions">
+        <button id="open-options" class="btn btn-secondary">Vault settings</button>
+        <button id="quick-export" class="btn btn-secondary">Export <span id="quick-format-action">JSON</span></button>
+      </div>
+      <button id="capture-now" class="btn btn-primary">Capture to Rakuzaichi</button>
+      <p id="last-export" class="last-export">No exports yet.</p>
     </footer>
   </div>
 

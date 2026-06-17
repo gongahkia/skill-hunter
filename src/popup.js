@@ -1,5 +1,5 @@
 (function() {
-  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv', 'pdf'];
+  var SELECTABLE_FORMATS = ['json', 'markdown', 'csv', 'tsv', 'html', 'pdf'];
 
   var state = {
     settings: null,
@@ -13,12 +13,16 @@
     contextPlatform: document.getElementById('context-platform'),
     contextMessages: document.getElementById('context-messages'),
     contextTitle: document.getElementById('context-title'),
+    contextTitleProp: document.getElementById('context-title-prop'),
+    contextUrl: document.getElementById('context-url'),
+    contextPreview: document.getElementById('context-preview'),
     contextModel: document.getElementById('context-model'),
     captureStatus: document.getElementById('capture-status'),
     captureStatusText: document.getElementById('capture-status-text'),
     captureNow: document.getElementById('capture-now'),
     quickExport: document.getElementById('quick-export'),
     quickFormat: document.getElementById('quick-format'),
+    quickFormatAction: document.getElementById('quick-format-action'),
     openOptions: document.getElementById('open-options'),
     formatButtons: Array.from(document.querySelectorAll('button[data-format]')),
     previewPanel: document.getElementById('export-preview'),
@@ -74,6 +78,7 @@
   }
 
   function formatLabel(format) {
+    if (format === 'markdown') return 'MD';
     return String(format || 'json').toUpperCase();
   }
 
@@ -88,6 +93,8 @@
       if (button.dataset.format === format) button.classList.add('active');
       else button.classList.remove('active');
     });
+    if (els.quickFormat) els.quickFormat.textContent = formatLabel(format);
+    if (els.quickFormatAction) els.quickFormatAction.textContent = formatLabel(format);
   }
 
   function setActionsDisabled(disabled) {
@@ -113,7 +120,14 @@
 
   function updateQuickFormat() {
     var format = normalizeExportFormat((state.settings && state.settings.defaultFormat) || 'json');
-    if (els.quickFormat) els.quickFormat.textContent = formatLabel(format);
+    setActiveFormat(format);
+  }
+
+  function truncateText(value, limit) {
+    var text = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!text) return '';
+    if (text.length <= limit) return text;
+    return text.slice(0, limit - 1).trim() + '...';
   }
 
   function renderCaptureStatus(status) {
@@ -146,6 +160,9 @@
       if (els.contextMessages) els.contextMessages.textContent = '-';
       if (els.contextModel) els.contextModel.textContent = 'Unavailable';
       if (els.contextTitle) els.contextTitle.textContent = 'Open a supported chat tab, then reopen this popup.';
+      if (els.contextTitleProp) els.contextTitleProp.textContent = 'Unsupported page';
+      if (els.contextUrl) els.contextUrl.textContent = truncateText(data && data.url ? data.url : 'Current tab', 96);
+      if (els.contextPreview) els.contextPreview.textContent = 'Rakuzaichi can capture supported AI chat pages into the local vault.';
       setPill('unsupported', 'Unsupported tab');
       setActionsDisabled(true);
       return;
@@ -155,7 +172,10 @@
     if (els.contextMessages) els.contextMessages.textContent = String(data.messageCount || 0);
     if (els.contextModel) els.contextModel.textContent = data.model || 'Not exposed by this chat UI';
     if (els.contextTitle) els.contextTitle.textContent = data.chatTitle || 'Untitled conversation';
-    setPill('supported', 'Ready to export');
+    if (els.contextTitleProp) els.contextTitleProp.textContent = data.chatTitle || 'Untitled conversation';
+    if (els.contextUrl) els.contextUrl.textContent = truncateText(data.url || 'Current tab', 96);
+    if (els.contextPreview) els.contextPreview.textContent = data.previewText || 'No message preview is available yet. Capture still works if the page exposes messages.';
+    setPill('supported', 'Ready');
     setActionsDisabled(false);
   }
 

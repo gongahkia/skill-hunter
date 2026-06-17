@@ -95,18 +95,27 @@ function detectContext(traceId) {
     return {
       supported: false,
       chatTitle: document.title,
+      url: window.location.href,
       messageCount: 0,
       model: '',
+      previewText: '',
       traceId: traceId
     };
   }
 
   var messageCount = 0;
   var model = '';
+  var previewText = '';
   try {
     var summary = platform.extract();
     if (summary && Array.isArray(summary.messages)) messageCount = summary.messages.length;
     model = summary && summary.model ? summary.model : '';
+    if (summary && Array.isArray(summary.messages)) {
+      var previewMessage = summary.messages.find(function(message) {
+        return message && message.content && String(message.content).trim();
+      });
+      previewText = previewMessage ? String(previewMessage.content).trim().replace(/\s+/g, ' ').slice(0, 520) : '';
+    }
   } catch (error) {
     logEvent('warn', 'content.detect.partial', {
       traceId: traceId,
@@ -120,8 +129,10 @@ function detectContext(traceId) {
     platform: platform.id,
     name: platform.name,
     chatTitle: document.title,
+    url: window.location.href,
     messageCount: messageCount,
     model: model,
+    previewText: previewText,
     traceId: traceId
   };
 }

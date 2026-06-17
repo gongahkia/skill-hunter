@@ -5,44 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rakuzaichi</title>
   <meta name="description" content="Zero-server browser-extension vault for AI chats, open threads, local extraction, export, and Obsidian sync.">
+  <link rel="icon" href="../asset/logo/rakuzaichi.webp">
   <style>
     :root {
-      --bg: #f7fafc;
-      --ink: #172232;
-      --muted: #45566a;
-      --line: #cbd5e1;
-      --primary: #0a7ca5;
-      --primary-dark: #075d7d;
-      --soft: #eef7ee;
-      --warm: #fff4e8;
-      --purple: #f4edf9;
+      --primary: #7c3aed;
+      --primary-60: #a78bfa;
+      --primary-80: #8b5cf6;
+      --secondary: #eeeeee;
+      --tertiary: #c4b5fd;
+      --neutral: #0f0f0f;
+      --surface: #1f1f1f;
+      --on-surface: #eeeeee;
+      --border: #404040;
+      --muted: #a3a3a3;
+      --error: #ef4444;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--secondary);
+      background: var(--neutral);
+      font: 16px/24px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    a { color: inherit; }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     .hero {
-      min-height: 92vh;
-      display: grid;
-      align-items: end;
+      min-height: 86vh;
       position: relative;
+      display: flex;
+      align-items: flex-end;
       overflow: hidden;
-      background: #102333;
+      border-bottom: 1px solid var(--border);
+      background: var(--neutral);
     }
 
     .hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, rgba(16, 35, 51, 0.92), rgba(16, 35, 51, 0.48) 52%, rgba(16, 35, 51, 0.2)), url("../asset/reference/demo.gif") center / cover no-repeat;
+      background:
+        linear-gradient(90deg, rgba(15, 15, 15, 1) 0%, rgba(15, 15, 15, 0.98) 42%, rgba(15, 15, 15, 0.72) 68%, rgba(15, 15, 15, 0.48) 100%),
+        url("../asset/reference/demo.gif") right center / 780px auto no-repeat;
+      background-color: var(--neutral);
     }
 
     .nav {
@@ -54,144 +70,188 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px clamp(20px, 5vw, 72px);
-      color: #fff;
+      padding: 24px 32px;
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      font-weight: 800;
-      text-decoration: none;
+      color: var(--secondary);
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 20px;
     }
 
     .brand img {
       width: 34px;
       height: 34px;
-      border-radius: 7px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      object-fit: cover;
     }
 
     .nav-links {
       display: flex;
-      gap: 18px;
-      color: rgba(255, 255, 255, 0.86);
-      font-size: 0.94rem;
-      font-weight: 700;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+    }
+
+    .nav-links a:hover {
+      color: var(--secondary);
     }
 
     .hero-inner {
       position: relative;
       z-index: 1;
-      width: min(980px, calc(100% - 40px));
-      padding: 150px 0 64px;
-      margin-left: clamp(20px, 6vw, 86px);
-      color: #fff;
+      width: min(940px, calc(100% - 64px));
+      margin: 0 auto;
+      padding: 150px 0 78px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      margin: 0 0 24px;
+      border-radius: 9999px;
+      padding: 4px 10px;
+      color: var(--primary-60);
+      background: #2a2140;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 16px;
+      letter-spacing: 0.02em;
     }
 
     h1 {
-      max-width: 840px;
+      max-width: 820px;
       margin: 0;
-      font-size: clamp(3.8rem, 9vw, 8.4rem);
-      line-height: 0.92;
+      color: var(--secondary);
+      font-size: 60px;
+      font-weight: 600;
+      line-height: 60px;
       letter-spacing: 0;
     }
 
     .hero-copy {
-      max-width: 700px;
-      margin: 26px 0 0;
-      color: rgba(255, 255, 255, 0.86);
-      font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+      max-width: 690px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 36px;
     }
 
     .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 34px;
+      gap: 14px;
+      margin-top: 46px;
     }
 
     .button {
-      min-height: 44px;
+      min-height: 60px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      border-radius: 7px;
-      padding: 10px 14px;
-      background: #fff;
-      color: #102333;
-      font-weight: 800;
-      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 16px 32px;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+
+    .button.primary {
+      color: var(--secondary);
+      background: var(--primary);
+    }
+
+    .button.primary:hover {
+      background: var(--primary-80);
     }
 
     .button.secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
+      color: var(--secondary);
+      background: transparent;
+      border-color: var(--border);
+    }
+
+    .button.secondary:hover {
+      border-color: var(--primary-60);
+      color: var(--primary-60);
     }
 
     main {
       display: grid;
-      gap: 0;
     }
 
     section {
-      padding: 76px clamp(20px, 6vw, 86px);
+      padding: 96px 32px;
     }
 
-    .strip {
-      background: #fff;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
+    .section-inner {
+      width: min(1120px, 100%);
+      margin: 0 auto;
     }
 
     .section-head {
-      max-width: 760px;
-      margin-bottom: 30px;
+      max-width: 780px;
+      margin-bottom: 46px;
     }
 
     h2 {
       margin: 0;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      line-height: 1.02;
+      color: var(--secondary);
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 60px;
       letter-spacing: 0;
     }
 
-    .section-head p,
-    .feature p,
-    .platforms,
-    .foot {
+    .section-head p {
+      margin: 14px 0 0;
       color: var(--muted);
+      font-size: 20px;
+      line-height: 32px;
+    }
+
+    .features {
+      border-bottom: 1px solid var(--border);
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
+      gap: 24px;
     }
 
-    .feature {
-      min-height: 178px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 22px;
-      background: var(--bg);
+    .card {
+      min-height: 210px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      color: var(--on-surface);
+      background: var(--surface);
     }
 
-    .feature:nth-child(2n) { background: var(--soft); }
-    .feature:nth-child(3n) { background: var(--warm); }
-
-    .feature h3 {
-      margin: 0 0 10px;
-      font-size: 1.2rem;
+    .card h3 {
+      margin: 0;
+      color: var(--secondary);
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 30px;
     }
 
-    .diagram {
-      width: min(100%, 1120px);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      display: block;
-      background: #fff;
+    .card p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 24px;
     }
 
     .platforms {
@@ -199,31 +259,103 @@
       flex-wrap: wrap;
       gap: 10px;
       max-width: 980px;
-      margin: 24px 0 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
-    .platforms span {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 11px;
-      background: #fff;
-      color: var(--ink);
-      font-weight: 700;
-      font-size: 0.92rem;
+    .platforms li {
+      border-radius: 9999px;
+      padding: 4px 10px;
+      color: var(--primary-60);
+      background: #2a2140;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+    }
+
+    .architecture {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #121212;
+    }
+
+    .diagram {
+      display: block;
+      width: min(100%, 1120px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
     }
 
     .foot {
-      border-top: 1px solid var(--line);
-      font-size: 0.92rem;
+      padding: 32px;
+      color: var(--muted);
+      background: var(--neutral);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+      text-align: center;
     }
 
-    @media (max-width: 800px) {
-      .hero { min-height: 88vh; }
-      .nav { align-items: flex-start; }
-      .nav-links { display: none; }
-      .hero-inner { margin: 0 20px; padding-bottom: 42px; }
-      .grid { grid-template-columns: 1fr; }
-      section { padding: 52px 20px; }
+    @media (max-width: 820px) {
+      .nav {
+        padding: 18px 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        min-height: 82vh;
+      }
+
+      .hero::before {
+        background:
+          linear-gradient(90deg, rgba(15, 15, 15, 0.96), rgba(15, 15, 15, 0.82)),
+          url("../asset/reference/demo.gif") center / cover no-repeat;
+      }
+
+      .hero-inner {
+        width: calc(100% - 40px);
+        padding-bottom: 52px;
+      }
+
+      h1 {
+        font-size: 48px;
+        line-height: 52px;
+      }
+
+      .hero-copy {
+        font-size: 20px;
+        line-height: 32px;
+      }
+
+      section {
+        padding: 64px 20px;
+      }
+
+      h2 {
+        font-size: 38px;
+        line-height: 46px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      h1 {
+        font-size: 38px;
+        line-height: 46px;
+      }
+
+      .actions,
+      .button {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -241,55 +373,60 @@
       </div>
     </nav>
     <div class="hero-inner">
+      <p class="eyebrow">Zero-server AI chat vault</p>
       <h1>Rakuzaichi</h1>
-      <p class="hero-copy">A zero-server browser-extension vault for AI chats, open threads, local extraction, offline export, and Obsidian sync.</p>
+      <p class="hero-copy">Capture AI conversations locally, keep unfinished threads visible, and export or sync your vault without a backend.</p>
       <div class="actions" aria-label="Install options">
-        <a class="button" href="https://github.com/gongahkia/rakuzaichi">Source</a>
-        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Chrome</a>
-        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Firefox</a>
-        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi/releases">Safari</a>
+        <a class="button primary" href="https://github.com/gongahkia/rakuzaichi/releases">Download</a>
+        <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi">Source</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section id="features" class="strip">
-      <div class="section-head">
-        <h2>Local memory for every LLM you use.</h2>
-        <p>Capture chats into IndexedDB, search across platforms, and keep unfinished work visible as open threads.</p>
-      </div>
-      <div class="grid">
-        <article class="feature">
-          <h3>Vault browser</h3>
-          <p>Search, filter, tag, pin, and organize captured chats without sending data to a server.</p>
-        </article>
-        <article class="feature">
-          <h3>Open threads</h3>
-          <p>Track TODO, FIXME, REF, PROMPT, and locally extracted follow-ups back to their source messages.</p>
-        </article>
-        <article class="feature">
-          <h3>Portable exports</h3>
-          <p>Save Markdown, JSON, CSV, TSV, offline HTML, PDF, Obsidian notes, ZIP fallbacks, and encrypted backups.</p>
-        </article>
+    <section id="features" class="features">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Local memory for every LLM you use.</h2>
+          <p>Rakuzaichi turns scattered chat tabs into a searchable local vault with tags, folders, open threads, backups, and exports.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Vault browser</h3>
+            <p>Search, filter, tag, pin, and organize captured chats across platforms while the data stays in browser storage.</p>
+          </article>
+          <article class="card">
+            <h3>Open threads</h3>
+            <p>Track TODO, FIXME, REF, PROMPT, and locally extracted follow-ups back to their source messages.</p>
+          </article>
+          <article class="card">
+            <h3>Portable exports</h3>
+            <p>Save Markdown, JSON, CSV, TSV, offline HTML, PDF, Obsidian notes, ZIP fallbacks, and encrypted backups.</p>
+          </article>
+        </div>
       </div>
     </section>
 
     <section id="platforms">
-      <div class="section-head">
-        <h2>15 chat platforms.</h2>
-        <p>One local schema for Western and Chinese LLM chat surfaces.</p>
-      </div>
-      <div class="platforms">
-        <span>ChatGPT</span><span>Claude</span><span>Gemini</span><span>Perplexity</span><span>DeepSeek</span><span>Grok</span><span>Copilot</span><span>Mistral</span><span>HuggingChat</span><span>Poe</span><span>Kimi</span><span>Qwen</span><span>ChatGLM</span><span>Doubao</span><span>NotebookLM</span>
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>15 chat platforms.</h2>
+          <p>One local schema for Western and Chinese LLM chat surfaces.</p>
+        </div>
+        <ul class="platforms" aria-label="Supported platforms">
+          <li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Perplexity</li><li>DeepSeek</li><li>Grok</li><li>Copilot</li><li>Mistral</li><li>HuggingChat</li><li>Poe</li><li>Kimi</li><li>Qwen</li><li>ChatGLM</li><li>Doubao</li><li>NotebookLM</li>
+        </ul>
       </div>
     </section>
 
-    <section id="architecture" class="strip">
-      <div class="section-head">
-        <h2>Zero-server by design.</h2>
-        <p>Content scripts normalize chats, the background worker writes IndexedDB rows, and the options UI handles vault browsing, local extraction, export, sync, and backup.</p>
+    <section id="architecture" class="architecture">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Zero-server by design.</h2>
+          <p>Content scripts normalize chats, the background worker writes IndexedDB rows, and the options UI handles vault browsing, local extraction, export, sync, and backup.</p>
+        </div>
+        <img class="diagram" src="../asset/reference/architecture.png" alt="Rakuzaichi architecture diagram">
       </div>
-      <img class="diagram" src="../asset/reference/architecture.png" alt="Rakuzaichi architecture diagram">
     </section>
   </main>
 
