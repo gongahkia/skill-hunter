@@ -8,17 +8,16 @@
   <link rel="icon" href="../asset/logo/rakuzaichi.webp">
   <style>
     :root {
-      --primary: #7c3aed;
-      --primary-60: #a78bfa;
-      --primary-80: #8b5cf6;
+      --primary: #eeeeee;
+      --primary-60: #d4d4d4;
+      --primary-80: #ffffff;
       --secondary: #eeeeee;
-      --tertiary: #c4b5fd;
       --neutral: #0f0f0f;
       --surface: #1f1f1f;
+      --surface-soft: #171717;
       --on-surface: #eeeeee;
       --border: #404040;
       --muted: #a3a3a3;
-      --error: #ef4444;
     }
 
     * {
@@ -42,10 +41,10 @@
     }
 
     .hero {
-      min-height: 86vh;
+      min-height: 94vh;
       position: relative;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       overflow: hidden;
       border-bottom: 1px solid var(--border);
       background: var(--neutral);
@@ -55,10 +54,8 @@
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(90deg, rgba(15, 15, 15, 1) 0%, rgba(15, 15, 15, 0.98) 42%, rgba(15, 15, 15, 0.72) 68%, rgba(15, 15, 15, 0.48) 100%),
-        url("../asset/reference/demo.gif") right center / 780px auto no-repeat;
-      background-color: var(--neutral);
+      background: radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.08), transparent 36%);
+      pointer-events: none;
     }
 
     .nav {
@@ -107,9 +104,10 @@
     .hero-inner {
       position: relative;
       z-index: 1;
-      width: min(940px, calc(100% - 64px));
+      width: min(1120px, calc(100% - 64px));
       margin: 0 auto;
-      padding: 150px 0 78px;
+      padding: 132px 0 72px;
+      text-align: center;
     }
 
     .eyebrow {
@@ -120,7 +118,7 @@
       border-radius: 9999px;
       padding: 4px 10px;
       color: var(--primary-60);
-      background: #2a2140;
+      background: var(--surface);
       font-size: 12px;
       font-weight: 500;
       line-height: 16px;
@@ -129,7 +127,7 @@
 
     h1 {
       max-width: 820px;
-      margin: 0;
+      margin: 0 auto;
       color: var(--secondary);
       font-size: 60px;
       font-weight: 600;
@@ -139,7 +137,7 @@
 
     .hero-copy {
       max-width: 690px;
-      margin: 24px 0 0;
+      margin: 24px auto 0;
       color: var(--muted);
       font-size: 24px;
       font-weight: 400;
@@ -149,6 +147,7 @@
     .actions {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 14px;
       margin-top: 46px;
     }
@@ -168,11 +167,12 @@
 
     .button.primary {
       color: var(--secondary);
-      background: var(--primary);
+      background: #ffffff;
+      color: #0f0f0f;
     }
 
     .button.primary:hover {
-      background: var(--primary-80);
+      background: #d4d4d4;
     }
 
     .button.secondary {
@@ -184,6 +184,115 @@
     .button.secondary:hover {
       border-color: var(--primary-60);
       color: var(--primary-60);
+    }
+
+    .hero-product {
+      width: min(720px, 100%);
+      margin: 46px auto 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      text-align: left;
+    }
+
+    .product-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+    }
+
+    .product-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 9999px;
+      background: var(--secondary);
+    }
+
+    .product-pill {
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 3px 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 16px;
+    }
+
+    .product-body {
+      display: grid;
+      gap: 16px;
+      padding: 20px 22px 22px;
+    }
+
+    .product-title {
+      margin: 0;
+      color: var(--secondary);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 34px;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 22px;
+    }
+
+    .product-row strong {
+      color: var(--secondary);
+      font-weight: 500;
+    }
+
+    .product-preview {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .product-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .product-actions span {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+    }
+
+    .product-actions .active {
+      color: var(--neutral);
+      background: var(--secondary);
+    }
+
+    .product-cta {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--neutral);
+      background: var(--secondary);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 20px;
     }
 
     main {
@@ -267,8 +376,8 @@
     .platforms li {
       border-radius: 9999px;
       padding: 4px 10px;
-      color: var(--primary-60);
-      background: #2a2140;
+      color: var(--secondary);
+      background: var(--surface);
       font-size: 14px;
       font-weight: 500;
       line-height: 18px;
@@ -280,12 +389,49 @@
       background: #121212;
     }
 
-    .diagram {
-      display: block;
+    .architecture-map {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
       width: min(100%, 1120px);
       border: 1px solid var(--border);
       border-radius: 12px;
-      background: var(--surface);
+      padding: 24px;
+      background: var(--neutral);
+    }
+
+    .arch-card,
+    .arch-band {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      color: var(--on-surface);
+      background: var(--surface-soft);
+    }
+
+    .arch-card h3,
+    .arch-band h3 {
+      margin: 0 0 10px;
+      color: var(--secondary);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+
+    .arch-card p,
+    .arch-band p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .arch-band {
+      grid-column: span 2;
+    }
+
+    .arch-band.wide {
+      grid-column: 1 / -1;
     }
 
     .foot {
@@ -312,9 +458,7 @@
       }
 
       .hero::before {
-        background:
-          linear-gradient(90deg, rgba(15, 15, 15, 0.96), rgba(15, 15, 15, 0.82)),
-          url("../asset/reference/demo.gif") center / cover no-repeat;
+        background: radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.08), transparent 40%);
       }
 
       .hero-inner {
@@ -343,6 +487,15 @@
 
       .grid {
         grid-template-columns: 1fr;
+      }
+
+      .architecture-map {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-band,
+      .arch-band.wide {
+        grid-column: auto;
       }
     }
 
@@ -379,6 +532,23 @@
       <div class="actions" aria-label="Install options">
         <a class="button primary" href="https://github.com/gongahkia/rakuzaichi/releases">Download</a>
         <a class="button secondary" href="https://github.com/gongahkia/rakuzaichi">Source</a>
+      </div>
+      <div class="hero-product" aria-label="Rakuzaichi popup preview">
+        <div class="product-top">
+          <span class="product-dot" aria-hidden="true"></span>
+          <span class="product-pill">Ready</span>
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">ChatGPT</h2>
+          <div class="product-row"><span>source</span><strong>https://chatgpt.com/</strong></div>
+          <div class="product-row"><span>platform</span><strong>ChatGPT</strong></div>
+          <div class="product-row"><span>messages</span><strong>24</strong></div>
+          <p class="product-preview">Capture this chat into the local vault, then search, tag, export, or sync it without a server.</p>
+          <div class="product-actions" aria-hidden="true">
+            <span class="active">JSON</span><span>MD</span><span>PDF</span>
+          </div>
+          <div class="product-cta">Capture to Rakuzaichi</div>
+        </div>
       </div>
     </div>
   </header>
@@ -425,7 +595,40 @@
           <h2>Zero-server by design.</h2>
           <p>Content scripts normalize chats, the background worker writes IndexedDB rows, and the options UI handles vault browsing, local extraction, export, sync, and backup.</p>
         </div>
-        <img class="diagram" src="../asset/reference/architecture.png" alt="Rakuzaichi architecture diagram">
+        <div class="architecture-map" aria-label="Rakuzaichi architecture diagram">
+          <article class="arch-card">
+            <h3>15 chat platforms</h3>
+            <p>ChatGPT, Claude, Gemini, Perplexity, DeepSeek, Grok, Copilot, Mistral, Poe, Kimi, Qwen, ChatGLM, Doubao, NotebookLM.</p>
+          </article>
+          <article class="arch-card">
+            <h3>Content scripts</h3>
+            <p>Adapters normalize chat ID, title, URL, model, and messages.</p>
+          </article>
+          <article class="arch-card">
+            <h3>Background worker</h3>
+            <p>Capture trigger, throttle, dedupe, diagnostics, and export downloads.</p>
+          </article>
+          <article class="arch-card">
+            <h3>IndexedDB vault</h3>
+            <p>Chats, messages, folders, open threads, extraction runs, and search index.</p>
+          </article>
+          <article class="arch-band">
+            <h3>Vault UI</h3>
+            <p>Search, filter, pin, folders, tags, chat detail, source links, settings, diagnostics, and export history.</p>
+          </article>
+          <article class="arch-band">
+            <h3>Local extraction</h3>
+            <p>Candidate filtering, chunking, Transformers.js WebGPU/WASM, and optional Chrome Prompt API.</p>
+          </article>
+          <article class="arch-band">
+            <h3>Export and sync</h3>
+            <p>JSON, CSV, TSV, Markdown, offline HTML, print PDF, Obsidian sync, ZIP fallback, and encrypted backups.</p>
+          </article>
+          <article class="arch-band wide">
+            <h3>Privacy boundary</h3>
+            <p>No Rakuzaichi server. Captured chats, extracted threads, search indexes, settings, backups, and sync handles stay on-device.</p>
+          </article>
+        </div>
       </div>
     </section>
   </main>
