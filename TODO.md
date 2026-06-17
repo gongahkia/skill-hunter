@@ -359,7 +359,8 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
   - 2026-06-16: aligned `package.json`, `package-lock.json`, `src/manifest.json`, and generated Safari manifest to `3.0.0`; rebuilt package artifacts for the release version.
   - 2026-06-18: added `docs/launch/store-submission-runbook.md` with exact CWS upload/listing steps from official Chrome docs; CWS draft creation remains blocked on account UI access.
 - [ ] `M8.T03` — Submit to CWS. **Success:** review status visible in dev console. [Inference] Expect 3-21 day review per 2026 surge data.
-- [ ] `M8.T04` — Create Mozilla Add-Ons developer account. **Success:** account confirmed at `https://addons.mozilla.org/developers/`.
+- [x] `M8.T04` — Create Mozilla Add-Ons developer account. **Success:** account confirmed at `https://addons.mozilla.org/developers/`.
+  - 2026-06-18: verified public AMO developer profile for Gabriel Ong shows "Add-on Developer", user since 2026-03-20, and 7 add-ons at `https://addons.mozilla.org/es-AR/firefox/user/19801058/`; this proves the AMO developer account exists. Developer-dashboard access itself is not exposed publicly.
 - [ ] `M8.T05` — Build Firefox bundle + source bundle: `npm run package:firefox` and `npm run package:firefox-source`. Submit. **Success:** AMO listing accepted into review queue.
   - 2026-06-16: fixed `scripts/package-firefox-source.mjs` to stage under ignored `dist/firefox-source` and include existing repo files; local `npm run package:firefox-source` succeeded and produced ignored artifact `rakuzaichi-firefox-source.zip`. AMO submission is not done because no AMO account access is available here.
   - 2026-06-18: added `docs/launch/store-submission-runbook.md` with exact AMO upload/source/listing steps from official Mozilla docs; AMO queue entry remains blocked on account UI access.
