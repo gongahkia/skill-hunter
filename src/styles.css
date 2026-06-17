@@ -1,18 +1,18 @@
 :root {
-  --clip-bg: #f7f7f8;
+  --clip-bg: #ffffff;
   --clip-surface: #ffffff;
-  --clip-surface-soft: #fafafa;
-  --clip-ink: #2c2c2c;
-  --clip-ink-soft: #575757;
-  --clip-ink-muted: #7b7b7b;
-  --clip-line: #dedede;
-  --clip-line-strong: #c8c8c8;
-  --clip-primary: #8b5cf6;
-  --clip-primary-strong: #7c3aed;
-  --clip-primary-soft: #f1eaff;
-  --clip-success: #22a06b;
-  --clip-amber: #d99a25;
-  --clip-error: #d23f3f;
+  --clip-surface-soft: #f5f5f5;
+  --clip-ink: #111111;
+  --clip-ink-soft: #4f4f4f;
+  --clip-ink-muted: #7a7a7a;
+  --clip-line: #dddddd;
+  --clip-line-strong: #bdbdbd;
+  --clip-primary: #111111;
+  --clip-primary-strong: #000000;
+  --clip-primary-soft: #f0f0f0;
+  --clip-success: #111111;
+  --clip-amber: #555555;
+  --clip-error: #111111;
   --clip-on-primary: #ffffff;
 }
 
@@ -47,7 +47,7 @@ button {
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px 6px;
-  border-top: 3px solid #f0d84a;
+  border-top: 3px solid var(--clip-primary-strong);
 }
 
 .vault-label {
@@ -64,7 +64,7 @@ button {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #f0d84a;
+  background: var(--clip-primary);
 }
 
 .context-pill {
@@ -84,15 +84,15 @@ button {
 }
 
 .context-pill.supported {
-  color: #12613f;
-  border-color: #b7dfce;
-  background: #eefaf4;
+  color: var(--clip-ink);
+  border-color: var(--clip-line-strong);
+  background: var(--clip-surface-soft);
 }
 
 .context-pill.unsupported {
-  color: #8f2525;
-  border-color: #efc7c7;
-  background: #fff2f2;
+  color: var(--clip-ink);
+  border-color: var(--clip-line-strong);
+  background: var(--clip-surface-soft);
 }
 
 .document-header {
@@ -101,7 +101,7 @@ button {
 
 h1 {
   margin: 0;
-  color: #222222;
+  color: var(--clip-ink);
   font-size: 18px;
   font-weight: 750;
   line-height: 23px;
@@ -159,7 +159,7 @@ h1 {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: #2f2f2f;
+  color: var(--clip-ink);
   font-size: 14px;
   line-height: 18px;
   text-overflow: ellipsis;
@@ -169,7 +169,7 @@ h1 {
 .row-icon {
   width: 18px;
   flex: 0 0 18px;
-  color: #888888;
+  color: var(--clip-ink-muted);
   text-align: center;
   font-size: 14px;
   line-height: 18px;
@@ -212,7 +212,7 @@ h1 {
 
 .content-preview p {
   margin: 0;
-  color: #252525;
+  color: var(--clip-ink);
   font-size: 14px;
   line-height: 19px;
 }
@@ -320,15 +320,15 @@ h1 {
 }
 
 .status.success {
-  color: #12613f;
-  border-color: #b7dfce;
-  background: #eefaf4;
+  color: var(--clip-ink);
+  border-color: var(--clip-line-strong);
+  background: var(--clip-surface-soft);
 }
 
 .status.error {
-  color: #8f2525;
-  border-color: #efc7c7;
-  background: #fff2f2;
+  color: var(--clip-ink);
+  border-color: var(--clip-line-strong);
+  background: var(--clip-surface-soft);
 }
 
 .action-bar {
@@ -337,7 +337,7 @@ h1 {
   margin-top: auto;
   border-top: 1px solid var(--clip-line);
   padding: 10px;
-  background: #fbfbfb;
+  background: var(--clip-surface-soft);
 }
 
 .btn {
