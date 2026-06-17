@@ -1,12 +1,19 @@
 # v3.0.0 Release Draft
 
-Status: draft created. Do not publish until store submissions, Safari release artifact, and tag/source alignment are verified.
+Status: draft created. Do not publish until store submissions and the Safari release artifact are verified.
 
 Draft release is discoverable by tag with `gh release view v3.0.0`.
 
-## Current Blocker
+## Asset Alignment
 
-The draft release assets were refreshed from local commit `7193897e5447f470ba5f8aa5fdc616bc275d135f`, but tag `v3.0.0` currently points to `e8d744e6c6f8c25903ee7ba0919773ef027a8be1`. Do not publish until the release tag, pushed source, and attached assets refer to the same intended commit.
+The draft release assets were rebuilt from tag commit `e8d744e6c6f8c25903ee7ba0919773ef027a8be1` on 2026-06-18 and re-uploaded to GitHub Release `v3.0.0`. Remote asset digests verified with `gh release view v3.0.0 --json tagName,isDraft,url,assets`.
+
+| Asset | SHA-256 |
+| :--- | :--- |
+| `rakuzaichi-chrome.zip` | `cf049b1cfaa2fe59542ee131bb9bf04f44d14e0567f9c436f62372250c3b5c9e` |
+| `rakuzaichi-firefox.xpi` | `aafacd4cdb21bb7e0985f40f467f1ec7b6a98358d99790a1ce93908f53b974c6` |
+| `rakuzaichi-firefox-source.zip` | `e80a8be2ea93e5d54e7df3c3ce9ba3dee2c4b9493a012a823e719b4ef85e9141` |
+| `rakuzaichi-safari.zip` | `58f57141e2e64aef7063e45425f06b4360364d38b69f89cdd32f978e170839d5` |
 
 ## Tag
 
@@ -59,6 +66,7 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 - [x] `v3.0.0` tag pushed.
 - [x] GitHub Release created.
 - [x] Chrome/Firefox/Safari binaries attached.
+- [x] Release assets rebuilt from `v3.0.0` tag source and remote SHA-256 digests verified.
 
 ## Publish Commands
 
