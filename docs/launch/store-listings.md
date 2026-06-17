@@ -54,7 +54,7 @@ Key features:
 | Name | Rakuzaichi |
 | Summary | Local AI-chat memory vault with search, exports, Obsidian sync, backups, and open-thread extraction. |
 | Category | Productivity |
-| License | Not specified in repo. |
+| License | MIT |
 | Homepage URL | `https://github.com/gongahkia/rakuzaichi` |
 | Support URL | `https://github.com/gongahkia/rakuzaichi/issues` |
 | Privacy policy URL | `https://github.com/gongahkia/rakuzaichi/blob/main/PRIVACY.md` |

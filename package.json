@@ -2,6 +2,7 @@
   "name": "rakuzaichi",
   "version": "3.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "build": "node scripts/build.mjs",
     "build:chrome": "node scripts/build.mjs chrome",
