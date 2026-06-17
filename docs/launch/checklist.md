@@ -1,12 +1,15 @@
 # Pre-launch Checklist
 
 - [ ] Chrome Web Store listing approved.
+  Runbook: `docs/launch/store-submission-runbook.md`
   Verify by: `https://chrome.google.com/webstore/devconsole/`
 
 - [ ] Firefox AMO listing approved.
+  Runbook: `docs/launch/store-submission-runbook.md`
   Verify by: `https://addons.mozilla.org/developers/addons`
 
 - [ ] Safari TestFlight build available.
+  Runbook: `docs/launch/store-submission-runbook.md`
   Verify by: `https://appstoreconnect.apple.com/apps`
 
 - [ ] README updated with current positioning, install notes, source link, and privacy link.
