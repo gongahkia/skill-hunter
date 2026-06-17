@@ -376,6 +376,7 @@ Combined with `--allow-unrelated-histories`, `-s ours` is the canonical way to g
   - 2026-06-16: added `rakuzaichi-safari.zip` to local release asset prep via `npm run package:safari-local`; release still unchecked because no GitHub release page/tag exists and the Safari ZIP is unsigned local output.
   - 2026-06-16: pushed `main`, pushed `v3.0.0`, created draft GitHub Release `Rakuzaichi v3.0.0 - local AI-chat memory vault`, attached `rakuzaichi-chrome.zip`, `rakuzaichi-firefox.xpi`, `rakuzaichi-firefox-source.zip`, and unsigned local `rakuzaichi-safari.zip`, with generated changelog `2.0.0...v3.0.0`. Verify with `gh release view v3.0.0`.
   - 2026-06-18: rebuilt Chrome, Firefox, Firefox source, and unsigned Safari artifacts after adding MIT license metadata; refreshed draft GitHub Release assets with matching SHA-256 digests.
+  - 2026-06-18: release publish blocker recorded: refreshed assets were built from local commit `c916a440a6104ec17c3ab12e4727697f6da7b4be`, while tag `v3.0.0` still points to `e8d744e6c6f8c25903ee7ba0919773ef027a8be1`. Do not publish until tag/source/assets are aligned.
 - [ ] `M8.T10` — Post-approval: update README badges to point at live store URLs. **Success:** badge URLs return 200; badges render correctly.
 
 ---
