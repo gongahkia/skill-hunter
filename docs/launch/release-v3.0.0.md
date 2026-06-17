@@ -6,7 +6,7 @@ Draft release is discoverable by tag with `gh release view v3.0.0`.
 
 ## Current Blocker
 
-The draft release assets were refreshed from local commit `c916a440a6104ec17c3ab12e4727697f6da7b4be`, but tag `v3.0.0` currently points to `e8d744e6c6f8c25903ee7ba0919773ef027a8be1`. Do not publish until the release tag, pushed source, and attached assets refer to the same intended commit.
+The draft release assets were refreshed from local commit `7193897e5447f470ba5f8aa5fdc616bc275d135f`, but tag `v3.0.0` currently points to `e8d744e6c6f8c25903ee7ba0919773ef027a8be1`. Do not publish until the release tag, pushed source, and attached assets refer to the same intended commit.
 
 ## Tag
 
