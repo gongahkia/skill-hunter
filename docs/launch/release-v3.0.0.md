@@ -25,7 +25,7 @@ Rakuzaichi v3 turns the project from a chat exporter into a zero-server memory v
 - Local extraction path with browser-side Transformers.js model loading and Chrome built-in Prompt API fallback when available.
 - Markdown, JSON, CSV, TSV, HTML, PDF, bulk export, Obsidian sync, ZIP fallback, and encrypted vault backups.
 - Chrome/Firefox/Safari packaging paths.
-- Privacy policy, launch copy, store listing drafts, demo GIF, landing-page source, and pre-launch checklist.
+- Privacy policy, launch copy, store listing drafts, demo GIF, and pre-launch checklist.
 
 **Full Changelog**: `2.0.0...v3.0.0` at `https://github.com/gongahkia/rakuzaichi/compare/2.0.0...v3.0.0`
 

@@ -1,8 +1,5 @@
 # Pre-launch Checklist
 
-- [ ] Domain DNS live for the static landing page.
-  Verify by: `curl -I https://rakuzaichi.<domain>/`
-
 - [ ] Chrome Web Store listing approved.
   Verify by: `https://chrome.google.com/webstore/devconsole/`
 

@@ -28,6 +28,6 @@ Current surfaces: ChatGPT, Claude, Gemini, Perplexity, DeepSeek, Grok, Copilot, 
 
 ## Tweet 5
 
-Still pre-store-review. The repo has the extension, demo GIF, landing page, privacy policy, and launch notes.
+Still pre-store-review. The repo has the extension, demo GIF, privacy policy, and launch notes.
 
 Feedback wanted: local extraction defaults, vault UX, and missing chat surfaces.

@@ -45,4 +45,4 @@ Q: Why host permissions for many domains?
 A: Content scripts need exact per-domain access to read chat DOM content on supported LLM pages. The manifest enumerates the supported origins and does not request `<all_urls>`.
 
 Q: What is not done yet?
-A: Store approvals and hosted landing-page DNS/deploy are not verified in this repo.
+A: Store approvals are not verified in this repo.
