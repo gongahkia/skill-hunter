@@ -116,6 +116,8 @@ Use shared import session behavior:
 
 Discard Owl Apps Script for M10 baseline. No Apps Script code ships by accident.
 
+M10.T08 outcome: discard. Owl Apps Script is not reused or rewritten in M10.
+
 Reason: local Takeout/export parsing is simpler, avoids script authorization, and matches the zero-server/no-broad-OAuth baseline.
 
 ## Tests
