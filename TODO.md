@@ -116,7 +116,7 @@ Tasks:
 
 - [x] `M10.T01` - Write `docs/pivots/m10-google-docs-adapter.md`.
   - Success: doc chooses local export/Takeout-first vs live Picker/OAuth, states scopes, verification consequences, parser inputs, and non-goals.
-- [ ] `M10.T02` - Decide canonical local input format.
+- [x] `M10.T02` - Decide canonical local input format.
   - Success: pivot chooses HTML, DOCX, Markdown, plain text, or multiple formats with precedence.
 - [ ] `M10.T03` - Build exported Docs fixtures.
   - Success: fixtures cover headings, lists, links, tables, footnotes if present, images/placeholders, comments if export contains them, long docs, and empty docs.
