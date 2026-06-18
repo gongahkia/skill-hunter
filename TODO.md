@@ -44,7 +44,7 @@
   - Success: `docs/pivots/adapter-contract.md` exists or the M9 pivot doc contains the contract.
 - [x] `ADAPTER.T02` - Confirm imported documents can reuse existing vault/search/thread/export schemas.
   - Success: no new top-level IndexedDB stores are required unless the pivot doc justifies them.
-- [ ] `ADAPTER.T03` - Add shared import-run metadata.
+- [x] `ADAPTER.T03` - Add shared import-run metadata.
   - Success: imports record adapter ID, source object/path, import package hash for files, importedAt, item counts, duration, warnings, and errors.
 - [ ] `ADAPTER.T04` - Add shared progress/cancel/error model for file and API imports.
   - Success: large imports show progress, can be cancelled, and leave a recoverable partial-import record.

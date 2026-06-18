@@ -78,6 +78,8 @@ No new top-level IndexedDB stores are required for M9-M14 baseline imports. Adap
 
 Every import must create an import-run record. Until a dedicated store is justified, the run may be stored as an `extractionRuns` row with `modelName: "import"` and adapter metadata.
 
+Shared helper: `src/imports/run-metadata.js`.
+
 Required run fields:
 
 | Field | Rule |
