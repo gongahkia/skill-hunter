@@ -48,4 +48,19 @@ describe('ImportPrivacyCopy', () => {
     expect(copy.forAdapter('google-docs').apiLimitWarning).toBe('Google Drive API exports can fail when exported content exceeds the 10 MB files.export limit. Use Google Takeout or export the Doc locally, then import that file.');
     expect(copy.warnings('google-docs')).toContain('Google Drive API exports can fail when exported content exceeds the 10 MB files.export limit. Use Google Takeout or export the Doc locally, then import that file.');
   });
+
+  it('includes Slack and Discord shared-export privacy warnings', () => {
+    const copy = loadCopy();
+
+    expect(copy.warnings('slack')).toEqual(expect.arrayContaining([
+      "Imported Slack exports can include other people's messages, names, reactions, links, and file references.",
+      'Imported content stays local unless you export, back up, or sync the vault.',
+      'Review Slack export scope before importing shared workspaces, private channels, or DMs.'
+    ]));
+    expect(copy.warnings('discord')).toEqual(expect.arrayContaining([
+      "Imported Discord packages can include other people's messages, usernames, IDs, and attachment links.",
+      'Imported content stays local unless you export, back up, or sync the vault.',
+      'Review Discord package scope before importing servers, group DMs, or DMs.'
+    ]));
+  });
 });

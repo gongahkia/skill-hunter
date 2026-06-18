@@ -205,7 +205,7 @@ Tasks:
   - Success: workspace, channel, thread timestamp/ID, message timestamp, user ID/name map, export package hash, and importedAt are retained.
 - [ ] `M12.T07` - Preserve Discord provenance.
   - Success: server/channel/DM IDs, message ID, author ID/name where present, timestamp, attachment URLs, package hash, and importedAt are retained.
-- [ ] `M12.T08` - Add privacy warnings.
+- [x] `M12.T08` - Add privacy warnings.
   - Success: UI states exports may include other people's messages and should remain local.
 - [ ] `M12.T09` - Run scanner before extraction.
   - Success: explicit tasks in chat exports become open threads.

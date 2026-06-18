@@ -18,10 +18,12 @@ var ImportPrivacyCopy = (function() {
       archiveWarning: 'Imported Keep notes can include personal notes, labels, attachments, and deleted/archive state.'
     },
     slack: {
-      archiveWarning: 'Imported Slack exports can include other people\'s messages, names, reactions, links, and file references.'
+      archiveWarning: 'Imported Slack exports can include other people\'s messages, names, reactions, links, and file references.',
+      reviewWarning: 'Review Slack export scope before importing shared workspaces, private channels, or DMs.'
     },
     discord: {
-      archiveWarning: 'Imported Discord packages can include other people\'s messages, usernames, IDs, and attachment links.'
+      archiveWarning: 'Imported Discord packages can include other people\'s messages, usernames, IDs, and attachment links.',
+      reviewWarning: 'Review Discord package scope before importing servers, group DMs, or DMs.'
     },
     email: {
       archiveWarning: 'Imported email can include senders, recipients, private threads, labels, headers, and attachments.'
