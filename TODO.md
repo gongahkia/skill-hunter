@@ -199,7 +199,7 @@ Tasks:
   - Success: fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, current/recent server metadata, and package metadata.
 - [ ] `M12.T04` - Implement ZIP streaming import.
   - Success: large exports import with progress/cancel and without blocking UI.
-- [ ] `M12.T05` - Define grouping.
+- [x] `M12.T05` - Define grouping.
   - Success: imported snapshots group by workspace/server + channel/DM/thread according to pivot doc.
 - [ ] `M12.T06` - Preserve Slack provenance.
   - Success: workspace, channel, thread timestamp/ID, message timestamp, user ID/name map, export package hash, and importedAt are retained.

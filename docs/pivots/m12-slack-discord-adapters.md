@@ -32,6 +32,10 @@ Separate adapters:
 
 Reason: provenance, grouping, fixture layout, and privacy semantics differ enough that one combined parser would hide important source-specific behavior.
 
+## Grouping Policy
+
+M12.T05 outcome: Slack snapshots group by workspace + conversation. Discord snapshots group by server channel, DM, or group DM. Slack thread replies remain in the parent conversation snapshot with thread provenance; Discord messages remain in source channel/DM order.
+
 ## Slack Scope
 
 Input:
