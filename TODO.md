@@ -246,7 +246,7 @@ Tasks:
   - Success: attachments are imported, linked, skipped, or metadata-only according to pivot doc with visible warnings.
 - [x] `M13.T08` - Defer IMAP/OAuth until separate threat model.
   - Success: no password/OAuth UI ships in M13 unless pivot doc adds a dedicated credential model.
-- [ ] `M13.T09` - Run scanner before extraction.
+- [x] `M13.T09` - Run scanner before extraction.
   - Success: explicit task markers in emails become open threads.
 - [ ] `M13.T10` - Add email import tests.
   - Success: MIME parsing, mbox variants, sanitization, labels, attachments, dedupe, scanner, malformed input, and large mailbox cases are covered.
