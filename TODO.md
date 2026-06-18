@@ -310,7 +310,7 @@ Tasks:
   - Success: doc states retrieval-only vs answer-generation scope, embedding model, index store, chunk policy, citation UI, privacy copy, storage budget, runtime surface, and rollback.
 - [x] `M15.T02` - Start with retrieval-only UX.
   - Success: user can search semantically and open cited source chunks before any generated answer feature ships.
-- [ ] `M15.T03` - Define chunk IDs across chats and imported prose.
+- [x] `M15.T03` - Define chunk IDs across chats and imported prose.
   - Success: every chunk maps back to chat/document/message/source row and survives rebuilds.
 - [ ] `M15.T04` - Select embedding model.
   - Success: decision records model size, license, browser runtime, quantization, expected latency, and cache size.
