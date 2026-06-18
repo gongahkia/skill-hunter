@@ -164,6 +164,8 @@ Import UI and docs must state:
 - local LLM extraction is optional and runs after deterministic scanning
 - source permissions can be revoked at the source service where applicable
 
+Shared copy helper: `src/imports/privacy-copy.js`.
+
 ## Adapter Pivot Requirements
 
 Before code starts for M9-M14, each pivot doc must specify:
