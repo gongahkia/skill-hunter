@@ -316,7 +316,7 @@ Tasks:
   - Success: decision records model size, license, browser runtime, quantization, expected latency, and cache size.
 - [ ] `M15.T05` - Prototype on copied fixture vault only.
   - Success: latency/storage/recall numbers are recorded before production schema migration.
-- [ ] `M15.T06` - Design vector index storage.
+- [x] `M15.T06` - Design vector index storage.
   - Success: pivot states whether vectors live in IndexedDB, OPFS, or another local store and how rebuild/migration works.
 - [ ] `M15.T07` - Add model lifecycle UX.
   - Success: user can download, pause, clear model cache, clear vector index, and rebuild index.
