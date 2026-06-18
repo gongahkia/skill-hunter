@@ -8,6 +8,7 @@
   var currentExtractionModel = 'qwen2.5-0.5b-q4';
   var currentPromptApiAvailability = { status: 'unknown', available: false, api: 'none' };
   var currentBatchExtractionController = null;
+  var currentRagController = null;
   var latestWrappedStats = null;
   var threadPane = null;
 
@@ -57,6 +58,11 @@
     wrappedLongestChatDetail: document.getElementById('wrappedLongestChatDetail'),
     wrappedTopTopics: document.getElementById('wrappedTopTopics'),
     wrappedStatus: document.getElementById('wrappedStatus'),
+    ragSearch: document.getElementById('ragSearch'),
+    ragBuildIndex: document.getElementById('ragBuildIndex'),
+    ragRunSearch: document.getElementById('ragRunSearch'),
+    ragStatus: document.getElementById('ragStatus'),
+    ragResults: document.getElementById('ragResults'),
     vaultSearch: document.getElementById('vaultSearch'),
     allChatsFolder: document.getElementById('allChatsFolder'),
     folderTree: document.getElementById('folderTree'),
@@ -639,6 +645,118 @@
       log('error', 'options.stats.refresh.failed', { error: serializeError(error) });
       renderStats(defaultStats(), { usageMB: 0 });
       await refreshWrappedStats();
+    }
+  }
+
+  function setRagStatus(message) {
+    if (els.ragStatus) els.ragStatus.textContent = message;
+  }
+
+  function renderRagResults(results, onOpenChunk) {
+    if (!els.ragResults) return;
+    els.ragResults.innerHTML = '';
+    results = Array.isArray(results) ? results : [];
+    if (!results.length) {
+      var empty = document.createElement('p');
+      empty.className = 'rag-empty';
+      empty.textContent = els.ragSearch && els.ragSearch.value.trim() ? 'No semantic matches.' : '';
+      els.ragResults.appendChild(empty);
+      return;
+    }
+    results.forEach(function(result) {
+      var chunk = result.chunk || {};
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'rag-result';
+      button.dataset.chatId = chunk.chatId || '';
+      button.dataset.messageId = chunk.messageId || '';
+
+      var copy = document.createElement('div');
+      var title = document.createElement('strong');
+      title.textContent = chunk.title || 'Untitled source';
+      copy.appendChild(title);
+
+      var meta = document.createElement('span');
+      meta.textContent = [chunk.platform || 'unknown', chunk.timestamp || '', chunk.messageId || ''].filter(Boolean).join(' | ');
+      copy.appendChild(meta);
+      button.appendChild(copy);
+
+      var score = document.createElement('span');
+      score.className = 'rag-score';
+      score.textContent = Math.round((result.score || 0) * 100) + '%';
+      button.appendChild(score);
+
+      var excerpt = document.createElement('p');
+      excerpt.textContent = chunk.excerpt || chunk.text || '';
+      button.appendChild(excerpt);
+
+      button.addEventListener('click', function() {
+        Promise.resolve(onOpenChunk(chunk)).catch(function(error) {
+          setRagStatus('Unable to open source.');
+          log('error', 'options.rag.open_source.failed', { error: serializeError(error), chatId: chunk.chatId, messageId: chunk.messageId });
+        });
+      });
+      els.ragResults.appendChild(button);
+    });
+  }
+
+  async function buildRagIndex(rag) {
+    if (!rag || !els.ragBuildIndex || els.ragBuildIndex.disabled) return null;
+    var previous = els.ragBuildIndex.textContent;
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    currentRagController = controller;
+    els.ragBuildIndex.disabled = true;
+    if (els.ragRunSearch) els.ragRunSearch.disabled = true;
+    els.ragBuildIndex.textContent = 'Indexing';
+    setRagStatus('Indexing...');
+    try {
+      var result = await rag.build({
+        signal: controller && controller.signal,
+        onProgress: function(event) {
+          if (event.status === 'embedding') {
+            setRagStatus('Indexed ' + event.indexed + '/' + event.total + ' chunks');
+          }
+        }
+      });
+      setRagStatus('Indexed ' + result.chunkCount + ' chunks.');
+      log('info', 'options.rag.index.success', result);
+      return result;
+    } catch (error) {
+      setRagStatus('Semantic index failed.');
+      log('error', 'options.rag.index.failed', { error: serializeError(error) });
+      return null;
+    } finally {
+      currentRagController = null;
+      els.ragBuildIndex.disabled = false;
+      els.ragBuildIndex.textContent = previous;
+      if (els.ragRunSearch) els.ragRunSearch.disabled = false;
+    }
+  }
+
+  async function runRagSearch(rag, onOpenChunk) {
+    if (!rag || !els.ragSearch) return;
+    var query = els.ragSearch.value.trim();
+    if (!query) {
+      renderRagResults([], onOpenChunk);
+      setRagStatus(rag.isReady && rag.isReady() ? 'Index ready.' : 'Index not built.');
+      return;
+    }
+    if (els.ragRunSearch) els.ragRunSearch.disabled = true;
+    setRagStatus(rag.isReady && rag.isReady() ? 'Searching...' : 'Indexing...');
+    try {
+      var results = await rag.search(query, {
+        onProgress: function(event) {
+          if (event.status === 'embedding') setRagStatus('Indexed ' + event.indexed + '/' + event.total + ' chunks');
+        }
+      });
+      renderRagResults(results, onOpenChunk);
+      setRagStatus(results.length + (results.length === 1 ? ' semantic match.' : ' semantic matches.'));
+      log('info', 'options.rag.search.success', { query: query, results: results.length });
+    } catch (error) {
+      setRagStatus('Semantic search failed.');
+      log('error', 'options.rag.search.failed', { error: serializeError(error), query: query });
+    } finally {
+      if (els.ragRunSearch) els.ragRunSearch.disabled = false;
     }
   }
 
@@ -1372,6 +1490,26 @@
     }
   }
 
+  function bindRagControls(rag, onOpenChunk) {
+    if (!rag || !els.ragSearch) return;
+    renderRagResults([], onOpenChunk);
+    if (els.ragBuildIndex) {
+      els.ragBuildIndex.addEventListener('click', function() {
+        buildRagIndex(rag);
+      });
+    }
+    if (els.ragRunSearch) {
+      els.ragRunSearch.addEventListener('click', function() {
+        runRagSearch(rag, onOpenChunk);
+      });
+    }
+    els.ragSearch.addEventListener('keydown', function(event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      runRagSearch(rag, onOpenChunk);
+    });
+  }
+
   function wireEvents(refreshVault) {
     if (els.form) els.form.addEventListener('submit', handleSave);
     if (els.downloadDiagnostics) els.downloadDiagnostics.addEventListener('click', downloadDiagnostics);
@@ -1562,6 +1700,25 @@
           refreshVault(true);
         }
       });
+    }
+
+    if (els.ragSearch) {
+      if (typeof LocalRAG !== 'undefined' && typeof VaultDAO !== 'undefined') {
+        var rag = LocalRAG.create({
+          dao: VaultDAO,
+          modelLoader: typeof ExtractionModelLoader !== 'undefined' ? ExtractionModelLoader : null
+        });
+        bindRagControls(rag, async function(chunk) {
+          if (!detail) throw new Error('Chat detail view is unavailable');
+          if (!chunk || !chunk.chatId) throw new Error('RAG result is missing chatId');
+          var sourceChat = VaultDAO.getChat ? await VaultDAO.getChat(chunk.chatId) : null;
+          if (!sourceChat) throw new Error('Source chat not found');
+          await detail.load(sourceChat, { messageId: chunk.messageId });
+          setRagStatus('Opened cited source.');
+        });
+      } else {
+        setRagStatus('Semantic search unavailable.');
+      }
     }
 
     if (!els.chatList || typeof OptionsChatList === 'undefined') return refreshVault;

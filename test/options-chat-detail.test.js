@@ -438,6 +438,23 @@ describe('OptionsChatDetail', () => {
     expect(opened).toEqual(['thread-2']);
   });
 
+  it('focuses a cited source message when loading detail', async () => {
+    const { dom } = createDom();
+    const { OptionsChatDetail } = loadOptionsModules(dom);
+    const detail = OptionsChatDetail.create({
+      root: dom.window.document.getElementById('chat-detail'),
+      openLink: dom.window.document.getElementById('open-original'),
+      dao: { listMessages: async () => messages() },
+      window: dom.window
+    });
+
+    await detail.load(chat(), { messageId: 'm2' });
+
+    const target = dom.window.document.querySelector('.message-card[data-message-id="m2"]');
+    expect(target.className).toContain('message-highlight');
+    expect(dom.window.document.activeElement).toBe(target);
+  });
+
   it('archives a thread row when removing a message tag chip', async () => {
     const { dom } = createDom();
     const { OptionsChatDetail } = loadOptionsModules(dom);

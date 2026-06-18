@@ -758,9 +758,9 @@ var OptionsChatDetail = (function() {
       return editor;
     }
 
-    function jumpToThread(thread) {
-      var target = findMessageCard(root, thread.messageId || '');
-      if (!target) return;
+    function focusMessage(messageId) {
+      var target = findMessageCard(root, messageId || '');
+      if (!target) return false;
       if (typeof target.scrollIntoView === 'function') {
         target.scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
@@ -769,6 +769,11 @@ var OptionsChatDetail = (function() {
         target.classList.remove('message-highlight');
       }, 1800);
       target.focus();
+      return true;
+    }
+
+    function jumpToThread(thread) {
+      if (!focusMessage(thread.messageId || '')) return;
       onThreadOpen(thread);
     }
 
@@ -835,7 +840,7 @@ var OptionsChatDetail = (function() {
       root.appendChild(layout);
     }
 
-    async function load(chat) {
+    async function load(chat, focusOptions) {
       if (!chat || !chat.chatId) {
         setOriginalLink(openLink, null);
         renderEmpty('Select a chat', 'No captured chat selected.');
@@ -849,6 +854,7 @@ var OptionsChatDetail = (function() {
         ]);
         var messages = Array.isArray(results[0]) ? results[0] : [];
         render(chat, messages, Array.isArray(results[1]) ? results[1] : []);
+        if (focusOptions && focusOptions.messageId) focusMessage(focusOptions.messageId);
         return messages;
       } catch (error) {
         setOriginalLink(openLink, chat);
@@ -920,7 +926,8 @@ var OptionsChatDetail = (function() {
     renderEmpty('Select a chat', 'No captured chat selected.');
 
     return {
-      load: load
+      load: load,
+      focusMessage: focusMessage
     };
   }
 

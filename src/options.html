@@ -143,6 +143,19 @@
         </div>
       </section>
 
+      <section class="rag-search" aria-label="Semantic search">
+        <div class="rag-search-controls">
+          <label>
+            Semantic search
+            <input id="ragSearch" type="search" placeholder="Ask over local vault chunks">
+          </label>
+          <button id="ragBuildIndex" class="btn btn-secondary" type="button">Build index</button>
+          <button id="ragRunSearch" class="btn btn-primary" type="button">Search</button>
+          <span id="ragStatus">Index not built.</span>
+        </div>
+        <div id="ragResults" class="rag-results"></div>
+      </section>
+
       <section id="wrappedStats" class="wrapped-stats" aria-label="Vault wrapped">
         <div class="wrapped-heading">
           <div>
@@ -483,6 +496,7 @@
   <script src="extraction/runtime.js"></script>
   <script src="extraction/prompt-api.js"></script>
   <script src="extraction/model-loader.js"></script>
+  <script src="rag/local-rag.js"></script>
   <script src="extraction/prompt.js"></script>
   <script src="extraction/candidates.js"></script>
   <script src="extraction/chunks.js"></script>
