@@ -209,7 +209,7 @@ Tasks:
   - Success: UI states exports may include other people's messages and should remain local.
 - [x] `M12.T09` - Run scanner before extraction.
   - Success: explicit tasks in chat exports become open threads.
-- [ ] `M12.T10` - Add Slack/Discord tests.
+- [x] `M12.T10` - Add Slack/Discord tests.
   - Success: ZIP parsing, malformed entries, huge archives, user maps, deleted/missing users, dedupe, scanner, and cancellation are covered.
 
 Sources:
