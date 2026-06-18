@@ -58,6 +58,22 @@ Required `message` fields:
 
 Adapters may add metadata fields but must not require new top-level IndexedDB stores unless the pivot doc explicitly justifies why existing stores cannot preserve source identity, dedupe, progress, or provenance.
 
+## Schema Reuse Audit
+
+Current vault stores are sufficient for M9-M14 imported prose snapshots:
+
+| Existing store/path | Adapter use |
+| :--- | :--- |
+| `chats` | One imported document, note, channel/thread, mailbox group, or bookmark collection per snapshot. Adapter/source/package data lives under `metadata`. |
+| `messages` | Ordered source blocks, notes, chat messages, emails, or posts. Source row IDs and raw refs live under `metadata.provenance`. |
+| `openThreads` | Scanner and optional local extraction output keyed to normalized imported messages. |
+| `extractionRuns` | Import-run audit rows using `modelName: "import"` plus adapter metadata. |
+| `meta` | Reusable for cached indexes or adapter-level feature flags. |
+| Vault search | Already indexes chat title/content/platform/url/tags from normalized snapshot data. |
+| Export/backup | Existing envelopes already carry `messages`, `openThreads`, metadata, folders, and extraction runs. |
+
+No new top-level IndexedDB stores are required for M9-M14 baseline imports. Adapter pivots may request one only after proving that existing `metadata`, `extractionRuns`, and content hashes cannot support the required provenance, dedupe, progress, or rollback behavior.
+
 ## Import Run Contract
 
 Every import must create an import-run record. Until a dedicated store is justified, the run may be stored as an `extractionRuns` row with `modelName: "import"` and adapter metadata.
