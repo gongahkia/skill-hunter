@@ -320,7 +320,7 @@ Tasks:
   - Success: pivot states whether vectors live in IndexedDB, OPFS, or another local store and how rebuild/migration works.
 - [ ] `M15.T07` - Add model lifecycle UX.
   - Success: user can download, pause, clear model cache, clear vector index, and rebuild index.
-- [ ] `M15.T08` - Add progress/cancel for indexing.
+- [x] `M15.T08` - Add progress/cancel for indexing.
   - Success: indexing large vaults is visible, cancellable, and resumes/restarts cleanly.
 - [ ] `M15.T09` - Add citation-first answer UI if generation ships.
   - Success: every generated answer cites source chats/docs/messages; unsupported questions can return no result.

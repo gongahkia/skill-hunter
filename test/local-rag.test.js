@@ -107,4 +107,29 @@ describe('LocalRAG', () => {
     expect(chunks[1].text).toContain('word99');
     expect(new Set(chunks.map((chunk) => chunk.chunkId)).size).toBe(chunks.length);
   });
+
+  it('cancels index builds without publishing partial chunks and can restart', async () => {
+    const LocalRAG = loadLocalRAG();
+    const controller = new AbortController();
+    const rag = LocalRAG.create({
+      dao: {
+        listChats: async () => chats(),
+        listAllMessages: async () => messages()
+      },
+      embedder: fakeEmbedder()
+    });
+
+    await expect(rag.build({
+      batchSize: 1,
+      signal: controller.signal,
+      onProgress() {
+        controller.abort();
+      }
+    })).rejects.toThrow('RAG index build cancelled');
+    expect(rag.isReady()).toBe(false);
+    expect(rag.getChunks()).toEqual([]);
+
+    await expect(rag.build({ batchSize: 2 })).resolves.toMatchObject({ chunkCount: 3 });
+    expect(rag.isReady()).toBe(true);
+  });
 });

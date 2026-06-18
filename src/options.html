@@ -147,12 +147,13 @@
         <div class="rag-search-controls">
           <label>
             Semantic search
-            <input id="ragSearch" type="search" placeholder="Ask over local vault chunks">
-          </label>
-          <button id="ragBuildIndex" class="btn btn-secondary" type="button">Build index</button>
-          <button id="ragRunSearch" class="btn btn-primary" type="button">Search</button>
-          <span id="ragStatus">Index not built.</span>
-        </div>
+          <input id="ragSearch" type="search" placeholder="Ask over local vault chunks">
+        </label>
+        <button id="ragBuildIndex" class="btn btn-secondary" type="button">Build index</button>
+        <button id="ragStopIndex" class="btn btn-ghost" type="button" hidden disabled>Stop</button>
+        <button id="ragRunSearch" class="btn btn-primary" type="button">Search</button>
+        <span id="ragStatus">Index not built.</span>
+      </div>
         <div id="ragResults" class="rag-results"></div>
       </section>
 

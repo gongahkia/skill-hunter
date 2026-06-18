@@ -462,7 +462,7 @@ select[multiple] {
 
 .rag-search-controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto minmax(140px, auto);
+  grid-template-columns: minmax(220px, 1fr) auto auto auto minmax(140px, auto);
   gap: 8px;
   align-items: end;
 }

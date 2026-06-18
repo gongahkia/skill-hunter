@@ -60,6 +60,7 @@
     wrappedStatus: document.getElementById('wrappedStatus'),
     ragSearch: document.getElementById('ragSearch'),
     ragBuildIndex: document.getElementById('ragBuildIndex'),
+    ragStopIndex: document.getElementById('ragStopIndex'),
     ragRunSearch: document.getElementById('ragRunSearch'),
     ragStatus: document.getElementById('ragStatus'),
     ragResults: document.getElementById('ragResults'),
@@ -652,6 +653,13 @@
     if (els.ragStatus) els.ragStatus.textContent = message;
   }
 
+  function syncRagStopButton(running) {
+    if (!els.ragStopIndex) return;
+    els.ragStopIndex.hidden = !running;
+    els.ragStopIndex.disabled = !running;
+    if (!running) els.ragStopIndex.textContent = 'Stop';
+  }
+
   function renderRagResults(results, onOpenChunk) {
     if (!els.ragResults) return;
     els.ragResults.innerHTML = '';
@@ -707,6 +715,7 @@
     currentRagController = controller;
     els.ragBuildIndex.disabled = true;
     if (els.ragRunSearch) els.ragRunSearch.disabled = true;
+    syncRagStopButton(!!controller);
     els.ragBuildIndex.textContent = 'Indexing';
     setRagStatus('Indexing...');
     try {
@@ -722,14 +731,20 @@
       log('info', 'options.rag.index.success', result);
       return result;
     } catch (error) {
-      setRagStatus('Semantic index failed.');
-      log('error', 'options.rag.index.failed', { error: serializeError(error) });
+      if (controller && controller.signal && controller.signal.aborted) {
+        setRagStatus('Indexing stopped.');
+        log('warn', 'options.rag.index.cancelled', {});
+      } else {
+        setRagStatus('Semantic index failed.');
+        log('error', 'options.rag.index.failed', { error: serializeError(error) });
+      }
       return null;
     } finally {
       currentRagController = null;
       els.ragBuildIndex.disabled = false;
       els.ragBuildIndex.textContent = previous;
       if (els.ragRunSearch) els.ragRunSearch.disabled = false;
+      syncRagStopButton(false);
     }
   }
 
@@ -1501,6 +1516,15 @@
     if (els.ragRunSearch) {
       els.ragRunSearch.addEventListener('click', function() {
         runRagSearch(rag, onOpenChunk);
+      });
+    }
+    if (els.ragStopIndex) {
+      els.ragStopIndex.addEventListener('click', function() {
+        if (!currentRagController) return;
+        currentRagController.abort();
+        els.ragStopIndex.disabled = true;
+        els.ragStopIndex.textContent = 'Stopping';
+        setRagStatus('Stopping index...');
       });
     }
     els.ragSearch.addEventListener('keydown', function(event) {

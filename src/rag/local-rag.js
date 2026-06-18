@@ -206,6 +206,7 @@ var LocalRAG = (function() {
         var batch = chunks.slice(i, i + batchSize);
         if (buildOptions.signal && buildOptions.signal.aborted) throw new Error('RAG index build cancelled');
         var embedded = await embedTexts(batch.map(function(chunk) { return chunk.text; }), buildOptions);
+        if (buildOptions.signal && buildOptions.signal.aborted) throw new Error('RAG index build cancelled');
         Array.prototype.push.apply(vectors, embedded);
         if (typeof buildOptions.onProgress === 'function') {
           buildOptions.onProgress({ status: 'embedding', indexed: Math.min(i + batch.length, chunks.length), total: chunks.length });
