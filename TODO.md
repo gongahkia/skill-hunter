@@ -282,7 +282,7 @@ Tasks:
   - Success: post ID, author ID/handle/name where available, text, createdAt, bookmark folder if available, media placeholders, source URL, archive/API source, and importedAt are retained.
 - [ ] `M14.T06` - Handle unavailable/deleted/protected posts.
   - Success: imported post text/context survives if live URL later fails.
-- [ ] `M14.T07` - Add API rate/error/cost handling if API path ships.
+- [x] `M14.T07` - Add API rate/error/cost handling if API path ships.
   - Success: auth failure, insufficient access tier, rate limit, deleted post, and protected post states are explicit.
 - [ ] `M14.T08` - Run scanner before extraction.
   - Success: task markers in saved post text become open threads.
