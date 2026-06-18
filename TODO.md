@@ -230,7 +230,7 @@ Source constraints checked 2026-06-18:
 
 Tasks:
 
-- [ ] `M13.T01` - Write `docs/pivots/m13-email-adapter.md`.
+- [x] `M13.T01` - Write `docs/pivots/m13-email-adapter.md`.
   - Success: doc chooses Gmail Takeout/MBOX-first, grouping policy, attachment policy, HTML sanitization, credential risk if IMAP is ever added, and rollback.
 - [ ] `M13.T02` - Build MBOX fixtures.
   - Success: fixtures cover plain text, HTML, multipart, attachments, labels, forwarded/replied threads, duplicate Message-IDs, malformed headers, huge mailboxes, and `From ` body escaping.
