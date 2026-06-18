@@ -276,7 +276,7 @@ Tasks:
   - Success: sample proves whether bookmarks are present and which fields are available.
 - [ ] `M14.T03` - If archive path works, implement local archive parser.
   - Success: bookmarked posts import without OAuth.
-- [ ] `M14.T04` - If API path is accepted, implement OAuth only against official endpoints.
+- [x] `M14.T04` - If API path is accepted, implement OAuth only against official endpoints.
   - Success: no cookies, private web GraphQL, or page scraping are used.
 - [ ] `M14.T05` - Preserve bookmark provenance.
   - Success: post ID, author ID/handle/name where available, text, createdAt, bookmark folder if available, media placeholders, source URL, archive/API source, and importedAt are retained.
