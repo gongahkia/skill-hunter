@@ -122,7 +122,7 @@ Tasks:
   - Success: fixtures cover headings, lists, links, tables, footnotes if present, images/placeholders, comments if export contains them, long docs, and empty docs.
 - [x] `M10.T04` - Implement local file/folder import first.
   - Success: user can drop/select exported Docs files and import without OAuth.
-- [ ] `M10.T05` - Preserve Docs provenance.
+- [x] `M10.T05` - Preserve Docs provenance.
   - Success: original file path/name, exported format, document title, source URL if present, import package hash, and importedAt are retained.
 - [ ] `M10.T06` - Add export-size fallback copy for live API path.
   - Success: docs over API export limits tell user to use Takeout/local export.

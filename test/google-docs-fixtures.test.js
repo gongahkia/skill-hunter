@@ -15,6 +15,7 @@ describe('Google Docs exported fixtures', () => {
     const doc = html('rich-doc.html');
 
     expect(doc.querySelectorAll('h1,h2')).toHaveLength(2);
+    expect(doc.querySelector('meta[name="source-url"]').getAttribute('content')).toBe('https://docs.google.com/document/d/doc-rich/edit');
     expect(doc.querySelectorAll('ul li')).toHaveLength(2);
     expect(doc.querySelectorAll('ol li')).toHaveLength(2);
     expect(doc.querySelector('a[href="https://example.test/source"]').textContent).toBe('source brief');

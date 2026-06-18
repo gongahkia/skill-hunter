@@ -58,6 +58,34 @@ describe('GoogleDocsImporter', () => {
       messageCount: result.messages.length
     });
     expect(result.chat.chatId).toMatch(/^google-docs:file:/);
+    expect(result.chat.url).toBe('https://docs.google.com/document/d/doc-rich/edit');
+    expect(result.chat.metadata.import.importedAt).toBe('2026-06-18T11:00:00.000Z');
+    expect(result.chat.metadata.import.packageHash).toBe(result.run.metadata.packageHash);
+    expect(result.chat.metadata.import.source).toMatchObject({
+      kind: 'file',
+      path: 'Takeout/Docs/rich-doc.html',
+      name: 'rich-doc.html',
+      url: 'https://docs.google.com/document/d/doc-rich/edit'
+    });
+    expect(result.chat.metadata.provenance).toMatchObject({
+      filePath: 'Takeout/Docs/rich-doc.html',
+      fileName: 'rich-doc.html',
+      exportedFormat: 'html',
+      documentTitle: 'Docs rich export fixture',
+      sourceUrl: 'https://docs.google.com/document/d/doc-rich/edit'
+    });
+    expect(result.messages[0].metadata.import).toMatchObject({
+      packageHash: result.chat.metadata.import.packageHash,
+      importedAt: '2026-06-18T11:00:00.000Z'
+    });
+    expect(result.messages[0].metadata.provenance).toMatchObject({
+      filePath: 'Takeout/Docs/rich-doc.html',
+      fileName: 'rich-doc.html',
+      exportedFormat: 'html',
+      documentTitle: 'Docs rich export fixture',
+      sourceUrl: 'https://docs.google.com/document/d/doc-rich/edit',
+      nodePath: 'html:h1:0'
+    });
     expect(result.messages.map((message) => message.content)).toEqual(expect.arrayContaining([
       'TODO: review launch copy',
       'Chrome listing',
