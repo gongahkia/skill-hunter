@@ -1,0 +1,28 @@
+{
+  "page": {
+    "object": "page",
+    "id": "page-unsupported",
+    "url": "https://notion.so/page-unsupported",
+    "last_edited_time": "2026-06-18T08:00:00.000Z",
+    "properties": {
+      "title": {
+        "type": "title",
+        "title": [{ "type": "text", "plain_text": "Unsupported blocks fixture", "href": null, "text": { "content": "Unsupported blocks fixture", "link": null } }]
+      }
+    }
+  },
+  "responses": [
+    {
+      "block_id": "page-unsupported",
+      "has_more": false,
+      "next_cursor": null,
+      "results": [
+        { "object": "block", "id": "empty-1", "type": "paragraph", "has_children": false, "paragraph": { "rich_text": [], "color": "default" } },
+        { "object": "block", "id": "unsupported-1", "type": "synced_block", "has_children": false, "synced_block": { "synced_from": { "type": "block_id", "block_id": "source-block-1" }, "children": [] } },
+        { "object": "block", "id": "unsupported-2", "type": "file", "has_children": false, "file": { "caption": [], "type": "external", "external": { "url": "https://example.test/file.pdf" } } },
+        { "object": "block", "id": "unsupported-3", "type": "child_database", "has_children": false, "child_database": { "title": "Backlog database" } }
+      ]
+    }
+  ],
+  "coverage": ["empty-block", "unsupported-block", "synced-block", "file", "child-database"]
+}

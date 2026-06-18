@@ -1,0 +1,11 @@
+{
+  "cases": [
+    { "name": "revoked-token", "status": 401, "code": "unauthorized", "message": "API token is invalid." },
+    { "name": "missing-share", "status": 403, "code": "restricted_resource", "message": "This page is not shared with the integration." },
+    { "name": "not-found-or-inaccessible", "status": 404, "code": "object_not_found", "message": "Could not find block with ID: page-missing." },
+    { "name": "rate-limited", "status": 429, "code": "rate_limited", "message": "Rate limited.", "retry_after": 2 },
+    { "name": "service-overload", "status": 529, "code": "service_overload", "message": "Notion is temporarily overloaded.", "retry_after": 5 },
+    { "name": "network-failure", "status": 0, "code": "network_error", "message": "Network request failed." }
+  ],
+  "coverage": ["401", "403", "404", "429", "529", "network"]
+}

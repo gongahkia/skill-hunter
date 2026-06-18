@@ -78,7 +78,7 @@ Tasks:
   - Success: pivot doc explains why public OAuth is included or deferred.
 - [x] `M9.T03` - Define supported Notion objects.
   - Success: pages and child blocks are explicitly in/out; databases, comments, files, and synced blocks have decisions.
-- [ ] `M9.T04` - Build synthetic Notion fixtures.
+- [x] `M9.T04` - Build synthetic Notion fixtures.
   - Success: fixtures cover headings, paragraphs, bullets, numbered lists, to-dos, toggles, code, quotes, links, nested blocks, empty blocks, unsupported blocks, and long pages.
 - [ ] `M9.T05` - Obtain one user-owned exported/API fixture.
   - Success: fixture validates real block shape and permission edge cases.

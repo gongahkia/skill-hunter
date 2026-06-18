@@ -1,0 +1,43 @@
+{
+  "page": {
+    "object": "page",
+    "id": "page-nested",
+    "url": "https://notion.so/page-nested",
+    "last_edited_time": "2026-06-18T07:00:00.000Z",
+    "properties": {
+      "title": {
+        "type": "title",
+        "title": [{ "type": "text", "plain_text": "Nested Notion fixture", "href": null, "text": { "content": "Nested Notion fixture", "link": null } }]
+      }
+    }
+  },
+  "responses": [
+    {
+      "block_id": "page-nested",
+      "has_more": false,
+      "next_cursor": null,
+      "results": [
+        { "object": "block", "id": "toggle-1", "type": "toggle", "has_children": true, "toggle": { "rich_text": [{ "type": "text", "plain_text": "Release tasks", "href": null, "text": { "content": "Release tasks", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "callout-1", "type": "callout", "has_children": true, "callout": { "rich_text": [{ "type": "text", "plain_text": "Nested callout", "href": null, "text": { "content": "Nested callout", "link": null } }], "icon": { "type": "emoji", "emoji": "i" }, "color": "gray_background" } }
+      ]
+    },
+    {
+      "block_id": "toggle-1",
+      "has_more": false,
+      "next_cursor": null,
+      "results": [
+        { "object": "block", "id": "toggle-child-1", "type": "paragraph", "has_children": false, "paragraph": { "rich_text": [{ "type": "text", "plain_text": "FIXME: verify recursive pagination", "href": null, "text": { "content": "FIXME: verify recursive pagination", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "toggle-child-2", "type": "bulleted_list_item", "has_children": false, "bulleted_list_item": { "rich_text": [{ "type": "text", "plain_text": "Nested bullet", "href": null, "text": { "content": "Nested bullet", "link": null } }], "color": "default" } }
+      ]
+    },
+    {
+      "block_id": "callout-1",
+      "has_more": false,
+      "next_cursor": null,
+      "results": [
+        { "object": "block", "id": "callout-child-1", "type": "numbered_list_item", "has_children": false, "numbered_list_item": { "rich_text": [{ "type": "text", "plain_text": "Nested numbered item", "href": null, "text": { "content": "Nested numbered item", "link": null } }], "color": "default" } }
+      ]
+    }
+  ],
+  "coverage": ["toggle", "nested-blocks", "recursive-fetch", "scanner-fixme"]
+}

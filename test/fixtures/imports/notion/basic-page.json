@@ -1,0 +1,32 @@
+{
+  "page": {
+    "object": "page",
+    "id": "page-basic",
+    "url": "https://notion.so/page-basic",
+    "last_edited_time": "2026-06-18T06:00:00.000Z",
+    "properties": {
+      "title": {
+        "type": "title",
+        "title": [{ "type": "text", "plain_text": "Basic Notion fixture", "href": null, "text": { "content": "Basic Notion fixture", "link": null } }]
+      }
+    }
+  },
+  "responses": [
+    {
+      "block_id": "page-basic",
+      "has_more": false,
+      "next_cursor": null,
+      "results": [
+        { "object": "block", "id": "heading-1", "type": "heading_1", "has_children": false, "heading_1": { "rich_text": [{ "type": "text", "plain_text": "Project plan", "href": null, "text": { "content": "Project plan", "link": null } }], "color": "default", "is_toggleable": false } },
+        { "object": "block", "id": "paragraph-1", "type": "paragraph", "has_children": false, "paragraph": { "rich_text": [{ "type": "text", "plain_text": "TODO: publish launch checklist", "href": null, "text": { "content": "TODO: publish launch checklist", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "bulleted-1", "type": "bulleted_list_item", "has_children": false, "bulleted_list_item": { "rich_text": [{ "type": "text", "plain_text": "Chrome listing", "href": null, "text": { "content": "Chrome listing", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "numbered-1", "type": "numbered_list_item", "has_children": false, "numbered_list_item": { "rich_text": [{ "type": "text", "plain_text": "Submit package", "href": null, "text": { "content": "Submit package", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "todo-1", "type": "to_do", "has_children": false, "to_do": { "rich_text": [{ "type": "text", "plain_text": "Verify screenshots", "href": null, "text": { "content": "Verify screenshots", "link": null } }], "checked": false, "color": "default" } },
+        { "object": "block", "id": "code-1", "type": "code", "has_children": false, "code": { "rich_text": [{ "type": "text", "plain_text": "npm run validate", "href": null, "text": { "content": "npm run validate", "link": null } }], "caption": [], "language": "shell" } },
+        { "object": "block", "id": "quote-1", "type": "quote", "has_children": false, "quote": { "rich_text": [{ "type": "text", "plain_text": "Ship local-first.", "href": null, "text": { "content": "Ship local-first.", "link": null } }], "color": "default" } },
+        { "object": "block", "id": "link-1", "type": "paragraph", "has_children": false, "paragraph": { "rich_text": [{ "type": "text", "plain_text": "Store docs", "href": "https://example.test/docs", "text": { "content": "Store docs", "link": { "url": "https://example.test/docs" } } }], "color": "default" } }
+      ]
+    }
+  ],
+  "coverage": ["heading", "paragraph", "todo-marker", "bulleted-list", "numbered-list", "to-do", "code", "quote", "link"]
+}
