@@ -35,6 +35,8 @@ HTML is preferred because it preserves headings, lists, links, tables, and place
 
 Deferred for M10 baseline.
 
+M10.T07 outcome: live API import is not accepted for the M10 baseline, so no Picker/OAuth implementation ships. A future pivot must accept live import before adding any Drive API code, and that path must stay limited to explicit user-selected files.
+
 If added later:
 
 - Use Google Picker or equivalent explicit file selection.
