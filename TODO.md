@@ -193,7 +193,7 @@ Tasks:
 
 - [x] `M12.T01` - Write `docs/pivots/m12-slack-discord-adapters.md`.
   - Success: doc states export-only scope, separate vs combined shipping, grouping policy, privacy copy, fixture policy, and no-live-API rule.
-- [ ] `M12.T02` - Build Slack fixture set.
+- [x] `M12.T02` - Build Slack fixture set.
   - Success: fixtures cover public channel export, thread replies, reactions, files/links, user maps, missing private/DM data, and malformed JSON.
 - [ ] `M12.T03` - Build Discord fixture set.
   - Success: fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, current/recent server metadata, and package metadata.

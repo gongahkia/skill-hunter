@@ -1,0 +1,49 @@
+[
+  {
+    "type": "message",
+    "user": "U123",
+    "text": "TODO: publish launch checklist",
+    "ts": "1781740800.000100",
+    "client_msg_id": "msg-public-1",
+    "reactions": [
+      {
+        "name": "eyes",
+        "count": 2,
+        "users": ["U123", "U456"]
+      }
+    ]
+  },
+  {
+    "type": "message",
+    "user": "U456",
+    "text": "Thread parent for release notes",
+    "ts": "1781740860.000200",
+    "thread_ts": "1781740860.000200",
+    "reply_count": 1,
+    "reply_users": ["U123"]
+  },
+  {
+    "type": "message",
+    "user": "U123",
+    "text": "Reply with REF: release source",
+    "ts": "1781740920.000300",
+    "thread_ts": "1781740860.000200",
+    "parent_user_id": "U456"
+  },
+  {
+    "type": "message",
+    "user": "B999",
+    "subtype": "file_share",
+    "text": "Launch deck",
+    "ts": "1781740980.000400",
+    "files": [
+      {
+        "id": "F123",
+        "name": "launch.pdf",
+        "mimetype": "application/pdf",
+        "url_private": "https://files.slack.com/files-pri/T123-F123/launch.pdf",
+        "permalink": "https://fixture.slack.com/files/U123/F123/launch.pdf"
+      }
+    ]
+  }
+]

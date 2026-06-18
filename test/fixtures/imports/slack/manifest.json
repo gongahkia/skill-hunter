@@ -1,0 +1,19 @@
+{
+  "source": "synthetic-slack-export",
+  "exportScope": "public_channels_only",
+  "workspace": {
+    "id": "T123",
+    "name": "Fixture Workspace"
+  },
+  "coverage": [
+    "public-channel",
+    "thread-replies",
+    "reactions",
+    "file-links",
+    "user-map",
+    "missing-private-channel-data",
+    "missing-dm-data",
+    "malformed-json"
+  ],
+  "missing": ["groups.json", "dms.json", "mpims.json"]
+}

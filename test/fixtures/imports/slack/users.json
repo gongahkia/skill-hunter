@@ -1,0 +1,37 @@
+[
+  {
+    "id": "U123",
+    "team_id": "T123",
+    "name": "alice",
+    "real_name": "Alice Example",
+    "profile": {
+      "display_name": "Alice",
+      "real_name": "Alice Example"
+    },
+    "deleted": false,
+    "is_bot": false
+  },
+  {
+    "id": "U456",
+    "team_id": "T123",
+    "name": "bob",
+    "real_name": "Bob Example",
+    "profile": {
+      "display_name": "Bob",
+      "real_name": "Bob Example"
+    },
+    "deleted": false,
+    "is_bot": false
+  },
+  {
+    "id": "B999",
+    "team_id": "T123",
+    "name": "releasebot",
+    "real_name": "Release Bot",
+    "profile": {
+      "display_name": "Release Bot"
+    },
+    "deleted": false,
+    "is_bot": true
+  }
+]

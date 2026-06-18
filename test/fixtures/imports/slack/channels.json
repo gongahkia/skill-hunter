@@ -1,0 +1,16 @@
+[
+  {
+    "id": "C123",
+    "name": "general",
+    "is_channel": true,
+    "is_archived": false,
+    "is_general": true,
+    "members": ["U123", "U456", "B999"],
+    "topic": {
+      "value": "Launch coordination"
+    },
+    "purpose": {
+      "value": "Synthetic public channel fixture"
+    }
+  }
+]
