@@ -1,0 +1,70 @@
+From mailer-daemon@example.test Thu Jun 18 09:00:00 2026
+Message-ID: <plain-1@example.test>
+Date: Thu, 18 Jun 2026 09:00:00 +0000
+From: Alice <alice@example.test>
+To: Launch <launch@example.test>
+Subject: Plain launch note
+X-Gmail-Labels: Inbox,Important,Project/Launch
+Content-Type: text/plain; charset=UTF-8
+
+TODO: send launch note.
+>From escaped body line should stay body text.
+
+From mailer-daemon@example.test Thu Jun 18 09:05:00 2026
+Message-ID: <reply-1@example.test>
+Date: Thu, 18 Jun 2026 09:05:00 +0000
+From: Bob <bob@example.test>
+To: Alice <alice@example.test>
+Subject: Re: Plain launch note
+In-Reply-To: <plain-1@example.test>
+References: <plain-1@example.test>
+X-Gmail-Labels: Sent,Project/Launch
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="alt-boundary"
+
+--alt-boundary
+Content-Type: text/plain; charset=UTF-8
+
+REF: reply source.
+
+--alt-boundary
+Content-Type: text/html; charset=UTF-8
+
+<html><body><p>REF: reply source.</p><img src="https://tracker.example.test/pixel.png" width="1" height="1"><script>alert("x")</script></body></html>
+
+--alt-boundary--
+
+From mailer-daemon@example.test Thu Jun 18 09:10:00 2026
+Message-ID: <attachment-1@example.test>
+Date: Thu, 18 Jun 2026 09:10:00 +0000
+From: Carol <carol@example.test>
+To: Launch <launch@example.test>
+Subject: Fwd: Launch attachment
+X-Gmail-Labels: Inbox,HasAttachment
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mixed-boundary"
+
+--mixed-boundary
+Content-Type: text/plain; charset=UTF-8
+
+Forwarded attachment metadata.
+
+--mixed-boundary
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="launch.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQK
+
+--mixed-boundary--
+
+From mailer-daemon@example.test Thu Jun 18 09:15:00 2026
+Message-ID: <plain-1@example.test>
+Date: Thu, 18 Jun 2026 09:15:00 +0000
+From: Duplicate <duplicate@example.test>
+To: Launch <launch@example.test>
+Subject: Duplicate message id
+X-Gmail-Labels: All Mail
+Content-Type: text/plain; charset=UTF-8
+
+Duplicate Message-ID fixture.

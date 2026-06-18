@@ -232,7 +232,7 @@ Tasks:
 
 - [x] `M13.T01` - Write `docs/pivots/m13-email-adapter.md`.
   - Success: doc chooses Gmail Takeout/MBOX-first, grouping policy, attachment policy, HTML sanitization, credential risk if IMAP is ever added, and rollback.
-- [ ] `M13.T02` - Build MBOX fixtures.
+- [x] `M13.T02` - Build MBOX fixtures.
   - Success: fixtures cover plain text, HTML, multipart, attachments, labels, forwarded/replied threads, duplicate Message-IDs, malformed headers, huge mailboxes, and `From ` body escaping.
 - [ ] `M13.T03` - Implement local MBOX parser.
   - Success: messages import from local files without IMAP/OAuth.

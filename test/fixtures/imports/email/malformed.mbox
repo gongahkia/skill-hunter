@@ -1,0 +1,8 @@
+From mailer-daemon@example.test Thu Jun 18 10:00:00 2026
+Message-ID <missing-colon@example.test>
+Date: not-a-date
+From: Broken <broken@example.test>
+Subject
+Content-Type: text/plain
+
+Malformed header fixture.

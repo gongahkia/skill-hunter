@@ -1,0 +1,21 @@
+{
+  "source": "synthetic-gmail-takeout-mbox",
+  "coverage": [
+    "plain-text",
+    "html",
+    "multipart",
+    "attachments",
+    "gmail-labels",
+    "forwarded-thread",
+    "replied-thread",
+    "duplicate-message-id",
+    "malformed-headers",
+    "large-mailbox",
+    "from-body-escaping"
+  ],
+  "files": [
+    "mixed.mbox",
+    "malformed.mbox",
+    "large.mbox"
+  ]
+}
