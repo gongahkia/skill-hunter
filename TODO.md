@@ -114,7 +114,7 @@ Source constraints checked 2026-06-18:
 
 Tasks:
 
-- [ ] `M10.T01` - Write `docs/pivots/m10-google-docs-adapter.md`.
+- [x] `M10.T01` - Write `docs/pivots/m10-google-docs-adapter.md`.
   - Success: doc chooses local export/Takeout-first vs live Picker/OAuth, states scopes, verification consequences, parser inputs, and non-goals.
 - [ ] `M10.T02` - Decide canonical local input format.
   - Success: pivot chooses HTML, DOCX, Markdown, plain text, or multiple formats with precedence.
