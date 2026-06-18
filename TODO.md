@@ -242,7 +242,7 @@ Tasks:
   - Success: scripts, event handlers, remote tracking pixels, and unsafe URLs are stripped before storage/render.
 - [x] `M13.T06` - Preserve email provenance.
   - Success: Message-ID, From, To, Cc, Bcc where present, subject, date, labels, mailbox path, package hash, and importedAt are retained.
-- [ ] `M13.T07` - Define attachment behavior.
+- [x] `M13.T07` - Define attachment behavior.
   - Success: attachments are imported, linked, skipped, or metadata-only according to pivot doc with visible warnings.
 - [x] `M13.T08` - Defer IMAP/OAuth until separate threat model.
   - Success: no password/OAuth UI ships in M13 unless pivot doc adds a dedicated credential model.
