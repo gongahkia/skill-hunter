@@ -92,7 +92,7 @@ Tasks:
   - Success: `TODO:`/`FIXME:` markers in imported Notion prose become explicit open threads without model use.
 - [x] `M9.T10` - Add Notion import tests.
   - Success: fixtures cover pagination, nesting, unsupported blocks, dedupe, rate-limit retry, cancellation, and scanner output.
-- [ ] `M9.T11` - Update user docs.
+- [x] `M9.T11` - Update user docs.
   - Success: docs explain creating/sharing a Notion connection, revoking access, and deleting imported data.
 
 Sources:
