@@ -207,7 +207,7 @@ Tasks:
   - Success: server/channel/DM IDs, message ID, author ID/name where present, timestamp, attachment URLs, package hash, and importedAt are retained.
 - [x] `M12.T08` - Add privacy warnings.
   - Success: UI states exports may include other people's messages and should remain local.
-- [ ] `M12.T09` - Run scanner before extraction.
+- [x] `M12.T09` - Run scanner before extraction.
   - Success: explicit tasks in chat exports become open threads.
 - [ ] `M12.T10` - Add Slack/Discord tests.
   - Success: ZIP parsing, malformed entries, huge archives, user maps, deleted/missing users, dedupe, scanner, and cancellation are covered.
