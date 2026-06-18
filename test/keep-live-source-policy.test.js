@@ -36,4 +36,69 @@ describe('Keep live source policy', () => {
     expect(optionsHtml).toContain('Google Takeout exports');
     expect(optionsHtml).toContain('Keep URLs and browser pages are not accepted');
   });
+
+  it('defines Keep attachment behavior without embedding binary payloads', () => {
+    const policy = loadPolicy();
+    const available = ['Takeout/Keep/note-assets/photo.png', 'Takeout/Keep/audio.m4a', 'Takeout/Keep/drawing.svg'];
+
+    expect(policy.classifyAttachment({
+      path: 'Takeout/Keep/note-assets/photo.png',
+      mimeType: 'image/png'
+    }, { availablePaths: available })).toMatchObject({
+      kind: 'image',
+      action: 'link',
+      placeholder: '[image: Takeout/Keep/note-assets/photo.png]',
+      provenance: { linked: true, path: 'Takeout/Keep/note-assets/photo.png', mimeType: 'image/png' },
+      warning: null
+    });
+    expect(policy.classifyAttachment({
+      filename: 'audio.m4a',
+      contentType: 'audio/mp4'
+    }, { availablePaths: available })).toMatchObject({
+      kind: 'audio',
+      action: 'link',
+      placeholder: '[audio: audio.m4a]',
+      provenance: { linked: true }
+    });
+    expect(policy.classifyAttachment({
+      filename: 'drawing.svg',
+      type: 'drawing'
+    }, { availablePaths: available })).toMatchObject({
+      kind: 'drawing',
+      action: 'link',
+      placeholder: '[drawing: drawing.svg]',
+      provenance: { linked: true }
+    });
+  });
+
+  it('emits visible recoverable warnings for missing and unsupported Keep attachments', () => {
+    const policy = loadPolicy();
+
+    expect(policy.classifyAttachment({
+      filename: 'missing.png',
+      mimeType: 'image/png'
+    }, { availablePaths: [] })).toMatchObject({
+      kind: 'image',
+      action: 'placeholder',
+      placeholder: '[image: missing.png]',
+      provenance: { linked: false },
+      warning: {
+        code: 'KEEP_ATTACHMENT_MISSING',
+        recoverable: true
+      }
+    });
+    expect(policy.classifyAttachment({
+      filename: 'archive.bin',
+      mimeType: 'application/octet-stream'
+    }, { availablePaths: ['archive.bin'] })).toMatchObject({
+      kind: 'unsupported',
+      action: 'placeholder',
+      placeholder: '[attachment: archive.bin]',
+      provenance: { linked: false },
+      warning: {
+        code: 'KEEP_ATTACHMENT_UNSUPPORTED',
+        recoverable: true
+      }
+    });
+  });
 });

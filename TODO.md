@@ -166,7 +166,7 @@ Tasks:
   - Success: title, labels, color, created/updated timestamps, archived/pinned/deleted state if present, source path, package hash, and importedAt are retained.
 - [x] `M11.T06` - Reject unsupported live sources.
   - Success: Keep URLs/browser pages are not scraped; UI points user to Takeout import.
-- [ ] `M11.T07` - Define attachment behavior.
+- [x] `M11.T07` - Define attachment behavior.
   - Success: images/audio/drawings are imported, linked, or skipped according to pivot doc with visible warnings.
 - [ ] `M11.T08` - Run scanner before extraction.
   - Success: checklist/prose markers create explicit open threads.
