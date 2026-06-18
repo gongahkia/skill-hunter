@@ -244,7 +244,7 @@ Tasks:
   - Success: Message-ID, From, To, Cc, Bcc where present, subject, date, labels, mailbox path, package hash, and importedAt are retained.
 - [ ] `M13.T07` - Define attachment behavior.
   - Success: attachments are imported, linked, skipped, or metadata-only according to pivot doc with visible warnings.
-- [ ] `M13.T08` - Defer IMAP/OAuth until separate threat model.
+- [x] `M13.T08` - Defer IMAP/OAuth until separate threat model.
   - Success: no password/OAuth UI ships in M13 unless pivot doc adds a dedicated credential model.
 - [ ] `M13.T09` - Run scanner before extraction.
   - Success: explicit task markers in emails become open threads.
