@@ -132,7 +132,7 @@ Tasks:
   - Success: pivot states reuse, rewrite, or discard; no Apps Script code ships by accident.
 - [x] `M10.T09` - Run scanner before extraction.
   - Success: inline prose tags create open threads before any local model call.
-- [ ] `M10.T10` - Add Docs import tests.
+- [x] `M10.T10` - Add Docs import tests.
   - Success: parser, malformed files, large files, unsupported structures, dedupe, scanner, and cancellation are covered.
 
 Sources:

@@ -17,6 +17,21 @@ function loadImporter() {
   return module.exports;
 }
 
+function loadBundle() {
+  const dom = new JSDOM('');
+  const module = { exports: {} };
+  const code = [
+    loadSrc('imports/run-metadata.js'),
+    loadSrc('imports/session.js'),
+    loadSrc('imports/normalizer.js'),
+    loadSrc('imports/dedupe.js'),
+    loadSrc('threads/scanner.js'),
+    loadSrc('imports/google-docs.js')
+  ].join('\n');
+  const fn = new Function('module', 'exports', 'DOMParser', code + '\nreturn { importer: GoogleDocsImporter, dedupe: ImportDedupe };');
+  return fn(module, module.exports, dom.window.DOMParser);
+}
+
 function fixture(name) {
   return loadFixture('fixtures/imports/google-docs/' + name);
 }
@@ -186,5 +201,75 @@ describe('GoogleDocsImporter', () => {
     await expect(importer.importFile({
       file: exportFile('slides.pdf', '%PDF-1.7')
     })).rejects.toThrow('Unsupported Google Docs export format');
+  });
+
+  it('records malformed DOCX XML as a failed import run', async () => {
+    const importer = loadImporter();
+    const runs = [];
+
+    await expect(importer.importFile({
+      file: exportFile('bad.xml', '<w:document><w:body>'),
+      dao: { putExtractionRun: async (run) => runs.push(run) },
+      importedAt: '2026-06-18T11:15:00.000Z'
+    })).rejects.toThrow('Malformed DOCX document XML');
+
+    expect(runs).toHaveLength(1);
+    expect(runs[0].metadata.status).toBe('error');
+    expect(runs[0].metadata.errors[0]).toMatchObject({ code: 'GOOGLE_DOCS_IMPORT_ERROR', sourceRef: 'bad.xml' });
+  });
+
+  it('handles large plain text imports with stable progress counts', async () => {
+    const importer = loadImporter();
+    const body = Array.from({ length: 750 }, (_, index) => 'Line ' + String(index)).join('\n');
+    const result = await importer.importFile({
+      file: exportFile('long.txt', body),
+      importedAt: '2026-06-18T11:20:00.000Z'
+    });
+
+    expect(result.messages).toHaveLength(750);
+    expect(result.run.metadata.itemCounts).toMatchObject({ parsed: 750, imported: 750, skipped: 0, errors: 0 });
+  });
+
+  it('supports source dedupe decisions for imported Docs files', async () => {
+    const { importer, dedupe } = loadBundle();
+    const result = await importer.importFile({
+      file: exportFile('plain.txt', fixture('plain.txt'), { webkitRelativePath: 'Takeout/Docs/plain.txt' }),
+      importedAt: '2026-06-18T11:25:00.000Z'
+    });
+
+    expect(dedupe.decide([result.chat], {
+      adapterId: 'google-docs',
+      sourceKind: 'file',
+      sourcePath: 'Takeout/Docs/plain.txt',
+      sourceName: 'plain.txt',
+      packageHash: result.chat.metadata.import.packageHash
+    }).action).toBe('skip');
+    expect(dedupe.decide([result.chat], {
+      adapterId: 'google-docs',
+      sourceKind: 'file',
+      sourcePath: 'Takeout/Docs/plain.txt',
+      sourceName: 'plain.txt',
+      packageHash: 'changed'
+    }).action).toBe('update');
+  });
+
+  it('records cancellation with a recoverable partial run', async () => {
+    const importer = loadImporter();
+    const controller = new AbortController();
+    const body = Array.from({ length: 50 }, (_, index) => 'Line ' + String(index)).join('\n');
+    const result = await importer.importFile({
+      file: exportFile('cancel.txt', body),
+      signal: controller.signal,
+      importedAt: '2026-06-18T11:30:00.000Z',
+      onProgress: (event) => {
+        if (event.itemCounts.parsed === 10) controller.abort();
+      }
+    });
+
+    expect(result.cancelled).toBe(true);
+    expect(result.messages).toEqual([]);
+    expect(result.run.metadata.status).toBe('cancelled');
+    expect(result.run.metadata.partial.recoverable).toBe(true);
+    expect(result.run.metadata.itemCounts.imported).toBeLessThan(50);
   });
 });
