@@ -188,6 +188,9 @@ var NotionImporter = (function() {
 
   function makeMessages(page, blockRows, options, session, normalizer, importedAt) {
     var pageIdValue = text(page.id || options.pageId);
+    var title = pageTitle(page);
+    var pageUrl = page.url || options.pageUrl || '';
+    var workspaceHint = text(options.workspaceHint || page.workspace || page.workspace_name);
     var chatId = ADAPTER_ID + ':page:' + pageIdValue;
     var messages = [];
     blockRows.forEach(function(row, index) {
@@ -220,6 +223,9 @@ var NotionImporter = (function() {
         runId: 'import:notion:' + pageIdValue + ':' + stableHash(importedAt),
         provenance: {
           pageId: pageIdValue,
+          pageTitle: title,
+          pageUrl: pageUrl,
+          workspaceHint: workspaceHint,
           blockId: text(block.id),
           parentBlockId: text(row.parentId),
           blockType: text(block.type)
@@ -284,7 +290,13 @@ var NotionImporter = (function() {
         importedAt: importedAt,
         packageHash: contentHash,
         runId: 'import:notion:' + text(page.id) + ':' + stableHash(importedAt),
-        messageCount: messages.length
+        messageCount: messages.length,
+        provenance: {
+          pageId: text(page.id),
+          pageTitle: pageTitle(page),
+          pageUrl: page.url || options.pageUrl || '',
+          workspaceHint: text(options.workspaceHint || page.workspace || page.workspace_name)
+        }
       });
       var openThreads = scanner && scanner.scanMessage
         ? messages.reduce(function(rows, message) {

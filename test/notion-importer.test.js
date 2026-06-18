@@ -159,4 +159,34 @@ describe('NotionImporter', () => {
     expect(writes.threads).toHaveLength(result.openThreads.length);
     expect(writes.runs).toHaveLength(1);
   });
+
+  it('preserves Notion page and block provenance', async () => {
+    const importer = loadImporter();
+    const doc = fixture('basic-page');
+    const result = await importer.importPage({
+      token: 'secret',
+      pageUrl: 'https://notion.so/page-basic',
+      fetch: mockFetch(doc),
+      sleep: async () => {},
+      workspaceHint: 'launch-workspace',
+      importedAt: '2026-06-18T10:40:00.000Z'
+    });
+
+    expect(result.chat.metadata.adapter).toEqual({ id: 'notion', version: 'v1' });
+    expect(result.chat.metadata.import.importedAt).toBe('2026-06-18T10:40:00.000Z');
+    expect(result.chat.metadata.provenance).toMatchObject({
+      pageId: 'page-basic',
+      pageTitle: 'Basic Notion fixture',
+      pageUrl: 'https://notion.so/page-basic',
+      workspaceHint: 'launch-workspace'
+    });
+    expect(result.messages[0].metadata.provenance).toMatchObject({
+      pageId: 'page-basic',
+      pageTitle: 'Basic Notion fixture',
+      pageUrl: 'https://notion.so/page-basic',
+      workspaceHint: 'launch-workspace',
+      blockId: 'heading-1',
+      blockType: 'heading_1'
+    });
+  });
 });

@@ -84,7 +84,7 @@ Tasks:
   - Success: fixture validates real block shape and permission edge cases.
 - [x] `M9.T06` - Implement read-only page import.
   - Success: selected page imports with recursive block pagination, progress, cancel, and retry/backoff.
-- [ ] `M9.T07` - Preserve Notion provenance.
+- [x] `M9.T07` - Preserve Notion provenance.
   - Success: page ID, block ID, page title, URL, workspace hint if available, importedAt, and adapter version are retained.
 - [ ] `M9.T08` - Add Notion permission/error states.
   - Success: missing share, revoked token, insufficient capabilities, 404 access mismatch, 429/529, and network failures have specific messages.
