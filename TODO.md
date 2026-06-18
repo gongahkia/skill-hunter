@@ -238,7 +238,7 @@ Tasks:
   - Success: messages import from local files without IMAP/OAuth.
 - [x] `M13.T04` - Decide grouping.
   - Success: snapshots group by thread, mailbox/label, sender, or one-email-per-snapshot according to pivot doc.
-- [ ] `M13.T05` - Sanitize HTML email.
+- [x] `M13.T05` - Sanitize HTML email.
   - Success: scripts, event handlers, remote tracking pixels, and unsafe URLs are stripped before storage/render.
 - [ ] `M13.T06` - Preserve email provenance.
   - Success: Message-ID, From, To, Cc, Bcc where present, subject, date, labels, mailbox path, package hash, and importedAt are retained.
