@@ -40,7 +40,7 @@
 
 ## Adapter baseline for M9-M14
 
-- [ ] `ADAPTER.T01` - Define the final prose import contract before M9 implementation.
+- [x] `ADAPTER.T01` - Define the final prose import contract before M9 implementation.
   - Success: `docs/pivots/adapter-contract.md` exists or the M9 pivot doc contains the contract.
 - [ ] `ADAPTER.T02` - Confirm imported documents can reuse existing vault/search/thread/export schemas.
   - Success: no new top-level IndexedDB stores are required unless the pivot doc justifies them.
