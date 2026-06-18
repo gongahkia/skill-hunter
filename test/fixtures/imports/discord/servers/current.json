@@ -1,0 +1,13 @@
+[
+  {
+    "id": "700",
+    "name": "Current Fixture Server",
+    "channels": [
+      {
+        "id": "300",
+        "name": "release",
+        "type": "guild_text"
+      }
+    ]
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "m100-1",
+    "timestamp": "2026-06-18T02:00:00.000Z",
+    "author": {
+      "id": "9001",
+      "username": "fixture_user"
+    },
+    "content": "TODO: send DM summary",
+    "attachments": []
+  }
+]

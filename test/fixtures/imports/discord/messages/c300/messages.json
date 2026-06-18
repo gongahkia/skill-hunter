@@ -1,0 +1,13 @@
+[
+  {
+    "id": "m300-1",
+    "timestamp": "2026-06-18T02:10:00.000Z",
+    "author": {
+      "id": "9004",
+      "username": "Deleted User",
+      "deleted": true
+    },
+    "content": "REF: deleted user context",
+    "attachments": []
+  }
+]

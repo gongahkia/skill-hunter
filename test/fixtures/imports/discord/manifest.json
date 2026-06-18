@@ -1,0 +1,19 @@
+{
+  "source": "synthetic-discord-data-package",
+  "package": {
+    "requestedAt": "2026-06-18T00:00:00.000Z",
+    "accountId": "9001"
+  },
+  "coverage": [
+    "dm",
+    "group-dm",
+    "server-channel",
+    "message-json",
+    "attachments",
+    "deleted-user",
+    "current-server-metadata",
+    "recent-server-metadata",
+    "package-metadata",
+    "malformed-json"
+  ]
+}

@@ -195,7 +195,7 @@ Tasks:
   - Success: doc states export-only scope, separate vs combined shipping, grouping policy, privacy copy, fixture policy, and no-live-API rule.
 - [x] `M12.T02` - Build Slack fixture set.
   - Success: fixtures cover public channel export, thread replies, reactions, files/links, user maps, missing private/DM data, and malformed JSON.
-- [ ] `M12.T03` - Build Discord fixture set.
+- [x] `M12.T03` - Build Discord fixture set.
   - Success: fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, current/recent server metadata, and package metadata.
 - [ ] `M12.T04` - Implement ZIP streaming import.
   - Success: large exports import with progress/cancel and without blocking UI.

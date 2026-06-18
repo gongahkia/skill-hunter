@@ -1,0 +1,23 @@
+{
+  "channels": [
+    {
+      "id": "100",
+      "type": "dm",
+      "name": "Alice",
+      "path": "messages/c100/messages.json"
+    },
+    {
+      "id": "200",
+      "type": "group_dm",
+      "name": "Launch Group",
+      "path": "messages/c200/messages.json"
+    },
+    {
+      "id": "300",
+      "type": "guild_text",
+      "guild_id": "700",
+      "name": "release",
+      "path": "messages/c300/messages.json"
+    }
+  ]
+}

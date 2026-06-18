@@ -1,0 +1,19 @@
+[
+  {
+    "id": "m200-1",
+    "timestamp": "2026-06-18T02:05:00.000Z",
+    "author": {
+      "id": "9003",
+      "username": "bob"
+    },
+    "content": "Group note with attachment",
+    "attachments": [
+      {
+        "id": "att-1",
+        "filename": "plan.png",
+        "url": "https://cdn.discordapp.com/attachments/200/att-1/plan.png",
+        "content_type": "image/png"
+      }
+    ]
+  }
+]

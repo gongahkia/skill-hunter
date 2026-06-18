@@ -1,0 +1,10 @@
+{
+  "id": "100",
+  "type": "dm",
+  "recipients": [
+    {
+      "id": "9002",
+      "username": "alice"
+    }
+  ]
+}

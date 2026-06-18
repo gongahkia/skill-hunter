@@ -1,0 +1,15 @@
+{
+  "id": "200",
+  "type": "group_dm",
+  "name": "Launch Group",
+  "recipients": [
+    {
+      "id": "9002",
+      "username": "alice"
+    },
+    {
+      "id": "9003",
+      "username": "bob"
+    }
+  ]
+}
