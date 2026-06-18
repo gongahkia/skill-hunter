@@ -248,7 +248,7 @@ Tasks:
   - Success: no password/OAuth UI ships in M13 unless pivot doc adds a dedicated credential model.
 - [x] `M13.T09` - Run scanner before extraction.
   - Success: explicit task markers in emails become open threads.
-- [ ] `M13.T10` - Add email import tests.
+- [x] `M13.T10` - Add email import tests.
   - Success: MIME parsing, mbox variants, sanitization, labels, attachments, dedupe, scanner, malformed input, and large mailbox cases are covered.
 
 Sources:
