@@ -164,7 +164,7 @@ Tasks:
   - Success: notes import as one snapshot per note with checklist/prose items normalized.
 - [ ] `M11.T05` - Preserve Keep metadata.
   - Success: title, labels, color, created/updated timestamps, archived/pinned/deleted state if present, source path, package hash, and importedAt are retained.
-- [ ] `M11.T06` - Reject unsupported live sources.
+- [x] `M11.T06` - Reject unsupported live sources.
   - Success: Keep URLs/browser pages are not scraped; UI points user to Takeout import.
 - [ ] `M11.T07` - Define attachment behavior.
   - Success: images/audio/drawings are imported, linked, or skipped according to pivot doc with visible warnings.
