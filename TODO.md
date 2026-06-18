@@ -72,7 +72,7 @@ Source constraints checked 2026-06-18:
 
 Tasks:
 
-- [ ] `M9.T01` - Write `docs/pivots/m9-notion-adapter.md`.
+- [x] `M9.T01` - Write `docs/pivots/m9-notion-adapter.md`.
   - Success: doc states auth mode, page/object scope, permissions, rate-limit behavior, fixture plan, non-goals, and rollback.
 - [ ] `M9.T02` - Decide v1 auth: PAT, internal connection token, or both.
   - Success: pivot doc explains why public OAuth is included or deferred.
