@@ -76,7 +76,7 @@ Tasks:
   - Success: doc states auth mode, page/object scope, permissions, rate-limit behavior, fixture plan, non-goals, and rollback.
 - [x] `M9.T02` - Decide v1 auth: PAT, internal connection token, or both.
   - Success: pivot doc explains why public OAuth is included or deferred.
-- [ ] `M9.T03` - Define supported Notion objects.
+- [x] `M9.T03` - Define supported Notion objects.
   - Success: pages and child blocks are explicitly in/out; databases, comments, files, and synced blocks have decisions.
 - [ ] `M9.T04` - Build synthetic Notion fixtures.
   - Success: fixtures cover headings, paragraphs, bullets, numbered lists, to-dos, toggles, code, quotes, links, nested blocks, empty blocks, unsupported blocks, and long pages.
