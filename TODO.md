@@ -328,7 +328,7 @@ Tasks:
   - Success: Transformers.js embedding path is baseline; Chrome Prompt API/Gemini Nano is optional and gracefully hidden when unavailable.
 - [x] `M15.T11` - Add RAG eval set.
   - Success: fixtures cover exact recall, semantic recall, stale/deleted sources, unsupported questions, and hallucination checks.
-- [ ] `M15.T12` - Add performance gates.
+- [x] `M15.T12` - Add performance gates.
   - Success: representative vault indexing time, query latency, memory, and storage budget are measured and documented.
 - [x] `M15.T13` - Add privacy/security docs.
   - Success: docs state what model files are downloaded, where vectors live, how to delete them, and that vault contents stay local.
