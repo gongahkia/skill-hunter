@@ -154,7 +154,7 @@ Source constraints checked 2026-06-18:
 
 Tasks:
 
-- [ ] `M11.T01` - Write `docs/pivots/m11-google-keep-adapter.md`.
+- [x] `M11.T01` - Write `docs/pivots/m11-google-keep-adapter.md`.
   - Success: doc states Takeout-only default, API caveat, no-scraping rule, attachment policy, fixture needs, and rollback.
 - [ ] `M11.T02` - Obtain a user-owned Keep Takeout sample.
   - Success: sample documents actual JSON/HTML fields, labels, colors, timestamps, checklists, pinned/archive state, deleted state if present, and attachments.
