@@ -201,7 +201,7 @@ Tasks:
   - Success: large exports import with progress/cancel and without blocking UI.
 - [x] `M12.T05` - Define grouping.
   - Success: imported snapshots group by workspace/server + channel/DM/thread according to pivot doc.
-- [ ] `M12.T06` - Preserve Slack provenance.
+- [x] `M12.T06` - Preserve Slack provenance.
   - Success: workspace, channel, thread timestamp/ID, message timestamp, user ID/name map, export package hash, and importedAt are retained.
 - [ ] `M12.T07` - Preserve Discord provenance.
   - Success: server/channel/DM IDs, message ID, author ID/name where present, timestamp, attachment URLs, package hash, and importedAt are retained.
