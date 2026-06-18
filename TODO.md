@@ -270,7 +270,7 @@ Source constraints checked 2026-06-18:
 
 Tasks:
 
-- [ ] `M14.T01` - Write `docs/pivots/m14-x-bookmarks.md`.
+- [x] `M14.T01` - Write `docs/pivots/m14-x-bookmarks.md`.
   - Success: doc chooses archive-first vs official API, states auth/cost assumptions, fixture policy, UI naming, and no-scraping/internal-GraphQL rule.
 - [ ] `M14.T02` - Verify X archive contents with a real sample.
   - Success: sample proves whether bookmarks are present and which fields are available.
