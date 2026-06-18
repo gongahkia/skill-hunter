@@ -82,7 +82,7 @@ Tasks:
   - Success: fixtures cover headings, paragraphs, bullets, numbered lists, to-dos, toggles, code, quotes, links, nested blocks, empty blocks, unsupported blocks, and long pages.
 - [ ] `M9.T05` - Obtain one user-owned exported/API fixture.
   - Success: fixture validates real block shape and permission edge cases.
-- [ ] `M9.T06` - Implement read-only page import.
+- [x] `M9.T06` - Implement read-only page import.
   - Success: selected page imports with recursive block pagination, progress, cancel, and retry/backoff.
 - [ ] `M9.T07` - Preserve Notion provenance.
   - Success: page ID, block ID, page title, URL, workspace hint if available, importedAt, and adapter version are retained.
