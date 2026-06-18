@@ -314,7 +314,7 @@ Tasks:
   - Success: every chunk maps back to chat/document/message/source row and survives rebuilds.
 - [x] `M15.T04` - Select embedding model.
   - Success: decision records model size, license, browser runtime, quantization, expected latency, and cache size.
-- [ ] `M15.T05` - Prototype on copied fixture vault only.
+- [x] `M15.T05` - Prototype on copied fixture vault only.
   - Success: latency/storage/recall numbers are recorded before production schema migration.
 - [x] `M15.T06` - Design vector index storage.
   - Success: pivot states whether vectors live in IndexedDB, OPFS, or another local store and how rebuild/migration works.
