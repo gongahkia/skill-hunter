@@ -34,6 +34,12 @@
     extractionStatus: document.getElementById('extractionStatus'),
     rescanThreads: document.getElementById('rescanThreads'),
     rescanStatus: document.getElementById('rescanStatus'),
+    importDocsFiles: document.getElementById('importDocsFiles'),
+    importDocsFolder: document.getElementById('importDocsFolder'),
+    docsImportFiles: document.getElementById('docsImportFiles'),
+    docsImportFolderFiles: document.getElementById('docsImportFolderFiles'),
+    docsImportDrop: document.getElementById('docsImportDrop'),
+    docsImportStatus: document.getElementById('docsImportStatus'),
     statsTotalChats: document.getElementById('statsTotalChats'),
     statsTotalMessages: document.getElementById('statsTotalMessages'),
     statsStorageUsed: document.getElementById('statsStorageUsed'),
@@ -1049,6 +1055,52 @@
     }
   }
 
+  function docsImportFileArray(files) {
+    return Array.prototype.slice.call(files || []).filter(Boolean);
+  }
+
+  function setDocsImportStatus(message) {
+    if (els.docsImportStatus) els.docsImportStatus.textContent = message;
+  }
+
+  function setDocsImportDisabled(disabled) {
+    [els.importDocsFiles, els.importDocsFolder].forEach(function(button) {
+      if (button) button.disabled = !!disabled;
+    });
+  }
+
+  async function importGoogleDocsExports(files, refreshVault) {
+    files = docsImportFileArray(files);
+    if (!files.length) return;
+    setDocsImportDisabled(true);
+    setDocsImportStatus('Importing...');
+    try {
+      if (typeof GoogleDocsImporter === 'undefined') throw new Error('Google Docs importer is unavailable');
+      var result = await GoogleDocsImporter.importFiles({
+        files: files,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        scanner: typeof ThreadScanner !== 'undefined' ? ThreadScanner : null
+      });
+      if (refreshVault) await refreshVault(true);
+      else await refreshVaultStats();
+      await refreshExtractionRuns();
+      setDocsImportStatus('Imported ' + result.chats.length + (result.chats.length === 1 ? ' document.' : ' documents.'));
+      log('info', 'options.google_docs_import.success', {
+        chats: result.chats.length,
+        messages: result.messages.length,
+        threads: result.openThreads.length
+      });
+    } catch (error) {
+      setDocsImportStatus('Docs import failed.');
+      log('error', 'options.google_docs_import.failed', { error: serializeError(error) });
+    } finally {
+      setDocsImportDisabled(false);
+      if (els.docsImportFiles) els.docsImportFiles.value = '';
+      if (els.docsImportFolderFiles) els.docsImportFolderFiles.value = '';
+      if (els.docsImportDrop) els.docsImportDrop.classList.remove('drag-active');
+    }
+  }
+
   function backupPassword() {
     return els.backupPassword ? els.backupPassword.value || '' : '';
   }
@@ -1356,6 +1408,44 @@
     }
     if (els.chooseObsidianVault) els.chooseObsidianVault.addEventListener('click', pickObsidianVault);
     if (els.syncObsidianVault) els.syncObsidianVault.addEventListener('click', runObsidianSync);
+    if (els.importDocsFiles && els.docsImportFiles) {
+      els.importDocsFiles.addEventListener('click', function() {
+        els.docsImportFiles.click();
+      });
+      els.docsImportFiles.addEventListener('change', function() {
+        importGoogleDocsExports(els.docsImportFiles.files, refreshVault);
+      });
+    }
+    if (els.importDocsFolder && els.docsImportFolderFiles) {
+      els.importDocsFolder.addEventListener('click', function() {
+        els.docsImportFolderFiles.click();
+      });
+      els.docsImportFolderFiles.addEventListener('change', function() {
+        importGoogleDocsExports(els.docsImportFolderFiles.files, refreshVault);
+      });
+    }
+    if (els.docsImportDrop) {
+      ['dragenter', 'dragover'].forEach(function(type) {
+        els.docsImportDrop.addEventListener(type, function(event) {
+          event.preventDefault();
+          els.docsImportDrop.classList.add('drag-active');
+        });
+      });
+      ['dragleave', 'drop'].forEach(function(type) {
+        els.docsImportDrop.addEventListener(type, function(event) {
+          event.preventDefault();
+          els.docsImportDrop.classList.remove('drag-active');
+        });
+      });
+      els.docsImportDrop.addEventListener('drop', function(event) {
+        importGoogleDocsExports(event.dataTransfer && event.dataTransfer.files, refreshVault);
+      });
+      els.docsImportDrop.addEventListener('keydown', function(event) {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        if (els.docsImportFiles) els.docsImportFiles.click();
+      });
+    }
     if (els.exportBackup) els.exportBackup.addEventListener('click', exportVaultBackup);
     if (els.importBackup && els.backupFile) {
       els.importBackup.addEventListener('click', function() {

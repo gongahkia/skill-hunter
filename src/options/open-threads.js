@@ -24,7 +24,8 @@ var OptionsOpenThreads = (function() {
     qwen: 'Qwen',
     chatglm: 'ChatGLM',
     doubao: 'Doubao',
-    notebooklm: 'NotebookLM'
+    notebooklm: 'NotebookLM',
+    'google-docs': 'Google Docs'
   };
 
   function text(value, fallback) {

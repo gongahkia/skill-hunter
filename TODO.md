@@ -120,7 +120,7 @@ Tasks:
   - Success: pivot chooses HTML, DOCX, Markdown, plain text, or multiple formats with precedence.
 - [x] `M10.T03` - Build exported Docs fixtures.
   - Success: fixtures cover headings, lists, links, tables, footnotes if present, images/placeholders, comments if export contains them, long docs, and empty docs.
-- [ ] `M10.T04` - Implement local file/folder import first.
+- [x] `M10.T04` - Implement local file/folder import first.
   - Success: user can drop/select exported Docs files and import without OAuth.
 - [ ] `M10.T05` - Preserve Docs provenance.
   - Success: original file path/name, exported format, document title, source URL if present, import package hash, and importedAt are retained.

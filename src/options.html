@@ -66,6 +66,7 @@
             <option value="chatglm">ChatGLM</option>
             <option value="doubao">Doubao</option>
             <option value="notebooklm">NotebookLM</option>
+            <option value="google-docs">Google Docs</option>
           </select>
         </label>
         <label>
@@ -262,6 +263,7 @@
               <option value="chatglm">ChatGLM</option>
               <option value="doubao">Doubao</option>
               <option value="notebooklm">NotebookLM</option>
+              <option value="google-docs">Google Docs</option>
             </select>
           </label>
           <label>
@@ -395,6 +397,18 @@
             <p id="obsidianSyncStatus">No Obsidian vault selected.</p>
           </section>
 
+          <section class="subpanel" aria-label="Google Docs import">
+            <h3>Google Docs import</h3>
+            <div id="docsImportDrop" class="docs-import-drop" tabindex="0">Drop Docs exports</div>
+            <div class="button-row">
+              <button id="importDocsFiles" class="btn btn-secondary" type="button">Choose files</button>
+              <button id="importDocsFolder" class="btn btn-ghost" type="button">Choose folder</button>
+              <input id="docsImportFiles" type="file" accept=".html,.htm,.txt,.md,.markdown,.xml,text/html,text/plain,text/markdown,application/xml,text/xml" multiple hidden>
+              <input id="docsImportFolderFiles" type="file" webkitdirectory multiple hidden>
+            </div>
+            <p id="docsImportStatus">No Docs import run yet.</p>
+          </section>
+
           <section class="subpanel" aria-label="Backup vault">
             <h3>Backup vault</h3>
             <label>
@@ -461,7 +475,11 @@
   <script src="vault/dao.js"></script>
   <script src="vault/quota.js"></script>
   <script src="vault/search.js"></script>
+  <script src="imports/run-metadata.js"></script>
+  <script src="imports/session.js"></script>
+  <script src="imports/normalizer.js"></script>
   <script src="threads/scanner.js"></script>
+  <script src="imports/google-docs.js"></script>
   <script src="extraction/runtime.js"></script>
   <script src="extraction/prompt-api.js"></script>
   <script src="extraction/model-loader.js"></script>
