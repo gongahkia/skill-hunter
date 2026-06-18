@@ -130,7 +130,7 @@ Tasks:
   - Success: Google Picker or equivalent user-selected flow is used; no background Drive crawl ships.
 - [x] `M10.T08` - Decide Owl Apps Script reuse.
   - Success: pivot states reuse, rewrite, or discard; no Apps Script code ships by accident.
-- [ ] `M10.T09` - Run scanner before extraction.
+- [x] `M10.T09` - Run scanner before extraction.
   - Success: inline prose tags create open threads before any local model call.
 - [ ] `M10.T10` - Add Docs import tests.
   - Success: parser, malformed files, large files, unsupported structures, dedupe, scanner, and cancellation are covered.

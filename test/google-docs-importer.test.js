@@ -123,6 +123,46 @@ describe('GoogleDocsImporter', () => {
     ]);
   });
 
+  it('runs the deterministic scanner before persisting imported rows', async () => {
+    const importer = loadImporter();
+    const events = [];
+    const scanner = {
+      scanMessage(message) {
+        events.push('scan:' + message.content);
+        if (message.content.indexOf('TODO:') !== 0) return [];
+        return [{
+          threadId: 'scan:' + message.messageId,
+          chatId: message.chatId,
+          messageId: message.messageId,
+          tag: 'TODO',
+          text: message.content.replace(/^TODO:\s*/, ''),
+          source: 'explicit',
+          subSource: 'scan',
+          status: 'open',
+          createdAt: message.timestamp
+        }];
+      }
+    };
+    const dao = {
+      putChat: async () => events.push('putChat'),
+      putMessages: async () => events.push('putMessages'),
+      putOpenThreads: async () => events.push('putOpenThreads'),
+      putExtractionRun: async () => events.push('putExtractionRun')
+    };
+
+    const result = await importer.importFile({
+      file: exportFile('rich-doc.html', fixture('rich-doc.html')),
+      scanner,
+      dao,
+      importedAt: '2026-06-18T11:08:00.000Z'
+    });
+
+    expect(result.openThreads).toHaveLength(1);
+    expect(events[0]).toMatch(/^scan:/);
+    expect(events.indexOf('putOpenThreads')).toBeGreaterThan(events.findIndex((event) => event.indexOf('scan:TODO:') === 0));
+    expect(events).not.toContain('runExtraction');
+  });
+
   it('parses DOCX document XML fallback files', async () => {
     const importer = loadImporter();
     const result = await importer.importFile({
