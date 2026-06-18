@@ -236,7 +236,7 @@ Tasks:
   - Success: fixtures cover plain text, HTML, multipart, attachments, labels, forwarded/replied threads, duplicate Message-IDs, malformed headers, huge mailboxes, and `From ` body escaping.
 - [ ] `M13.T03` - Implement local MBOX parser.
   - Success: messages import from local files without IMAP/OAuth.
-- [ ] `M13.T04` - Decide grouping.
+- [x] `M13.T04` - Decide grouping.
   - Success: snapshots group by thread, mailbox/label, sender, or one-email-per-snapshot according to pivot doc.
 - [ ] `M13.T05` - Sanitize HTML email.
   - Success: scripts, event handlers, remote tracking pixels, and unsafe URLs are stripped before storage/render.
