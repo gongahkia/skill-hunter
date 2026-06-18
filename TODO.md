@@ -46,7 +46,7 @@
   - Success: no new top-level IndexedDB stores are required unless the pivot doc justifies them.
 - [x] `ADAPTER.T03` - Add shared import-run metadata.
   - Success: imports record adapter ID, source object/path, import package hash for files, importedAt, item counts, duration, warnings, and errors.
-- [ ] `ADAPTER.T04` - Add shared progress/cancel/error model for file and API imports.
+- [x] `ADAPTER.T04` - Add shared progress/cancel/error model for file and API imports.
   - Success: large imports show progress, can be cancelled, and leave a recoverable partial-import record.
 - [ ] `ADAPTER.T05` - Add shared provenance fields to normalized snapshots/messages.
   - Success: every imported row can point back to original source ID/path/URL where available.

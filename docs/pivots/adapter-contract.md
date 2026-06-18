@@ -126,6 +126,8 @@ Re-import behavior:
 
 Long imports must expose progress as parsed/imported/total counts and current phase. Cancellation must stop new writes as soon as possible and record a recoverable partial run or roll back according to the pivot doc.
 
+Shared helper: `src/imports/session.js`.
+
 Errors must be structured:
 
 - `code`: stable adapter-specific code
