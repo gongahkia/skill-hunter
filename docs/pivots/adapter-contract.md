@@ -124,6 +124,21 @@ Re-import behavior:
 - deleted source rows in a newer import: keep existing imported rows unless the user chooses replace mode
 - repeated scanner matches: skip duplicate `openThreads` rows by `threadId` or by message ID, tag, and normalized text
 
+## Fixture Policy
+
+Each adapter must ship synthetic fixtures before parser code is marked complete. Synthetic fixtures must cover happy path, empty source, malformed source, unsupported structures, duplicate source IDs, scanner tags, and large-input behavior.
+
+Each adapter also needs at least one user-owned real fixture before parser behavior is marked complete. Real fixtures may be kept outside git if they contain personal data, but the adapter pivot must record:
+
+- source product/export/API path
+- acquisition date
+- redaction status
+- schema fields observed
+- permission or account edge cases observed
+- parser behavior verified against the fixture
+
+No test may require private real fixtures in CI. If a real fixture cannot be committed, tests must use a redacted synthetic fixture derived from the observed schema and the pivot must state what could not be preserved.
+
 ## Progress, Cancel, And Error Contract
 
 Long imports must expose progress as parsed/imported/total counts and current phase. Cancellation must stop new writes as soon as possible and record a recoverable partial run or roll back according to the pivot doc.

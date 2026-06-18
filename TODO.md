@@ -50,7 +50,7 @@
   - Success: large imports show progress, can be cancelled, and leave a recoverable partial-import record.
 - [x] `ADAPTER.T05` - Add shared provenance fields to normalized snapshots/messages.
   - Success: every imported row can point back to original source ID/path/URL where available.
-- [ ] `ADAPTER.T06` - Add fixture policy.
+- [x] `ADAPTER.T06` - Add fixture policy.
   - Success: each adapter has synthetic fixtures plus at least one user-owned real fixture before marking parser behavior complete.
 - [ ] `ADAPTER.T07` - Add import privacy copy.
   - Success: UI warns when an archive may include other people's messages or sensitive account data.
