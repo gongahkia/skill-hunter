@@ -189,4 +189,37 @@ describe('NotionImporter', () => {
       blockType: 'heading_1'
     });
   });
+
+  it('maps Notion API and network failures to specific error states', async () => {
+    const importer = loadImporter();
+    const errors = fixture('errors');
+    const cases = [
+      ['revoked-token', 'NOTION_TOKEN_INVALID'],
+      ['missing-share', 'NOTION_PAGE_NOT_SHARED'],
+      ['not-found-or-inaccessible', 'NOTION_PAGE_INACCESSIBLE'],
+      ['rate-limited', 'NOTION_RATE_LIMIT'],
+      ['service-overload', 'NOTION_SERVICE_OVERLOAD']
+    ];
+
+    for (const [name, code] of cases) {
+      const item = errors.cases.find((row) => row.name === name);
+      const writes = [];
+      await expect(importer.importPage({
+        token: 'secret',
+        pageId: 'page-basic',
+        maxRetries: 0,
+        fetch: async () => response(item.status, { code: item.code, message: item.message }, item.retry_after ? { 'retry-after': String(item.retry_after) } : {}),
+        sleep: async () => {},
+        dao: { putExtractionRun: async (run) => writes.push(run) }
+      })).rejects.toMatchObject({ code });
+      expect(writes[0].metadata.errors[0]).toMatchObject({ code });
+    }
+
+    await expect(importer.importPage({
+      token: 'secret',
+      pageId: 'page-basic',
+      fetch: async () => { throw new Error('offline'); },
+      sleep: async () => {}
+    })).rejects.toMatchObject({ code: 'NOTION_NETWORK_ERROR' });
+  });
 });

@@ -109,6 +109,29 @@ var NotionImporter = (function() {
     return Number.isFinite(value) && value >= 0 ? value : 1;
   }
 
+  function errorState(status, notionCode, message) {
+    message = text(message);
+    if (status === 401 || notionCode === 'unauthorized') {
+      return { code: 'NOTION_TOKEN_INVALID', message: 'Notion token is invalid or revoked.' };
+    }
+    if (status === 403 && /share|connection|integration/i.test(message)) {
+      return { code: 'NOTION_PAGE_NOT_SHARED', message: 'Notion page is not shared with the selected connection.' };
+    }
+    if (status === 403) {
+      return { code: 'NOTION_INSUFFICIENT_CAPABILITY', message: 'Notion token lacks permission to read this page.' };
+    }
+    if (status === 404 || notionCode === 'object_not_found') {
+      return { code: 'NOTION_PAGE_INACCESSIBLE', message: 'Notion page was not found or is inaccessible to this token.' };
+    }
+    if (status === 429 || notionCode === 'rate_limited') {
+      return { code: 'NOTION_RATE_LIMIT', message: 'Notion rate limit was exceeded.' };
+    }
+    if (status === 529 || notionCode === 'service_overload') {
+      return { code: 'NOTION_SERVICE_OVERLOAD', message: 'Notion is temporarily overloaded.' };
+    }
+    return { code: notionCode || ('NOTION_HTTP_' + text(status || 'ERROR')), message: message || 'Notion request failed.' };
+  }
+
   async function wait(ms, options) {
     if (options.signal && options.signal.aborted) throw abortError();
     if (typeof options.sleep === 'function') return options.sleep(ms);
@@ -130,17 +153,27 @@ var NotionImporter = (function() {
   async function requestJson(path, options, session, attempt) {
     attempt = attempt || 0;
     session.throwIfCancelled();
-    var response = await fetcher(options)(API_BASE + path, {
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + options.token,
-        'Notion-Version': options.notionVersion || NOTION_VERSION,
-        'Content-Type': 'application/json'
-      },
-      signal: options.signal
-    });
+    var response;
+    try {
+      response = await fetcher(options)(API_BASE + path, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + options.token,
+          'Notion-Version': options.notionVersion || NOTION_VERSION,
+          'Content-Type': 'application/json'
+        },
+        signal: options.signal
+      });
+    } catch (error) {
+      if (isAbort(error)) throw error;
+      var networkError = new Error('Network request to Notion failed.');
+      networkError.code = 'NOTION_NETWORK_ERROR';
+      networkError.cause = error;
+      throw networkError;
+    }
 
-    if ((response.status === 429 || response.status === 529) && attempt < (options.maxRetries || 3)) {
+    var maxRetries = options.maxRetries === undefined ? 3 : options.maxRetries;
+    if ((response.status === 429 || response.status === 529) && attempt < maxRetries) {
       var delayMs = retryAfter(response) * 1000;
       session.addWarning({
         code: response.status === 429 ? 'NOTION_RATE_LIMIT' : 'NOTION_SERVICE_OVERLOAD',
@@ -154,8 +187,10 @@ var NotionImporter = (function() {
 
     if (!response.ok) {
       var parsed = await parseError(response);
-      var error = new Error(parsed.message);
-      error.code = parsed.code;
+      var state = errorState(response.status, parsed.code, parsed.message);
+      var error = new Error(state.message);
+      error.code = state.code;
+      error.notionCode = parsed.code;
       error.status = response.status;
       throw error;
     }
@@ -330,6 +365,7 @@ var NotionImporter = (function() {
     ADAPTER_ID: ADAPTER_ID,
     ADAPTER_VERSION: ADAPTER_VERSION,
     NOTION_VERSION: NOTION_VERSION,
+    errorState: errorState,
     pageId: pageId,
     richText: richText,
     blockContent: blockContent,

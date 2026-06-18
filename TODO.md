@@ -86,7 +86,7 @@ Tasks:
   - Success: selected page imports with recursive block pagination, progress, cancel, and retry/backoff.
 - [x] `M9.T07` - Preserve Notion provenance.
   - Success: page ID, block ID, page title, URL, workspace hint if available, importedAt, and adapter version are retained.
-- [ ] `M9.T08` - Add Notion permission/error states.
+- [x] `M9.T08` - Add Notion permission/error states.
   - Success: missing share, revoked token, insufficient capabilities, 404 access mismatch, 429/529, and network failures have specific messages.
 - [ ] `M9.T09` - Run scanner before extraction.
   - Success: `TODO:`/`FIXME:` markers in imported Notion prose become explicit open threads without model use.
