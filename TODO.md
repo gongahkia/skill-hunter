@@ -324,7 +324,7 @@ Tasks:
   - Success: indexing large vaults is visible, cancellable, and resumes/restarts cleanly.
 - [ ] `M15.T09` - Add citation-first answer UI if generation ships.
   - Success: every generated answer cites source chats/docs/messages; unsupported questions can return no result.
-- [ ] `M15.T10` - Add backend policy.
+- [x] `M15.T10` - Add backend policy.
   - Success: Transformers.js embedding path is baseline; Chrome Prompt API/Gemini Nano is optional and gracefully hidden when unavailable.
 - [ ] `M15.T11` - Add RAG eval set.
   - Success: fixtures cover exact recall, semantic recall, stale/deleted sources, unsupported questions, and hallucination checks.
