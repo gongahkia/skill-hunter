@@ -1,0 +1,5 @@
+Plain Docs export fixture
+
+TODO: parse plain text fallback
+
+This fallback loses headings, tables, comments, and links, but preserves readable text.

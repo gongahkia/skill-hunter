@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body>
+    <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>DOCX project brief</w:t></w:r></w:p>
+    <w:p><w:r><w:t>TODO: parse DOCX fallback</w:t></w:r></w:p>
+    <w:p><w:hyperlink r:id="rId5"><w:r><w:t>linked source</w:t></w:r></w:hyperlink></w:p>
+    <w:tbl>
+      <w:tr><w:tc><w:p><w:r><w:t>Store</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Status</w:t></w:r></w:p></w:tc></w:tr>
+      <w:tr><w:tc><w:p><w:r><w:t>Chrome</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Draft</w:t></w:r></w:p></w:tc></w:tr>
+    </w:tbl>
+    <w:p><w:r><w:drawing/></w:r></w:p>
+    <w:p><w:r><w:footnoteReference w:id="1"/></w:r></w:p>
+  </w:body>
+</w:document>

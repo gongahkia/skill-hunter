@@ -118,7 +118,7 @@ Tasks:
   - Success: doc chooses local export/Takeout-first vs live Picker/OAuth, states scopes, verification consequences, parser inputs, and non-goals.
 - [x] `M10.T02` - Decide canonical local input format.
   - Success: pivot chooses HTML, DOCX, Markdown, plain text, or multiple formats with precedence.
-- [ ] `M10.T03` - Build exported Docs fixtures.
+- [x] `M10.T03` - Build exported Docs fixtures.
   - Success: fixtures cover headings, lists, links, tables, footnotes if present, images/placeholders, comments if export contains them, long docs, and empty docs.
 - [ ] `M10.T04` - Implement local file/folder import first.
   - Success: user can drop/select exported Docs files and import without OAuth.

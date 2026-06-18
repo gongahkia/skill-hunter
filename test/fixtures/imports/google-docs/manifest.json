@@ -1,0 +1,29 @@
+{
+  "fixtures": [
+    {
+      "name": "rich-doc.html",
+      "format": "html",
+      "coverage": ["heading", "paragraph", "todo-marker", "bulleted-list", "numbered-list", "link", "table", "image-placeholder", "footnote", "comment"]
+    },
+    {
+      "name": "empty-doc.html",
+      "format": "html",
+      "coverage": ["empty-doc"]
+    },
+    {
+      "name": "long-doc.html",
+      "format": "html",
+      "coverage": ["long-doc", "prompt-marker"]
+    },
+    {
+      "name": "plain.txt",
+      "format": "plain-text",
+      "coverage": ["plain-text-fallback", "todo-marker"]
+    },
+    {
+      "name": "docx-document.xml",
+      "format": "docx-document-xml",
+      "coverage": ["docx-fallback", "heading", "paragraph", "link", "table", "image-placeholder", "footnote"]
+    }
+  ]
+}
