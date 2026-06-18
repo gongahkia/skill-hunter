@@ -54,7 +54,7 @@
   - Success: each adapter has synthetic fixtures plus at least one user-owned real fixture before marking parser behavior complete.
 - [x] `ADAPTER.T07` - Add import privacy copy.
   - Success: UI warns when an archive may include other people's messages or sensitive account data.
-- [ ] `ADAPTER.T08` - Add source dedupe policy.
+- [x] `ADAPTER.T08` - Add source dedupe policy.
   - Success: re-importing the same archive or source object updates/skips existing rows instead of duplicating them.
 - [ ] `ADAPTER.T09` - Add import tests.
   - Success: parser, provenance, scanner, dedupe, cancellation, malformed input, and large-file cases are covered.

@@ -117,6 +117,8 @@ LLM extraction is optional and must be local. It must dedupe against scanner row
 
 File-backed imports must hash the selected package or file content before write. API-backed imports must use source object IDs plus source updated timestamps or content hashes.
 
+Shared helper: `src/imports/dedupe.js`.
+
 Re-import behavior:
 
 - same source identity and same content hash: skip without duplicating rows
