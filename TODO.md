@@ -56,7 +56,7 @@
   - Success: UI warns when an archive may include other people's messages or sensitive account data.
 - [x] `ADAPTER.T08` - Add source dedupe policy.
   - Success: re-importing the same archive or source object updates/skips existing rows instead of duplicating them.
-- [ ] `ADAPTER.T09` - Add import tests.
+- [x] `ADAPTER.T09` - Add import tests.
   - Success: parser, provenance, scanner, dedupe, cancellation, malformed input, and large-file cases are covered.
 
 ## M9 - Notion adapter

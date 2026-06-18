@@ -182,3 +182,5 @@ Before code starts for M9-M14, each pivot doc must specify:
 - privacy copy
 - rollback plan
 - tests required before marking parser behavior complete
+
+Shared import contract tests live in `test/import-contract.test.js`.
