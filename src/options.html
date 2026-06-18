@@ -442,6 +442,18 @@
             <p id="chatImportStatus">No chat export import run yet.</p>
           </section>
 
+          <section class="subpanel" aria-label="Email import">
+            <h3>Email import</h3>
+            <div class="button-row">
+              <button id="importEmailFiles" class="btn btn-secondary" type="button">Choose MBOX</button>
+              <button id="importEmailFolder" class="btn btn-ghost" type="button">Choose folder</button>
+              <button id="cancelEmailImport" class="btn btn-ghost" type="button" disabled>Stop</button>
+              <input id="emailImportFiles" type="file" accept=".mbox,application/mbox,text/plain" multiple hidden>
+              <input id="emailImportFolderFiles" type="file" webkitdirectory multiple hidden>
+            </div>
+            <p id="emailImportStatus">No email import run yet.</p>
+          </section>
+
           <section class="subpanel" aria-label="Backup vault">
             <h3>Backup vault</h3>
             <label>
@@ -514,6 +526,7 @@
   <script src="threads/scanner.js"></script>
   <script src="imports/google-docs.js"></script>
   <script src="imports/chat-exports.js"></script>
+  <script src="imports/email.js"></script>
   <script src="extraction/runtime.js"></script>
   <script src="extraction/prompt-api.js"></script>
   <script src="extraction/model-loader.js"></script>

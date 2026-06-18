@@ -10,6 +10,7 @@
   var currentBatchExtractionController = null;
   var currentRagController = null;
   var currentChatImportController = null;
+  var currentEmailImportController = null;
   var latestWrappedStats = null;
   var threadPane = null;
 
@@ -52,6 +53,12 @@
     discordImportFolderFiles: document.getElementById('discordImportFolderFiles'),
     cancelChatImport: document.getElementById('cancelChatImport'),
     chatImportStatus: document.getElementById('chatImportStatus'),
+    importEmailFiles: document.getElementById('importEmailFiles'),
+    importEmailFolder: document.getElementById('importEmailFolder'),
+    emailImportFiles: document.getElementById('emailImportFiles'),
+    emailImportFolderFiles: document.getElementById('emailImportFolderFiles'),
+    cancelEmailImport: document.getElementById('cancelEmailImport'),
+    emailImportStatus: document.getElementById('emailImportStatus'),
     statsTotalChats: document.getElementById('statsTotalChats'),
     statsTotalMessages: document.getElementById('statsTotalMessages'),
     statsStorageUsed: document.getElementById('statsStorageUsed'),
@@ -1375,6 +1382,76 @@
     }
   }
 
+  function setEmailImportStatus(message) {
+    if (els.emailImportStatus) els.emailImportStatus.textContent = message;
+  }
+
+  function setEmailImportDisabled(disabled) {
+    [els.importEmailFiles, els.importEmailFolder].forEach(function(button) {
+      if (button) button.disabled = !!disabled;
+    });
+    if (els.cancelEmailImport) els.cancelEmailImport.disabled = !disabled;
+  }
+
+  function clearEmailImportInputs() {
+    [els.emailImportFiles, els.emailImportFolderFiles].forEach(function(input) {
+      if (input) input.value = '';
+    });
+  }
+
+  function emailImportProgress(event) {
+    var counts = event.itemCounts || {};
+    var total = event.total || 0;
+    var progress = total ? ' ' + String(counts.imported || counts.parsed || 0) + '/' + String(total) : '';
+    setEmailImportStatus('Email import: ' + (event.phase || 'working') + progress + '.');
+  }
+
+  function emailImportFileArray(files) {
+    return docsImportFileArray(files).filter(function(file) {
+      var path = String((file && (file.webkitRelativePath || file.name)) || '').toLowerCase();
+      return /\.mbox$/.test(path);
+    });
+  }
+
+  async function importEmailMbox(files, refreshVault) {
+    files = emailImportFileArray(files);
+    if (!files.length) return;
+    setEmailImportDisabled(true);
+    currentEmailImportController = new AbortController();
+    setEmailImportStatus('Email import starting.');
+    try {
+      if (typeof EmailImporter === 'undefined') throw new Error('Email importer is unavailable');
+      var result = await EmailImporter.importFiles({
+        files: files,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        scanner: typeof ThreadScanner !== 'undefined' ? ThreadScanner : null,
+        signal: currentEmailImportController.signal,
+        onProgress: emailImportProgress
+      });
+      if (refreshVault) await refreshVault(true);
+      else await refreshVaultStats();
+      await refreshExtractionRuns();
+      if (result.cancelled) {
+        setEmailImportStatus('Email import cancelled.');
+      } else {
+        setEmailImportStatus('Imported ' + result.chats.length + (result.chats.length === 1 ? ' email thread.' : ' email threads.'));
+      }
+      log('info', 'options.email_import.success', {
+        chats: result.chats.length,
+        messages: result.messages.length,
+        threads: result.openThreads.length,
+        cancelled: result.cancelled
+      });
+    } catch (error) {
+      setEmailImportStatus('Email import failed.');
+      log('error', 'options.email_import.failed', { error: serializeError(error) });
+    } finally {
+      currentEmailImportController = null;
+      setEmailImportDisabled(false);
+      clearEmailImportInputs();
+    }
+  }
+
   function backupPassword() {
     return els.backupPassword ? els.backupPassword.value || '' : '';
   }
@@ -1803,6 +1880,29 @@
         if (currentChatImportController) currentChatImportController.abort();
         setChatImportStatus('Stopping chat export import.');
         els.cancelChatImport.disabled = true;
+      });
+    }
+    if (els.importEmailFiles && els.emailImportFiles) {
+      els.importEmailFiles.addEventListener('click', function() {
+        els.emailImportFiles.click();
+      });
+      els.emailImportFiles.addEventListener('change', function() {
+        importEmailMbox(els.emailImportFiles.files, refreshVault);
+      });
+    }
+    if (els.importEmailFolder && els.emailImportFolderFiles) {
+      els.importEmailFolder.addEventListener('click', function() {
+        els.emailImportFolderFiles.click();
+      });
+      els.emailImportFolderFiles.addEventListener('change', function() {
+        importEmailMbox(els.emailImportFolderFiles.files, refreshVault);
+      });
+    }
+    if (els.cancelEmailImport) {
+      els.cancelEmailImport.addEventListener('click', function() {
+        if (currentEmailImportController) currentEmailImportController.abort();
+        setEmailImportStatus('Stopping email import.');
+        els.cancelEmailImport.disabled = true;
       });
     }
     if (els.exportBackup) els.exportBackup.addEventListener('click', exportVaultBackup);

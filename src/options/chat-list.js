@@ -20,7 +20,8 @@ var OptionsChatList = (function() {
     notebooklm: 'NotebookLM',
     'google-docs': 'Google Docs',
     slack: 'Slack',
-    discord: 'Discord'
+    discord: 'Discord',
+    email: 'Email'
   };
 
   function text(value, fallback) {
