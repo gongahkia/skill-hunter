@@ -326,7 +326,7 @@ Tasks:
   - Success: every generated answer cites source chats/docs/messages; unsupported questions can return no result.
 - [x] `M15.T10` - Add backend policy.
   - Success: Transformers.js embedding path is baseline; Chrome Prompt API/Gemini Nano is optional and gracefully hidden when unavailable.
-- [ ] `M15.T11` - Add RAG eval set.
+- [x] `M15.T11` - Add RAG eval set.
   - Success: fixtures cover exact recall, semantic recall, stale/deleted sources, unsupported questions, and hallucination checks.
 - [ ] `M15.T12` - Add performance gates.
   - Success: representative vault indexing time, query latency, memory, and storage budget are measured and documented.

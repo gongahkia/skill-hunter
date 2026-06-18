@@ -1,0 +1,106 @@
+{
+  "chats": [
+    {
+      "chatId": "chat-restore",
+      "platform": "chatgpt",
+      "title": "Vault restore",
+      "url": "https://chatgpt.com/c/restore",
+      "lastUpdatedAt": "2026-01-01T00:00:00.000Z",
+      "messageCount": 2
+    },
+    {
+      "chatId": "chat-release",
+      "platform": "claude",
+      "title": "Release plan",
+      "url": "https://claude.ai/chat/release",
+      "lastUpdatedAt": "2026-01-02T00:00:00.000Z",
+      "messageCount": 1
+    },
+    {
+      "chatId": "doc-migration",
+      "platform": "google-docs",
+      "title": "Adapter migration notes",
+      "url": "",
+      "lastUpdatedAt": "2026-01-03T00:00:00.000Z",
+      "messageCount": 1
+    },
+    {
+      "chatId": "stale-deleted",
+      "platform": "email",
+      "title": "Deleted source",
+      "url": "",
+      "lastUpdatedAt": "2026-01-04T00:00:00.000Z",
+      "messageCount": 1
+    }
+  ],
+  "messages": [
+    {
+      "messageId": "m-restore-1",
+      "chatId": "chat-restore",
+      "role": "user",
+      "content": "How do I restore a local vault backup snapshot?",
+      "index": 0
+    },
+    {
+      "messageId": "m-restore-2",
+      "chatId": "chat-restore",
+      "role": "assistant",
+      "content": "Use the encrypted vault backup and verify the package hash before import.",
+      "index": 1
+    },
+    {
+      "messageId": "m-release-1",
+      "chatId": "chat-release",
+      "role": "user",
+      "content": "Ship the browser search worker after manifest checks pass.",
+      "index": 0
+    },
+    {
+      "messageId": "m-doc-1",
+      "chatId": "doc-migration",
+      "role": "document",
+      "content": "Adapter migration notes describe preserving provenance for imported prose snapshots.",
+      "index": 0
+    },
+    {
+      "messageId": "m-stale-1",
+      "chatId": "stale-deleted",
+      "role": "document",
+      "content": "This removed stale source should disappear after index rebuild.",
+      "index": 0
+    }
+  ],
+  "queries": [
+    {
+      "id": "exact-recall",
+      "query": "package hash",
+      "expectedTopMessageId": "m-restore-2"
+    },
+    {
+      "id": "semantic-recall",
+      "query": "recover saved archive",
+      "expectedAnyMessageIds": ["m-restore-1", "m-restore-2"]
+    },
+    {
+      "id": "imported-prose-recall",
+      "query": "imported prose provenance",
+      "expectedTopMessageId": "m-doc-1"
+    },
+    {
+      "id": "unsupported-question",
+      "query": "quantum banana",
+      "expectedNone": true
+    },
+    {
+      "id": "stale-deleted-source",
+      "query": "removed stale source",
+      "removeChatIdBeforeSearch": "stale-deleted",
+      "expectedAbsentChatId": "stale-deleted"
+    },
+    {
+      "id": "hallucination-check",
+      "query": "write an uncited final answer",
+      "expectedNoAnswer": true
+    }
+  ]
+}
