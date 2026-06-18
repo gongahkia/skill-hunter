@@ -318,7 +318,7 @@ Tasks:
   - Success: latency/storage/recall numbers are recorded before production schema migration.
 - [x] `M15.T06` - Design vector index storage.
   - Success: pivot states whether vectors live in IndexedDB, OPFS, or another local store and how rebuild/migration works.
-- [ ] `M15.T07` - Add model lifecycle UX.
+- [x] `M15.T07` - Add model lifecycle UX.
   - Success: user can download, pause, clear model cache, clear vector index, and rebuild index.
 - [x] `M15.T08` - Add progress/cancel for indexing.
   - Success: indexing large vaults is visible, cancellable, and resumes/restarts cleanly.

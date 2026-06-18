@@ -188,8 +188,32 @@ var LocalRAG = (function() {
     var state = {
       chunks: [],
       vectors: [],
+      modelReady: false,
       ready: false
     };
+
+    async function downloadModel(downloadOptions) {
+      downloadOptions = Object.assign({}, options, downloadOptions || {});
+      if (downloadOptions.signal && downloadOptions.signal.aborted) throw new Error('RAG model download cancelled');
+      var loader = downloadOptions.modelLoader || options.modelLoader || (typeof ExtractionModelLoader !== 'undefined' ? ExtractionModelLoader : null);
+      if (!loader || typeof loader.loadModel !== 'function') throw new Error('RAG model loader is unavailable');
+      var pipe = await loader.loadModel(downloadOptions.modelId || DEFAULT_MODEL_ID, {
+        task: downloadOptions.task || DEFAULT_TASK,
+        quantization: downloadOptions.dtype || DEFAULT_DTYPE,
+        dtype: downloadOptions.dtype || DEFAULT_DTYPE,
+        backend: downloadOptions.backend || DEFAULT_BACKEND,
+        env: downloadOptions.env,
+        onProgress: downloadOptions.onProgress
+      });
+      if (downloadOptions.signal && downloadOptions.signal.aborted) throw new Error('RAG model download cancelled');
+      state.modelReady = true;
+      return {
+        modelId: downloadOptions.modelId || DEFAULT_MODEL_ID,
+        dtype: downloadOptions.dtype || DEFAULT_DTYPE,
+        backend: downloadOptions.backend || DEFAULT_BACKEND,
+        pipe: pipe
+      };
+    }
 
     async function build(buildOptions) {
       buildOptions = Object.assign({}, options, buildOptions || {});
@@ -240,13 +264,39 @@ var LocalRAG = (function() {
       state.chunks = [];
       state.vectors = [];
       state.ready = false;
+      return true;
+    }
+
+    async function clearModelCache(clearOptions) {
+      clearOptions = Object.assign({}, options, clearOptions || {});
+      var loader = clearOptions.modelLoader || options.modelLoader || (typeof ExtractionModelLoader !== 'undefined' ? ExtractionModelLoader : null);
+      if (loader && typeof loader.clearLoadedModels === 'function') loader.clearLoadedModels();
+      state.modelReady = false;
+      var cacheApi = clearOptions.caches || (typeof caches !== 'undefined' ? caches : null);
+      var keys = [
+        clearOptions.cacheKey,
+        loader && loader.DEFAULT_CACHE_KEY,
+        'rakuzaichi-transformers-cache'
+      ].filter(Boolean).filter(function(value, index, list) {
+        return list.indexOf(value) === index;
+      });
+      var deleted = 0;
+      if (cacheApi && typeof cacheApi.delete === 'function') {
+        for (var i = 0; i < keys.length; i++) {
+          if (await cacheApi.delete(keys[i])) deleted++;
+        }
+      }
+      return { clearedCaches: deleted, cacheKeys: keys };
     }
 
     return {
+      downloadModel: downloadModel,
       build: build,
       search: search,
+      clearModelCache: clearModelCache,
       clear: clear,
       isReady: function() { return state.ready; },
+      isModelReady: function() { return state.modelReady; },
       getChunks: function() { return state.chunks.slice(); }
     };
   }

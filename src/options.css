@@ -461,17 +461,19 @@ select[multiple] {
 }
 
 .rag-search-controls {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto auto minmax(140px, auto);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: end;
 }
 
 .rag-search-controls label {
+  flex: 1 1 240px;
   margin-top: 0;
 }
 
 .rag-search-controls span {
+  flex: 1 1 160px;
   min-height: 36px;
   display: inline-flex;
   align-items: center;

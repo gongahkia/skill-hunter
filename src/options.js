@@ -59,8 +59,11 @@
     wrappedTopTopics: document.getElementById('wrappedTopTopics'),
     wrappedStatus: document.getElementById('wrappedStatus'),
     ragSearch: document.getElementById('ragSearch'),
+    ragDownloadModel: document.getElementById('ragDownloadModel'),
     ragBuildIndex: document.getElementById('ragBuildIndex'),
     ragStopIndex: document.getElementById('ragStopIndex'),
+    ragClearIndex: document.getElementById('ragClearIndex'),
+    ragClearModelCache: document.getElementById('ragClearModelCache'),
     ragRunSearch: document.getElementById('ragRunSearch'),
     ragStatus: document.getElementById('ragStatus'),
     ragResults: document.getElementById('ragResults'),
@@ -745,6 +748,63 @@
       els.ragBuildIndex.textContent = previous;
       if (els.ragRunSearch) els.ragRunSearch.disabled = false;
       syncRagStopButton(false);
+    }
+  }
+
+  async function downloadRagModel(rag) {
+    if (!rag || !els.ragDownloadModel || els.ragDownloadModel.disabled) return null;
+    var previous = els.ragDownloadModel.textContent;
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    currentRagController = controller;
+    els.ragDownloadModel.disabled = true;
+    syncRagStopButton(!!controller);
+    els.ragDownloadModel.textContent = 'Downloading';
+    setRagStatus('Downloading model...');
+    try {
+      var result = await rag.downloadModel({
+        signal: controller && controller.signal,
+        onProgress: function(event) {
+          var status = event && event.status ? String(event.status) : 'downloading';
+          if (event && typeof event.progress === 'number') status += ' ' + Math.round(event.progress) + '%';
+          setRagStatus('Model ' + status);
+        }
+      });
+      setRagStatus('Model ready.');
+      log('info', 'options.rag.model_download.success', { modelId: result.modelId, dtype: result.dtype, backend: result.backend });
+      return result;
+    } catch (error) {
+      if (controller && controller.signal && controller.signal.aborted) {
+        setRagStatus('Model download stopped.');
+        log('warn', 'options.rag.model_download.cancelled', {});
+      } else {
+        setRagStatus('Model download failed.');
+        log('error', 'options.rag.model_download.failed', { error: serializeError(error) });
+      }
+      return null;
+    } finally {
+      currentRagController = null;
+      els.ragDownloadModel.disabled = false;
+      els.ragDownloadModel.textContent = previous;
+      syncRagStopButton(false);
+    }
+  }
+
+  async function clearRagModelCache(rag) {
+    if (!rag || !els.ragClearModelCache || els.ragClearModelCache.disabled) return;
+    var previous = els.ragClearModelCache.textContent;
+    els.ragClearModelCache.disabled = true;
+    els.ragClearModelCache.textContent = 'Clearing';
+    setRagStatus('Clearing model cache...');
+    try {
+      var result = await rag.clearModelCache();
+      setRagStatus(result.clearedCaches ? 'Model cache cleared.' : 'Model cache clear requested.');
+      log('info', 'options.rag.model_cache.clear.success', result);
+    } catch (error) {
+      setRagStatus('Model cache clear failed.');
+      log('error', 'options.rag.model_cache.clear.failed', { error: serializeError(error) });
+    } finally {
+      els.ragClearModelCache.disabled = false;
+      els.ragClearModelCache.textContent = previous;
     }
   }
 
@@ -1508,9 +1568,26 @@
   function bindRagControls(rag, onOpenChunk) {
     if (!rag || !els.ragSearch) return;
     renderRagResults([], onOpenChunk);
+    if (els.ragDownloadModel) {
+      els.ragDownloadModel.addEventListener('click', function() {
+        downloadRagModel(rag);
+      });
+    }
     if (els.ragBuildIndex) {
       els.ragBuildIndex.addEventListener('click', function() {
         buildRagIndex(rag);
+      });
+    }
+    if (els.ragClearIndex) {
+      els.ragClearIndex.addEventListener('click', function() {
+        rag.clear();
+        renderRagResults([], onOpenChunk);
+        setRagStatus('Index cleared.');
+      });
+    }
+    if (els.ragClearModelCache) {
+      els.ragClearModelCache.addEventListener('click', function() {
+        clearRagModelCache(rag);
       });
     }
     if (els.ragRunSearch) {
@@ -1524,7 +1601,7 @@
         currentRagController.abort();
         els.ragStopIndex.disabled = true;
         els.ragStopIndex.textContent = 'Stopping';
-        setRagStatus('Stopping index...');
+        setRagStatus('Stopping...');
       });
     }
     els.ragSearch.addEventListener('keydown', function(event) {

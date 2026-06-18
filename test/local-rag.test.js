@@ -132,4 +132,57 @@ describe('LocalRAG', () => {
     await expect(rag.build({ batchSize: 2 })).resolves.toMatchObject({ chunkCount: 3 });
     expect(rag.isReady()).toBe(true);
   });
+
+  it('downloads model pipeline and clears model cache separately from vector index', async () => {
+    const LocalRAG = loadLocalRAG();
+    const calls = [];
+    const loader = {
+      DEFAULT_CACHE_KEY: 'rakuzaichi-transformers-cache',
+      async loadModel(modelId, options) {
+        calls.push({ type: 'load', modelId, options });
+        if (options.onProgress) options.onProgress({ status: 'ready' });
+        return { modelId };
+      },
+      clearLoadedModels() {
+        calls.push({ type: 'clear-loaded' });
+      }
+    };
+    const deleted = [];
+    const cacheApi = {
+      async delete(key) {
+        deleted.push(key);
+        return true;
+      }
+    };
+    const rag = LocalRAG.create({
+      dao: {
+        listChats: async () => chats(),
+        listAllMessages: async () => messages()
+      },
+      embedder: fakeEmbedder(),
+      modelLoader: loader
+    });
+
+    await expect(rag.downloadModel()).resolves.toMatchObject({
+      modelId: 'Xenova/all-MiniLM-L6-v2',
+      dtype: 'q8',
+      backend: 'wasm'
+    });
+    expect(rag.isModelReady()).toBe(true);
+    expect(calls[0]).toMatchObject({ type: 'load', modelId: 'Xenova/all-MiniLM-L6-v2' });
+
+    await rag.build();
+    expect(rag.isReady()).toBe(true);
+    rag.clear();
+    expect(rag.isReady()).toBe(false);
+    expect(rag.getChunks()).toEqual([]);
+
+    await expect(rag.clearModelCache({ caches: cacheApi })).resolves.toMatchObject({
+      clearedCaches: 1,
+      cacheKeys: ['rakuzaichi-transformers-cache']
+    });
+    expect(rag.isModelReady()).toBe(false);
+    expect(deleted).toEqual(['rakuzaichi-transformers-cache']);
+    expect(calls.at(-1)).toEqual({ type: 'clear-loaded' });
+  });
 });
