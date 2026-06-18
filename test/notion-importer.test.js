@@ -15,6 +15,20 @@ function loadImporter() {
   return module.exports;
 }
 
+function loadBundle() {
+  const module = { exports: {} };
+  const code = [
+    loadSrc('imports/run-metadata.js'),
+    loadSrc('imports/session.js'),
+    loadSrc('imports/normalizer.js'),
+    loadSrc('imports/dedupe.js'),
+    loadSrc('threads/scanner.js'),
+    loadSrc('imports/notion.js')
+  ].join('\n');
+  const fn = new Function('module', 'exports', code + '\nreturn { importer: NotionImporter, dedupe: ImportDedupe };');
+  return fn(module, module.exports);
+}
+
 function fixture(name) {
   return JSON.parse(loadFixture('fixtures/imports/notion/' + name + '.json'));
 }
@@ -158,6 +172,69 @@ describe('NotionImporter', () => {
     expect(writes.messages).toHaveLength(result.messages.length);
     expect(writes.threads).toHaveLength(result.openThreads.length);
     expect(writes.runs).toHaveLength(1);
+  });
+
+  it('imports paginated long pages', async () => {
+    const importer = loadImporter();
+    const doc = fixture('long-page');
+    const result = await importer.importPage({
+      token: 'secret',
+      pageId: 'page-long',
+      fetch: mockFetch(doc),
+      sleep: async () => {},
+      importedAt: '2026-06-18T10:35:00.000Z'
+    });
+
+    expect(result.messages).toHaveLength(30);
+    expect(result.messages[29].content).toBe('PROMPT: summarize long import performance');
+    expect(result.openThreads).toHaveLength(1);
+    expect(result.openThreads[0].tag).toBe('PROMPT');
+  });
+
+  it('skips unsupported Notion blocks with recoverable warnings', async () => {
+    const importer = loadImporter();
+    const doc = fixture('unsupported-blocks');
+    const result = await importer.importPage({
+      token: 'secret',
+      pageId: 'page-unsupported',
+      fetch: mockFetch(doc),
+      sleep: async () => {},
+      importedAt: '2026-06-18T10:36:00.000Z'
+    });
+
+    expect(result.messages).toHaveLength(1);
+    expect(result.messages[0].content).toBe('');
+    expect(result.run.metadata.itemCounts).toMatchObject({ imported: 1, skipped: 3, warnings: 3 });
+    expect(result.run.metadata.warnings.map((warning) => warning.code)).toEqual([
+      'NOTION_UNSUPPORTED_BLOCK',
+      'NOTION_UNSUPPORTED_BLOCK',
+      'NOTION_UNSUPPORTED_BLOCK'
+    ]);
+  });
+
+  it('supports Notion source dedupe decisions', async () => {
+    const { importer, dedupe } = loadBundle();
+    const result = await importer.importPage({
+      token: 'secret',
+      pageId: 'page-basic',
+      fetch: mockFetch(fixture('basic-page')),
+      sleep: async () => {},
+      importedAt: '2026-06-18T10:37:00.000Z'
+    });
+    const packageHash = result.chat.metadata.import.packageHash;
+
+    expect(dedupe.decide([result.chat], {
+      adapterId: 'notion',
+      sourceKind: 'page',
+      sourceObjectId: 'page-basic',
+      packageHash
+    }).action).toBe('skip');
+    expect(dedupe.decide([result.chat], {
+      adapterId: 'notion',
+      sourceKind: 'page',
+      sourceObjectId: 'page-basic',
+      packageHash: 'changed'
+    }).action).toBe('update');
   });
 
   it('preserves Notion page and block provenance', async () => {
