@@ -197,7 +197,7 @@ Tasks:
   - Success: fixtures cover public channel export, thread replies, reactions, files/links, user maps, missing private/DM data, and malformed JSON.
 - [x] `M12.T03` - Build Discord fixture set.
   - Success: fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, current/recent server metadata, and package metadata.
-- [ ] `M12.T04` - Implement ZIP streaming import.
+- [x] `M12.T04` - Implement ZIP streaming import.
   - Success: large exports import with progress/cancel and without blocking UI.
 - [x] `M12.T05` - Define grouping.
   - Success: imported snapshots group by workspace/server + channel/DM/thread according to pivot doc.

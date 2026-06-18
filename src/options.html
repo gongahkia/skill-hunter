@@ -426,6 +426,22 @@
             <p id="docsImportStatus">No Docs import run yet.</p>
           </section>
 
+          <section class="subpanel" aria-label="Chat export import">
+            <h3>Slack / Discord import</h3>
+            <div class="button-row">
+              <button id="importSlackZip" class="btn btn-secondary" type="button">Slack ZIP</button>
+              <button id="importSlackFolder" class="btn btn-ghost" type="button">Slack folder</button>
+              <button id="importDiscordZip" class="btn btn-secondary" type="button">Discord ZIP</button>
+              <button id="importDiscordFolder" class="btn btn-ghost" type="button">Discord folder</button>
+              <button id="cancelChatImport" class="btn btn-ghost" type="button" disabled>Stop</button>
+              <input id="slackImportZipFile" type="file" accept=".zip,application/zip" hidden>
+              <input id="slackImportFolderFiles" type="file" webkitdirectory multiple hidden>
+              <input id="discordImportZipFile" type="file" accept=".zip,application/zip" hidden>
+              <input id="discordImportFolderFiles" type="file" webkitdirectory multiple hidden>
+            </div>
+            <p id="chatImportStatus">No chat export import run yet.</p>
+          </section>
+
           <section class="subpanel" aria-label="Backup vault">
             <h3>Backup vault</h3>
             <label>
@@ -497,6 +513,7 @@
   <script src="imports/normalizer.js"></script>
   <script src="threads/scanner.js"></script>
   <script src="imports/google-docs.js"></script>
+  <script src="imports/chat-exports.js"></script>
   <script src="extraction/runtime.js"></script>
   <script src="extraction/prompt-api.js"></script>
   <script src="extraction/model-loader.js"></script>

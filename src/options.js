@@ -9,6 +9,7 @@
   var currentPromptApiAvailability = { status: 'unknown', available: false, api: 'none' };
   var currentBatchExtractionController = null;
   var currentRagController = null;
+  var currentChatImportController = null;
   var latestWrappedStats = null;
   var threadPane = null;
 
@@ -41,6 +42,16 @@
     docsImportFolderFiles: document.getElementById('docsImportFolderFiles'),
     docsImportDrop: document.getElementById('docsImportDrop'),
     docsImportStatus: document.getElementById('docsImportStatus'),
+    importSlackZip: document.getElementById('importSlackZip'),
+    importSlackFolder: document.getElementById('importSlackFolder'),
+    slackImportZipFile: document.getElementById('slackImportZipFile'),
+    slackImportFolderFiles: document.getElementById('slackImportFolderFiles'),
+    importDiscordZip: document.getElementById('importDiscordZip'),
+    importDiscordFolder: document.getElementById('importDiscordFolder'),
+    discordImportZipFile: document.getElementById('discordImportZipFile'),
+    discordImportFolderFiles: document.getElementById('discordImportFolderFiles'),
+    cancelChatImport: document.getElementById('cancelChatImport'),
+    chatImportStatus: document.getElementById('chatImportStatus'),
     statsTotalChats: document.getElementById('statsTotalChats'),
     statsTotalMessages: document.getElementById('statsTotalMessages'),
     statsStorageUsed: document.getElementById('statsStorageUsed'),
@@ -1294,6 +1305,76 @@
     }
   }
 
+  function setChatImportStatus(message) {
+    if (els.chatImportStatus) els.chatImportStatus.textContent = message;
+  }
+
+  function setChatImportDisabled(disabled) {
+    [els.importSlackZip, els.importSlackFolder, els.importDiscordZip, els.importDiscordFolder].forEach(function(button) {
+      if (button) button.disabled = !!disabled;
+    });
+    if (els.cancelChatImport) els.cancelChatImport.disabled = !disabled;
+  }
+
+  function clearChatImportInputs() {
+    [els.slackImportZipFile, els.slackImportFolderFiles, els.discordImportZipFile, els.discordImportFolderFiles].forEach(function(input) {
+      if (input) input.value = '';
+    });
+  }
+
+  function chatImportProgress(adapter, event) {
+    var label = adapter === 'slack' ? 'Slack' : 'Discord';
+    var counts = event.itemCounts || {};
+    var total = event.total || 0;
+    var progress = total ? ' ' + String(counts.imported || counts.parsed || 0) + '/' + String(total) : '';
+    setChatImportStatus(label + ' import: ' + (event.phase || 'working') + progress + '.');
+  }
+
+  async function importChatExport(adapter, mode, files, refreshVault) {
+    files = docsImportFileArray(files);
+    if (!files.length) return;
+    setChatImportDisabled(true);
+    currentChatImportController = new AbortController();
+    setChatImportStatus((adapter === 'slack' ? 'Slack' : 'Discord') + ' import starting.');
+    try {
+      if (typeof ChatExportImporter === 'undefined') throw new Error('Chat export importer is unavailable');
+      var options = {
+        adapterId: adapter,
+        dao: typeof VaultDAO !== 'undefined' ? VaultDAO : null,
+        scanner: typeof ThreadScanner !== 'undefined' ? ThreadScanner : null,
+        signal: currentChatImportController.signal,
+        onProgress: function(event) {
+          chatImportProgress(adapter, event);
+        }
+      };
+      if (mode === 'zip') options.zipFile = files[0];
+      else options.files = files;
+      var result = await ChatExportImporter.importExport(options);
+      if (refreshVault) await refreshVault(true);
+      else await refreshVaultStats();
+      await refreshExtractionRuns();
+      if (result.cancelled) {
+        setChatImportStatus('Chat export import cancelled.');
+      } else {
+        setChatImportStatus('Imported ' + result.chats.length + (result.chats.length === 1 ? ' conversation.' : ' conversations.'));
+      }
+      log('info', 'options.chat_export_import.success', {
+        adapter: adapter,
+        chats: result.chats.length,
+        messages: result.messages.length,
+        threads: result.openThreads.length,
+        cancelled: result.cancelled
+      });
+    } catch (error) {
+      setChatImportStatus('Chat export import failed.');
+      log('error', 'options.chat_export_import.failed', { adapter: adapter, error: serializeError(error) });
+    } finally {
+      currentChatImportController = null;
+      setChatImportDisabled(false);
+      clearChatImportInputs();
+    }
+  }
+
   function backupPassword() {
     return els.backupPassword ? els.backupPassword.value || '' : '';
   }
@@ -1683,6 +1764,45 @@
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
         if (els.docsImportFiles) els.docsImportFiles.click();
+      });
+    }
+    if (els.importSlackZip && els.slackImportZipFile) {
+      els.importSlackZip.addEventListener('click', function() {
+        els.slackImportZipFile.click();
+      });
+      els.slackImportZipFile.addEventListener('change', function() {
+        importChatExport('slack', 'zip', els.slackImportZipFile.files, refreshVault);
+      });
+    }
+    if (els.importSlackFolder && els.slackImportFolderFiles) {
+      els.importSlackFolder.addEventListener('click', function() {
+        els.slackImportFolderFiles.click();
+      });
+      els.slackImportFolderFiles.addEventListener('change', function() {
+        importChatExport('slack', 'folder', els.slackImportFolderFiles.files, refreshVault);
+      });
+    }
+    if (els.importDiscordZip && els.discordImportZipFile) {
+      els.importDiscordZip.addEventListener('click', function() {
+        els.discordImportZipFile.click();
+      });
+      els.discordImportZipFile.addEventListener('change', function() {
+        importChatExport('discord', 'zip', els.discordImportZipFile.files, refreshVault);
+      });
+    }
+    if (els.importDiscordFolder && els.discordImportFolderFiles) {
+      els.importDiscordFolder.addEventListener('click', function() {
+        els.discordImportFolderFiles.click();
+      });
+      els.discordImportFolderFiles.addEventListener('change', function() {
+        importChatExport('discord', 'folder', els.discordImportFolderFiles.files, refreshVault);
+      });
+    }
+    if (els.cancelChatImport) {
+      els.cancelChatImport.addEventListener('click', function() {
+        if (currentChatImportController) currentChatImportController.abort();
+        setChatImportStatus('Stopping chat export import.');
+        els.cancelChatImport.disabled = true;
       });
     }
     if (els.exportBackup) els.exportBackup.addEventListener('click', exportVaultBackup);

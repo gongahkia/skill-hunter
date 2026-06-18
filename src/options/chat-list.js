@@ -18,7 +18,9 @@ var OptionsChatList = (function() {
     chatglm: 'ChatGLM',
     doubao: 'Doubao',
     notebooklm: 'NotebookLM',
-    'google-docs': 'Google Docs'
+    'google-docs': 'Google Docs',
+    slack: 'Slack',
+    discord: 'Discord'
   };
 
   function text(value, fallback) {

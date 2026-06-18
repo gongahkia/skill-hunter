@@ -144,34 +144,154 @@ var ZipWriter = (function() {
     return new Blob([concat(localParts.concat(centralParts).concat([end]), total)], { type: 'application/zip' });
   }
 
-  async function read(input) {
-    var data = input instanceof Uint8Array
-      ? input
-      : new Uint8Array(input instanceof ArrayBuffer ? input : await input.arrayBuffer());
-    var view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-    var decoder = new TextDecoder();
-    var entries = {};
+  function abortError() {
+    var error = new Error('ZIP read cancelled');
+    error.name = 'AbortError';
+    error.code = 'ABORT_ERR';
+    return error;
+  }
+
+  function throwIfCancelled(signal) {
+    if (signal && signal.aborted) throw abortError();
+  }
+
+  function inputBytes(input) {
+    if (input instanceof Uint8Array) return Promise.resolve(input);
+    if (input instanceof ArrayBuffer) return Promise.resolve(new Uint8Array(input));
+    return input.arrayBuffer().then(function(buffer) {
+      return new Uint8Array(buffer);
+    });
+  }
+
+  function findEndRecord(view, length) {
+    var min = Math.max(0, length - 66000);
+    for (var offset = length - 22; offset >= min; offset--) {
+      if (view.getUint32(offset, true) === 0x06054b50) return offset;
+    }
+    return -1;
+  }
+
+  function centralEntries(data, view, decoder) {
+    var end = findEndRecord(view, data.length);
+    if (end === -1) return [];
+    var count = view.getUint16(end + 10, true);
+    var offset = view.getUint32(end + 16, true);
+    var rows = [];
+    for (var i = 0; i < count; i++) {
+      if (offset + 46 > data.length || view.getUint32(offset, true) !== 0x02014b50) throw new Error('Invalid ZIP central directory');
+      var compressedSize = view.getUint32(offset + 20, true);
+      var uncompressedSize = view.getUint32(offset + 24, true);
+      var localOffset = view.getUint32(offset + 42, true);
+      if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) throw new Error('Unsupported ZIP64 entry');
+      var nameLength = view.getUint16(offset + 28, true);
+      var extraLength = view.getUint16(offset + 30, true);
+      var commentLength = view.getUint16(offset + 32, true);
+      var name = decoder.decode(data.slice(offset + 46, offset + 46 + nameLength));
+      if (localOffset + 30 > data.length || view.getUint32(localOffset, true) !== 0x04034b50) throw new Error('Invalid ZIP local header');
+      var localNameLength = view.getUint16(localOffset + 26, true);
+      var localExtraLength = view.getUint16(localOffset + 28, true);
+      var dataStart = localOffset + 30 + localNameLength + localExtraLength;
+      var dataEnd = dataStart + compressedSize;
+      if (dataEnd > data.length) throw new Error('Invalid ZIP entry size');
+      rows.push({
+        name: name,
+        method: view.getUint16(offset + 10, true),
+        flags: view.getUint16(offset + 8, true),
+        compressedSize: compressedSize,
+        uncompressedSize: uncompressedSize,
+        dataStart: dataStart,
+        dataEnd: dataEnd
+      });
+      offset += 46 + nameLength + extraLength + commentLength;
+    }
+    return rows;
+  }
+
+  function localEntries(data, view, decoder) {
+    var rows = [];
     var offset = 0;
     while (offset + 30 <= data.length && view.getUint32(offset, true) === 0x04034b50) {
-      var method = view.getUint16(offset + 8, true);
-      if (method !== 0) throw new Error('Unsupported ZIP compression method: ' + method);
       var compressedSize = view.getUint32(offset + 18, true);
+      var uncompressedSize = view.getUint32(offset + 22, true);
       var nameLength = view.getUint16(offset + 26, true);
       var extraLength = view.getUint16(offset + 28, true);
       var nameStart = offset + 30;
       var dataStart = nameStart + nameLength + extraLength;
       var dataEnd = dataStart + compressedSize;
       if (dataEnd > data.length) throw new Error('Invalid ZIP entry size');
-      var name = decoder.decode(data.slice(nameStart, nameStart + nameLength));
-      entries[name] = data.slice(dataStart, dataEnd);
+      rows.push({
+        name: decoder.decode(data.slice(nameStart, nameStart + nameLength)),
+        method: view.getUint16(offset + 8, true),
+        flags: view.getUint16(offset + 6, true),
+        compressedSize: compressedSize,
+        uncompressedSize: uncompressedSize,
+        dataStart: dataStart,
+        dataEnd: dataEnd
+      });
       offset = dataEnd;
     }
-    return entries;
+    return rows;
+  }
+
+  async function inflateRaw(data) {
+    if (typeof DecompressionStream !== 'undefined' && typeof Blob !== 'undefined' && typeof Response !== 'undefined') {
+      try {
+        var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+      } catch (error) {
+        if (typeof require === 'undefined') throw error;
+      }
+    }
+    if (typeof require !== 'undefined') {
+      var zlib = require('zlib');
+      return new Uint8Array(zlib.inflateRawSync(typeof Buffer !== 'undefined' ? Buffer.from(data) : data));
+    }
+    throw new Error('ZIP deflate support is unavailable');
+  }
+
+  async function entryData(data, entry) {
+    var compressed = data.slice(entry.dataStart, entry.dataEnd);
+    if (entry.method === 0) return compressed;
+    if (entry.method === 8) return inflateRaw(compressed);
+    throw new Error('Unsupported ZIP compression method: ' + entry.method);
+  }
+
+  function yieldTurn() {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, 0); // yield between entries for import UI responsiveness
+    });
+  }
+
+  async function* entries(input, options) {
+    options = options || {};
+    var data = await inputBytes(input);
+    var view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    var decoder = new TextDecoder();
+    var rows = centralEntries(data, view, decoder);
+    if (!rows.length) rows = localEntries(data, view, decoder);
+    for (var i = 0; i < rows.length; i++) {
+      throwIfCancelled(options.signal);
+      var row = rows[i];
+      var content = await entryData(data, row);
+      var entry = Object.assign({ index: i, total: rows.length, data: content }, row);
+      if (typeof options.onEntry === 'function') options.onEntry(entry);
+      yield entry;
+      if (options.yield !== false) await yieldTurn();
+    }
+  }
+
+  async function read(input, options) {
+    var out = {};
+    for await (var entry of entries(input, options)) {
+      out[entry.name] = entry.data;
+    }
+    return out;
   }
 
   return {
     create: create,
     read: read,
+    entries: entries,
     crc32: crc32
   };
 })();
