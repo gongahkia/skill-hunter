@@ -8,7 +8,7 @@ Rakuzaichi is a zero-server browser extension for capturing, searching, exportin
 
 - Zero user data leaves the device through Rakuzaichi. The extension has no Rakuzaichi backend and does not upload chat content, vault data, settings, tags, exports, backups, or extraction prompts to any third party.
 - No telemetry. No analytics. No ads. No sale of data. No human review of user data.
-- Transformers.js runtime and ONNX WASM assets are bundled in the extension package. When local extraction is first used for a selected model/cache state, Transformers.js may fetch model files from Hugging Face Hub model hosting at `https://huggingface.co/` using paths like `{model}/resolve/{revision}/`; browser caching is enabled.
+- Transformers.js runtime and ONNX WASM assets are bundled in the extension package. When local extraction or semantic search is first used for a selected model/cache state, Transformers.js may fetch model files from Hugging Face Hub model hosting at `https://huggingface.co/` using paths like `{model}/resolve/{revision}/`; browser caching is enabled.
 - Rakuzaichi does not request `<all_urls>` or `*://*/*`.
 - Use of information received from Google APIs adheres to the Chrome Web Store User Data Policy, including Limited Use requirements.
 
@@ -20,6 +20,7 @@ Rakuzaichi processes only data needed for its visible extension features:
 - Conversation metadata such as title, source URL, platform, model name when detected, timestamps, message IDs, and capture status.
 - User-created vault data such as tags, folders, open-thread items, search index state, export history, backup history, and extension settings.
 - Local extraction prompts and outputs used to identify TODO/FIXME/REF/PROMPT-style follow-ups.
+- Local semantic-search chunks and vectors derived from vault messages. The current retrieval-only semantic index is held in memory while the options page is open.
 - Optional Obsidian sync directory handles when the user selects a local vault folder.
 - Optional backup files the user exports or imports.
 
@@ -27,7 +28,7 @@ Rakuzaichi processes only data needed for its visible extension features:
 
 - IndexedDB stores the local vault.
 - `chrome.storage.local` stores settings, export history, diagnostic status, and scheduled-capture configuration.
-- Browser cache stores downloaded model files when local Transformers.js extraction is used.
+- Browser cache stores downloaded model files when local Transformers.js extraction or semantic search is used. Current semantic-search vectors are not persisted; if a later persistent vector index ships, it must remain local IndexedDB data.
 - User-selected local folders may receive Obsidian Markdown sync output.
 - User-selected download locations may receive Markdown, JSON, CSV, TSV, HTML, PDF, ZIP, or encrypted vault backup files.
 - Encrypted vault backups use browser Web Crypto with PBKDF2-derived AES-GCM when the user supplies a password.
@@ -39,7 +40,7 @@ Rakuzaichi itself does not transmit user chat content, vault data, settings, tag
 The extension can cause these network-visible actions:
 
 - Browser requests to the LLM websites the user is already visiting, under those websites' own terms and privacy policies.
-- Optional first-use model-file downloads from Hugging Face Hub model hosting at `https://huggingface.co/` for local extraction. These downloads are model/config/tokenizer assets, not user chats or prompts.
+- Optional first-use model-file downloads from Hugging Face Hub model hosting at `https://huggingface.co/` for local extraction or semantic search. These downloads are model/config/tokenizer assets, not user chats, vault text, vectors, or prompts.
 - Chrome built-in Prompt API use, when available, runs through the browser-provided local model path exposed by Chrome.
 
 ## Permissions
@@ -82,7 +83,7 @@ If a user manually exports a file, syncs to a local folder that is also managed 
 
 ## User Controls
 
-Users can delete extension data by removing Rakuzaichi or clearing the extension's site/storage data in the browser. Users can delete downloaded exports, backups, and Obsidian sync files from their filesystem.
+Users can delete extension data by removing Rakuzaichi or clearing the extension's site/storage data in the browser. Users can delete downloaded exports, backups, and Obsidian sync files from their filesystem. Current semantic-search vectors are deleted by closing the options page. Downloaded model files can be removed by clearing browser/extension cache or removing the extension profile data.
 
 ## Policy Sources
 

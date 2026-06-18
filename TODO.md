@@ -330,7 +330,7 @@ Tasks:
   - Success: fixtures cover exact recall, semantic recall, stale/deleted sources, unsupported questions, and hallucination checks.
 - [ ] `M15.T12` - Add performance gates.
   - Success: representative vault indexing time, query latency, memory, and storage budget are measured and documented.
-- [ ] `M15.T13` - Add privacy/security docs.
+- [x] `M15.T13` - Add privacy/security docs.
   - Success: docs state what model files are downloaded, where vectors live, how to delete them, and that vault contents stay local.
 
 Sources:
