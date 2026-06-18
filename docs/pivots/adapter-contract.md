@@ -58,6 +58,8 @@ Required `message` fields:
 
 Adapters may add metadata fields but must not require new top-level IndexedDB stores unless the pivot doc explicitly justifies why existing stores cannot preserve source identity, dedupe, progress, or provenance.
 
+Shared helper for normalized imported rows: `src/imports/normalizer.js`.
+
 ## Schema Reuse Audit
 
 Current vault stores are sufficient for M9-M14 imported prose snapshots:
