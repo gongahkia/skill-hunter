@@ -74,7 +74,7 @@ Tasks:
 
 - [x] `M9.T01` - Write `docs/pivots/m9-notion-adapter.md`.
   - Success: doc states auth mode, page/object scope, permissions, rate-limit behavior, fixture plan, non-goals, and rollback.
-- [ ] `M9.T02` - Decide v1 auth: PAT, internal connection token, or both.
+- [x] `M9.T02` - Decide v1 auth: PAT, internal connection token, or both.
   - Success: pivot doc explains why public OAuth is included or deferred.
 - [ ] `M9.T03` - Define supported Notion objects.
   - Success: pages and child blocks are explicitly in/out; databases, comments, files, and synced blocks have decisions.
