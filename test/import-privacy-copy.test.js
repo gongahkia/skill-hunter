@@ -41,4 +41,11 @@ describe('ImportPrivacyCopy', () => {
       'Review source files before importing shared workspaces, mailboxes, or chat exports.'
     ]);
   });
+
+  it('includes Google Docs API export-size fallback copy', () => {
+    const copy = loadCopy();
+
+    expect(copy.forAdapter('google-docs').apiLimitWarning).toBe('Google Drive API exports can fail when exported content exceeds the 10 MB files.export limit. Use Google Takeout or export the Doc locally, then import that file.');
+    expect(copy.warnings('google-docs')).toContain('Google Drive API exports can fail when exported content exceeds the 10 MB files.export limit. Use Google Takeout or export the Doc locally, then import that file.');
+  });
 });

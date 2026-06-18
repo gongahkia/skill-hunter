@@ -124,7 +124,7 @@ Tasks:
   - Success: user can drop/select exported Docs files and import without OAuth.
 - [x] `M10.T05` - Preserve Docs provenance.
   - Success: original file path/name, exported format, document title, source URL if present, import package hash, and importedAt are retained.
-- [ ] `M10.T06` - Add export-size fallback copy for live API path.
+- [x] `M10.T06` - Add export-size fallback copy for live API path.
   - Success: docs over API export limits tell user to use Takeout/local export.
 - [ ] `M10.T07` - If live API is accepted, implement explicit file selection only.
   - Success: Google Picker or equivalent user-selected flow is used; no background Drive crawl ships.

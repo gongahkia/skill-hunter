@@ -11,7 +11,8 @@ var ImportPrivacyCopy = (function() {
       archiveWarning: 'Imported Notion pages can include shared workspace content and private page text.'
     },
     'google-docs': {
-      archiveWarning: 'Imported Google Docs can include comments, links, names, and shared document text.'
+      archiveWarning: 'Imported Google Docs can include comments, links, names, and shared document text.',
+      apiLimitWarning: 'Google Drive API exports can fail when exported content exceeds the 10 MB files.export limit. Use Google Takeout or export the Doc locally, then import that file.'
     },
     keep: {
       archiveWarning: 'Imported Keep notes can include personal notes, labels, attachments, and deleted/archive state.'
@@ -45,7 +46,7 @@ var ImportPrivacyCopy = (function() {
 
   function warnings(adapterId) {
     var copy = copyFor(adapterId);
-    return [copy.archiveWarning, copy.localOnly, copy.tokenWarning, copy.reviewWarning];
+    return [copy.archiveWarning, copy.localOnly, copy.tokenWarning, copy.reviewWarning, copy.apiLimitWarning].filter(Boolean);
   }
 
   return {
