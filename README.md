@@ -1,10 +1,4 @@
-[![](https://img.shields.io/badge/owl_1.0.0-passing-%23006400)](https://github.com/gongahkia/owl/releases/tag/1.0.0)
-[![](https://img.shields.io/badge/owl_1.0.1-passing-%23228B22)](https://github.com/gongahkia/owl/releases/tag/1.0.1)
-[![](https://img.shields.io/badge/owl_2.0.0-passing-%2390EE90)](https://github.com/gongahkia/owl/releases/tag/2.0.0)
-
-# `Rakuzaichi`
-
-Zero-server browser-extension vault for AI chats: capture conversations locally, search them later, and export or sync them without a backend.
+# `Dorso`
 
 Rakuzaichi adds an open-threads layer over your vault, surfacing TODO/FIXME/REF/PROMPT-style follow-ups from explicit tags and local extraction.
 
