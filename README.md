@@ -8,43 +8,65 @@ Everything lives on-device in IndexedDB, with Obsidian sync, encrypted backups, 
 
 ## Rationale
 
-Since I started taking law modules in August 2023, I've found it necessary to flag specific cases, rulings and analysis for later review, rework, or revision.
+The 2025 software development experience involves reaching for the closest AI chatbot available, then battling the urge to [punt your laptop across the room](https://media1.tenor.com/m/nJW6x9jzp1AAAAAC/mob-psycho100-mob-psycho.gif) when the chatbot can't understand your poorly worded prompt.
 
-`Rakuzaichi` keeps your chat archive local while making it searchable, syncable, and portable across Markdown, JSON, CSV, TSV, HTML, PDF, Obsidian notes, and encrypted vault backups.
+Worried that the convenience and availability of web-based AI chatbots were [making programmers dumber](https://andrewzuo.com/is-ai-making-programmers-stupid-115e9d6e7460), I created `Dorso`.
 
-However, the closest I could ever get to replicating that experience in Google Editors was finding with `Ctrl + F`, or commenting with `Ctrl + Alt + M`.
+`Dorso` is a client-sided browser extension that monitors web activity and forces users to correctly answer a **Leetcode question** before allowing them access to their [AI chatbot](#details) of choice for the next 15 minutes.
 
-Importantly, I needed a frictionless solution that complemented my existing notetaking workflow and did not slow me down by requiring learning a new keybind.
+## Stack
 
-With these considerations in mind, I created [`Owl`](https://github.com/gongahkia/owl).
-
-![](./asset/screenshot/rationale.png)
+* *Script*: [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* *Backend*: [Python](https://www.python.org/), [Gunicorn 21](https://gunicorn.org/)
+* *API*: [Chrome WebExtension API](https://developer.chrome.com/docs/extensions/), [Firefox WebExtension API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions), [LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [LeetCode GraphQL API](https://leetcode.com/graphql) 
+* *DB*: [Django](https://www.djangoproject.com/), [Django REST](https://www.django-rest-framework.org/), [PostgreSQL](https://www.postgresql.org/)
+* *Cache*: [Redis](https://redis.io/)
+* *Observability*: [Prometheus](https://github.com/prometheus/client_python), [Grafana](https://grafana.com/) 
+* *Logs*: [structlog](https://www.structlog.org/)
+* *CI/CD*: [GitHub Actions](https://github.com/features/actions), [Pytest](https://docs.pytest.org/), [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/) 
+* *Package*: [Docker](https://www.docker.com/) 
 
 ## Screenshot
 
-### Docs Owl
+![](./asset/reference/5.png)
+![](./asset/reference/6.png)
 
-![](./asset/screenshot/docsFilled.png)
-![](./asset/screenshot/docsEmpty.png)
+## Details
 
-### Sheets Owl
+### Versions
 
-![](./asset/screenshot/sheetsFilled.png)
-![](./asset/screenshot/sheetsEmpty.png)
+* `Dorso v1.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/dorso/).
+* `Dorso v2.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-GB/firefox/addon/dorso-2/).
 
-| File type | Purpose |
-| :--- | :--- |
-| [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | Wide support for tabular data and spreadsheet operations|
-| [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) | Tab-delimited CSV alternative for ease of parsing and storage|
-| [JSON](https://en.wikipedia.org/wiki/JSON) | Human-readable and universally supported storage format|
-| [Markdown](https://en.wikipedia.org/wiki/Markdown) | Portable prose archive for notes and review |
-| [PDF](https://en.wikipedia.org/wiki/PDF) | Printable offline archive |
-| [HTML](https://en.wikipedia.org/wiki/HTML) | Shareable offline archive |
+### Blacklist
 
-![](./asset/screenshot/slidesFilled.png)
-![](./asset/screenshot/slidesEmpty.png)
+`Dorso` checks for web-based AI chatbot access off the following blacklist.
 
-## Tags
+* https://chatgpt.com/
+* https://www.perplexity.ai/
+* https://gemini.google.com/app
+* https://claude.ai/
+* https://www.deepseek.com/
+* https://copilot.microsoft.com/
+* https://socrat.ai/
+* https://huggingface.co/chat/
+* https://writesonic.com/chat
+* https://you.com/
+* https://www.jasper.ai/
+
+### Supported browsers
+
+Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+
+| Browser | Status | Link |
+| :--- | :--- | :--- |
+| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
+| Google Chrome | Coming soon (Chrome Web Store review in progress) | NIL |
+| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
+
+## Architecture
+
+![](./asset/reference/architecture.png)
 
 ## Usage
 
