@@ -84,6 +84,7 @@ function getManifest(browser) {
             ...baseManifest,
             background: {
                 service_worker: 'extension/background/index.js',
+                type: 'module',
             },
         };
     }
@@ -92,6 +93,7 @@ function getManifest(browser) {
         ...baseManifest,
         background: {
             scripts: ['extension/background/index.js'],
+            type: 'module',
         },
         browser_specific_settings: {
             gecko: {
