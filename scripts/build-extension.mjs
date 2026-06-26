@@ -1,4 +1,5 @@
 import { cp, mkdir, rm, stat, writeFile } from 'node:fs/promises';
+import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -6,6 +7,7 @@ import { CHATBOT_MATCH_PATTERNS } from '../src/shared/core/constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
+const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const extensionRoot = path.join(repoRoot, 'src', 'extension');
 const sharedRoot = path.join(repoRoot, 'src', 'shared');
 const distRoot = path.join(repoRoot, 'dist');
@@ -51,7 +53,7 @@ function getManifest(browser) {
     const baseManifest = {
         manifest_version: 3,
         name: 'Dorso',
-        version: '2.1.0',
+        version: packageJson.version,
         description: 'Protect selected AI chatbot sites until a matching LeetCode challenge is solved.',
         permissions: ['storage'],
         host_permissions: [...CHATBOT_MATCH_PATTERNS, leetCodePattern],
