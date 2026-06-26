@@ -1,368 +1,103 @@
-# TODO - Rakuzaichi Active Backlog
-
-> Active backlog as of 2026-06-18. Completed v3 implementation tasks were removed from this file. Use git history and `docs/launch/` for shipped-task audit trail.
-
-## Operating rules
-
-- Keep the product zero-server, local-first, read-only by default.
-- After completing any task here, mark it done and make a git commit for rollback.
-- Prefer local archive/import flows over broad OAuth when both are viable.
-- Do not scrape web UIs unless a future pivot doc explicitly accepts ToS and maintenance risk.
-- Do not store OAuth/API tokens in exported vault files.
-- For prose/document imports, run deterministic scanning before local LLM extraction.
-- M9-M15 code starts only after the milestone pivot doc exists and states scope, fixtures, privacy, and rollback.
-
-## Current active status
-
-- v3 core implementation is complete.
-- Distribution remains the active launch blocker.
-- GitHub draft release and launch docs exist under `docs/launch/`.
-- The Owl repo was deleted, so remaining Owl archival tasks are no longer active.
-
-## M8 - Distribution
-
-- [ ] `M8.T01` - Create Chrome Web Store developer account if needed and pay the one-time registration fee.
-  - Success: `chrome.google.com/webstore/devconsole` opens for this account and accepts a new item upload.
-- [ ] `M8.T02` - Upload `rakuzaichi-chrome.zip` to Chrome Web Store as a draft.
-  - Success: CWS item exists in draft state with the v3 ZIP attached and no missing required fields.
-- [ ] `M8.T03` - Submit Chrome Web Store listing for review.
-  - Success: CWS dashboard shows submitted/review state; listing URL/item ID is recorded in `docs/launch/store-submission-runbook.md`.
-- [ ] `M8.T05` - Submit Firefox AMO v3 update.
-  - Success: AMO shows the v3 package submitted or approved.
-- [ ] `M8.T06` - Create/confirm Apple Developer Program access for Safari distribution.
-  - Success: App Store Connect accepts a Safari extension submission for this Apple ID/team.
-- [ ] `M8.T07` - Sign/archive/notarize/package Safari extension through Xcode and submit to App Store Connect.
-  - Success: App Store Connect build exists for review; signed artifact metadata is recorded in `docs/launch/store-submission-runbook.md`.
-- [ ] `M8.T08` - After store submissions, update `docs/launch/store-listings.md` with exact store URLs and status.
-  - Success: Chrome/Firefox/Safari rows include final item URLs or review-pending dashboard refs.
-- [ ] `M8.T10` - After approval, update README badges to live store URLs.
-  - Success: badge URLs return 200 and render correctly.
-
-## Adapter baseline for M9-M14
-
-- [x] `ADAPTER.T01` - Define the final prose import contract before M9 implementation.
-  - Success: `docs/pivots/adapter-contract.md` exists or the M9 pivot doc contains the contract.
-- [x] `ADAPTER.T02` - Confirm imported documents can reuse existing vault/search/thread/export schemas.
-  - Success: no new top-level IndexedDB stores are required unless the pivot doc justifies them.
-- [x] `ADAPTER.T03` - Add shared import-run metadata.
-  - Success: imports record adapter ID, source object/path, import package hash for files, importedAt, item counts, duration, warnings, and errors.
-- [x] `ADAPTER.T04` - Add shared progress/cancel/error model for file and API imports.
-  - Success: large imports show progress, can be cancelled, and leave a recoverable partial-import record.
-- [x] `ADAPTER.T05` - Add shared provenance fields to normalized snapshots/messages.
-  - Success: every imported row can point back to original source ID/path/URL where available.
-- [x] `ADAPTER.T06` - Add fixture policy.
-  - Success: each adapter has synthetic fixtures plus at least one user-owned real fixture before marking parser behavior complete.
-- [x] `ADAPTER.T07` - Add import privacy copy.
-  - Success: UI warns when an archive may include other people's messages or sensitive account data.
-- [x] `ADAPTER.T08` - Add source dedupe policy.
-  - Success: re-importing the same archive or source object updates/skips existing rows instead of duplicating them.
-- [x] `ADAPTER.T09` - Add import tests.
-  - Success: parser, provenance, scanner, dedupe, cancellation, malformed input, and large-file cases are covered.
-
-## M9 - Notion adapter
-
-Objective: import selected Notion pages as prose snapshots. Scanner is primary; local LLM extraction is optional.
-
-Source constraints checked 2026-06-18:
-
-- Notion supports internal connections, personal access tokens, and public OAuth connections.
-- Internal connections require pages to be manually shared with the connection.
-- Block children are paginated and nested blocks require recursive fetch.
-- Notion documents average request limits of 3 requests/second per connection and `429`/`529` retry handling.
-
-Tasks:
-
-- [x] `M9.T01` - Write `docs/pivots/m9-notion-adapter.md`.
-  - Success: doc states auth mode, page/object scope, permissions, rate-limit behavior, fixture plan, non-goals, and rollback.
-- [x] `M9.T02` - Decide v1 auth: PAT, internal connection token, or both.
-  - Success: pivot doc explains why public OAuth is included or deferred.
-- [x] `M9.T03` - Define supported Notion objects.
-  - Success: pages and child blocks are explicitly in/out; databases, comments, files, and synced blocks have decisions.
-- [x] `M9.T04` - Build synthetic Notion fixtures.
-  - Success: fixtures cover headings, paragraphs, bullets, numbered lists, to-dos, toggles, code, quotes, links, nested blocks, empty blocks, unsupported blocks, and long pages.
-- [ ] `M9.T05` - Obtain one user-owned exported/API fixture.
-  - Success: fixture validates real block shape and permission edge cases.
-- [x] `M9.T06` - Implement read-only page import.
-  - Success: selected page imports with recursive block pagination, progress, cancel, and retry/backoff.
-- [x] `M9.T07` - Preserve Notion provenance.
-  - Success: page ID, block ID, page title, URL, workspace hint if available, importedAt, and adapter version are retained.
-- [x] `M9.T08` - Add Notion permission/error states.
-  - Success: missing share, revoked token, insufficient capabilities, 404 access mismatch, 429/529, and network failures have specific messages.
-- [x] `M9.T09` - Run scanner before extraction.
-  - Success: `TODO:`/`FIXME:` markers in imported Notion prose become explicit open threads without model use.
-- [x] `M9.T10` - Add Notion import tests.
-  - Success: fixtures cover pagination, nesting, unsupported blocks, dedupe, rate-limit retry, cancellation, and scanner output.
-- [x] `M9.T11` - Update user docs.
-  - Success: docs explain creating/sharing a Notion connection, revoking access, and deleting imported data.
-
-Sources:
-
-- `https://developers.notion.com/guides/get-started/authorization`
-- `https://developers.notion.com/reference/get-block-children`
-- `https://developers.notion.com/reference/request-limits`
-
-## M10 - Google Docs adapter
-
-Objective: import selected Google Docs as prose snapshots without broad Drive access by default.
-
-Source constraints checked 2026-06-18:
-
-- Google Takeout supports exporting Google products such as Email and Documents into archives.
-- Drive API scopes should be narrowly focused; broader user-data scopes can require verification.
-- Google Picker provides user-selected file access; desktop/mobile flow only permits `drive.file`.
-- Drive `files.export` exports Google Workspace docs to MIME types but exported content is limited to 10 MB.
-
-Tasks:
-
-- [x] `M10.T01` - Write `docs/pivots/m10-google-docs-adapter.md`.
-  - Success: doc chooses local export/Takeout-first vs live Picker/OAuth, states scopes, verification consequences, parser inputs, and non-goals.
-- [x] `M10.T02` - Decide canonical local input format.
-  - Success: pivot chooses HTML, DOCX, Markdown, plain text, or multiple formats with precedence.
-- [x] `M10.T03` - Build exported Docs fixtures.
-  - Success: fixtures cover headings, lists, links, tables, footnotes if present, images/placeholders, comments if export contains them, long docs, and empty docs.
-- [x] `M10.T04` - Implement local file/folder import first.
-  - Success: user can drop/select exported Docs files and import without OAuth.
-- [x] `M10.T05` - Preserve Docs provenance.
-  - Success: original file path/name, exported format, document title, source URL if present, import package hash, and importedAt are retained.
-- [x] `M10.T06` - Add export-size fallback copy for live API path.
-  - Success: docs over API export limits tell user to use Takeout/local export.
-- [x] `M10.T07` - If live API is accepted, implement explicit file selection only.
-  - Success: Google Picker or equivalent user-selected flow is used; no background Drive crawl ships.
-- [x] `M10.T08` - Decide Owl Apps Script reuse.
-  - Success: pivot states reuse, rewrite, or discard; no Apps Script code ships by accident.
-- [x] `M10.T09` - Run scanner before extraction.
-  - Success: inline prose tags create open threads before any local model call.
-- [x] `M10.T10` - Add Docs import tests.
-  - Success: parser, malformed files, large files, unsupported structures, dedupe, scanner, and cancellation are covered.
-
-Sources:
-
-- `https://support.google.com/accounts/answer/3024190?hl=en`
-- `https://developers.google.com/workspace/drive/api/guides/api-specific-auth`
-- `https://developers.google.com/workspace/drive/picker/guides/overview`
-- `https://developers.google.com/workspace/drive/api/reference/rest/v3/files/export`
-
-## M11 - Google Keep adapter
-
-Objective: import Keep notes without scraping Keep web UI.
-
-Source constraints checked 2026-06-18:
-
-- Google documents a Keep REST API, but describes it for enterprise/security administration use cases.
-- Google Takeout is the default consumer-friendly path for downloading user Google data.
-- I cannot verify the exact current Keep Takeout file schema without a user-owned archive.
-
-Tasks:
-
-- [x] `M11.T01` - Write `docs/pivots/m11-google-keep-adapter.md`.
-  - Success: doc states Takeout-only default, API caveat, no-scraping rule, attachment policy, fixture needs, and rollback.
-- [ ] `M11.T02` - Obtain a user-owned Keep Takeout sample.
-  - Success: sample documents actual JSON/HTML fields, labels, colors, timestamps, checklists, pinned/archive state, deleted state if present, and attachments.
-- [ ] `M11.T03` - Build synthetic Keep fixtures matching the sample schema.
-  - Success: fixtures cover text notes, checklists, labels, colors, pinned notes, archived notes, empty notes, and attachment placeholders.
-- [ ] `M11.T04` - Implement local Takeout import.
-  - Success: notes import as one snapshot per note with checklist/prose items normalized.
-- [ ] `M11.T05` - Preserve Keep metadata.
-  - Success: title, labels, color, created/updated timestamps, archived/pinned/deleted state if present, source path, package hash, and importedAt are retained.
-- [x] `M11.T06` - Reject unsupported live sources.
-  - Success: Keep URLs/browser pages are not scraped; UI points user to Takeout import.
-- [x] `M11.T07` - Define attachment behavior.
-  - Success: images/audio/drawings are imported, linked, or skipped according to pivot doc with visible warnings.
-- [ ] `M11.T08` - Run scanner before extraction.
-  - Success: checklist/prose markers create explicit open threads.
-- [ ] `M11.T09` - Add Keep import tests.
-  - Success: parser, missing fields, attachment policy, dedupe, scanner, and malformed archive cases are covered.
-
-Sources:
-
-- `https://developers.google.com/workspace/keep/api/guides`
-- `https://developers.google.com/workspace/keep/api/reference/rest`
-- `https://support.google.com/accounts/answer/3024190?hl=en`
-
-## M12 - Slack / Discord adapters
-
-Objective: ingest user-owned communication exports. No live Slack/Discord APIs in this milestone.
-
-Source constraints checked 2026-06-18:
-
-- Slack export scope depends on plan/admin permissions; public-channel JSON export is broadly available to owners/admins, while private channels/DMs require higher plans or approved export types.
-- Discord Data Package is a user-requested ZIP with JSON files; Discord says delivery can take up to 30 days and links remain active for 30 days.
-- Discord messages include IDs, timestamps, contents, and attachment CDN links in the data package docs.
-
-Tasks:
-
-- [x] `M12.T01` - Write `docs/pivots/m12-slack-discord-adapters.md`.
-  - Success: doc states export-only scope, separate vs combined shipping, grouping policy, privacy copy, fixture policy, and no-live-API rule.
-- [x] `M12.T02` - Build Slack fixture set.
-  - Success: fixtures cover public channel export, thread replies, reactions, files/links, user maps, missing private/DM data, and malformed JSON.
-- [x] `M12.T03` - Build Discord fixture set.
-  - Success: fixtures cover DM, group DM, server channel, message JSON, attachments, deleted users, current/recent server metadata, and package metadata.
-- [x] `M12.T04` - Implement ZIP streaming import.
-  - Success: large exports import with progress/cancel and without blocking UI.
-- [x] `M12.T05` - Define grouping.
-  - Success: imported snapshots group by workspace/server + channel/DM/thread according to pivot doc.
-- [x] `M12.T06` - Preserve Slack provenance.
-  - Success: workspace, channel, thread timestamp/ID, message timestamp, user ID/name map, export package hash, and importedAt are retained.
-- [x] `M12.T07` - Preserve Discord provenance.
-  - Success: server/channel/DM IDs, message ID, author ID/name where present, timestamp, attachment URLs, package hash, and importedAt are retained.
-- [x] `M12.T08` - Add privacy warnings.
-  - Success: UI states exports may include other people's messages and should remain local.
-- [x] `M12.T09` - Run scanner before extraction.
-  - Success: explicit tasks in chat exports become open threads.
-- [x] `M12.T10` - Add Slack/Discord tests.
-  - Success: ZIP parsing, malformed entries, huge archives, user maps, deleted/missing users, dedupe, scanner, and cancellation are covered.
-
-Sources:
-
-- `https://slack.com/help/articles/201658943-Export-your-workspace-data`
-- `https://support.discord.com/hc/en-us/articles/360004957991-Your-Discord-Data-Package`
-
-## M13 - Email adapter
-
-Objective: import email into the vault as read-only knowledge snapshots, starting with Gmail Takeout/MBOX.
-
-Source constraints checked 2026-06-18:
-
-- Google Takeout supports Email archives and ZIP/TGZ output.
-- Google says Gmail labels are preserved in an `X-Gmail-Labels` header in exported mail.
-- Google says Takeout does not support Gmail timeframe exports.
-- RFC 4155 describes `application/mbox`; mbox has variant behavior, so parser fixtures must include malformed/variant files.
-
-Tasks:
-
-- [x] `M13.T01` - Write `docs/pivots/m13-email-adapter.md`.
-  - Success: doc chooses Gmail Takeout/MBOX-first, grouping policy, attachment policy, HTML sanitization, credential risk if IMAP is ever added, and rollback.
-- [x] `M13.T02` - Build MBOX fixtures.
-  - Success: fixtures cover plain text, HTML, multipart, attachments, labels, forwarded/replied threads, duplicate Message-IDs, malformed headers, huge mailboxes, and `From ` body escaping.
-- [x] `M13.T03` - Implement local MBOX parser.
-  - Success: messages import from local files without IMAP/OAuth.
-- [x] `M13.T04` - Decide grouping.
-  - Success: snapshots group by thread, mailbox/label, sender, or one-email-per-snapshot according to pivot doc.
-- [x] `M13.T05` - Sanitize HTML email.
-  - Success: scripts, event handlers, remote tracking pixels, and unsafe URLs are stripped before storage/render.
-- [x] `M13.T06` - Preserve email provenance.
-  - Success: Message-ID, From, To, Cc, Bcc where present, subject, date, labels, mailbox path, package hash, and importedAt are retained.
-- [x] `M13.T07` - Define attachment behavior.
-  - Success: attachments are imported, linked, skipped, or metadata-only according to pivot doc with visible warnings.
-- [x] `M13.T08` - Defer IMAP/OAuth until separate threat model.
-  - Success: no password/OAuth UI ships in M13 unless pivot doc adds a dedicated credential model.
-- [x] `M13.T09` - Run scanner before extraction.
-  - Success: explicit task markers in emails become open threads.
-- [x] `M13.T10` - Add email import tests.
-  - Success: MIME parsing, mbox variants, sanitization, labels, attachments, dedupe, scanner, malformed input, and large mailbox cases are covered.
-
-Sources:
-
-- `https://support.google.com/accounts/answer/3024190?hl=en`
-- `https://support.google.com/mail/answer/10016932?hl=en`
-- `https://www.rfc-editor.org/rfc/rfc4155`
-
-## M14 - Twitter/X bookmarks
-
-Objective: import saved/bookmarked X posts without scraping.
-
-Source constraints checked 2026-06-18:
-
-- X documents `GET /2/users/{id}/bookmarks` for the authenticated user with OAuth 2.0 access token.
-- X documents account data archives in HTML/JSON.
-- I cannot verify whether current X account archives include bookmark payloads without a user-owned archive.
-- API pricing/access can change; revalidate before code.
-
-Tasks:
-
-- [x] `M14.T01` - Write `docs/pivots/m14-x-bookmarks.md`.
-  - Success: doc chooses archive-first vs official API, states auth/cost assumptions, fixture policy, UI naming, and no-scraping/internal-GraphQL rule.
-- [ ] `M14.T02` - Verify X archive contents with a real sample.
-  - Success: sample proves whether bookmarks are present and which fields are available.
-- [ ] `M14.T03` - If archive path works, implement local archive parser.
-  - Success: bookmarked posts import without OAuth.
-- [x] `M14.T04` - If API path is accepted, implement OAuth only against official endpoints.
-  - Success: no cookies, private web GraphQL, or page scraping are used.
-- [ ] `M14.T05` - Preserve bookmark provenance.
-  - Success: post ID, author ID/handle/name where available, text, createdAt, bookmark folder if available, media placeholders, source URL, archive/API source, and importedAt are retained.
-- [ ] `M14.T06` - Handle unavailable/deleted/protected posts.
-  - Success: imported post text/context survives if live URL later fails.
-- [x] `M14.T07` - Add API rate/error/cost handling if API path ships.
-  - Success: auth failure, insufficient access tier, rate limit, deleted post, and protected post states are explicit.
-- [ ] `M14.T08` - Run scanner before extraction.
-  - Success: task markers in saved post text become open threads.
-- [ ] `M14.T09` - Add X import tests.
-  - Success: archive/API fixtures, pagination, media placeholders, deleted/protected posts, dedupe, scanner, and malformed input are covered.
-
-Sources:
-
-- `https://docs.x.com/x-api/users/get-bookmarks`
-- `https://help.x.com/en/managing-your-account/accessing-your-x-data`
-
-## M15 - Local RAG over vault
-
-Objective: ask questions over the local vault without sending vault contents to a server.
-
-Source constraints checked 2026-06-18:
-
-- Transformers.js runs ML models in the browser with no server and supports feature extraction, sentence similarity, question answering, and text generation tasks.
-- Transformers.js supports WASM and WebGPU paths; WebGPU remains browser/hardware-dependent.
-- Chrome Prompt API can use Gemini Nano in Chrome, but model availability, hardware requirements, download lifecycle, and API stage make it an optional backend, not a baseline dependency.
-
-Tasks:
-
-- [x] `M15.T01` - Write `docs/pivots/m15-local-rag.md`.
-  - Success: doc states retrieval-only vs answer-generation scope, embedding model, index store, chunk policy, citation UI, privacy copy, storage budget, runtime surface, and rollback.
-- [x] `M15.T02` - Start with retrieval-only UX.
-  - Success: user can search semantically and open cited source chunks before any generated answer feature ships.
-- [x] `M15.T03` - Define chunk IDs across chats and imported prose.
-  - Success: every chunk maps back to chat/document/message/source row and survives rebuilds.
-- [x] `M15.T04` - Select embedding model.
-  - Success: decision records model size, license, browser runtime, quantization, expected latency, and cache size.
-- [x] `M15.T05` - Prototype on copied fixture vault only.
-  - Success: latency/storage/recall numbers are recorded before production schema migration.
-- [x] `M15.T06` - Design vector index storage.
-  - Success: pivot states whether vectors live in IndexedDB, OPFS, or another local store and how rebuild/migration works.
-- [x] `M15.T07` - Add model lifecycle UX.
-  - Success: user can download, pause, clear model cache, clear vector index, and rebuild index.
-- [x] `M15.T08` - Add progress/cancel for indexing.
-  - Success: indexing large vaults is visible, cancellable, and resumes/restarts cleanly.
-- [ ] `M15.T09` - Add citation-first answer UI if generation ships.
-  - Success: every generated answer cites source chats/docs/messages; unsupported questions can return no result.
-- [x] `M15.T10` - Add backend policy.
-  - Success: Transformers.js embedding path is baseline; Chrome Prompt API/Gemini Nano is optional and gracefully hidden when unavailable.
-- [x] `M15.T11` - Add RAG eval set.
-  - Success: fixtures cover exact recall, semantic recall, stale/deleted sources, unsupported questions, and hallucination checks.
-- [x] `M15.T12` - Add performance gates.
-  - Success: representative vault indexing time, query latency, memory, and storage budget are measured and documented.
-- [x] `M15.T13` - Add privacy/security docs.
-  - Success: docs state what model files are downloaded, where vectors live, how to delete them, and that vault contents stay local.
-
-Sources:
-
-- `https://huggingface.co/docs/transformers.js/index`
-- `https://huggingface.co/docs/transformers.js/api/pipelines`
-- `https://developer.chrome.com/docs/ai/built-in-apis`
-- `https://developer.chrome.com/docs/ai/prompt-api`
-
-## Deferred after M15
-
-- `M16` - Cross-LLM primer generator.
-- `M17` - Mobile PWA read-only vault bundle.
-
-## Web sources checked
-
-- Notion auth: `https://developers.notion.com/guides/get-started/authorization`
-- Notion block children: `https://developers.notion.com/reference/get-block-children`
-- Notion request limits: `https://developers.notion.com/reference/request-limits`
-- Google Takeout: `https://support.google.com/accounts/answer/3024190?hl=en`
-- Google Drive scopes: `https://developers.google.com/workspace/drive/api/guides/api-specific-auth`
-- Google Picker: `https://developers.google.com/workspace/drive/picker/guides/overview`
-- Google Drive export: `https://developers.google.com/workspace/drive/api/reference/rest/v3/files/export`
-- Google Keep API: `https://developers.google.com/workspace/keep/api/guides`
-- Google Keep REST: `https://developers.google.com/workspace/keep/api/reference/rest`
-- Slack export: `https://slack.com/help/articles/201658943-Export-your-workspace-data`
-- Discord data package: `https://support.discord.com/hc/en-us/articles/360004957991-Your-Discord-Data-Package`
-- Gmail export: `https://support.google.com/mail/answer/10016932?hl=en`
-- MBOX RFC: `https://www.rfc-editor.org/rfc/rfc4155`
-- X bookmarks API: `https://docs.x.com/x-api/users/get-bookmarks`
-- X account archive: `https://help.x.com/en/managing-your-account/accessing-your-x-data`
-- Transformers.js: `https://huggingface.co/docs/transformers.js/index`
-- Transformers.js pipelines: `https://huggingface.co/docs/transformers.js/api/pipelines`
-- Chrome built-in AI APIs: `https://developer.chrome.com/docs/ai/built-in-apis`
-- Chrome Prompt API: `https://developer.chrome.com/docs/ai/prompt-api`
+# Dorso v3.0 TODO. todo.txt format. Strategic context: WORKON-PIVOT-ASAP.md. Priority bands: A=demolition (week1), B=sources+hardening (week2), C=viral surface (week3), D=ship (week4), E=v3.1+, X=constraints/anti-tasks. Tasks are self-contained for an independent coding agent.
+
+(A) 2026-06-26 Create signed git tag v2.1.0-final via `git tag -s v2.1.0-final -m "Final v2.x snapshot before v3.0 demolition"` and `git push origin v2.1.0-final`. Create GitHub release via `gh release create v2.1.0-final` with `artifacts/dorso-firefox-2.1.0-source-clean.zip` attached. Preserves v2.x for reviewer reproduction and rollback. +Demolition @config due:2026-06-29 id:01
+(A) 2026-06-26 Delete `backend/` directory. Verify zero references first: `grep -rE "(fetch|axios|http\.request|XMLHttpRequest|new\s+URL.*\$\{)" src/extension/` must return nothing pointing at a backend. Backend has no callers in shipping extension (confirmed by audit). +Demolition @cleanup due:2026-06-29 id:02 dep:01
+(A) 2026-06-26 Delete `monitoring/` directory (Prometheus + Grafana provisioning, backend-only). +Demolition @cleanup due:2026-06-29 id:03 dep:01
+(A) 2026-06-26 Delete `docker-compose.yml`. Composed backend + postgres + redis + prometheus + grafana — none load-bearing for extension. +Demolition @cleanup due:2026-06-29 id:04 dep:01
+(A) 2026-06-26 Delete `.env.example` (every var is Django/Docker). +Demolition @cleanup due:2026-06-29 id:05 dep:01
+(A) 2026-06-26 Delete `src/helper/scraper.py` and `src/helper/serialize.py` (served the deleted backend's LeetCode scrape pipeline). +Demolition @cleanup due:2026-06-29 id:06 dep:01
+(A) 2026-06-26 Delete `archive/legacy-extension/` (v1.0-era Flask backend + old extensions; available in git history if needed). +Demolition @cleanup due:2026-06-29 id:07 dep:01
+(A) 2026-06-26 Delete `artifacts/dorso-firefox-2.1.0-source-staging-*/` directories (~18MB of node_modules-laden staging). Add `artifacts/*-staging-*` to `.gitignore`. Keep only `dorso-firefox-2.1.0-source-clean.zip`. +Demolition @cleanup due:2026-06-29 id:08 dep:01
+(A) 2026-06-26 Delete `tests/e2e/specs/backend-api.spec.js` (tests the deleted backend). Replaced by extension Playwright test in id:30. +Demolition @cleanup due:2026-06-29 id:09 dep:02
+(A) 2026-06-26 Delete `src/shared/api/backend-client.js` (already filtered at build via `scripts/build-extension.mjs:35`; zero runtime references in `src/extension/**`). +Demolition @cleanup due:2026-06-29 id:10 dep:02
+(A) 2026-06-26 Delete `src/shared/core/session-manager.js` and `src/shared/core/question-manager.js` (filtered at build, never imported, duplicate the constants/logic in `src/extension/background/index.js`). +Demolition @cleanup due:2026-06-29 id:12
+(A) 2026-06-26 Audit `src/shared/utils/validator.js` and `src/shared/utils/logger.js`. Delete if no runtime import in `src/extension/**`. Confirm via `grep -r "from.*shared/utils\|require.*shared/utils" src/extension/`. +Demolition @cleanup due:2026-06-29 id:13
+(A) 2026-06-26 Delete `src/shared/__tests__/session-manager.test.js`, `validator.test.js`, `logger.test.js` if their target modules are deleted in id:12/id:13. No orphan tests for missing modules. +Demolition @test due:2026-06-29 id:14 dep:12,13
+(A) 2026-06-26 Rewrite `.github/workflows/ci.yml`. Remove the `pytest backend` Python job entirely. Keep shared-js test job. New jobs added by id:26..31. +Demolition @ci due:2026-06-29 id:15 dep:02
+(A) 2026-06-26 Update `.pre-commit-config.yaml`. Remove Python-targeted hooks (black, flake8, isort, etc). Keep JS-focused hooks (prettier, eslint). +Demolition @ci due:2026-06-29 id:16 dep:02
+(A) 2026-06-26 Rewrite README.md Stack section. Remove: Python, Gunicorn, Django, Django REST, PostgreSQL, Redis, Prometheus, Grafana, structlog, Docker. Keep: JavaScript, Chrome/Firefox WebExtension APIs, Jest, Playwright, GitHub Actions. +Demolition @docs due:2026-07-03 id:17 dep:02
+(A) 2026-06-26 Bump `package.json` version to `3.0.0-rc.1`. Becomes single source of truth for all build outputs (see id:22). +Demolition @config due:2026-06-29 id:18
+(A) 2026-06-26 Strip misleading "v1.0.0 passing" / "v2.0.0 passing" shields from README header (lines 1-2). AMO listing has 0 users / 0 reviews; shields imply install/CI status they don't represent. +Demolition @docs due:2026-06-29 id:19
+(A) 2026-06-26 Update README support table (line 67). Either remove the "Awaiting Approval" Chrome row OR reword to "Coming soon (Chrome Web Store review in progress)". Current text reads as negative public signal. +Demolition @docs due:2026-06-29 id:20
+(A) 2026-06-26 Consolidate duplicate constants. CHATBOT_TARGETS, LOCAL_CHALLENGES, STORAGE_KEYS, MESSAGE_ACTIONS are duplicated between `src/extension/background/index.js:5-42` and `src/shared/core/constants.js:10-88`. Make `src/shared/core/constants.js` the only source; import in background. Remove `constants.js` from `sharedFilter` exclude list in `scripts/build-extension.mjs:32-48`. +Demolition @code due:2026-07-03 id:21 dep:12
+(A) 2026-06-26 Modify `scripts/build-extension.mjs` to read version from `package.json` (line 54 currently hardcodes 2.1.0). Use `JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)))`. All manifest outputs derive from this. +Demolition @config due:2026-07-03 id:22 dep:18
+(A) 2026-06-26 Modify `scripts/build-extension.mjs` to derive manifest `host_permissions` dynamically from `CHATBOT_TARGETS` in `src/shared/core/constants.js`. Iterate targets, emit one `https://{origin}/*` per. Include LeetCode pattern only if LeetCode is in default ENABLED_SOURCES. +Demolition @config due:2026-07-03 id:23 dep:21
+(A) 2026-06-26 Add CSP to manifest output in `scripts/build-extension.mjs`. Set `"content_security_policy": { "extension_pages": "script-src 'self'; object-src 'self'" }` for MV3 Chrome; equivalent string form for MV2 Firefox. Proves no remote code execution to reviewers. +Demolition @config due:2026-07-03 id:24 dep:22
+(A) 2026-06-26 Move SESSION_DURATION_MS (background/index.js:3) to a user-configurable setting. Popup UI: select with options 5/15/30/60 minutes. Persist in `chrome.storage.local` under `SESSION_DURATION_MS_PREF`. Default 15 min. Background reads value on session start, not at script-load. +Demolition @ux due:2026-07-03 id:25
+(A) 2026-06-26 Add `web-ext lint` step to ci.yml against Firefox build output (`dist/firefox/`). Fail CI on errors; warn-only acceptable. AMO compliance prerequisite. `web-ext` v8+ (May 2024) is the canonical Mozilla CLI; no deprecation. +Demolition @ci due:2026-07-03 id:26 dep:15
+(A) 2026-06-26 Add `npm audit --production --audit-level=moderate` step to ci.yml. Catches vulnerable transitive dependencies in production-only deps. +Demolition @ci due:2026-07-03 id:27 dep:15
+(A) 2026-06-26 Add `google/osv-scanner-action@v2` step to ci.yml. Broader CVE coverage than `npm audit` alone (handles unmaintained packages and OSV-only advisories). +Demolition @ci due:2026-07-03 id:28 dep:15
+(A) 2026-06-26 Add manifest-shape validation test at `tests/unit/manifest.test.js`. For each browser build, assert required fields present, `host_permissions` count matches CHATBOT_TARGETS length, CSP present, version equals package.json version. Catches store-rejection bugs pre-submission. +Demolition @test due:2026-07-03 id:29 dep:22,23,24
+(A) 2026-06-26 Add Playwright extension-load smoke test at `tests/e2e/specs/extension.spec.js`. Use `chromium.launchPersistentContext` with `--load-extension=dist/chrome --disable-extensions-except=dist/chrome`. Navigate to `https://chatgpt.com`, assert shadow-root gate element exists. Open extension popup via background message, assert popup root renders. +Demolition @test due:2026-07-03 id:30 dep:09
+(A) 2026-06-26 Add `web-ext sign --channel=listed` step to ci.yml gated on `release/*` tag push. Use `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET` from repo secrets. Outputs signed .xpi for AMO submission. +Demolition @ci due:2026-07-03 id:31 dep:15
+(A) 2026-06-26 Add `.github/ISSUE_TEMPLATE/bug.md`, `challenge-pack.md`, `feature.md`. Bug: browser + version + repro steps + expected vs actual. Challenge-pack: link to schema, `npm run validate:packs` cmd, example diff. Feature: problem statement + proposed solution + non-goals. +Demolition @docs due:2026-07-03 id:32
+(A) 2026-06-26 Add `.github/CODEOWNERS` with `* @gongahkia`. Override per-directory if community maintainers added later. +Demolition @docs due:2026-07-03 id:33
+(A) 2026-06-26 Create `CONTRIBUTING.md` at repo root. Cover: how to add a challenge pack (schema link, `npm run validate:packs`, example JSON), how to run extension locally (`npm run build:chrome` / `build:firefox` + load-unpacked instructions), bug reporting, code style refs (existing `.eslintrc.json` + `.prettierrc.json`). +Demolition @docs due:2026-07-03 id:34
+(B) 2026-06-26 Create `src/shared/core/challenge-provider.js` defining ChallengeProvider interface: `{ source: string; getChallenge(opts: { recentSlugs: { source, slug }[], difficulty?: 'easy'|'medium'|'hard' }): Promise<Challenge>; verify(challenge: Challenge, submission: any): Promise<{ ok: boolean; message?: string; expectedSlug?: string; expectedSource?: string }> }`. Export type defs as JSDoc. All sources implement this. +Sources @code due:2026-07-06 id:35 dep:21
+(B) 2026-06-26 Create `src/shared/data/mcq.json` bundled MCQ pack. Item schema: `{ id: string, prompt: string, choices: string[], answerIndex: int, tags: string[], difficulty: 1..5, source: string }`. Ship 200 questions covering Big-O, data-structure internals, JS/TS quirks, concurrency basics, OS basics. Author in-house only; do not copy text from copyrighted sources. +Sources @code due:2026-07-08 id:36 dep:35
+(B) 2026-06-26 Create `src/shared/data/drills.json` typed-from-memory pack. Item schema: `{ id, prompt, expected, normalizers: ('whitespace'|'quotes'|'semicolons'|'casing')[], threshold: int (Levenshtein max), tags, difficulty }`. Ship 60+ drills: stdlib signatures, algo skeletons (quicksort partition, BFS, hashmap probe), syntax snippets. +Sources @code due:2026-07-08 id:37 dep:35
+(B) 2026-06-26 Create `schemas/mcq.schema.json` and `schemas/drills.schema.json` as JSON Schema draft-2020-12. Required fields, enum on difficulty 1..5, source pattern, tag pattern. +Sources @code due:2026-07-08 id:38 dep:36,37
+(B) 2026-06-26 Add npm script `validate:packs` using `ajv-cli` and matching CI step. Validates `src/shared/data/*.json` against `schemas/*.json` on every PR. Fail PR on schema violation. Enables community pack PRs without manual content review. +Sources @ci due:2026-07-08 id:39 dep:38
+(B) 2026-06-26 Implement `src/extension/lib/providers/mcq-provider.js` using ChallengeProvider interface. Lazy-load `data/mcq.json` via `fetch(chrome.runtime.getURL('data/mcq.json'))` on first getChallenge() call (do not put in chrome.storage.local). Filter by recentSlugs (exclude last 30 per source), filter by difficulty if provided, random select. verify() checks `submission === challenge.answerIndex`. +Sources @code due:2026-07-08 id:40 dep:35,36
+(B) 2026-06-26 Implement `src/extension/lib/providers/drills-provider.js`. Lazy-load `data/drills.json`. verify() applies each normalizer in challenge's `normalizers` array to both `expected` and `submission`, then computes Levenshtein distance, compares to `threshold`. Normalizers: whitespace (collapse runs to single space, trim), quotes (smart → straight, single → double), semicolons (strip trailing), casing (toLowerCase). +Sources @code due:2026-07-08 id:41 dep:35,37
+(B) 2026-06-26 Refactor existing LeetCode logic into `src/extension/lib/providers/leetcode-provider.js`. verify() reads submission status from content script via existing message bus. Add fallback DOM selectors to `src/extension/content/leetcode.js:25`: in addition to `span[data-e2e-locator="submission-result"]`, also try `.text-message-green-s`, body text-content includes literal `Accepted`, and a network-based hook intercepting `/submissions/detail/` XHR responses via MutationObserver on script tags or via `chrome.webRequest` if permission acceptable. +Sources @code due:2026-07-08 id:42 dep:35
+(B) 2026-06-26 Add staleness alarm for leetcode-provider. If user has LeetCode enabled but no successful submission detected in 30 days, popup shows banner "LeetCode detection may be broken. Try a different source." Track `LAST_LC_SUBMISSION_TIMESTAMP` in storage. +Sources @ux due:2026-07-08 id:43 dep:42
+(B) 2026-06-26 Implement `src/extension/lib/providers/aoc-provider.js` for Advent of Code as link-out + numeric-answer verification. Eric Wastl forbids problem-text redistribution (https://adventofcode.com/about). Surface only: problem ID, year, day, difficulty, tags, external URL. verify() compares `SHA-256(String(submission).trim())` against stored hash. Bundle answer hashes only in `src/shared/data/aoc-answers.json`: `{ id, year, day, url, answerHash, difficulty, tags }`. Never bundle plaintext problem or answer. +Sources @code due:2026-07-10 id:44 dep:35
+(B) 2026-06-26 Implement `src/extension/lib/providers/euler-provider.js` for Project Euler. PE main problems are CC BY-NC-SA 4.0 (redistributable with attribution, non-commercial) per https://projecteuler.net/copyright; bonus problems are forbidden. Default to link-out + hashed-answer verification (same shape as id:44) to keep the door open to future monetization without re-licensing. Bundle in `src/shared/data/euler-answers.json`: `{ id, url, answerHash, difficulty, tags }`. Add a clearly-labeled attribution string in popup credits if any PE problem text is ever shown inline. +Sources @code due:2026-07-10 id:45 dep:35
+(B) 2026-06-26 Extend RECENT_CHALLENGE_SLUGS storage shape from `string[]` to `{ source, slug, timestamp }[]`. Update rotation logic to dedupe per (source, slug) so a user enabling 4 sources doesn't get lopsided rotation. Migration on first read: wrap legacy entries as `{ source: 'leetcode', slug, timestamp: 0 }`. +Sources @code due:2026-07-10 id:46 dep:21
+(B) 2026-06-26 Add source-picker UI to popup. Checkbox per enabled source (MCQ, Drills, LeetCode, AoC, Euler). Persist in `chrome.storage.local` under `ENABLED_SOURCES` as `string[]`. Default `["mcq", "drills"]` (lowest fragility — fully local, no third-party DOM dependency). +Sources @ux due:2026-07-10 id:47 dep:35
+(B) 2026-06-26 Implement gate-difficulty-to-chatbot mapping in `src/shared/core/constants.js`: export `CHATBOT_DIFFICULTY_MAP: Record<string, 'easy'|'medium'|'hard'>` keyed by origin. Examples: `'claude.ai': 'hard'`, `'chatgpt.com': 'medium'`, `'perplexity.ai': 'easy'`. Background reads target URL on gate trigger, passes difficulty to ChallengeProvider.getChallenge(). Generates the "Claude Opus locked behind quicksort partition" screenshot. +Sources @code due:2026-07-10 id:48 dep:35,21
+(B) 2026-06-26 Audit `src/extension/background/index.js` for module-scope state. MV3 service workers can be killed after ~30s idle, zeroing in-memory state. Migrate any in-memory cache (problem list, install ID cache) to chrome.storage.local reads, or keep-alive via `chrome.alarms` if state is hot-path. List violations file:line in PR description before changing. +Sources @code due:2026-07-10 id:49
+(B) 2026-06-26 Fix race in `ensureInstallState()` at `src/extension/background/index.js:135-137`. Two windows on first install can write two install IDs. Use deterministic install ID: `SHA-256(chrome.runtime.id + first-storage-write-timestamp-from-storage-or-now())`. Once written, never rotated. Wrap get+set inside same async function with explicit promise chaining; no concurrent writes possible. +Sources @code due:2026-07-10 id:50
+(B) 2026-06-26 Add 5s timeout + 1 retry to all `chrome.runtime.sendMessage` calls in `src/extension/content/chatbot-gate.js`, `src/extension/content/leetcode.js`, `src/extension/ui/popup.js`. Wrap with `Promise.race([sendMessage, timeout])` helper in `src/extension/lib/messaging.js`. Log failed messages to a local counter shown in popup as health indicator. +Sources @code due:2026-07-10 id:51
+(B) 2026-06-26 Add runtime shape validation to `src/extension/ui/popup.js:332` state handling. Use ajv against a JSON Schema for `DashboardState`. On invalid background response, render fallback "Extension state corrupted. Click Reset." with a Reset button wiping `chrome.storage.local` and reinitializing. +Sources @code due:2026-07-10 id:52
+(B) 2026-06-26 Clear `sessionExpiryTimer` in `beforeunload` handler in `src/extension/content/chatbot-gate.js:93-97`. Current code leaks timer on tab close, sending messages to a possibly-dead background. +Sources @code due:2026-07-10 id:53
+(B) 2026-06-26 Add error-message channel from `grantAccess()` at `src/extension/background/index.js:284-303` to content script for mismatched-submission case. Currently returns silent `{ success: false }`. Return `{ success: false, error: 'WRONG_PROBLEM', expectedSlug, expectedSource }`. Content script renders banner "Wrong problem — solve {expectedSlug} from {expectedSource}." +Sources @ux due:2026-07-10 id:54
+(B) 2026-06-26 Add Jest unit tests for new modules: `tests/unit/mcq-provider.test.js` (filter/select/verify edge cases), `drills-provider.test.js` (Levenshtein normalization on whitespace/quotes/casing edge cases), `leetcode-provider.test.js` (fallback selector chain ordering), `atrophy.test.js` (formula composition, clamping at 0 and 100, empty-data behavior). +Sources @test due:2026-07-10 id:55 dep:40,41,42
+(C) 2026-06-26 Implement Atrophy/Cognitive Index formula in `src/shared/core/atrophy.js`. Composition: `0.5 * min(1, solves_in_last_7d / target_7d_solves) + 0.3 * (1 - normalized_median_time_to_solve_trend) + 0.2 * source_diversity_ratio`. Clamp 0..100. Higher = better. DO NOT weight bypass count as input (would punish legitimate use). Bypass count subtracts flat -5 per bypass during current week. Rename internal name to `cognitiveIndex`; display label: "Cognitive Index" (avoids "low atrophy = good" UX confusion). +Viral @code due:2026-07-13 id:56 dep:21
+(C) 2026-06-26 Implement streak tracking with grace-day mechanic in `src/shared/core/streak.js`. Default 1 grace day per week (configurable in popup, range 0..3). Pause-on-vacation toggle. State: `STREAK_STATE = { currentRun: int, longestRun: int, graceDaysRemaining: int, pausedUntil: ISO date | null, lastSolveDate: ISO }`. Streak does not break if paused or grace day consumed. Reset graceDaysRemaining on each ISO week boundary. +Viral @code due:2026-07-13 id:57 dep:21
+(C) 2026-06-26 Replace "streak" UI primitive in popup with "current run" + "longest run" pair. Same dopamine, no Duolingo-style anxiety loop. Add tooltip explaining grace-day mechanic. +Viral @ux due:2026-07-13 id:58 dep:57
+(C) 2026-06-26 Implement SVG receipt renderer in `src/extension/lib/receipt-svg.js`. Inputs: `{ problemTitle, sourceLabel, timeToSolveMs, currentRun, dorsoWordmark, cognitiveIndex }`. Returns SVG string. Identical template to CF Worker badge endpoint (id:64) — brand consistency on solve-screen and embed. ViewBox `0 0 800 400`. Inline fonts as base64 or use generic sans-serif fallback. +Viral @code due:2026-07-13 id:59
+(C) 2026-06-26 Implement one-click share on solve-success screen. Use Web Share API (`navigator.share`) with fallback to clipboard (`navigator.clipboard.writeText` + `navigator.clipboard.write` for image). Buttons: Share, Copy text, Copy image. Image = receipt SVG rasterized to PNG via OffscreenCanvas. Pre-formed text strings live as placeholder constants in `src/extension/ui/share-text.js` (final copy is outside engineering scope; ship plausible defaults). +Viral @code due:2026-07-15 id:60 dep:59
+(C) 2026-06-26 Implement "what you almost asked" capture. Textarea below challenge prompt on gate screen, label "What were you about to ask the chatbot? (optional)". On submit, append to `chrome.storage.local` key `WHAT_I_ASKED` as ring buffer of last 200: `[{ timestamp, target, text }]`. Privacy-critical: text never leaves device, never logged, never sent to badge endpoint. Add per-entry delete in popup. +Viral @code due:2026-07-15 id:61
+(C) 2026-06-26 Implement end-of-week digest view in popup. Reads WHAT_I_ASKED entries from last 7 days, groups by chatbot target. Renders as shareable card SVG using the same template approach as id:59. Export buttons: download SVG, download PNG, copy markdown. Entries can be redacted individually before export. +Viral @ux due:2026-07-17 id:62 dep:61,59
+(C) 2026-06-26 Implement configurable AI emergency bypass. Setting `EMERGENCY_BYPASSES_PER_WEEK` (default 2, range 0..7, configurable in popup). Counter resets weekly via stored `BYPASS_WEEK_START`. Bypass button visible on gate screen only if remaining > 0. Each use grants a 15-min session, decrements counter, subtracts 5 from cognitiveIndex for current week. Pre-empts the "this is a trap" HN comment archetype. +Viral @ux due:2026-07-15 id:63 dep:56
+(C) 2026-06-26 Create `cloudflare/` directory at repo root. Contents: `wrangler.toml`, `src/worker.js`, `README.md`. Worker serves SVG badge at `GET /badge/<encoded-state>.svg`. URL param `state` is base64url-encoded JSON `{ score, longestRun, installIdHash, timestamp }`. URL param `sig` is base64url HMAC-SHA256(secret, state). Worker recomputes HMAC, rejects if mismatch or timestamp > 90 days. Returns SVG with `Content-Type: image/svg+xml`, `Cache-Control: public, max-age=86400` (CDN caches help stay within free-tier 100k req/day at 10k installs). +Viral @infra due:2026-07-17 id:64
+(C) 2026-06-26 Document HMAC signing scheme in `cloudflare/README.md`. Extension computes `HMAC-SHA256(secret, base64url(JSON.stringify(canonicalState)))` where canonicalState is stable-key-order. Secret shared via env: Worker reads from `CF_HMAC_SECRET` Cloudflare env var; extension reads from build-injected constant. CI build step injects from repo secret `CF_HMAC_SECRET`. Document rotation procedure (rotate secret, force-refresh URLs via cache-bust query param). +Viral @docs due:2026-07-17 id:65 dep:64
+(C) 2026-06-26 Wire badge URL generation into extension popup. Display copy-to-clipboard markdown snippet: `![Dorso Cognitive Index](https://dorso.dev/badge/<state>.svg?sig=<sig>)`. Snippet updates as state changes. README-embed is the compounding distribution surface (precedent: WakaTime, github-readme-stats). Provide HTML form too. +Viral @ux due:2026-07-17 id:66 dep:64
+(C) 2026-06-26 Add `cloudflare/` deploy step to ci.yml gated on `release/*` tag push. Use `cloudflare/wrangler-action@v3`. Required repo secrets: `CF_API_TOKEN`, `CF_ACCOUNT_ID`, `CF_HMAC_SECRET`. Deploy to staging environment first, manual approval gate, then production. +Viral @ci due:2026-07-17 id:67 dep:64
+(C) 2026-06-26 Add Playwright E2E for full unlock flow at `tests/e2e/specs/unlock-flow.spec.js`. Load extension, navigate to chatgpt.com, gate appears, programmatically fill MCQ answer (use MCQ source for deterministic test), submit, assert overlay clears, assert popup shows session active with countdown, mock-advance system time past 15 min, assert overlay reappears. +Viral @test due:2026-07-17 id:68 dep:30
+(C) 2026-06-26 Rewrite popup onboarding flow as 3 panels: (1) pick sources (uses id:47 picker), (2) pick chatbot targets to gate (checkbox per CHATBOT_TARGET, persist as `ENABLED_TARGET_IDS`), (3) see a sample receipt SVG (uses id:59 with example data). First-run only; skip on subsequent opens. Settings still accessible from main popup view. +Viral @ux due:2026-07-15 id:69 dep:47,59
+(D) 2026-06-26 Rewrite README.md following 2026 Show HN convention. Order: demo GIF (above the fold) → one-paragraph thesis citing the Anthropic Feb 2026 17% RCT (InfoQ source: https://www.infoq.com/news/2026/02/ai-coding-skill-formation/) → install (3-step max per browser) → privacy summary (link to docs/PRIVACY.md) → tech stack → contributing → references. Use first-person plural ("we"), not second-person. Keep brand name and dorsolateral-prefrontal-cortex reference. +Polish @docs due:2026-07-22 id:70
+(D) 2026-06-26 Generate demo GIF (<15s, <8MB). Browser screen recording of: visit https://chatgpt.com → Dorso overlay appears → solve MCQ/drill → unlock → 15-min session timer visible. Tools: macOS screen-record → `ffmpeg -i input.mov -vf "fps=12,scale=960:-1:flags=lanczos" -loop 0` → `gifski`. Save to `asset/reference/demo.gif`. Embed in README at top via `<img src="./asset/reference/demo.gif" width="100%">`. +Polish @docs due:2026-07-22 id:71
+(D) 2026-06-26 Regenerate screenshots for v3.0 flow at 1280x800: popup with source picker, gate overlay showing difficulty mapping ("Claude Opus → hard"), badge example, end-of-week digest. Save to `asset/reference/{popup,gate,badge,digest}.png`. +Polish @docs due:2026-07-22 id:72
+(D) 2026-06-26 Create `docs/PRIVACY.md`. Required sections: (a) host-permissions accounting (one line per host: why the extension needs it), (b) "no server" claim with one explicit exception (stateless CF Worker for SVG badge — link to cloudflare/README.md), (c) "no tracking" claim (no analytics, no telemetry, no third-party scripts), (d) "no accounts" (no auth, no email collection). Defense kit for HN comments and store review. +Polish @docs due:2026-07-22 id:73
+(D) 2026-06-26 Create `docs/ARCHITECTURE.md`. File/module map: `src/extension/{background,content,popup,lib}`, `src/shared/{core,data}`, `schemas/`, `cloudflare/`, `scripts/`. Mermaid data-flow diagrams: gate trigger → ChallengeProvider → verify → session, atrophy compute → badge state → CF Worker. +Polish @docs due:2026-07-22 id:74
+(D) 2026-06-26 Create `docs/SECURITY.md`. Disclosure flow: email + GPG fingerprint, 90-day disclosure window, hall-of-fame format. Reference the post-Q1 2026 ChatGPT-stealing-extensions scandal as motivation. +Polish @docs due:2026-07-22 id:75
+(D) 2026-06-26 Label initial GitHub issues with `good-first-issue` for challenge-pack contributions. Open 8-10 issues with body "Add 10 MCQ questions on $TOPIC. See CONTRIBUTING.md and `schemas/mcq.schema.json`. PR src/shared/data/mcq.json updated." Topics: Big-O, hash tables, JS closures/scoping, async patterns, OS basics, networking, SQL fundamentals, regex, recursion, dynamic programming. +Polish @docs due:2026-07-22 id:76 dep:34
+(D) 2026-06-26 Safari decision. EITHER (a) finish `safari/DorsoSafari` for v3.0: acquire Apple developer cert, write provisioning profile, fix Xcode project (missing app icon, no signing), test on macOS Safari ≥17. OR (b) explicitly defer Safari past v3.0: remove `npm run build:safari` from default `build` script in package.json, document deferral in README support table, archive `safari/` to a `v3.0-defer-safari` branch. Pick one before id:80. +Polish @config due:2026-07-22 id:77
+(D) 2026-06-26 Run full build via `npm run build`. Verify outputs: Chrome MV3 with `service_worker` (no `background.scripts`), Firefox MV2 with `background.scripts` (or MV3 if explicitly upgraded), dynamic `host_permissions` count matches CHATBOT_TARGETS, CSP present, version matches package.json. +Polish @ci due:2026-07-22 id:78 dep:24
+(D) 2026-06-26 Run `web-ext lint` on `dist/firefox/`. Fix all errors; warn-only acceptable. AMO review will run the same check. +Polish @ci due:2026-07-22 id:79 dep:78
+(D) 2026-06-26 Submit Firefox build to AMO via `web-ext sign --channel=listed`. Triggered by `release/*` tag push (id:31). First-listing reviews historically 1-5 business days. Track via AMO dashboard. +Polish @ci due:2026-07-24 id:80 dep:79
+(D) 2026-06-26 Submit Chrome Web Store package manually via Developer Dashboard. Include privacy policy URL pointing to `https://github.com/gongahkia/dorso/blob/main/docs/PRIVACY.md`. Permission justifications must emphasize "no network egress from extension" given post-Q1 2026 reviewer paranoia about ChatGPT-touching extensions. Submit Mon-Wed window; avoid first 2 days of any Chrome stable release per the new 2-week cycle starting 2026-09-08. +Polish @ci due:2026-07-24 id:81 dep:78
+(D) 2026-06-26 Bump `package.json` from 3.0.0-rc.1 to 3.0.0; create signed tag `v3.0.0` via `git tag -s v3.0.0`. Push. CI runs id:31 (web-ext sign) and id:67 (Cloudflare deploy). GitHub Release auto-created via `gh release create` with signed .xpi and source zip attached. +Polish @config due:2026-07-24 id:82 dep:78,79,80
+(D) 2026-06-26 Add CI assertion verifying all version strings match. Test parses package.json version, `dist/chrome/manifest.json` version, `dist/firefox/manifest.json` version, `cloudflare/wrangler.toml` name/version if versioned. Fail CI on mismatch. +Polish @ci due:2026-07-24 id:83 dep:22
+(E) 2026-06-26 Per-domain rules. Popup UI: per-target (ChatGPT, Claude, Gemini, etc.) configure block schedule (always / weekdays HH:MM-HH:MM / weekends only / cron-like custom), required difficulty override, source pool override. Persist as `PER_TARGET_RULES = { [origin]: { schedule, difficultyOverride, sourcesOverride } }`. Refactor background gate-trigger logic to read these rules. +Future @ux id:84
+(E) 2026-06-26 Implement `dorso` CLI companion in new `cli/` directory. Node CLI reads exported JSON status from a configurable path (extension writes status file via `chrome.downloads` API to user-chosen folder periodically). Single command: `dorso status [--json | --prompt | --watch]`. Prompt mode emits short string for tmux/zsh prompt segment (e.g., `DRS:87`). Publish to npm as `@dorso/cli`. +Future @infra id:85
+(E) 2026-06-26 Browser-agnostic userscript fallback. Single-file Tampermonkey/Violentmonkey build with same gate logic. No extension install required; works on Brave, Vivaldi, Orion, Safari-without-cert. Build target: `npm run build:userscript` outputs `dist/userscript/dorso.user.js`. Embed challenge JSON inline. +Future @code id:86
+(E) 2026-06-26 AI fast mode. Hard-lock for 24h/7d/30d. No emergency bypass during active fast. Calendar export (ICS file) at fast-end summarizing solves during fast. Settings + state under `chrome.storage.local` key `AI_FAST = { active: bool, durationHours: int, startedAt: ISO, plannedSummary?: { solves, drillsCompleted } }`. +Future @ux id:87
+(E) 2026-06-26 Per-problem "why this question" disclosure. Tag problems by skill in JSON packs (already in schema via `tags`). Track per-skill gate-trigger counts. On gate, show short string "This problem tests {skill}. Last week you triggered the gate {n} times on {skill}-shaped queries." Privacy-sensitive: this requires inferring intent from gate triggers; spec needed before implementation. +Future @code id:88
+(E) 2026-06-26 Public Atrophy Leaderboard via CF Worker. Opt-in only (extension must explicitly POST scores). Scoped per-repo (user passes a repo URL to badge endpoint; leaderboard aggregates by repo). Storage in CF KV. Read-only public ranking endpoint at `/leaderboard/<repo-hash>.json`. No PII stored. +Future @infra id:89 dep:64
+(E) 2026-06-26 Introduce esbuild bundler if extension size grows past ~500KB. Tree-shake unused exports, minify production builds, generate source maps for dev builds only (omit for store builds). Currently uncomplicated `fs.cp` is fine; revisit when needed. +Future @config id:90
+(X) 2026-06-26 CONSTRAINT do NOT add Pro tier, freemium, or any monetization in v3.0. Per WORKON-PIVOT-ASAP.md D3: stars first, revenue later. Mixing freemium with launch dilutes the meme and triggers "show me the dark pattern" reflex on HN. +Constraints id:91
+(X) 2026-06-26 CONSTRAINT do NOT add affiliate links anywhere in v3.0. Chrome Web Store June 2025 affiliate policy enforcement requires multiple disclosure surfaces (listing, UI, pre-install) — known footgun. +Constraints id:92
+(X) 2026-06-26 CONSTRAINT do NOT add accounts, login, email collection, or any user-identifying server-side state. "No server, no accounts" is a marketing claim that must remain literally true. Badge URL state is anonymous (hashed install ID, HMAC-signed). +Constraints id:93
+(X) 2026-06-26 CONSTRAINT do NOT bundle Advent of Code problem text. AoC forbids problem-text redistribution; only linking permitted (https://adventofcode.com/about). Use SHA-256 hashed answer verification + external links only (see id:44). +Constraints id:94
+(X) 2026-06-26 CONSTRAINT Project Euler problems CAN be bundled under CC BY-NC-SA 4.0 with attribution (non-commercial only); bonus problems are forbidden. Default plan is link-out + hashed answers (id:45) to keep monetization door open. If inline rendering is ever added, attribution surface required in popup credits. +Constraints id:95
+(X) 2026-06-26 CONSTRAINT do NOT ship streaks without grace-day mechanic. 2026 Duolingo gamification backlash is significant (Habitica data: 0.90% return rate after a 2-3 day streak break). Grace days are mandatory on day one of any streak feature (see id:57). +Constraints id:96
+(X) 2026-06-26 CONSTRAINT do NOT introduce remote code execution paths. No `eval()`, no `new Function()`, no `setTimeout(string)`, no remote `<script>` injection. CSP (id:24) enforces but a future PR could regress; review PRs against this constraint. +Constraints id:97
+(X) 2026-06-26 CONSTRAINT do NOT add wildcard host permissions or `<all_urls>` in manifest. Per-chatbot-domain only. Post-Q1 2026 ChatGPT-stealing-extension scandals raised reviewer paranoia; permission justification required on listing. +Constraints id:98
+(X) 2026-06-26 CONSTRAINT do NOT log gate-screen "what you almost asked" textarea content off-device. Privacy is the entire feature surface. Storage local only; never sent to badge endpoint; never analytics. +Constraints id:99 dep:61
+(X) 2026-06-26 CONSTRAINT do NOT use second-person scolding in user-facing copy. "Braindead programmers" framing works as self-deprecation in README (first-person plural / "we") but will misfire as scolding ("you"). Apply to popup, gate overlay, share-text, error messages. +Constraints id:100
+(X) 2026-06-26 CONSTRAINT do NOT block the uninstall flow (would trigger CWS/AMO rejection); also do NOT make uninstall the de facto bypass. Right pattern: respect uninstall, surface AI emergency bypass (id:63) as the in-product escape valve. +Constraints id:101
+(X) 2026-06-26 CONSTRAINT free-tier Cloudflare Workers cap is 100k req/day and 10ms CPU/invocation. SVG-badge endpoint fits easily at low install counts; at 10k installs the cap is tight — rely on `Cache-Control: public, max-age=86400` and CF CDN to deflect. Budget for the $5/mo Paid plan if installs exceed 5k. +Constraints id:102 dep:64
