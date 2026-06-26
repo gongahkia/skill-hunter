@@ -93,6 +93,8 @@ export const SOURCE_LABELS = {
     leetcode: 'LeetCode',
 };
 
+export const DEFAULT_ENABLED_SOURCES = ['leetcode'];
+
 export const LOCAL_CHALLENGES = [
     { slug: 'two-sum', title: 'Two Sum', difficulty: 'Easy', topic_tags: ['Array', 'Hash Table'] },
     { slug: 'valid-parentheses', title: 'Valid Parentheses', difficulty: 'Easy', topic_tags: ['Stack', 'String'] },

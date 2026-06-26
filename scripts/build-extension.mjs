@@ -3,7 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { CHATBOT_MATCH_PATTERNS } from '../src/shared/core/constants.js';
+import {
+    CHATBOT_MATCH_PATTERNS,
+    CHATBOT_TARGETS,
+    DEFAULT_ENABLED_SOURCES,
+} from '../src/shared/core/constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -18,6 +22,7 @@ const actionIcons = {
     16: 'extension/assets/icons/icon-16.png',
     32: 'extension/assets/icons/icon-32.png',
 };
+const defaultEnabledSources = new Set(DEFAULT_ENABLED_SOURCES);
 
 const browserConfigs = {
     chrome: {
@@ -49,6 +54,18 @@ const sharedFilter = (sourcePath) => {
     ].some((needle) => sourcePath.includes(needle));
 };
 
+function getHostPermissions() {
+    const permissions = CHATBOT_TARGETS.flatMap((target) => {
+        return target.hostnames.map((hostname) => `https://${hostname}/*`);
+    });
+
+    if (defaultEnabledSources.has('leetcode')) {
+        permissions.push(leetCodePattern);
+    }
+
+    return [...new Set(permissions)];
+}
+
 function getManifest(browser) {
     const baseManifest = {
         manifest_version: 3,
@@ -56,7 +73,7 @@ function getManifest(browser) {
         version: packageJson.version,
         description: 'Protect selected AI chatbot sites until a matching LeetCode challenge is solved.',
         permissions: ['storage'],
-        host_permissions: [...CHATBOT_MATCH_PATTERNS, leetCodePattern],
+        host_permissions: getHostPermissions(),
         icons: {
             16: actionIcons[16],
             32: actionIcons[32],
