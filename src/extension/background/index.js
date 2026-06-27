@@ -13,6 +13,11 @@ import {
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
 import {
+    DEFAULT_CLI_STATUS_EXPORT_PATH,
+    createCliStatusSnapshot,
+    normalizeCliStatusExportPath,
+} from '../../shared/core/cli-status.js';
+import {
     getEmergencyBypassState,
     normalizeEmergencyBypassLimit,
 } from '../../shared/core/emergency-bypass.js';
@@ -34,6 +39,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
     const browserApi = globalThis.browser ?? globalThis.chrome;
     const RECENT_CHALLENGE_WINDOW = 5;
     const LEETCODE_STALENESS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+    const CLI_STATUS_EXPORT_ALARM = 'dorso-cli-status-export';
     const providers = {
         mcq: mcqProvider,
         drills: drillsProvider,
@@ -87,6 +93,18 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         return isPromise(response)
             ? response
             : callbackToPromise((done) => browserApi.storage.local.remove(keys, done));
+    }
+
+    async function downloadUrl(options) {
+        if (!browserApi.downloads?.download) {
+            throw new Error('Downloads API unavailable.');
+        }
+
+        if (globalThis.browser?.downloads?.download) {
+            return globalThis.browser.downloads.download(options);
+        }
+
+        return callbackToPromise((done) => browserApi.downloads.download(options, done));
     }
 
     async function sha256Hex(value) {
@@ -192,6 +210,19 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         };
     }
 
+    function syncCliStatusExportAlarm(enabled) {
+        if (!browserApi.alarms?.create) {
+            return;
+        }
+
+        if (enabled) {
+            browserApi.alarms.create(CLI_STATUS_EXPORT_ALARM, { periodInMinutes: 1 });
+            return;
+        }
+
+        browserApi.alarms.clear?.(CLI_STATUS_EXPORT_ALARM);
+    }
+
     async function ensureInstallStateInner() {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
@@ -199,6 +230,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.ENABLED_SOURCES,
             STORAGE_KEYS.PER_TARGET_RULES,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_PATH,
+            STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -235,6 +270,18 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             updates[STORAGE_KEYS.PER_TARGET_RULES] = getAllowedTargetRules();
         }
 
+        if (typeof stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED] !== 'boolean') {
+            updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED] = false;
+        }
+
+        if (typeof stored[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH] !== 'string') {
+            updates[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH] = DEFAULT_CLI_STATUS_EXPORT_PATH;
+        }
+
+        if (typeof stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] !== 'string') {
+            updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] = '';
+        }
+
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
             updates[STORAGE_KEYS.SESSION_DURATION_MS_PREF] = SESSION_DURATION_MS;
         }
@@ -266,6 +313,12 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         if (Object.keys(updates).length > 0) {
             await setStorageValues(updates);
         }
+
+        syncCliStatusExportAlarm(Boolean(
+            Object.prototype.hasOwnProperty.call(updates, STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED)
+                ? updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED]
+                : stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED],
+        ));
     }
 
     async function ensureInstallState() {
@@ -326,6 +379,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.ENABLED_SOURCES,
             STORAGE_KEYS.PER_TARGET_RULES,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_PATH,
+            STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
+            STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -441,6 +498,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             enabledTargetIds: stored[STORAGE_KEYS.ENABLED_TARGET_IDS] || getDefaultEnabledTargetIds(),
             enabledSources: getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]),
             perTargetRules: getAllowedTargetRules(stored[STORAGE_KEYS.PER_TARGET_RULES]),
+            cliStatusExportEnabled: Boolean(stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED]),
+            cliStatusExportPath: normalizeCliStatusExportPath(stored[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH]),
+            cliStatusLastExportedAt: stored[STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT] || null,
+            cliStatusExportError: stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] || '',
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
@@ -463,6 +524,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
     async function saveSettings(payload) {
         const updates = {};
+        let cliStatusSettingsChanged = false;
 
         if (Array.isArray(payload?.enabledTargetIds)) {
             const allowedTargetIds = new Set(CHATBOT_TARGETS.map((target) => target.id));
@@ -475,6 +537,16 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (payload?.perTargetRules && typeof payload.perTargetRules === 'object') {
             updates[STORAGE_KEYS.PER_TARGET_RULES] = getAllowedTargetRules(payload.perTargetRules);
+        }
+
+        if (typeof payload?.cliStatusExportEnabled === 'boolean') {
+            updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED] = payload.cliStatusExportEnabled;
+            cliStatusSettingsChanged = true;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(payload || {}, 'cliStatusExportPath')) {
+            updates[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH] = normalizeCliStatusExportPath(payload.cliStatusExportPath);
+            cliStatusSettingsChanged = true;
         }
 
         if (typeof payload?.isPaused === 'boolean') {
@@ -497,7 +569,63 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             await setStorageValues(updates);
         }
 
+        if (cliStatusSettingsChanged) {
+            const isEnabled = Object.prototype.hasOwnProperty.call(updates, STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED)
+                ? updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED]
+                : Boolean(await getStorageValue(STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED));
+            syncCliStatusExportAlarm(isEnabled);
+            if (isEnabled) {
+                await exportCliStatus({ force: true });
+            }
+        }
+
         return getDashboardState();
+    }
+
+    async function exportCliStatus({ force = false } = {}) {
+        try {
+            await ensureInstallState();
+            const stored = await getStorageValues([
+                STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED,
+                STORAGE_KEYS.CLI_STATUS_EXPORT_PATH,
+            ]);
+            const enabled = Boolean(stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED]);
+            if (!enabled && !force) {
+                return { success: true, skipped: true };
+            }
+
+            const state = await getDashboardState();
+            const exportPath = normalizeCliStatusExportPath(stored[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH]);
+            const snapshot = createCliStatusSnapshot(state, {
+                installIdHash: await sha256Hex(String(state.installId || 'unknown-install')),
+            });
+            const downloadId = await downloadUrl({
+                url: `data:application/json;charset=utf-8,${encodeURIComponent(`${JSON.stringify(snapshot, null, 2)}\n`)}`,
+                filename: exportPath,
+                conflictAction: 'overwrite',
+                saveAs: false,
+            });
+
+            await setStorageValues({
+                [STORAGE_KEYS.CLI_STATUS_EXPORT_PATH]: exportPath,
+                [STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT]: snapshot.exportedAt,
+                [STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR]: '',
+            });
+
+            return {
+                success: true,
+                downloadId,
+                path: exportPath,
+                status: snapshot,
+            };
+        } catch (error) {
+            const message = error.message || 'CLI status export failed.';
+            await setStorageValues({ [STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR]: message });
+            return {
+                success: false,
+                error: message,
+            };
+        }
     }
 
     async function grantAccess(message) {
@@ -615,6 +743,13 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
                 return { success: true, state: await saveSettings({ isPaused: Boolean(message.isPaused) }) };
             case MESSAGE_ACTIONS.EMERGENCY_BYPASS:
                 return useEmergencyBypass();
+            case MESSAGE_ACTIONS.EXPORT_CLI_STATUS: {
+                const result = await exportCliStatus({ force: true });
+                return {
+                    ...result,
+                    state: await getDashboardState(),
+                };
+            }
             case MESSAGE_ACTIONS.SUBMISSION_RESULT:
                 if (message.source && message.slug) {
                     return grantAccess(message);
@@ -643,5 +778,13 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
     browserApi.runtime.onStartup?.addListener(() => {
         ensureInstallState().catch(() => {});
+    });
+
+    browserApi.alarms?.onAlarm?.addListener((alarm) => {
+        if (alarm.name !== CLI_STATUS_EXPORT_ALARM) {
+            return;
+        }
+
+        exportCliStatus({ force: false }).catch(() => {});
     });
 })();

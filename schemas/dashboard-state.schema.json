@@ -13,6 +13,10 @@
     "enabledTargetIds",
     "enabledSources",
     "perTargetRules",
+    "cliStatusExportEnabled",
+    "cliStatusExportPath",
+    "cliStatusLastExportedAt",
+    "cliStatusExportError",
     "sessionDurationMinutes",
     "emergencyBypassesPerWeek",
     "bypassesThisWeek",
@@ -173,6 +177,18 @@
           }
         }
       }
+    },
+    "cliStatusExportEnabled": {
+      "type": "boolean"
+    },
+    "cliStatusExportPath": {
+      "type": "string"
+    },
+    "cliStatusLastExportedAt": {
+      "type": ["string", "null"]
+    },
+    "cliStatusExportError": {
+      "type": "string"
     },
     "sessionDurationMinutes": {
       "type": "number",

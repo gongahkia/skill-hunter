@@ -24,10 +24,13 @@ Safari is deferred for v3.0 store polish.
 
 Dorso stores challenge state, timers, settings, solve receipts, and saved prompt notes in browser extension storage. The extension has no accounts, no analytics, no telemetry, and no remote problem-statement fetch path. The optional SVG badge is stateless: badge state is HMAC-signed into the URL and served by a Cloudflare Worker without per-user storage. Details: [docs/PRIVACY.md](./docs/PRIVACY.md).
 
+Optional CLI export writes a local JSON status file under the browser Downloads directory for `dorso status`; it does not send status to a server.
+
 ## Tech Stack
 
 - JavaScript ES modules
 - Chrome and Firefox WebExtension APIs
+- Optional `@dorso/cli` Node companion
 - Local `chrome.storage.local` state
 - JSON challenge packs with AJV schema validation
 - MCQ, drill, LeetCode, and Project Euler challenge providers

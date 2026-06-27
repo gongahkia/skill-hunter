@@ -1,0 +1,21 @@
+{
+  "name": "@dorso/cli",
+  "version": "3.0.0-rc.1",
+  "description": "CLI companion for Dorso local status exports.",
+  "type": "module",
+  "bin": {
+    "dorso": "./bin/dorso.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

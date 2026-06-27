@@ -69,7 +69,7 @@ function getManifest(browser) {
         version: manifestVersion,
         version_name: packageJson.version,
         description: 'Protect selected AI chatbot sites until a coding challenge is solved.',
-        permissions: ['storage'],
+        permissions: ['storage', 'downloads', 'alarms'],
         host_permissions: getHostPermissions(),
         icons: {
             16: actionIcons[16],

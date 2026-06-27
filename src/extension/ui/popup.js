@@ -13,6 +13,7 @@ import {
     getTargetOrigin,
     normalizeTargetRule,
 } from '../../shared/core/target-rules.js';
+import { DEFAULT_CLI_STATUS_EXPORT_PATH } from '../../shared/core/cli-status.js';
 import { formatDuration } from '../lib/formatters.js';
 import {
     getDigestEntries,
@@ -41,6 +42,7 @@ const mainPanelIds = [
     'statusPanel',
     'challengePanel',
     'controlPanel',
+    'cliPanel',
     'badgePanel',
     'sourcesPanel',
     'sitesPanel',
@@ -587,6 +589,74 @@ function renderControls(state) {
     panel.querySelector('.field-grid').append(durationLabel, bypassLabel, healthLabel);
 }
 
+function renderCliExport(state) {
+    const panel = document.getElementById('cliPanel');
+    resetPanel(panel);
+
+    const form = createElement('form', { className: 'form-grid' });
+    const enabledLabel = createElement('label', { className: 'checkbox-card' });
+    const enabledCheckbox = createElement('input', { type: 'checkbox' });
+    const pathLabel = createElement('label', { className: 'field-label' });
+    const pathInput = createElement('input', { type: 'text' });
+    const statusText = createElement('span', { className: 'small' });
+
+    enabledCheckbox.name = 'cliStatusExportEnabled';
+    enabledCheckbox.checked = Boolean(state.cliStatusExportEnabled);
+    pathInput.name = 'cliStatusExportPath';
+    pathInput.value = state.cliStatusExportPath || DEFAULT_CLI_STATUS_EXPORT_PATH;
+    pathInput.placeholder = DEFAULT_CLI_STATUS_EXPORT_PATH;
+    statusText.textContent = state.cliStatusExportError
+        ? `Last error: ${state.cliStatusExportError}`
+        : `Last export: ${state.cliStatusLastExportedAt ? new Date(state.cliStatusLastExportedAt).toLocaleString() : 'never'}`;
+
+    enabledLabel.append(enabledCheckbox, createElement('span', { text: 'Write CLI status JSON' }));
+    pathLabel.append(
+        createElement('span', { text: 'Downloads-relative path' }),
+        pathInput,
+        createElement('span', { className: 'small', text: 'Used by dorso status --path.' }),
+    );
+    form.append(
+        enabledLabel,
+        pathLabel,
+        statusText,
+        createButtonRow([
+            createButton({
+                label: 'Save CLI Export',
+                className: 'button-primary',
+                type: 'submit',
+                onClick: () => {},
+            }),
+            createButton({
+                label: 'Export Now',
+                className: 'button-secondary',
+                onClick: async () => {
+                    const result = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.EXPORT_CLI_STATUS });
+                    setMessage(result.success ? 'CLI status exported.' : result.error, Boolean(result.success));
+                    await loadState();
+                },
+            }),
+        ]),
+    );
+
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: {
+                cliStatusExportEnabled: enabledCheckbox.checked,
+                cliStatusExportPath: pathInput.value,
+            },
+        });
+        setMessage('CLI export settings saved.', true);
+        await loadState();
+    };
+
+    panel.append(createSectionHead(
+        'CLI Export',
+        'Write a local JSON status file for the dorso CLI.',
+    ), form);
+}
+
 function renderSupportedSites(state) {
     const form = document.getElementById('sitesForm');
     const enabledTargetIds = new Set(state.enabledTargetIds || []);
@@ -879,7 +949,7 @@ function renderCorruptedStateFallback() {
     const onboardingPanel = document.getElementById('onboardingPanel');
     resetPanel(onboardingPanel);
     onboardingPanel.hidden = true;
-    ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
+    ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'cliPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
         resetPanel(document.getElementById(panelId));
     });
     document.getElementById('sharePanel').hidden = true;
@@ -1090,6 +1160,7 @@ async function loadState() {
     renderChallenge(latestState);
     renderSolveReceipt(latestState);
     renderControls(latestState);
+    renderCliExport(latestState);
     await renderBadge(latestState);
     renderSources(latestState);
     renderSupportedSites(latestState);

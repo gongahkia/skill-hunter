@@ -10,7 +10,9 @@ test('generated package versions stay in sync', () => {
     });
 
     const packageVersion = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version;
+    const cliPackageVersion = JSON.parse(fs.readFileSync(new URL('../../cli/package.json', import.meta.url), 'utf8')).version;
     const manifestVersion = packageVersion.split('-')[0];
+    assert.equal(cliPackageVersion, packageVersion, 'CLI package version mismatch');
     for (const browser of ['chrome', 'firefox', 'safari']) {
         const manifest = JSON.parse(fs.readFileSync(new URL(`../../dist/${browser}/manifest.json`, import.meta.url), 'utf8'));
         assert.equal(manifest.version, manifestVersion, `${browser} manifest version mismatch`);

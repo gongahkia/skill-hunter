@@ -19,6 +19,7 @@ No durable extension state depends on module-scope memory.
 - Recent challenge slugs: `chrome.storage.local` via `STORAGE_KEYS.RECENT_CHALLENGE_SLUGS`.
 - Session expiry and last solve time: `chrome.storage.local` via `STORAGE_KEYS.SESSION_EXPIRES_AT` and `STORAGE_KEYS.LAST_SOLVED_TIME`.
 - User settings: `chrome.storage.local` via `STORAGE_KEYS.ENABLED_TARGET_IDS`, `STORAGE_KEYS.SESSION_DURATION_MS_PREF`, and `STORAGE_KEYS.IS_PAUSED`.
+- Optional CLI export settings: `chrome.storage.local` via `STORAGE_KEYS.CLI_STATUS_EXPORT_ENABLED`, `STORAGE_KEYS.CLI_STATUS_EXPORT_PATH`, and export result keys.
 
 ## Required Changes
 
