@@ -449,11 +449,58 @@ function renderSupportedSites(state) {
     };
 }
 
+function renderSources(state) {
+    const form = document.getElementById('sourcesForm');
+    const enabledSources = new Set(state.enabledSources || []);
+    resetPanel(form);
+
+    const checkboxGrid = createElement('div', { className: 'checkbox-grid' });
+    state.supportedSources.forEach((source) => {
+        const label = createElement('label', { className: 'checkbox-card' });
+        const checkbox = createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'enabledSources';
+        checkbox.value = source.id;
+        checkbox.checked = enabledSources.has(source.id);
+        checkbox.disabled = !source.isAvailable;
+        label.append(checkbox, createElement('span', {
+            text: source.isAvailable ? source.label : `${source.label} (coming soon)`,
+        }));
+        checkboxGrid.append(label);
+    });
+
+    form.append(
+        checkboxGrid,
+        createButton({
+            label: 'Save Sources',
+            className: 'button-primary',
+            type: 'submit',
+            onClick: () => {},
+        }),
+    );
+
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const enabledSourcesValue = formData.getAll('enabledSources');
+
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: {
+                enabledSources: enabledSourcesValue,
+            },
+        });
+        setMessage('Challenge sources saved.', true);
+        await loadState();
+    };
+}
+
 function renderCorruptedStateFallback() {
     ['statusPanel', 'challengePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
         resetPanel(document.getElementById(panelId));
     });
     resetPanel(document.getElementById('sitesForm'));
+    resetPanel(document.getElementById('sourcesForm'));
     setMessage('');
 
     const panel = document.getElementById('statusPanel');
@@ -646,6 +693,7 @@ async function loadState() {
     renderChallenge(latestState);
     renderControls(latestState);
     await renderBadge(latestState);
+    renderSources(latestState);
     renderSupportedSites(latestState);
     renderDisclosure(latestWhatIAsked);
 }

@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import {
     CHATBOT_MATCH_PATTERNS,
     CHATBOT_TARGETS,
-    DEFAULT_ENABLED_SOURCES,
 } from '../src/shared/core/constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,8 +23,6 @@ const actionIcons = {
     16: 'extension/assets/icons/icon-16.png',
     32: 'extension/assets/icons/icon-32.png',
 };
-const defaultEnabledSources = new Set(DEFAULT_ENABLED_SOURCES);
-
 const browserConfigs = {
     chrome: {
         outputDir: path.join(distRoot, 'chrome'),
@@ -60,10 +57,7 @@ function getHostPermissions() {
     const permissions = CHATBOT_TARGETS.flatMap((target) => {
         return target.hostnames.map((hostname) => `https://${hostname}/*`);
     });
-
-    if (defaultEnabledSources.has('leetcode')) {
-        permissions.push(leetCodePattern);
-    }
+    permissions.push(leetCodePattern);
 
     return [...new Set(permissions)];
 }

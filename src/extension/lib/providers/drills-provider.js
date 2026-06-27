@@ -1,4 +1,5 @@
 import { ChallengeProvider } from '../../../shared/core/challenge-provider.js';
+import { SOURCE_LABELS } from '../../../shared/core/constants.js';
 
 const difficultyBuckets = {
     easy: new Set([1, 2]),
@@ -101,6 +102,7 @@ class DrillsProvider extends ChallengeProvider {
         return {
             ...drill,
             source: this.source,
+            source_label: SOURCE_LABELS.drills,
             slug: drill.id,
             title: drill.prompt,
             supports_verification: true,

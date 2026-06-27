@@ -1,4 +1,5 @@
 import {
+    CHALLENGE_SOURCES,
     CHATBOT_TARGETS,
     DEFAULT_ENABLED_SOURCES,
     INSTALL_ID_PREFIX,
@@ -19,12 +20,19 @@ import {
     normalizeStreakState,
     recordSolve,
 } from '../../shared/core/streak.js';
+import drillsProvider from '../lib/providers/drills-provider.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
+import mcqProvider from '../lib/providers/mcq-provider.js';
 
 (function backgroundWorker() {
     const browserApi = globalThis.browser ?? globalThis.chrome;
     const RECENT_CHALLENGE_WINDOW = 5;
     const LEETCODE_STALENESS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+    const providers = {
+        mcq: mcqProvider,
+        drills: drillsProvider,
+        leetcode: leetcodeProvider,
+    };
     let ensureInstallStatePromise = null;
 
     function isPromise(value) {
@@ -124,11 +132,27 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             .filter(Boolean);
     }
 
+    function getSupportedSources() {
+        return CHALLENGE_SOURCES.map((source) => ({
+            ...source,
+            isAvailable: Boolean(providers[source.id]),
+        }));
+    }
+
+    function getAllowedEnabledSources(value = DEFAULT_ENABLED_SOURCES) {
+        const requestedSources = Array.isArray(value) ? value : DEFAULT_ENABLED_SOURCES;
+        const enabledSources = requestedSources.filter((sourceId) => providers[sourceId]);
+        return enabledSources.length
+            ? [...new Set(enabledSources)]
+            : DEFAULT_ENABLED_SOURCES.filter((sourceId) => providers[sourceId]);
+    }
+
     async function ensureInstallStateInner() {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
+            STORAGE_KEYS.ENABLED_SOURCES,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -151,6 +175,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
         if (!Array.isArray(stored[STORAGE_KEYS.ENABLED_TARGET_IDS])) {
             updates[STORAGE_KEYS.ENABLED_TARGET_IDS] = getDefaultEnabledTargetIds();
+        }
+
+        if (!Array.isArray(stored[STORAGE_KEYS.ENABLED_SOURCES])) {
+            updates[STORAGE_KEYS.ENABLED_SOURCES] = getAllowedEnabledSources();
         }
 
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
@@ -237,6 +265,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
+            STORAGE_KEYS.ENABLED_SOURCES,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -250,7 +279,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
     }
 
     function getLeetCodeDetectionWarning(stored) {
-        if (!DEFAULT_ENABLED_SOURCES.includes('leetcode')) {
+        if (!getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]).includes('leetcode')) {
             return '';
         }
 
@@ -271,7 +300,9 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         }
 
         const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
-        const challenge = await leetcodeProvider.getChallenge({
+        const enabledSources = getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]);
+        const provider = providers[enabledSources[Math.floor(Math.random() * enabledSources.length)]];
+        const challenge = await provider.getChallenge({
             recentSlugs,
             difficulty: getChatbotDifficultyByUrl(targetUrl),
         });
@@ -337,6 +368,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             session: await getSessionInfo(),
             currentChallenge: stored[STORAGE_KEYS.CURRENT_CHALLENGE] || null,
             enabledTargetIds: stored[STORAGE_KEYS.ENABLED_TARGET_IDS] || getDefaultEnabledTargetIds(),
+            enabledSources: getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]),
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
@@ -349,6 +381,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             graceDaysRemaining: streakState.graceDaysRemaining,
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
+            supportedSources: getSupportedSources(),
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
             messageFailureCount: Number(stored[STORAGE_KEYS.MESSAGE_FAILURE_COUNT] || 0),
             leetcodeDetectionWarning: getLeetCodeDetectionWarning(stored),
@@ -361,6 +394,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         if (Array.isArray(payload?.enabledTargetIds)) {
             const allowedTargetIds = new Set(CHATBOT_TARGETS.map((target) => target.id));
             updates[STORAGE_KEYS.ENABLED_TARGET_IDS] = payload.enabledTargetIds.filter((targetId) => allowedTargetIds.has(targetId));
+        }
+
+        if (Array.isArray(payload?.enabledSources)) {
+            updates[STORAGE_KEYS.ENABLED_SOURCES] = getAllowedEnabledSources(payload.enabledSources);
         }
 
         if (typeof payload?.isPaused === 'boolean') {
@@ -382,13 +419,14 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         return getDashboardState();
     }
 
-    async function grantAccess(source, slug) {
+    async function grantAccess(message) {
         const stored = await getStoredState();
         const currentChallenge = stored[STORAGE_KEYS.CURRENT_CHALLENGE];
+        const provider = currentChallenge ? providers[currentChallenge.source] : null;
 
-        if (!currentChallenge || currentChallenge.source !== source || currentChallenge.slug !== slug) {
+        if (!currentChallenge || currentChallenge.source !== message.source || currentChallenge.slug !== message.slug || !provider) {
             const expectedSlug = currentChallenge?.slug || '';
-            const expectedSource = currentChallenge?.source_label || currentChallenge?.source || source;
+            const expectedSource = currentChallenge?.source_label || currentChallenge?.source || message.source;
             await setStorageValues({
                 [STORAGE_KEYS.UI_MESSAGE]: expectedSlug
                     ? `Wrong problem - solve ${expectedSlug} from ${expectedSource}.`
@@ -403,13 +441,35 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             };
         }
 
+        const verification = await provider.verify(
+            currentChallenge,
+            currentChallenge.source === 'leetcode' ? message : message.submission,
+        );
+
+        if (!verification.ok) {
+            await setStorageValues({
+                [STORAGE_KEYS.UI_MESSAGE]: verification.message || 'Challenge answer did not verify.',
+            });
+
+            return {
+                success: false,
+                error: 'VERIFY_FAILED',
+                ...verification,
+                state: await getDashboardState(),
+            };
+        }
+
         await startSession();
         const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE]);
-        await setStorageValues({
-            [STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP]: Date.now(),
+        const updates = {
             [STORAGE_KEYS.STREAK_STATE]: streakState,
-        });
-        await clearChallenge('Accepted on LeetCode. Dorso is standing down for the selected session duration.');
+        };
+        if (currentChallenge.source === 'leetcode') {
+            updates[STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP] = Date.now();
+        }
+
+        await setStorageValues(updates);
+        await clearChallenge(`Accepted on ${currentChallenge.source_label || currentChallenge.source}. Dorso is standing down for the selected session duration.`);
 
         return {
             success: true,
@@ -466,8 +526,8 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             case MESSAGE_ACTIONS.EMERGENCY_BYPASS:
                 return useEmergencyBypass();
             case MESSAGE_ACTIONS.SUBMISSION_RESULT:
-                if (message.success && message.source === 'leetcode' && message.slug) {
-                    return grantAccess('leetcode', message.slug);
+                if (message.source && message.slug) {
+                    return grantAccess(message);
                 }
                 return { success: false };
             case MESSAGE_ACTIONS.CLEAR_UI_MESSAGE:

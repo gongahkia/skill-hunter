@@ -330,14 +330,6 @@
         const chipRow = createElement('div', { className: 'dorso-chip-row' });
         const actionRow = createElement('div', { className: 'dorso-actions' });
         const list = createElement('ul', { className: 'dorso-list' });
-        const openLink = createElement('a', {
-            className: 'dorso-link dorso-link-primary',
-            text: 'Open Challenge',
-        });
-
-        openLink.href = challenge.url;
-        openLink.target = '_blank';
-        openLink.rel = 'noreferrer';
 
         (challenge.topic_tags || []).forEach((tag) => {
             chipRow.append(createElement('span', {
@@ -346,22 +338,33 @@
             }));
         });
 
+        const verificationCopy = challenge.source === 'leetcode'
+            ? 'The overlay disappears automatically once LeetCode reports an accepted submission for this exact problem.'
+            : 'The overlay disappears after the local answer verifies.';
         [
-            'The overlay disappears automatically once LeetCode reports an accepted submission for this exact problem.',
+            verificationCopy,
             'Use the Dorso toolbar popup to change which supported sites stay protected.',
             'Unsupported websites are left untouched.',
         ].forEach((item) => {
             list.append(createElement('li', { text: item }));
         });
 
-        actionRow.append(
-            openLink,
-            createElement('button', {
-                className: 'dorso-button dorso-button-secondary',
-                id: 'dorsoSwapButton',
-                text: 'Get Another',
-            }),
-        );
+        if (challenge.url) {
+            const openLink = createElement('a', {
+                className: 'dorso-link dorso-link-primary',
+                text: 'Open Challenge',
+            });
+            openLink.href = challenge.url;
+            openLink.target = '_blank';
+            openLink.rel = 'noreferrer';
+            actionRow.append(openLink);
+        }
+
+        actionRow.append(createElement('button', {
+            className: 'dorso-button dorso-button-secondary',
+            id: 'dorsoSwapButton',
+            text: 'Get Another',
+        }));
 
         if (Number(state.emergencyBypassesRemaining) > 0) {
             actionRow.append(createElement('button', {
@@ -398,7 +401,7 @@
             createElement('h2', { text: challenge.title }),
             createElement('p', {
                 className: 'dorso-meta',
-                text: `LeetCode • ${challenge.difficulty}`,
+                text: `${challenge.source_label || challenge.source} • ${challenge.difficulty}`,
             }),
             createElement('p', {
                 className: 'dorso-note',
@@ -406,6 +409,63 @@
             }),
             chipRow,
         );
+
+        if (challenge.source === 'mcq') {
+            const mcqForm = createElement('form', { className: 'dorso-intent' });
+            (challenge.choices || []).forEach((choice, index) => {
+                const label = createElement('label');
+                const input = createElement('input');
+                input.type = 'radio';
+                input.name = 'dorsoMcqAnswer';
+                input.value = String(index);
+                label.append(input, document.createTextNode(` ${choice}`));
+                mcqForm.append(label);
+            });
+            mcqForm.append(createElement('button', {
+                className: 'dorso-button dorso-button-secondary',
+                text: 'Submit Answer',
+            }));
+            mcqForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const selected = mcqForm.querySelector('input[name="dorsoMcqAnswer"]:checked');
+                if (!selected) {
+                    return;
+                }
+
+                await sendMessage({
+                    action: 'submissionResult',
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: Number(selected.value),
+                });
+                await loadState();
+            });
+            challengeCard.append(mcqForm);
+        }
+
+        if (challenge.source === 'drills') {
+            const drillForm = createElement('form', { className: 'dorso-intent' });
+            const drillTextarea = createElement('textarea');
+            drillTextarea.rows = 3;
+            drillForm.append(
+                drillTextarea,
+                createElement('button', {
+                    className: 'dorso-button dorso-button-secondary',
+                    text: 'Submit Answer',
+                }),
+            );
+            drillForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                await sendMessage({
+                    action: 'submissionResult',
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: drillTextarea.value,
+                });
+                await loadState();
+            });
+            challengeCard.append(drillForm);
+        }
 
         panel.append(
             createElement('p', { className: 'dorso-kicker', text: 'Selected Site Blocked' }),
@@ -415,7 +475,7 @@
             }),
             createElement('p', {
                 className: 'dorso-copy',
-                text: 'This public-store build keeps everything local. Dorso only reads the supported site list, stores your timer in extension storage, and watches LeetCode for an accepted submission on the assigned problem.',
+                text: 'This public-store build keeps runtime state local. Dorso reads the supported site list, stores timers in extension storage, and verifies the assigned challenge source.',
             }),
         );
 

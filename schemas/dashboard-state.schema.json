@@ -10,6 +10,7 @@
     "session",
     "currentChallenge",
     "enabledTargetIds",
+    "enabledSources",
     "sessionDurationMinutes",
     "emergencyBypassesPerWeek",
     "bypassesThisWeek",
@@ -20,6 +21,7 @@
     "graceDaysRemaining",
     "isPaused",
     "supportedTargets",
+    "supportedSources",
     "uiMessage",
     "messageFailureCount",
     "leetcodeDetectionWarning"
@@ -107,6 +109,12 @@
         "type": "string"
       }
     },
+    "enabledSources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "sessionDurationMinutes": {
       "type": "number",
       "minimum": 1
@@ -172,6 +180,25 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      }
+    },
+    "supportedSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "label", "isAvailable"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "isAvailable": {
+            "type": "boolean"
           }
         }
       }

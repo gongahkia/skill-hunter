@@ -109,9 +109,19 @@ export const SOURCE_LABELS = {
     mcq: 'MCQ',
     drills: 'Drills',
     leetcode: 'LeetCode',
+    aoc: 'Advent of Code',
+    euler: 'Project Euler',
 };
 
-export const DEFAULT_ENABLED_SOURCES = ['leetcode'];
+export const CHALLENGE_SOURCES = [
+    { id: 'mcq', label: SOURCE_LABELS.mcq },
+    { id: 'drills', label: SOURCE_LABELS.drills },
+    { id: 'leetcode', label: SOURCE_LABELS.leetcode },
+    { id: 'aoc', label: SOURCE_LABELS.aoc },
+    { id: 'euler', label: SOURCE_LABELS.euler },
+];
+
+export const DEFAULT_ENABLED_SOURCES = ['mcq', 'drills'];
 
 export const LOCAL_CHALLENGES = [
     { slug: 'two-sum', title: 'Two Sum', difficulty: 'Easy', topic_tags: ['Array', 'Hash Table'] },
@@ -138,6 +148,7 @@ export const STORAGE_KEYS = {
     RECENT_CHALLENGE_SLUGS: 'recentChallengeSlugs',
     STREAK_STATE: 'streakState',
     ENABLED_TARGET_IDS: 'enabledTargetIds',
+    ENABLED_SOURCES: 'ENABLED_SOURCES',
     SESSION_DURATION_MS_PREF: 'SESSION_DURATION_MS_PREF',
     EMERGENCY_BYPASSES_PER_WEEK: 'EMERGENCY_BYPASSES_PER_WEEK',
     BYPASS_WEEK_START: 'BYPASS_WEEK_START',

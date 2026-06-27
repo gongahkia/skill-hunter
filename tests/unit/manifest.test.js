@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import test from 'node:test';
-import {
-    CHATBOT_TARGETS,
-    DEFAULT_ENABLED_SOURCES,
-} from '../../src/shared/core/constants.js';
+import { CHATBOT_TARGETS } from '../../src/shared/core/constants.js';
 
 const browsers = ['chrome', 'firefox', 'safari'];
 const requiredFields = [
@@ -26,7 +23,7 @@ const expectedHostPermissions = [
     ...CHATBOT_TARGETS.flatMap((target) => {
         return target.hostnames.map((hostname) => `https://${hostname}/*`);
     }),
-    ...(DEFAULT_ENABLED_SOURCES.includes('leetcode') ? [leetCodePattern] : []),
+    leetCodePattern,
 ];
 const packageJson = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
 
