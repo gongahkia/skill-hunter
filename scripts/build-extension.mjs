@@ -166,6 +166,11 @@ async function buildBrowser(browser) {
         recursive: true,
         filter: sharedFilter,
     });
+    if (await exists(path.join(sharedRoot, 'data'))) {
+        await cp(path.join(sharedRoot, 'data'), path.join(config.outputDir, 'data'), {
+            recursive: true,
+        });
+    }
     await writeFile(
         path.join(config.outputDir, 'manifest.json'),
         `${JSON.stringify(getManifest(browser), null, 2)}\n`,
