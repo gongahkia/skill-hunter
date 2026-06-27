@@ -494,7 +494,7 @@ async function loadState() {
     latestState = response.state;
     latestWhatIAsked = await getWhatIAskedEntries();
 
-    setMessage(latestState.uiMessage, latestState.hasActiveSession);
+    setMessage(latestState.uiMessage || latestState.leetcodeDetectionWarning, latestState.hasActiveSession && !latestState.leetcodeDetectionWarning);
     renderStatus(latestState);
     renderChallenge(latestState);
     renderControls(latestState);

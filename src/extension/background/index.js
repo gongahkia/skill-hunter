@@ -1,5 +1,6 @@
 import {
     CHATBOT_TARGETS,
+    DEFAULT_ENABLED_SOURCES,
     INSTALL_ID_PREFIX,
     MESSAGE_ACTIONS,
     SESSION_DURATION_MS,
@@ -13,6 +14,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 (function backgroundWorker() {
     const browserApi = globalThis.browser ?? globalThis.chrome;
     const RECENT_CHALLENGE_WINDOW = 5;
+    const LEETCODE_STALENESS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
     let ensureInstallStatePromise = null;
 
     function isPromise(value) {
@@ -200,9 +202,26 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
+            STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP,
+            STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.UI_MESSAGE,
         ]);
+    }
+
+    function getLeetCodeDetectionWarning(stored) {
+        if (!DEFAULT_ENABLED_SOURCES.includes('leetcode')) {
+            return '';
+        }
+
+        const lastSubmission = stored[STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP];
+        const firstStorageWrite = stored[STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP];
+        const referenceTimestamp = Number(lastSubmission || firstStorageWrite || Date.now());
+        if (Date.now() - referenceTimestamp <= LEETCODE_STALENESS_WINDOW_MS) {
+            return '';
+        }
+
+        return 'LeetCode detection may be broken. Try a different source.';
     }
 
     async function persistChallenge(force) {
@@ -275,6 +294,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
+            leetcodeDetectionWarning: getLeetCodeDetectionWarning(stored),
         };
     }
 
@@ -323,6 +343,9 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         }
 
         await startSession(currentChallenge);
+        await setStorageValues({
+            [STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP]: Date.now(),
+        });
         await clearChallenge('Accepted on LeetCode. Dorso is standing down for the selected session duration.');
 
         return {
