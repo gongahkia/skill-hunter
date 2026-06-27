@@ -158,6 +158,7 @@ export const STORAGE_KEYS = {
     LAST_LC_SUBMISSION_TIMESTAMP: 'LAST_LC_SUBMISSION_TIMESTAMP',
     MESSAGE_FAILURE_COUNT: 'messageFailureCount',
     IS_PAUSED: 'isPaused',
+    ONBOARDING_COMPLETED: 'onboardingCompleted',
     UI_MESSAGE: 'uiMessage',
 };
 

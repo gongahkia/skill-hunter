@@ -23,6 +23,7 @@ function validState() {
         longestRun: 0,
         graceDaysRemaining: 1,
         isPaused: false,
+        hasCompletedOnboarding: true,
         supportedTargets: [{
             id: 'chatgpt',
             label: 'ChatGPT',

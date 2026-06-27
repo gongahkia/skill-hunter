@@ -21,6 +21,7 @@
     "longestRun",
     "graceDaysRemaining",
     "isPaused",
+    "hasCompletedOnboarding",
     "supportedTargets",
     "supportedSources",
     "uiMessage",
@@ -180,6 +181,9 @@
       "minimum": 0
     },
     "isPaused": {
+      "type": "boolean"
+    },
+    "hasCompletedOnboarding": {
       "type": "boolean"
     },
     "supportedTargets": {

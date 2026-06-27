@@ -1,7 +1,7 @@
 "use strict";
 export const validate = validate20;
 export default validate20;
-const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","supportedTargets","supportedSources","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
+const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","hasCompletedOnboarding","supportedTargets","supportedSources","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"hasCompletedOnboarding":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
 
 function validate20(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 /*# sourceURL="https://dorso.dev/schemas/dashboard-state.schema.json" */;
@@ -17,7 +17,7 @@ evaluated0.items = undefined;
 if(errors === 0){
 if(data && typeof data == "object" && !Array.isArray(data)){
 let missing0;
-if((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
+if(((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.hasCompletedOnboarding === undefined) && (missing0 = "hasCompletedOnboarding"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
 validate20.errors = [{instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: missing0},message:"must have required property '"+missing0+"'"}];
 return false;
 }
@@ -902,40 +902,40 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.supportedTargets !== undefined){
-let data39 = data.supportedTargets;
+if(data.hasCompletedOnboarding !== undefined){
 const _errs91 = errors;
-if(errors === _errs91){
-if(Array.isArray(data39)){
-var valid9 = true;
-const len3 = data39.length;
-for(let i3=0; i3<len3; i3++){
-let data40 = data39[i3];
+if(typeof data.hasCompletedOnboarding !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/hasCompletedOnboarding",schemaPath:"#/properties/hasCompletedOnboarding/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+return false;
+}
+var valid0 = _errs91 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
+if(data.supportedTargets !== undefined){
+let data40 = data.supportedTargets;
 const _errs93 = errors;
 if(errors === _errs93){
-if(data40 && typeof data40 == "object" && !Array.isArray(data40)){
+if(Array.isArray(data40)){
+var valid9 = true;
+const len3 = data40.length;
+for(let i3=0; i3<len3; i3++){
+let data41 = data40[i3];
+const _errs95 = errors;
+if(errors === _errs95){
+if(data41 && typeof data41 == "object" && !Array.isArray(data41)){
 let missing4;
-if((((data40.id === undefined) && (missing4 = "id")) || ((data40.label === undefined) && (missing4 = "label"))) || ((data40.matches === undefined) && (missing4 = "matches"))){
+if((((data41.id === undefined) && (missing4 = "id")) || ((data41.label === undefined) && (missing4 = "label"))) || ((data41.matches === undefined) && (missing4 = "matches"))){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3,schemaPath:"#/properties/supportedTargets/items/required",keyword:"required",params:{missingProperty: missing4},message:"must have required property '"+missing4+"'"}];
 return false;
 }
 else {
-if(data40.id !== undefined){
-const _errs96 = errors;
-if(typeof data40.id !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/id",schemaPath:"#/properties/supportedTargets/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
-return false;
-}
-var valid10 = _errs96 === errors;
-}
-else {
-var valid10 = true;
-}
-if(valid10){
-if(data40.label !== undefined){
+if(data41.id !== undefined){
 const _errs98 = errors;
-if(typeof data40.label !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/label",schemaPath:"#/properties/supportedTargets/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+if(typeof data41.id !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/id",schemaPath:"#/properties/supportedTargets/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid10 = _errs98 === errors;
@@ -944,20 +944,32 @@ else {
 var valid10 = true;
 }
 if(valid10){
-if(data40.hostnames !== undefined){
-let data43 = data40.hostnames;
+if(data41.label !== undefined){
 const _errs100 = errors;
-if(errors === _errs100){
-if(Array.isArray(data43)){
-var valid11 = true;
-const len4 = data43.length;
-for(let i4=0; i4<len4; i4++){
+if(typeof data41.label !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/label",schemaPath:"#/properties/supportedTargets/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+return false;
+}
+var valid10 = _errs100 === errors;
+}
+else {
+var valid10 = true;
+}
+if(valid10){
+if(data41.hostnames !== undefined){
+let data44 = data41.hostnames;
 const _errs102 = errors;
-if(typeof data43[i4] !== "string"){
+if(errors === _errs102){
+if(Array.isArray(data44)){
+var valid11 = true;
+const len4 = data44.length;
+for(let i4=0; i4<len4; i4++){
+const _errs104 = errors;
+if(typeof data44[i4] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/hostnames/" + i4,schemaPath:"#/properties/supportedTargets/items/properties/hostnames/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid11 = _errs102 === errors;
+var valid11 = _errs104 === errors;
 if(!valid11){
 break;
 }
@@ -968,26 +980,26 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/host
 return false;
 }
 }
-var valid10 = _errs100 === errors;
+var valid10 = _errs102 === errors;
 }
 else {
 var valid10 = true;
 }
 if(valid10){
-if(data40.pathPrefixes !== undefined){
-let data45 = data40.pathPrefixes;
-const _errs104 = errors;
-if(errors === _errs104){
-if(Array.isArray(data45)){
-var valid12 = true;
-const len5 = data45.length;
-for(let i5=0; i5<len5; i5++){
+if(data41.pathPrefixes !== undefined){
+let data46 = data41.pathPrefixes;
 const _errs106 = errors;
-if(typeof data45[i5] !== "string"){
+if(errors === _errs106){
+if(Array.isArray(data46)){
+var valid12 = true;
+const len5 = data46.length;
+for(let i5=0; i5<len5; i5++){
+const _errs108 = errors;
+if(typeof data46[i5] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/pathPrefixes/" + i5,schemaPath:"#/properties/supportedTargets/items/properties/pathPrefixes/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid12 = _errs106 === errors;
+var valid12 = _errs108 === errors;
 if(!valid12){
 break;
 }
@@ -998,26 +1010,26 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/path
 return false;
 }
 }
-var valid10 = _errs104 === errors;
+var valid10 = _errs106 === errors;
 }
 else {
 var valid10 = true;
 }
 if(valid10){
-if(data40.matches !== undefined){
-let data47 = data40.matches;
-const _errs108 = errors;
-if(errors === _errs108){
-if(Array.isArray(data47)){
-var valid13 = true;
-const len6 = data47.length;
-for(let i6=0; i6<len6; i6++){
+if(data41.matches !== undefined){
+let data48 = data41.matches;
 const _errs110 = errors;
-if(typeof data47[i6] !== "string"){
+if(errors === _errs110){
+if(Array.isArray(data48)){
+var valid13 = true;
+const len6 = data48.length;
+for(let i6=0; i6<len6; i6++){
+const _errs112 = errors;
+if(typeof data48[i6] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/matches/" + i6,schemaPath:"#/properties/supportedTargets/items/properties/matches/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid13 = _errs110 === errors;
+var valid13 = _errs112 === errors;
 if(!valid13){
 break;
 }
@@ -1028,7 +1040,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3+"/matc
 return false;
 }
 }
-var valid10 = _errs108 === errors;
+var valid10 = _errs110 === errors;
 }
 else {
 var valid10 = true;
@@ -1044,7 +1056,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i3,schema
 return false;
 }
 }
-var valid9 = _errs93 === errors;
+var valid9 = _errs95 === errors;
 if(!valid9){
 break;
 }
@@ -1055,46 +1067,34 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets",schemaPath:"
 return false;
 }
 }
-var valid0 = _errs91 === errors;
+var valid0 = _errs93 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.supportedSources !== undefined){
-let data49 = data.supportedSources;
-const _errs112 = errors;
-if(errors === _errs112){
-if(Array.isArray(data49)){
-var valid14 = true;
-const len7 = data49.length;
-for(let i7=0; i7<len7; i7++){
-let data50 = data49[i7];
+let data50 = data.supportedSources;
 const _errs114 = errors;
 if(errors === _errs114){
-if(data50 && typeof data50 == "object" && !Array.isArray(data50)){
+if(Array.isArray(data50)){
+var valid14 = true;
+const len7 = data50.length;
+for(let i7=0; i7<len7; i7++){
+let data51 = data50[i7];
+const _errs116 = errors;
+if(errors === _errs116){
+if(data51 && typeof data51 == "object" && !Array.isArray(data51)){
 let missing5;
-if((((data50.id === undefined) && (missing5 = "id")) || ((data50.label === undefined) && (missing5 = "label"))) || ((data50.isAvailable === undefined) && (missing5 = "isAvailable"))){
+if((((data51.id === undefined) && (missing5 = "id")) || ((data51.label === undefined) && (missing5 = "label"))) || ((data51.isAvailable === undefined) && (missing5 = "isAvailable"))){
 validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7,schemaPath:"#/properties/supportedSources/items/required",keyword:"required",params:{missingProperty: missing5},message:"must have required property '"+missing5+"'"}];
 return false;
 }
 else {
-if(data50.id !== undefined){
-const _errs117 = errors;
-if(typeof data50.id !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/id",schemaPath:"#/properties/supportedSources/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
-return false;
-}
-var valid15 = _errs117 === errors;
-}
-else {
-var valid15 = true;
-}
-if(valid15){
-if(data50.label !== undefined){
+if(data51.id !== undefined){
 const _errs119 = errors;
-if(typeof data50.label !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/label",schemaPath:"#/properties/supportedSources/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+if(typeof data51.id !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/id",schemaPath:"#/properties/supportedSources/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid15 = _errs119 === errors;
@@ -1103,13 +1103,25 @@ else {
 var valid15 = true;
 }
 if(valid15){
-if(data50.isAvailable !== undefined){
+if(data51.label !== undefined){
 const _errs121 = errors;
-if(typeof data50.isAvailable !== "boolean"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/isAvailable",schemaPath:"#/properties/supportedSources/items/properties/isAvailable/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+if(typeof data51.label !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/label",schemaPath:"#/properties/supportedSources/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid15 = _errs121 === errors;
+}
+else {
+var valid15 = true;
+}
+if(valid15){
+if(data51.isAvailable !== undefined){
+const _errs123 = errors;
+if(typeof data51.isAvailable !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7+"/isAvailable",schemaPath:"#/properties/supportedSources/items/properties/isAvailable/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+return false;
+}
+var valid15 = _errs123 === errors;
 }
 else {
 var valid15 = true;
@@ -1123,7 +1135,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i7,schema
 return false;
 }
 }
-var valid14 = _errs114 === errors;
+var valid14 = _errs116 === errors;
 if(!valid14){
 break;
 }
@@ -1134,30 +1146,30 @@ validate20.errors = [{instancePath:instancePath+"/supportedSources",schemaPath:"
 return false;
 }
 }
-var valid0 = _errs112 === errors;
+var valid0 = _errs114 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.uiMessage !== undefined){
-const _errs123 = errors;
+const _errs125 = errors;
 if(typeof data.uiMessage !== "string"){
 validate20.errors = [{instancePath:instancePath+"/uiMessage",schemaPath:"#/properties/uiMessage/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid0 = _errs123 === errors;
+var valid0 = _errs125 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.messageFailureCount !== undefined){
-let data55 = data.messageFailureCount;
-const _errs125 = errors;
-if(errors === _errs125){
-if(typeof data55 == "number"){
-if(data55 < 0 || isNaN(data55)){
+let data56 = data.messageFailureCount;
+const _errs127 = errors;
+if(errors === _errs127){
+if(typeof data56 == "number"){
+if(data56 < 0 || isNaN(data56)){
 validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
 return false;
 }
@@ -1167,22 +1179,23 @@ validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPat
 return false;
 }
 }
-var valid0 = _errs125 === errors;
+var valid0 = _errs127 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.leetcodeDetectionWarning !== undefined){
-const _errs127 = errors;
+const _errs129 = errors;
 if(typeof data.leetcodeDetectionWarning !== "string"){
 validate20.errors = [{instancePath:instancePath+"/leetcodeDetectionWarning",schemaPath:"#/properties/leetcodeDetectionWarning/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid0 = _errs127 === errors;
+var valid0 = _errs129 === errors;
 }
 else {
 var valid0 = true;
+}
 }
 }
 }

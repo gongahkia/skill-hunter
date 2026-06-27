@@ -30,6 +30,15 @@ let countdownTimer = null;
 let latestState = null;
 let latestWhatIAsked = [];
 const redactedWhatIAskedTimestamps = new Set();
+const mainPanelIds = [
+    'statusPanel',
+    'challengePanel',
+    'controlPanel',
+    'badgePanel',
+    'sourcesPanel',
+    'sitesPanel',
+    'disclosurePanel',
+];
 
 function clearTimers() {
     if (countdownTimer) {
@@ -40,6 +49,13 @@ function clearTimers() {
 
 function resetPanel(panel) {
     panel.replaceChildren();
+}
+
+function setMainPanelsHidden(hidden) {
+    mainPanelIds.forEach((panelId) => {
+        document.getElementById(panelId).hidden = hidden;
+    });
+    document.getElementById('sharePanel').hidden = true;
 }
 
 function createElement(tagName, options = {}) {
@@ -330,7 +346,7 @@ function renderStatus(state) {
         createElement('p', {
             text: state.isPaused
                 ? 'Protected chatbot sites are temporarily open until you resume Dorso.'
-                : 'Visit a selected chatbot site and Dorso will require an accepted LeetCode submission before the page becomes usable.',
+                : 'Visit a selected chatbot site and Dorso will require challenge verification before the page becomes usable.',
         }),
         createRunMetrics(state),
     );
@@ -359,6 +375,25 @@ function renderChallenge(state) {
         return;
     }
 
+    const buttons = [
+        createButton({
+            label: 'Get Another',
+            className: 'button-secondary',
+            id: 'refreshChallengeButton',
+            onClick: () => startChallenge(true),
+        }),
+    ];
+    if (challenge.url) {
+        buttons.unshift(createButton({
+            label: 'Open Challenge',
+            className: 'button-primary',
+            id: 'openChallengeButton',
+            onClick: () => {
+                window.open(challenge.url, '_blank', 'noopener,noreferrer');
+            },
+        }));
+    }
+
     panel.append(
         createSectionHead(
             challenge.title,
@@ -366,22 +401,7 @@ function renderChallenge(state) {
         ),
         createElement('p', { text: challenge.guidance }),
         createChipRow(challenge.topic_tags || []),
-        createButtonRow([
-            createButton({
-                label: 'Open On LeetCode',
-                className: 'button-primary',
-                id: 'openChallengeButton',
-                onClick: () => {
-                    window.open(challenge.url, '_blank', 'noopener,noreferrer');
-                },
-            }),
-            createButton({
-                label: 'Get Another',
-                className: 'button-secondary',
-                id: 'refreshChallengeButton',
-                onClick: () => startChallenge(true),
-            }),
-        ]),
+        createButtonRow(buttons),
     );
 }
 
@@ -624,7 +644,104 @@ function renderSources(state) {
     };
 }
 
+function createOnboardingStep(title, copy) {
+    const panel = createElement('section', { className: 'panel' });
+    panel.append(createSectionHead(title, copy));
+    return panel;
+}
+
+function appendSourceCheckboxes(panel, state) {
+    const enabledSources = new Set(state.enabledSources || []);
+    const checkboxGrid = createElement('div', { className: 'checkbox-grid' });
+    state.supportedSources.forEach((source) => {
+        const label = createElement('label', { className: 'checkbox-card' });
+        const checkbox = createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'enabledSources';
+        checkbox.value = source.id;
+        checkbox.checked = enabledSources.has(source.id);
+        checkbox.disabled = !source.isAvailable;
+        label.append(checkbox, createElement('span', {
+            text: source.isAvailable ? source.label : `${source.label} (coming soon)`,
+        }));
+        checkboxGrid.append(label);
+    });
+    panel.append(checkboxGrid);
+}
+
+function appendTargetCheckboxes(panel, state) {
+    const enabledTargetIds = new Set(state.enabledTargetIds || []);
+    const checkboxGrid = createElement('div', { className: 'checkbox-grid' });
+    state.supportedTargets.forEach((target) => {
+        const label = createElement('label', { className: 'checkbox-card' });
+        const checkbox = createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'enabledTargetIds';
+        checkbox.value = target.id;
+        checkbox.checked = enabledTargetIds.has(target.id);
+        label.append(checkbox, createElement('span', { text: target.label }));
+        checkboxGrid.append(label);
+    });
+    panel.append(checkboxGrid);
+}
+
+function renderOnboarding(state) {
+    const panel = document.getElementById('onboardingPanel');
+    resetPanel(panel);
+    panel.hidden = false;
+
+    const form = createElement('form', { className: 'onboarding-grid' });
+    const sourceStep = createOnboardingStep('Pick Sources', 'Choose which challenge pools Dorso can assign.');
+    const targetStep = createOnboardingStep('Pick Sites', 'Choose which chatbot domains Dorso should protect.');
+    const receiptStep = createOnboardingStep('Sample Receipt', 'A solve receipt appears after each verified unlock.');
+    const preview = createElement('img', { className: 'receipt-preview' });
+    preview.alt = 'Sample Dorso solve receipt';
+    preview.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderReceiptSvg({
+        problemTitle: 'Binary Search Drill',
+        sourceLabel: 'MCQ',
+        timeToSolveMs: 184000,
+        currentRun: 3,
+        cognitiveIndex: 82,
+    }))}`;
+
+    appendSourceCheckboxes(sourceStep, state);
+    appendTargetCheckboxes(targetStep, state);
+    receiptStep.append(
+        preview,
+        createButtonRow([
+            createButton({
+                label: 'Enter Dashboard',
+                className: 'button-primary',
+                type: 'submit',
+                onClick: () => {},
+            }),
+        ]),
+    );
+
+    form.append(sourceStep, targetStep, receiptStep);
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: {
+                enabledSources: formData.getAll('enabledSources'),
+                enabledTargetIds: formData.getAll('enabledTargetIds'),
+                hasCompletedOnboarding: true,
+            },
+        });
+        setMessage('Setup saved.', true);
+        await loadState();
+    };
+
+    panel.append(form);
+}
+
 function renderCorruptedStateFallback() {
+    setMainPanelsHidden(false);
+    const onboardingPanel = document.getElementById('onboardingPanel');
+    resetPanel(onboardingPanel);
+    onboardingPanel.hidden = true;
     ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
         resetPanel(document.getElementById(panelId));
     });
@@ -710,7 +827,7 @@ function renderDisclosure(entries = []) {
         },
         {
             title: 'Official problem pages',
-            copy: 'Dorso links to LeetCode directly instead of rehosting third-party problem statements inside the extension.',
+            copy: 'Dorso links to official challenge pages instead of rehosting third-party problem statements inside the extension.',
         },
     ].forEach((item) => {
         const row = createElement('div', { className: 'list-item' });
@@ -818,6 +935,18 @@ async function loadState() {
     latestState = response.state;
     latestWhatIAsked = await getWhatIAskedEntries();
 
+    if (!latestState.hasCompletedOnboarding) {
+        clearTimers();
+        setMessage('');
+        setMainPanelsHidden(true);
+        renderOnboarding(latestState);
+        return;
+    }
+
+    const onboardingPanel = document.getElementById('onboardingPanel');
+    resetPanel(onboardingPanel);
+    onboardingPanel.hidden = true;
+    setMainPanelsHidden(false);
     setMessage(latestState.uiMessage || latestState.leetcodeDetectionWarning, latestState.hasActiveSession && !latestState.leetcodeDetectionWarning);
     renderStatus(latestState);
     renderChallenge(latestState);

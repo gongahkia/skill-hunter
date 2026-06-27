@@ -161,8 +161,12 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
             STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.IS_PAUSED,
+            STORAGE_KEYS.ONBOARDING_COMPLETED,
         ]);
         const updates = {};
+        const hasExistingInstallState = Boolean(
+            stored[STORAGE_KEYS.INSTALL_ID] || stored[STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP],
+        );
         const emergencyBypassState = getEmergencyBypassState({
             limit: stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK],
             weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
@@ -205,6 +209,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (typeof stored[STORAGE_KEYS.IS_PAUSED] !== 'boolean') {
             updates[STORAGE_KEYS.IS_PAUSED] = false;
+        }
+
+        if (typeof stored[STORAGE_KEYS.ONBOARDING_COMPLETED] !== 'boolean') {
+            updates[STORAGE_KEYS.ONBOARDING_COMPLETED] = hasExistingInstallState;
         }
 
         if (Object.keys(updates).length > 0) {
@@ -277,6 +285,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.MESSAGE_FAILURE_COUNT,
             STORAGE_KEYS.IS_PAUSED,
+            STORAGE_KEYS.ONBOARDING_COMPLETED,
             STORAGE_KEYS.UI_MESSAGE,
         ]);
     }
@@ -383,6 +392,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             longestRun: streakState.longestRun,
             graceDaysRemaining: streakState.graceDaysRemaining,
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
+            hasCompletedOnboarding: Boolean(stored[STORAGE_KEYS.ONBOARDING_COMPLETED]),
             supportedTargets: CHATBOT_TARGETS,
             supportedSources: getSupportedSources(),
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
@@ -405,6 +415,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (typeof payload?.isPaused === 'boolean') {
             updates[STORAGE_KEYS.IS_PAUSED] = payload.isPaused;
+        }
+
+        if (typeof payload?.hasCompletedOnboarding === 'boolean') {
+            updates[STORAGE_KEYS.ONBOARDING_COMPLETED] = payload.hasCompletedOnboarding;
         }
 
         if (SESSION_DURATION_MS_OPTIONS.includes(payload?.sessionDurationMsPref)) {

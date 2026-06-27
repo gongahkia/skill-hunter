@@ -111,6 +111,19 @@ a {
     backdrop-filter: blur(8px);
 }
 
+.onboarding-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.receipt-preview {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    background: var(--panel-strong);
+}
+
 .panel h2,
 .panel h3 {
     margin-top: 0;
