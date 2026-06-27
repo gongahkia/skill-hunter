@@ -9,7 +9,6 @@
 (A) 2026-06-26 Delete `archive/legacy-extension/` (v1.0-era Flask backend + old extensions; available in git history if needed). +Demolition @cleanup due:2026-06-29 id:07 dep:01
 (A) 2026-06-26 Delete `artifacts/dorso-firefox-2.1.0-source-staging-*/` directories (~18MB of node_modules-laden staging). Add `artifacts/*-staging-*` to `.gitignore`. Keep only `dorso-firefox-2.1.0-source-clean.zip`. +Demolition @cleanup due:2026-06-29 id:08 dep:01
 (A) 2026-06-26 Delete `tests/e2e/specs/backend-api.spec.js` (tests the deleted backend). Replaced by extension Playwright test in id:30. +Demolition @cleanup due:2026-06-29 id:09 dep:02
-(A) 2026-06-26 Delete `src/shared/api/backend-client.js` (already filtered at build via `scripts/build-extension.mjs:35`; zero runtime references in `src/extension/**`). +Demolition @cleanup due:2026-06-29 id:10 dep:02
 (A) 2026-06-26 Rewrite `.github/workflows/ci.yml`. Remove the `pytest backend` Python job entirely. Keep shared-js test job. New jobs added by id:26..31. +Demolition @ci due:2026-06-29 id:15 dep:02
 (A) 2026-06-26 Update `.pre-commit-config.yaml`. Remove Python-targeted hooks (black, flake8, isort, etc). Keep JS-focused hooks (prettier, eslint). +Demolition @ci due:2026-06-29 id:16 dep:02
 (A) 2026-06-26 Rewrite README.md Stack section. Remove: Python, Gunicorn, Django, Django REST, PostgreSQL, Redis, Prometheus, Grafana, structlog, Docker. Keep: JavaScript, Chrome/Firefox WebExtension APIs, Jest, Playwright, GitHub Actions. +Demolition @docs due:2026-07-03 id:17 dep:02
