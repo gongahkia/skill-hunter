@@ -308,6 +308,20 @@ input[type="text"] {
     font: inherit;
 }
 
+.snippet-field {
+    display: grid;
+    gap: 8px;
+}
+
+.snippet-field input {
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid rgba(25, 20, 17, 0.14);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px 14px;
+    font: inherit;
+}
+
 .list {
     display: grid;
     gap: 12px;

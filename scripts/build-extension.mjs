@@ -19,6 +19,7 @@ const distRoot = path.join(repoRoot, 'dist');
 const leetCodePattern = 'https://leetcode.com/problems/*';
 const iconPath = 'extension/assets/icons/icon-128.png';
 const firefoxAddonId = 'dorso-public-firefox@extensions.gongahkia.com';
+const badgeConfigPath = path.join('extension', 'lib', 'badge-config.js');
 const actionIcons = {
     16: 'extension/assets/icons/icon-16.png',
     32: 'extension/assets/icons/icon-32.png',
@@ -134,6 +135,13 @@ function getManifest(browser) {
     };
 }
 
+function getBadgeConfigSource() {
+    return `globalThis.DorsoBadgeConfig = ${JSON.stringify({
+        baseUrl: process.env.DORSO_BADGE_BASE_URL || 'https://dorso.dev',
+        hmacSecret: process.env.CF_HMAC_SECRET || '',
+    }, null, 4)};\n`;
+}
+
 async function exists(targetPath) {
   try {
     await stat(targetPath);
@@ -174,6 +182,11 @@ async function buildBrowser(browser) {
     await writeFile(
         path.join(config.outputDir, 'manifest.json'),
         `${JSON.stringify(getManifest(browser), null, 2)}\n`,
+        'utf8',
+    );
+    await writeFile(
+        path.join(config.outputDir, badgeConfigPath),
+        getBadgeConfigSource(),
         'utf8',
     );
 

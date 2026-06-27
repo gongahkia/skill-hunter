@@ -11,6 +11,7 @@ import {
     renderDigestMarkdown,
     renderDigestSvg,
 } from '../lib/digest-svg.js';
+import { createBadgeEmbeds } from '../lib/badge-url.js';
 import {
     getStorageValues,
     sendRuntimeMessage,
@@ -81,6 +82,18 @@ function createButtonRow(buttons) {
     const row = createElement('div', { className: 'button-row' });
     buttons.forEach((button) => row.append(button));
     return row;
+}
+
+function createSnippetField(label, value) {
+    const wrapper = createElement('label', { className: 'snippet-field' });
+    const input = createElement('input', { type: 'text' });
+    input.value = value;
+    input.readOnly = true;
+    wrapper.append(
+        createElement('span', { text: label }),
+        input,
+    );
+    return wrapper;
 }
 
 async function getWhatIAskedEntries() {
@@ -414,6 +427,50 @@ function renderSupportedSites(state) {
     };
 }
 
+async function renderBadge(state) {
+    const panel = document.getElementById('badgePanel');
+    resetPanel(panel);
+    const config = globalThis.DorsoBadgeConfig || {};
+    const embeds = await createBadgeEmbeds({
+        dashboardState: state,
+        secret: config.hmacSecret,
+        baseUrl: config.baseUrl,
+    });
+
+    panel.append(createSectionHead(
+        'Badge',
+        'Copy a signed Cognitive Index embed for README use.',
+    ));
+
+    if (!embeds.available) {
+        panel.append(createElement('p', { text: embeds.reason }));
+        return;
+    }
+
+    panel.append(
+        createSnippetField('Markdown', embeds.markdown),
+        createSnippetField('HTML', embeds.html),
+        createButtonRow([
+            createButton({
+                label: 'Copy Markdown',
+                className: 'button-primary',
+                onClick: async () => {
+                    await navigator.clipboard.writeText(embeds.markdown);
+                    setMessage('Badge markdown copied.', true);
+                },
+            }),
+            createButton({
+                label: 'Copy HTML',
+                className: 'button-secondary',
+                onClick: async () => {
+                    await navigator.clipboard.writeText(embeds.html);
+                    setMessage('Badge HTML copied.', true);
+                },
+            }),
+        ]),
+    );
+}
+
 function renderDisclosure(entries = []) {
     const panel = document.getElementById('disclosurePanel');
     resetPanel(panel);
@@ -537,6 +594,7 @@ async function loadState() {
     renderStatus(latestState);
     renderChallenge(latestState);
     renderControls(latestState);
+    await renderBadge(latestState);
     renderSupportedSites(latestState);
     renderDisclosure(latestWhatIAsked);
 }
