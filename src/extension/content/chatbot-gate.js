@@ -82,6 +82,8 @@
         sessionExpiryTimer = null;
     }
 
+    window.addEventListener('beforeunload', clearSessionExpiryTimer);
+
     function scheduleRelock(state) {
         clearSessionExpiryTimer();
 
