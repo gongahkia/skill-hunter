@@ -134,6 +134,7 @@ export const STORAGE_KEYS = {
     CURRENT_CHALLENGE: 'currentChallenge',
     CHALLENGE_STARTED_AT: 'challengeStartedAt',
     RECENT_CHALLENGE_SLUGS: 'recentChallengeSlugs',
+    STREAK_STATE: 'streakState',
     ENABLED_TARGET_IDS: 'enabledTargetIds',
     SESSION_DURATION_MS_PREF: 'SESSION_DURATION_MS_PREF',
     EMERGENCY_BYPASSES_PER_WEEK: 'EMERGENCY_BYPASSES_PER_WEEK',

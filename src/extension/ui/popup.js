@@ -183,6 +183,24 @@ function setMessage(message, success = false) {
     }));
 }
 
+function createRunMetrics(state) {
+    const tooltip = `${state.graceDaysRemaining ?? 0} grace day(s) remaining this week before a missed day breaks the run.`;
+    const metrics = createElement('div', { className: 'metrics' });
+    [
+        ['Current run', state.currentRun || 0],
+        ['Longest run', state.longestRun || 0],
+    ].forEach(([label, value]) => {
+        const metric = createElement('div', { className: 'metric' });
+        metric.title = tooltip;
+        metric.append(
+            createElement('span', { className: 'metric-label', text: label }),
+            createElement('span', { className: 'metric-value', text: String(value) }),
+        );
+        metrics.append(metric);
+    });
+    return metrics;
+}
+
 function renderStatus(state) {
     const panel = document.getElementById('statusPanel');
     resetPanel(panel);
@@ -202,6 +220,7 @@ function renderStatus(state) {
             createElement('h2', { text: 'Dorso is standing down.' }),
             createElement('p', { text: 'You can use protected chatbot sites until the timer expires.' }),
             countdownValue,
+            createRunMetrics(state),
         );
 
         clearTimers();
@@ -237,6 +256,7 @@ function renderStatus(state) {
                 ? 'Protected chatbot sites are temporarily open until you resume Dorso.'
                 : 'Visit a selected chatbot site and Dorso will require an accepted LeetCode submission before the page becomes usable.',
         }),
+        createRunMetrics(state),
     );
 }
 

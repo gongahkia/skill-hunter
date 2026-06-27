@@ -14,6 +14,11 @@ import {
     getEmergencyBypassState,
     normalizeEmergencyBypassLimit,
 } from '../../shared/core/emergency-bypass.js';
+import {
+    createStreakState,
+    normalizeStreakState,
+    recordSolve,
+} from '../../shared/core/streak.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
 (function backgroundWorker() {
@@ -128,6 +133,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
             STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
+            STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.IS_PAUSED,
         ]);
         const updates = {};
@@ -161,6 +167,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
         if (stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK] !== emergencyBypassState.used) {
             updates[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK] = emergencyBypassState.used;
+        }
+
+        if (!stored[STORAGE_KEYS.STREAK_STATE]) {
+            updates[STORAGE_KEYS.STREAK_STATE] = createStreakState();
         }
 
         if (typeof stored[STORAGE_KEYS.IS_PAUSED] !== 'boolean') {
@@ -225,6 +235,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.CURRENT_CHALLENGE,
             STORAGE_KEYS.CHALLENGE_STARTED_AT,
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
+            STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
@@ -318,6 +329,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
             used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
         });
+        const streakState = normalizeStreakState(stored[STORAGE_KEYS.STREAK_STATE]);
 
         return {
             installId: stored[STORAGE_KEYS.INSTALL_ID] || null,
@@ -332,6 +344,9 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             bypassesThisWeek: emergencyBypassState.used,
             emergencyBypassesRemaining: emergencyBypassState.remaining,
             bypassWeekStart: emergencyBypassState.weekStart,
+            currentRun: streakState.currentRun,
+            longestRun: streakState.longestRun,
+            graceDaysRemaining: streakState.graceDaysRemaining,
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
@@ -389,8 +404,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         }
 
         await startSession();
+        const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE]);
         await setStorageValues({
             [STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP]: Date.now(),
+            [STORAGE_KEYS.STREAK_STATE]: streakState,
         });
         await clearChallenge('Accepted on LeetCode. Dorso is standing down for the selected session duration.');
 

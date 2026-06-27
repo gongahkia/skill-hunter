@@ -17,6 +17,9 @@ function validState() {
         bypassesThisWeek: 0,
         emergencyBypassesRemaining: 2,
         bypassWeekStart: 1782432000000,
+        currentRun: 0,
+        longestRun: 0,
+        graceDaysRemaining: 1,
         isPaused: false,
         supportedTargets: [{
             id: 'chatgpt',
