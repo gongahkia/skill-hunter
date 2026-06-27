@@ -10,7 +10,7 @@
     "build:safari": "node scripts/build-extension.mjs safari",
     "sync:safari-wrapper": "node scripts/sync-safari-wrapper.mjs",
     "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
-    "test:unit": "node --test tests/unit/*.test.js",
+    "test:unit": "node --test --test-concurrency=1 tests/unit/*.test.js",
     "test:shared": "npm test -- --runInBand --silent --passWithNoTests",
     "test:e2e": "npm test -- --reporter=line"
   }
