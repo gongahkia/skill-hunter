@@ -1,15 +1,14 @@
 import {
     CHATBOT_TARGETS,
     INSTALL_ID_PREFIX,
-    LOCAL_CHALLENGES,
     MESSAGE_ACTIONS,
     SESSION_DURATION_MS,
     SESSION_DURATION_MS_OPTIONS,
     SESSION_DURATION_MINUTES,
-    SOURCE_LABELS,
     STORAGE_KEYS,
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
+import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
 (function backgroundWorker() {
     const browserApi = globalThis.browser ?? globalThis.chrome;
@@ -83,22 +82,6 @@ import {
 
     function getSessionDurationMinutes(durationMs) {
         return Math.round(getValidSessionDurationMs(durationMs) / 60000);
-    }
-
-    function normalizeChallenge(challenge) {
-        return {
-            source: 'leetcode',
-            source_label: SOURCE_LABELS.leetcode,
-            challenge_id: challenge.slug,
-            title: challenge.title,
-            slug: challenge.slug,
-            url: `https://leetcode.com/problems/${challenge.slug}/description/`,
-            difficulty: challenge.difficulty,
-            topic_tags: challenge.topic_tags,
-            guidance: 'Open the official LeetCode page to read the full prompt and submit your solution there.',
-            selection_mode: 'curated_local',
-            supports_verification: true,
-        };
     }
 
     function normalizeRecentChallengeSlugs(value) {
@@ -229,11 +212,7 @@ import {
         }
 
         const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
-        const candidatePool = LOCAL_CHALLENGES.filter((challenge) => {
-            return !recentSlugs.some((entry) => entry.source === 'leetcode' && entry.slug === challenge.slug);
-        });
-        const pool = candidatePool.length ? candidatePool : LOCAL_CHALLENGES;
-        const challenge = normalizeChallenge(pool[Math.floor(Math.random() * pool.length)]);
+        const challenge = await leetcodeProvider.getChallenge({ recentSlugs });
         const nextRecentSlugs = [
             {
                 source: challenge.source,
