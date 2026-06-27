@@ -62,7 +62,7 @@ Find `Dorso` on the [Chrome Web Store](https://chromewebstore.google.com) or [Fi
 | :--- | :--- | :--- |
 | Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/dorso/](https://addons.mozilla.org/en-US/firefox/addon/dorso/) |
 | Google Chrome | Coming soon (Chrome Web Store review in progress) | NIL |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
+| Safari | Deferred past v3.0 | NIL |
 
 ## Architecture
 

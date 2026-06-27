@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "node scripts/build-extension.mjs all",
+    "build": "npm run build:chrome && npm run build:firefox",
     "build:chrome": "node scripts/build-extension.mjs chrome",
     "build:firefox": "node scripts/build-extension.mjs firefox",
     "build:safari": "node scripts/build-extension.mjs safari",
