@@ -432,7 +432,7 @@
         shadowRoot.append(style, backdrop);
 
         shadowRoot.getElementById('dorsoSwapButton').addEventListener('click', async () => {
-            await sendMessage({ action: 'startChallenge', force: true });
+            await sendMessage({ action: 'startChallenge', force: true, targetUrl: location.href });
             await loadState();
         });
 
@@ -454,7 +454,7 @@
         latestState = response.state;
 
         if (!latestState.currentChallenge && !latestState.hasActiveSession && !latestState.isPaused) {
-            await sendMessage({ action: 'startChallenge', force: false });
+            await sendMessage({ action: 'startChallenge', force: false, targetUrl: location.href });
             latestState = (await sendMessage({ action: 'requestState' })).state;
         }
 

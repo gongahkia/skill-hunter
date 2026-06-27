@@ -485,6 +485,7 @@ async function startChallenge(force = false) {
     await sendRuntimeMessage({
         action: MESSAGE_ACTIONS.START_CHALLENGE,
         force,
+        targetUrl: latestState?.supportedTargets?.[0]?.matches?.[0]?.replace('*', ''),
     });
     await loadState();
 }

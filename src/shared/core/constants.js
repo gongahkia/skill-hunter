@@ -91,6 +91,20 @@ export const CHATBOT_TARGETS = [
 
 export const CHATBOT_MATCH_PATTERNS = CHATBOT_TARGETS.flatMap((target) => target.matches);
 
+export const CHATBOT_DIFFICULTY_MAP = {
+    'chatgpt.com': 'medium',
+    'www.perplexity.ai': 'easy',
+    'gemini.google.com': 'medium',
+    'claude.ai': 'hard',
+    'www.deepseek.com': 'medium',
+    'copilot.microsoft.com': 'medium',
+    'socrat.ai': 'easy',
+    'huggingface.co': 'medium',
+    'writesonic.com': 'easy',
+    'you.com': 'easy',
+    'www.jasper.ai': 'easy',
+};
+
 export const SOURCE_LABELS = {
     leetcode: 'LeetCode',
 };
@@ -157,5 +171,14 @@ export function getChatbotTargetByUrl(url) {
         }) || null;
     } catch {
         return null;
+    }
+}
+
+export function getChatbotDifficultyByUrl(url) {
+    try {
+        const parsedUrl = new URL(url);
+        return CHATBOT_DIFFICULTY_MAP[parsedUrl.hostname] || 'medium';
+    } catch {
+        return 'medium';
     }
 }

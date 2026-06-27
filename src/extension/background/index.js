@@ -7,6 +7,7 @@ import {
     SESSION_DURATION_MS_OPTIONS,
     SESSION_DURATION_MINUTES,
     STORAGE_KEYS,
+    getChatbotDifficultyByUrl,
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
@@ -224,14 +225,17 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         return 'LeetCode detection may be broken. Try a different source.';
     }
 
-    async function persistChallenge(force) {
+    async function persistChallenge(force, targetUrl) {
         const stored = await getStoredState();
         if (stored[STORAGE_KEYS.CURRENT_CHALLENGE] && !force) {
             return stored[STORAGE_KEYS.CURRENT_CHALLENGE];
         }
 
         const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
-        const challenge = await leetcodeProvider.getChallenge({ recentSlugs });
+        const challenge = await leetcodeProvider.getChallenge({
+            recentSlugs,
+            difficulty: getChatbotDifficultyByUrl(targetUrl),
+        });
         const nextRecentSlugs = [
             {
                 source: challenge.source,
@@ -361,7 +365,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             case MESSAGE_ACTIONS.REQUEST_STATE:
                 return { success: true, state: await getDashboardState() };
             case MESSAGE_ACTIONS.START_CHALLENGE:
-                await persistChallenge(Boolean(message.force));
+                await persistChallenge(Boolean(message.force), message.targetUrl);
                 return { success: true, state: await getDashboardState() };
             case MESSAGE_ACTIONS.SAVE_SETTINGS:
                 return { success: true, state: await saveSettings(message.payload) };
