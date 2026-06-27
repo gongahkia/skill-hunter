@@ -1,0 +1,23 @@
+[
+  {
+    "id": "pe-001",
+    "url": "https://projecteuler.net/problem=1",
+    "answerHash": "c0b20f4665d0388d564f0b6ecf3edc9f9480cb15fff87198b95701d9f5fe1f7b",
+    "difficulty": 1,
+    "tags": ["math", "multiples"]
+  },
+  {
+    "id": "pe-002",
+    "url": "https://projecteuler.net/problem=2",
+    "answerHash": "1f5882e19314ac13acca52ad5503184b3cb1fd8dbeea82e0979d799af2361704",
+    "difficulty": 1,
+    "tags": ["math", "fibonacci"]
+  },
+  {
+    "id": "pe-003",
+    "url": "https://projecteuler.net/problem=3",
+    "answerHash": "5c09f0554518a413e58e6bc5964ba90655713483d0b2bbc94572ad6b0b4dda28",
+    "difficulty": 2,
+    "tags": ["math", "factors"]
+  }
+]

@@ -258,16 +258,19 @@
                 color: #66594d;
                 line-height: 1.4;
             }
-            .dorso-intent textarea {
+            .dorso-intent textarea,
+            .dorso-intent input {
                 width: 100%;
-                min-height: 78px;
-                resize: vertical;
                 border-radius: 14px;
                 border: 1px solid rgba(25, 20, 17, 0.14);
                 background: #fffdf7;
                 padding: 12px;
                 color: #191411;
                 font: inherit;
+            }
+            .dorso-intent textarea {
+                min-height: 78px;
+                resize: vertical;
             }
             .dorso-intent-status {
                 min-height: 1.2em;
@@ -465,6 +468,31 @@
                 await loadState();
             });
             challengeCard.append(drillForm);
+        }
+
+        if (challenge.selection_mode === 'link_out_hash') {
+            const answerForm = createElement('form', { className: 'dorso-intent' });
+            const answerInput = createElement('input', { type: 'text' });
+            answerInput.inputMode = 'numeric';
+            answerInput.autocomplete = 'off';
+            answerForm.append(
+                answerInput,
+                createElement('button', {
+                    className: 'dorso-button dorso-button-secondary',
+                    text: 'Submit Answer',
+                }),
+            );
+            answerForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                await sendMessage({
+                    action: 'submissionResult',
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: answerInput.value,
+                });
+                await loadState();
+            });
+            challengeCard.append(answerForm);
         }
 
         panel.append(

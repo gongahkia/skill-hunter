@@ -21,6 +21,7 @@ import {
     recordSolve,
 } from '../../shared/core/streak.js';
 import drillsProvider from '../lib/providers/drills-provider.js';
+import eulerProvider from '../lib/providers/euler-provider.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 import mcqProvider from '../lib/providers/mcq-provider.js';
 
@@ -32,6 +33,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         mcq: mcqProvider,
         drills: drillsProvider,
         leetcode: leetcodeProvider,
+        euler: eulerProvider,
     };
     let ensureInstallStatePromise = null;
 

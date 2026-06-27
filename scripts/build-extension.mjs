@@ -68,7 +68,7 @@ function getManifest(browser) {
         name: 'Dorso',
         version: manifestVersion,
         version_name: packageJson.version,
-        description: 'Protect selected AI chatbot sites until a matching LeetCode challenge is solved.',
+        description: 'Protect selected AI chatbot sites until a coding challenge is solved.',
         permissions: ['storage'],
         host_permissions: getHostPermissions(),
         icons: {
