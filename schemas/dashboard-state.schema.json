@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dorso.dev/schemas/dashboard-state.schema.json",
+  "title": "Dorso Dashboard State",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "installId",
+    "hasActiveSession",
+    "session",
+    "currentChallenge",
+    "enabledTargetIds",
+    "sessionDurationMinutes",
+    "emergencyBypassesPerWeek",
+    "bypassesThisWeek",
+    "emergencyBypassesRemaining",
+    "bypassWeekStart",
+    "isPaused",
+    "supportedTargets",
+    "uiMessage",
+    "messageFailureCount",
+    "leetcodeDetectionWarning"
+  ],
+  "properties": {
+    "installId": {
+      "type": ["string", "null"]
+    },
+    "hasActiveSession": {
+      "type": "boolean"
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["isActive", "timeRemaining"],
+      "properties": {
+        "isActive": {
+          "type": "boolean"
+        },
+        "timeRemaining": {
+          "type": "number",
+          "minimum": 0
+        },
+        "lastSolvedTime": {
+          "type": "string"
+        },
+        "expiresAt": {
+          "type": "string"
+        }
+      }
+    },
+    "currentChallenge": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["source", "slug", "title", "url", "difficulty"],
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "source_label": {
+              "type": "string"
+            },
+            "challenge_id": {
+              "type": "string"
+            },
+            "slug": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "difficulty": {
+              "type": ["string", "number"]
+            },
+            "topic_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "guidance": {
+              "type": "string"
+            },
+            "selection_mode": {
+              "type": "string"
+            },
+            "supports_verification": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "enabledTargetIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sessionDurationMinutes": {
+      "type": "number",
+      "minimum": 1
+    },
+    "emergencyBypassesPerWeek": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "bypassesThisWeek": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "emergencyBypassesRemaining": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bypassWeekStart": {
+      "type": "number"
+    },
+    "isPaused": {
+      "type": "boolean"
+    },
+    "supportedTargets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "label", "matches"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "hostnames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pathPrefixes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "uiMessage": {
+      "type": "string"
+    },
+    "messageFailureCount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "leetcodeDetectionWarning": {
+      "type": "string"
+    }
+  }
+}

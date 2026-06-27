@@ -31,3 +31,10 @@ export async function setStorageValues(values) {
         browserApi.storage.local.set(values, done);
     });
 }
+
+export async function clearStorage() {
+    const response = browserApi.storage.local.clear();
+    return isPromise(response) ? response : callbackToPromise((done) => {
+        browserApi.storage.local.clear(done);
+    });
+}

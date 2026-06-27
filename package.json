@@ -10,12 +10,14 @@
     "build:safari": "node scripts/build-extension.mjs safari",
     "sync:safari-wrapper": "node scripts/sync-safari-wrapper.mjs",
     "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
+    "build:dashboard-validator": "node scripts/build-dashboard-validator.mjs",
     "test:unit": "node --test --test-concurrency=1 tests/unit/*.test.js",
     "test:shared": "npm test -- --runInBand --silent --passWithNoTests",
     "test:e2e": "npm test -- --reporter=line",
     "validate:packs": "node scripts/validate-packs.mjs"
   },
   "devDependencies": {
+    "ajv": "^8.20.0",
     "ajv-cli": "^5.0.0"
   }
 }

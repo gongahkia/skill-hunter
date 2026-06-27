@@ -12,7 +12,9 @@ import {
     renderDigestSvg,
 } from '../lib/digest-svg.js';
 import { createBadgeEmbeds } from '../lib/badge-url.js';
+import validateDashboardState from '../lib/dashboard-state-validator.js';
 import {
+    clearStorage,
     getStorageValues,
     sendRuntimeMessage,
     setStorageValues,
@@ -427,6 +429,30 @@ function renderSupportedSites(state) {
     };
 }
 
+function renderCorruptedStateFallback() {
+    ['statusPanel', 'challengePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
+        resetPanel(document.getElementById(panelId));
+    });
+    resetPanel(document.getElementById('sitesForm'));
+    setMessage('');
+
+    const panel = document.getElementById('statusPanel');
+    panel.append(
+        createElement('h2', { text: 'Extension state corrupted. Click Reset.' }),
+        createElement('p', { text: 'This clears local extension storage and reinitializes Dorso.' }),
+        createButtonRow([
+            createButton({
+                label: 'Reset',
+                className: 'button-primary',
+                onClick: async () => {
+                    await clearStorage();
+                    await loadState();
+                },
+            }),
+        ]),
+    );
+}
+
 async function renderBadge(state) {
     const panel = document.getElementById('badgePanel');
     resetPanel(panel);
@@ -587,6 +613,11 @@ async function startChallenge(force = false) {
 
 async function loadState() {
     const response = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.REQUEST_STATE });
+    if (!validateDashboardState(response?.state)) {
+        renderCorruptedStateFallback();
+        return;
+    }
+
     latestState = response.state;
     latestWhatIAsked = await getWhatIAskedEntries();
 
