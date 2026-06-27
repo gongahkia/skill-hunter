@@ -251,6 +251,27 @@ button:hover,
     gap: 14px;
 }
 
+.field-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.field-label {
+    display: grid;
+    gap: 8px;
+    color: var(--muted);
+}
+
+.field-label select {
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid rgba(25, 20, 17, 0.14);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px 14px;
+    color: var(--ink);
+    font: inherit;
+}
+
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

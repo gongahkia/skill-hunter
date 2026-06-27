@@ -4,6 +4,8 @@
 
 export const SESSION_DURATION_MS = 15 * 60 * 1000;
 export const SESSION_DURATION_MINUTES = 15;
+export const SESSION_DURATION_MINUTE_OPTIONS = [5, 15, 30, 60];
+export const SESSION_DURATION_MS_OPTIONS = SESSION_DURATION_MINUTE_OPTIONS.map((minutes) => minutes * 60 * 1000);
 
 export const INSTALL_ID_PREFIX = 'dorso-install';
 
@@ -118,6 +120,7 @@ export const STORAGE_KEYS = {
     CHALLENGE_STARTED_AT: 'challengeStartedAt',
     RECENT_CHALLENGE_SLUGS: 'recentChallengeSlugs',
     ENABLED_TARGET_IDS: 'enabledTargetIds',
+    SESSION_DURATION_MS_PREF: 'SESSION_DURATION_MS_PREF',
     IS_PAUSED: 'isPaused',
     UI_MESSAGE: 'uiMessage',
 };

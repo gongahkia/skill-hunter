@@ -3,6 +3,8 @@ import {
     LOCAL_CHALLENGES,
     MESSAGE_ACTIONS,
     SESSION_DURATION_MS,
+    SESSION_DURATION_MS_OPTIONS,
+    SESSION_DURATION_MINUTES,
     SOURCE_LABELS,
     STORAGE_KEYS,
     getDefaultEnabledTargetIds,
@@ -67,6 +69,15 @@ import {
         return `dorso-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     }
 
+    function getValidSessionDurationMs(value) {
+        const durationMs = Number(value);
+        return SESSION_DURATION_MS_OPTIONS.includes(durationMs) ? durationMs : SESSION_DURATION_MS;
+    }
+
+    function getSessionDurationMinutes(durationMs) {
+        return Math.round(getValidSessionDurationMs(durationMs) / 60000);
+    }
+
     function normalizeChallenge(challenge) {
         return {
             source: 'leetcode',
@@ -87,6 +98,7 @@ import {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
+            STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.IS_PAUSED,
         ]);
         const updates = {};
@@ -97,6 +109,10 @@ import {
 
         if (!Array.isArray(stored[STORAGE_KEYS.ENABLED_TARGET_IDS])) {
             updates[STORAGE_KEYS.ENABLED_TARGET_IDS] = getDefaultEnabledTargetIds();
+        }
+
+        if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
+            updates[STORAGE_KEYS.SESSION_DURATION_MS_PREF] = SESSION_DURATION_MS;
         }
 
         if (typeof stored[STORAGE_KEYS.IS_PAUSED] !== 'boolean') {
@@ -151,6 +167,7 @@ import {
             STORAGE_KEYS.CHALLENGE_STARTED_AT,
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
+            STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.UI_MESSAGE,
         ]);
@@ -199,9 +216,10 @@ import {
 
     async function startSession(challenge) {
         const now = Date.now();
+        const durationMs = getValidSessionDurationMs(await getStorageValue(STORAGE_KEYS.SESSION_DURATION_MS_PREF));
         await setStorageValues({
             [STORAGE_KEYS.LAST_SOLVED_TIME]: now,
-            [STORAGE_KEYS.SESSION_EXPIRES_AT]: now + SESSION_DURATION_MS,
+            [STORAGE_KEYS.SESSION_EXPIRES_AT]: now + durationMs,
         });
     }
 
@@ -215,6 +233,9 @@ import {
             session: await getSessionInfo(),
             currentChallenge: stored[STORAGE_KEYS.CURRENT_CHALLENGE] || null,
             enabledTargetIds: stored[STORAGE_KEYS.ENABLED_TARGET_IDS] || getDefaultEnabledTargetIds(),
+            sessionDurationMinutes: getSessionDurationMinutes(
+                stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
+            ),
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
@@ -231,6 +252,10 @@ import {
 
         if (typeof payload?.isPaused === 'boolean') {
             updates[STORAGE_KEYS.IS_PAUSED] = payload.isPaused;
+        }
+
+        if (SESSION_DURATION_MS_OPTIONS.includes(payload?.sessionDurationMsPref)) {
+            updates[STORAGE_KEYS.SESSION_DURATION_MS_PREF] = payload.sessionDurationMsPref;
         }
 
         if (Object.keys(updates).length > 0) {
@@ -262,7 +287,7 @@ import {
         }
 
         await startSession(currentChallenge);
-        await clearChallenge('Accepted on LeetCode. Dorso is standing down for the next fifteen minutes.');
+        await clearChallenge('Accepted on LeetCode. Dorso is standing down for the selected session duration.');
 
         return {
             success: true,

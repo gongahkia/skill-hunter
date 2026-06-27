@@ -1,5 +1,6 @@
 import {
     MESSAGE_ACTIONS,
+    SESSION_DURATION_MINUTE_OPTIONS,
     SOURCE_LABELS,
 } from '../../shared/core/constants.js';
 import { formatDuration } from '../lib/formatters.js';
@@ -211,12 +212,36 @@ function renderChallenge(state) {
 function renderControls(state) {
     const panel = document.getElementById('controlPanel');
     resetPanel(panel);
+    const durationSelect = createElement('select', { id: 'sessionDurationSelect' });
+    SESSION_DURATION_MINUTE_OPTIONS.forEach((minutes) => {
+        const option = createElement('option', { text: `${minutes} min` });
+        option.value = String(minutes);
+        durationSelect.append(option);
+    });
+    durationSelect.value = String(state.sessionDurationMinutes || 15);
+    durationSelect.addEventListener('change', async () => {
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: {
+                sessionDurationMsPref: Number(durationSelect.value) * 60 * 1000,
+            },
+        });
+        setMessage('Session length saved.', true);
+        await loadState();
+    });
+
+    const durationLabel = createElement('label', { className: 'field-label' });
+    durationLabel.append(
+        createElement('span', { text: 'Session length' }),
+        durationSelect,
+    );
 
     panel.append(
         createSectionHead(
             'Controls',
             'Pause protection or clear status copy without changing the selected site list.',
         ),
+        createElement('div', { className: 'field-grid' }),
         createButtonRow([
             createButton({
                 label: state.isPaused ? 'Resume Dorso' : 'Pause Dorso',
@@ -241,6 +266,7 @@ function renderControls(state) {
             }),
         ]),
     );
+    panel.querySelector('.field-grid').append(durationLabel);
 }
 
 function renderSupportedSites(state) {
