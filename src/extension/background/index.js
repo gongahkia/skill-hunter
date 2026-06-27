@@ -101,6 +101,34 @@ import {
         };
     }
 
+    function normalizeRecentChallengeSlugs(value) {
+        if (!Array.isArray(value)) {
+            return [];
+        }
+
+        return value
+            .map((entry) => {
+                if (typeof entry === 'string') {
+                    return {
+                        source: 'leetcode',
+                        slug: entry,
+                        timestamp: 0,
+                    };
+                }
+
+                if (entry && typeof entry.source === 'string' && typeof entry.slug === 'string') {
+                    return {
+                        source: entry.source,
+                        slug: entry.slug,
+                        timestamp: Number.isFinite(entry.timestamp) ? entry.timestamp : 0,
+                    };
+                }
+
+                return null;
+            })
+            .filter(Boolean);
+    }
+
     async function ensureInstallStateInner() {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
@@ -200,13 +228,21 @@ import {
             return stored[STORAGE_KEYS.CURRENT_CHALLENGE];
         }
 
-        const recentSlugs = stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS] || [];
-        const candidatePool = LOCAL_CHALLENGES.filter((challenge) => !recentSlugs.includes(challenge.slug));
+        const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
+        const candidatePool = LOCAL_CHALLENGES.filter((challenge) => {
+            return !recentSlugs.some((entry) => entry.source === 'leetcode' && entry.slug === challenge.slug);
+        });
         const pool = candidatePool.length ? candidatePool : LOCAL_CHALLENGES;
         const challenge = normalizeChallenge(pool[Math.floor(Math.random() * pool.length)]);
         const nextRecentSlugs = [
-            challenge.slug,
-            ...recentSlugs.filter((slug) => slug !== challenge.slug),
+            {
+                source: challenge.source,
+                slug: challenge.slug,
+                timestamp: Date.now(),
+            },
+            ...recentSlugs.filter((entry) => {
+                return entry.source !== challenge.source || entry.slug !== challenge.slug;
+            }),
         ].slice(0, RECENT_CHALLENGE_WINDOW);
 
         await setStorageValues({
