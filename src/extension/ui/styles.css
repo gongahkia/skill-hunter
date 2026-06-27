@@ -326,6 +326,13 @@ input[type="text"] {
     gap: 12px;
 }
 
+.inline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+}
+
 .list-item strong {
     display: block;
     margin-bottom: 4px;

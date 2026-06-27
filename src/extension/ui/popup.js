@@ -6,6 +6,11 @@ import {
 } from '../../shared/core/constants.js';
 import { formatDuration } from '../lib/formatters.js';
 import {
+    getDigestEntries,
+    renderDigestMarkdown,
+    renderDigestSvg,
+} from '../lib/digest-svg.js';
+import {
     getStorageValues,
     sendRuntimeMessage,
     setStorageValues,
@@ -14,6 +19,7 @@ import {
 let countdownTimer = null;
 let latestState = null;
 let latestWhatIAsked = [];
+const redactedWhatIAskedTimestamps = new Set();
 
 function clearTimers() {
     if (countdownTimer) {
@@ -89,6 +95,43 @@ async function deleteWhatIAskedEntry(timestamp) {
     await setStorageValues({ [STORAGE_KEYS.WHAT_I_ASKED]: nextEntries });
     setMessage('Entry deleted.', true);
     await loadState();
+}
+
+function getIncludedDigestEntries(entries) {
+    return getDigestEntries(entries).filter((entry) => !redactedWhatIAskedTimestamps.has(entry.timestamp));
+}
+
+function downloadTextFile(filename, content, type) {
+    const url = URL.createObjectURL(new Blob([content], { type }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+async function downloadDigestPng(svg) {
+    const image = new Image();
+    const imageUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = imageUrl;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 400;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dorso-weekly-digest.png';
+    link.click();
+    URL.revokeObjectURL(url);
 }
 
 function createChipRow(tags = []) {
@@ -369,6 +412,19 @@ function renderDisclosure(entries = []) {
     entries.slice().reverse().forEach((entry) => {
         const row = createElement('div', { className: 'list-item list-item-actions' });
         const textBlock = createElement('div');
+        const includeLabel = createElement('label', { className: 'inline-check' });
+        const includeCheckbox = createElement('input');
+        includeCheckbox.type = 'checkbox';
+        includeCheckbox.checked = !redactedWhatIAskedTimestamps.has(entry.timestamp);
+        includeCheckbox.addEventListener('change', () => {
+            if (includeCheckbox.checked) {
+                redactedWhatIAskedTimestamps.delete(entry.timestamp);
+                return;
+            }
+
+            redactedWhatIAskedTimestamps.add(entry.timestamp);
+        });
+        includeLabel.append(includeCheckbox, createElement('span', { text: 'Include' }));
         textBlock.append(
             createElement('strong', { text: entry.target || 'unknown target' }),
             createElement('span', {
@@ -378,6 +434,7 @@ function renderDisclosure(entries = []) {
         );
         row.append(
             textBlock,
+            includeLabel,
             createButton({
                 label: 'Delete',
                 className: 'button-secondary',
@@ -390,6 +447,37 @@ function renderDisclosure(entries = []) {
     panel.append(
         createSectionHead('What I Asked', 'Saved locally on this device.'),
         entries.length ? askedList : createElement('p', { text: 'No saved prompts.' }),
+    );
+
+    panel.append(
+        createSectionHead('Weekly Digest', 'Export saved prompts from the last 7 days.'),
+        createButtonRow([
+            createButton({
+                label: 'Download SVG',
+                className: 'button-primary',
+                onClick: () => {
+                    const digestSvg = renderDigestSvg({ entries: getIncludedDigestEntries(entries) });
+                    downloadTextFile('dorso-weekly-digest.svg', digestSvg, 'image/svg+xml');
+                },
+            }),
+            createButton({
+                label: 'Download PNG',
+                className: 'button-secondary',
+                onClick: async () => {
+                    const digestSvg = renderDigestSvg({ entries: getIncludedDigestEntries(entries) });
+                    await downloadDigestPng(digestSvg);
+                },
+            }),
+            createButton({
+                label: 'Copy Markdown',
+                className: 'button-secondary',
+                onClick: async () => {
+                    const digestEntries = getIncludedDigestEntries(entries);
+                    await navigator.clipboard.writeText(renderDigestMarkdown(digestEntries));
+                    setMessage('Digest markdown copied.', true);
+                },
+            }),
+        ]),
     );
 }
 
