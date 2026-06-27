@@ -12,6 +12,10 @@
     "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
     "test:unit": "node --test --test-concurrency=1 tests/unit/*.test.js",
     "test:shared": "npm test -- --runInBand --silent --passWithNoTests",
-    "test:e2e": "npm test -- --reporter=line"
+    "test:e2e": "npm test -- --reporter=line",
+    "validate:packs": "node scripts/validate-packs.mjs"
+  },
+  "devDependencies": {
+    "ajv-cli": "^5.0.0"
   }
 }
