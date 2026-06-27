@@ -101,6 +101,9 @@ function getManifest(browser) {
     if (browser === 'chrome' || browser === 'safari') {
         return {
             ...baseManifest,
+            content_security_policy: {
+                extension_pages: "script-src 'self'; object-src 'self'",
+            },
             background: {
                 service_worker: 'extension/background/index.js',
                 type: 'module',
@@ -110,6 +113,7 @@ function getManifest(browser) {
 
     return {
         ...baseManifest,
+        content_security_policy: "script-src 'self'; object-src 'self'",
         background: {
             scripts: ['extension/background/index.js'],
             type: 'module',
