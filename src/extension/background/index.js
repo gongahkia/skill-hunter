@@ -10,6 +10,10 @@ import {
     getChatbotDifficultyByUrl,
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
+import {
+    getEmergencyBypassState,
+    normalizeEmergencyBypassLimit,
+} from '../../shared/core/emergency-bypass.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
 (function backgroundWorker() {
@@ -121,9 +125,17 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
+            STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
+            STORAGE_KEYS.BYPASS_WEEK_START,
+            STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
             STORAGE_KEYS.IS_PAUSED,
         ]);
         const updates = {};
+        const emergencyBypassState = getEmergencyBypassState({
+            limit: stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK],
+            weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
+            used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
+        });
 
         if (!stored[STORAGE_KEYS.INSTALL_ID]) {
             const firstStorageWriteTimestamp = stored[STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP] || Date.now();
@@ -137,6 +149,18 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
             updates[STORAGE_KEYS.SESSION_DURATION_MS_PREF] = SESSION_DURATION_MS;
+        }
+
+        if (stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK] !== emergencyBypassState.limit) {
+            updates[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK] = emergencyBypassState.limit;
+        }
+
+        if (stored[STORAGE_KEYS.BYPASS_WEEK_START] !== emergencyBypassState.weekStart) {
+            updates[STORAGE_KEYS.BYPASS_WEEK_START] = emergencyBypassState.weekStart;
+        }
+
+        if (stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK] !== emergencyBypassState.used) {
+            updates[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK] = emergencyBypassState.used;
         }
 
         if (typeof stored[STORAGE_KEYS.IS_PAUSED] !== 'boolean') {
@@ -203,6 +227,9 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
+            STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
+            STORAGE_KEYS.BYPASS_WEEK_START,
+            STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
             STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP,
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.IS_PAUSED,
@@ -273,18 +300,23 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         ]);
     }
 
-    async function startSession(challenge) {
+    async function startSession(durationMs = null) {
         const now = Date.now();
-        const durationMs = getValidSessionDurationMs(await getStorageValue(STORAGE_KEYS.SESSION_DURATION_MS_PREF));
+        const sessionDurationMs = durationMs || getValidSessionDurationMs(await getStorageValue(STORAGE_KEYS.SESSION_DURATION_MS_PREF));
         await setStorageValues({
             [STORAGE_KEYS.LAST_SOLVED_TIME]: now,
-            [STORAGE_KEYS.SESSION_EXPIRES_AT]: now + durationMs,
+            [STORAGE_KEYS.SESSION_EXPIRES_AT]: now + sessionDurationMs,
         });
     }
 
     async function getDashboardState() {
         await ensureInstallState();
         const stored = await getStoredState();
+        const emergencyBypassState = getEmergencyBypassState({
+            limit: stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK],
+            weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
+            used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
+        });
 
         return {
             installId: stored[STORAGE_KEYS.INSTALL_ID] || null,
@@ -295,6 +327,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
+            emergencyBypassesPerWeek: emergencyBypassState.limit,
+            bypassesThisWeek: emergencyBypassState.used,
+            emergencyBypassesRemaining: emergencyBypassState.remaining,
+            bypassWeekStart: emergencyBypassState.weekStart,
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
@@ -316,6 +352,10 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
 
         if (SESSION_DURATION_MS_OPTIONS.includes(payload?.sessionDurationMsPref)) {
             updates[STORAGE_KEYS.SESSION_DURATION_MS_PREF] = payload.sessionDurationMsPref;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(payload || {}, 'emergencyBypassesPerWeek')) {
+            updates[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK] = normalizeEmergencyBypassLimit(payload.emergencyBypassesPerWeek);
         }
 
         if (Object.keys(updates).length > 0) {
@@ -346,7 +386,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             };
         }
 
-        await startSession(currentChallenge);
+        await startSession();
         await setStorageValues({
             [STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP]: Date.now(),
         });
@@ -355,6 +395,39 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
         return {
             success: true,
             challenge: currentChallenge,
+            state: await getDashboardState(),
+        };
+    }
+
+    async function useEmergencyBypass() {
+        await ensureInstallState();
+        const stored = await getStoredState();
+        const emergencyBypassState = getEmergencyBypassState({
+            limit: stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK],
+            weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
+            used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
+        });
+
+        if (emergencyBypassState.remaining <= 0) {
+            await setStorageValues({
+                [STORAGE_KEYS.UI_MESSAGE]: 'No emergency bypasses remaining this week.',
+            });
+            return {
+                success: false,
+                error: 'NO_EMERGENCY_BYPASSES_REMAINING',
+                state: await getDashboardState(),
+            };
+        }
+
+        await startSession(SESSION_DURATION_MS);
+        await setStorageValues({
+            [STORAGE_KEYS.BYPASS_WEEK_START]: emergencyBypassState.weekStart,
+            [STORAGE_KEYS.BYPASSES_USED_THIS_WEEK]: emergencyBypassState.used + 1,
+            [STORAGE_KEYS.UI_MESSAGE]: `Emergency bypass used. ${emergencyBypassState.remaining - 1} remaining this week.`,
+        });
+
+        return {
+            success: true,
             state: await getDashboardState(),
         };
     }
@@ -371,6 +444,8 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
                 return { success: true, state: await saveSettings(message.payload) };
             case MESSAGE_ACTIONS.SET_PAUSED:
                 return { success: true, state: await saveSettings({ isPaused: Boolean(message.isPaused) }) };
+            case MESSAGE_ACTIONS.EMERGENCY_BYPASS:
+                return useEmergencyBypass();
             case MESSAGE_ACTIONS.SUBMISSION_RESULT:
                 if (message.success && message.source === 'leetcode' && message.slug) {
                     return grantAccess('leetcode', message.slug);

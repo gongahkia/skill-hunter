@@ -4,6 +4,7 @@ import {
     SOURCE_LABELS,
     STORAGE_KEYS,
 } from '../../shared/core/constants.js';
+import { EMERGENCY_BYPASS_OPTIONS } from '../../shared/core/emergency-bypass.js';
 import { formatDuration } from '../lib/formatters.js';
 import {
     getDigestEntries,
@@ -300,10 +301,38 @@ function renderControls(state) {
         durationSelect,
     );
 
+    const bypassSelect = createElement('select', { id: 'emergencyBypassSelect' });
+    EMERGENCY_BYPASS_OPTIONS.forEach((count) => {
+        const option = createElement('option', { text: `${count} / week` });
+        option.value = String(count);
+        bypassSelect.append(option);
+    });
+    bypassSelect.value = String(state.emergencyBypassesPerWeek ?? 2);
+    bypassSelect.addEventListener('change', async () => {
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: {
+                emergencyBypassesPerWeek: Number(bypassSelect.value),
+            },
+        });
+        setMessage('Emergency bypass limit saved.', true);
+        await loadState();
+    });
+
+    const bypassLabel = createElement('label', { className: 'field-label' });
+    bypassLabel.append(
+        createElement('span', { text: 'Emergency bypasses' }),
+        bypassSelect,
+        createElement('span', {
+            className: 'small',
+            text: `${state.emergencyBypassesRemaining ?? 0} remaining this week`,
+        }),
+    );
+
     panel.append(
         createSectionHead(
             'Controls',
-            'Pause protection or clear status copy without changing the selected site list.',
+            'Pause protection, set session length, or tune the weekly emergency escape valve.',
         ),
         createElement('div', { className: 'field-grid' }),
         createButtonRow([
@@ -330,7 +359,7 @@ function renderControls(state) {
             }),
         ]),
     );
-    panel.querySelector('.field-grid').append(durationLabel);
+    panel.querySelector('.field-grid').append(durationLabel, bypassLabel);
 }
 
 function renderSupportedSites(state) {

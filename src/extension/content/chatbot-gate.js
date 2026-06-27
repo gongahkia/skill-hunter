@@ -372,6 +372,17 @@
                 id: 'dorsoSwapButton',
                 text: 'Get Another',
             }),
+        );
+
+        if (Number(state.emergencyBypassesRemaining) > 0) {
+            actionRow.append(createElement('button', {
+                className: 'dorso-button dorso-button-secondary',
+                id: 'dorsoBypassButton',
+                text: `Emergency Bypass (${state.emergencyBypassesRemaining})`,
+            }));
+        }
+
+        actionRow.append(
             createElement('button', {
                 className: 'dorso-button dorso-button-secondary',
                 id: 'dorsoPauseButton',
@@ -433,6 +444,12 @@
 
         shadowRoot.getElementById('dorsoSwapButton').addEventListener('click', async () => {
             await sendMessage({ action: 'startChallenge', force: true, targetUrl: location.href });
+            await loadState();
+        });
+
+        shadowRoot.getElementById('dorsoBypassButton')?.addEventListener('click', async (event) => {
+            event.currentTarget.disabled = true;
+            await sendMessage({ action: 'emergencyBypass' });
             await loadState();
         });
 
