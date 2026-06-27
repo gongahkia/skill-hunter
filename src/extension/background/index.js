@@ -1,5 +1,6 @@
 import {
     CHATBOT_TARGETS,
+    INSTALL_ID_PREFIX,
     LOCAL_CHALLENGES,
     MESSAGE_ACTIONS,
     SESSION_DURATION_MS,
@@ -13,6 +14,7 @@ import {
 (function backgroundWorker() {
     const browserApi = globalThis.browser ?? globalThis.chrome;
     const RECENT_CHALLENGE_WINDOW = 5;
+    let ensureInstallStatePromise = null;
 
     function isPromise(value) {
         return value && typeof value.then === 'function';
@@ -61,12 +63,17 @@ import {
             : callbackToPromise((done) => browserApi.storage.local.remove(keys, done));
     }
 
-    function createInstallId() {
-        if (globalThis.crypto?.randomUUID) {
-            return globalThis.crypto.randomUUID();
-        }
+    async function sha256Hex(value) {
+        const bytes = new TextEncoder().encode(value);
+        const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+        return [...new Uint8Array(digest)]
+            .map((byte) => byte.toString(16).padStart(2, '0'))
+            .join('');
+    }
 
-        return `dorso-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    async function createInstallId(firstStorageWriteTimestamp) {
+        const runtimeId = String(browserApi.runtime?.id || 'unknown-runtime');
+        return `${INSTALL_ID_PREFIX}-${await sha256Hex(`${runtimeId}:${firstStorageWriteTimestamp}`)}`;
     }
 
     function getValidSessionDurationMs(value) {
@@ -94,9 +101,10 @@ import {
         };
     }
 
-    async function ensureInstallState() {
+    async function ensureInstallStateInner() {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
+            STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.IS_PAUSED,
@@ -104,7 +112,9 @@ import {
         const updates = {};
 
         if (!stored[STORAGE_KEYS.INSTALL_ID]) {
-            updates[STORAGE_KEYS.INSTALL_ID] = createInstallId();
+            const firstStorageWriteTimestamp = stored[STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP] || Date.now();
+            updates[STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP] = firstStorageWriteTimestamp;
+            updates[STORAGE_KEYS.INSTALL_ID] = await createInstallId(firstStorageWriteTimestamp);
         }
 
         if (!Array.isArray(stored[STORAGE_KEYS.ENABLED_TARGET_IDS])) {
@@ -122,6 +132,17 @@ import {
         if (Object.keys(updates).length > 0) {
             await setStorageValues(updates);
         }
+    }
+
+    async function ensureInstallState() {
+        if (!ensureInstallStatePromise) {
+            ensureInstallStatePromise = ensureInstallStateInner()
+                .finally(() => {
+                    ensureInstallStatePromise = null;
+                });
+        }
+
+        return ensureInstallStatePromise;
     }
 
     async function hasActiveSession() {

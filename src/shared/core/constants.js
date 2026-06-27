@@ -114,6 +114,7 @@ export const LOCAL_CHALLENGES = [
 
 export const STORAGE_KEYS = {
     INSTALL_ID: 'installId',
+    FIRST_STORAGE_WRITE_TIMESTAMP: 'firstStorageWriteTimestamp',
     SESSION_EXPIRES_AT: 'sessionExpiresAt',
     LAST_SOLVED_TIME: 'lastSolvedTime',
     CURRENT_CHALLENGE: 'currentChallenge',
