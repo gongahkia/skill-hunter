@@ -106,6 +106,8 @@ export const CHATBOT_DIFFICULTY_MAP = {
 };
 
 export const SOURCE_LABELS = {
+    mcq: 'MCQ',
+    drills: 'Drills',
     leetcode: 'LeetCode',
 };
 
