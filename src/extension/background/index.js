@@ -245,9 +245,19 @@ import {
         const currentChallenge = stored[STORAGE_KEYS.CURRENT_CHALLENGE];
 
         if (!currentChallenge || currentChallenge.source !== source || currentChallenge.slug !== slug) {
+            const expectedSlug = currentChallenge?.slug || '';
+            const expectedSource = currentChallenge?.source_label || currentChallenge?.source || source;
+            await setStorageValues({
+                [STORAGE_KEYS.UI_MESSAGE]: expectedSlug
+                    ? `Wrong problem - solve ${expectedSlug} from ${expectedSource}.`
+                    : 'Wrong problem - no active challenge is waiting for verification.',
+            });
+
             return {
                 success: false,
-                error: 'No matching challenge is waiting for verification.',
+                error: 'WRONG_PROBLEM',
+                expectedSlug,
+                expectedSource,
             };
         }
 

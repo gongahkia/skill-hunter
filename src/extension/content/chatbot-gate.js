@@ -193,6 +193,15 @@
                 color: #66594d;
                 line-height: 1.5;
             }
+            .dorso-banner {
+                margin: 16px 0 0;
+                padding: 12px 14px;
+                border-radius: 12px;
+                background: #fff1db;
+                border: 1px solid rgba(161, 68, 25, 0.28);
+                color: #713611;
+                line-height: 1.4;
+            }
             .dorso-card {
                 margin: 18px 0;
                 padding: 18px;
@@ -320,10 +329,16 @@
                 className: 'dorso-copy',
                 text: 'This public-store build keeps everything local. Dorso only reads the supported site list, stores your timer in extension storage, and watches LeetCode for an accepted submission on the assigned problem.',
             }),
-            challengeCard,
-            actionRow,
-            list,
         );
+
+        if (state.uiMessage) {
+            panel.append(createElement('p', {
+                className: 'dorso-banner',
+                text: state.uiMessage,
+            }));
+        }
+
+        panel.append(challengeCard, actionRow, list);
 
         backdrop.append(panel);
         shadowRoot.append(style, backdrop);
