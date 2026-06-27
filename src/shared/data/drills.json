@@ -1,0 +1,569 @@
+[
+  {
+    "id": "drill-js-map-callback",
+    "prompt": "Type the JavaScript Array.map callback signature.",
+    "expected": "array.map((value, index, array) => result)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["javascript", "arrays"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-filter-callback",
+    "prompt": "Type the JavaScript Array.filter callback signature.",
+    "expected": "array.filter((value, index, array) => condition)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["javascript", "arrays"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-reduce-callback",
+    "prompt": "Type the JavaScript Array.reduce callback signature.",
+    "expected": "array.reduce((accumulator, value, index, array) => nextAccumulator, initialValue)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 5,
+    "tags": ["javascript", "arrays"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-js-promise-all",
+    "prompt": "Type the Promise.all await pattern for an array named tasks.",
+    "expected": "const results = await Promise.all(tasks)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "async"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-async-function",
+    "prompt": "Type an async function declaration named loadData with no parameters.",
+    "expected": "async function loadData() {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "async"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-try-catch",
+    "prompt": "Type a JavaScript try/catch block catching error.",
+    "expected": "try {} catch (error) {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "errors"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-event-listener",
+    "prompt": "Type the addEventListener call for a click handler.",
+    "expected": "element.addEventListener(\"click\", handleClick)",
+    "normalizers": ["whitespace", "quotes", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "dom"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-query-selector",
+    "prompt": "Type the DOM query for an element with id app.",
+    "expected": "document.querySelector(\"#app\")",
+    "normalizers": ["whitespace", "quotes", "semicolons"],
+    "threshold": 1,
+    "tags": ["javascript", "dom"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-destructure-object",
+    "prompt": "Type object destructuring for name and age from user.",
+    "expected": "const { name, age } = user",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "syntax"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-destructure-array",
+    "prompt": "Type array destructuring for first and second from items.",
+    "expected": "const [first, second] = items",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "syntax"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-class-constructor",
+    "prompt": "Type a class constructor that stores name on this.",
+    "expected": "constructor(name) { this.name = name }",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["javascript", "classes"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-js-module-import",
+    "prompt": "Type a named import of readFile from node:fs/promises.",
+    "expected": "import { readFile } from \"node:fs/promises\"",
+    "normalizers": ["whitespace", "quotes", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "modules"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-module-export",
+    "prompt": "Type a named export for function score.",
+    "expected": "export function score() {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "modules"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-nullish-coalescing",
+    "prompt": "Type assignment of value to fallback only when value is nullish.",
+    "expected": "const result = value ?? fallback",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "syntax"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-optional-chaining",
+    "prompt": "Type optional chaining to read user.profile.email.",
+    "expected": "user?.profile?.email",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["javascript", "syntax"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-set-add",
+    "prompt": "Type code to add value to a Set named seen.",
+    "expected": "seen.add(value)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["javascript", "data-structures"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-map-get",
+    "prompt": "Type code to get key from a Map named counts.",
+    "expected": "counts.get(key)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["javascript", "data-structures"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-map-increment",
+    "prompt": "Type code to increment counts map at key with default 0.",
+    "expected": "counts.set(key, (counts.get(key) ?? 0) + 1)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 4,
+    "tags": ["javascript", "hash-map"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-js-json-parse",
+    "prompt": "Type code to parse jsonText as JSON.",
+    "expected": "const data = JSON.parse(jsonText)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "json"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-js-json-stringify",
+    "prompt": "Type code to stringify data as JSON text.",
+    "expected": "const jsonText = JSON.stringify(data)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["javascript", "json"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-binary-search-loop",
+    "prompt": "Type the standard binary search loop condition with left and right inclusive.",
+    "expected": "while (left <= right) {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["algorithms", "binary-search"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-binary-search-mid",
+    "prompt": "Type overflow-safe midpoint calculation for left and right.",
+    "expected": "const mid = left + Math.floor((right - left) / 2)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["algorithms", "binary-search"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-two-pointer-loop",
+    "prompt": "Type the two-pointer loop condition for left and right.",
+    "expected": "while (left < right) {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["algorithms", "two-pointers"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-sliding-window-grow",
+    "prompt": "Type the line that adds nums[right] to windowSum.",
+    "expected": "windowSum += nums[right]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["algorithms", "sliding-window"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-sliding-window-shrink",
+    "prompt": "Type the line that removes nums[left] and advances left.",
+    "expected": "windowSum -= nums[left++]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "sliding-window"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-bfs-queue-init",
+    "prompt": "Type initialization for BFS queue with start.",
+    "expected": "const queue = [start]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["algorithms", "bfs"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-bfs-pop-front",
+    "prompt": "Type the simple JavaScript line to pop the front queue node.",
+    "expected": "const node = queue.shift()",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "bfs"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-bfs-visit-neighbor",
+    "prompt": "Type BFS neighbor enqueue guarded by seen set.",
+    "expected": "if (!seen.has(next)) { seen.add(next); queue.push(next) }",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 6,
+    "tags": ["algorithms", "bfs"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-algo-dfs-base-case",
+    "prompt": "Type a DFS visited guard using seen and node.",
+    "expected": "if (seen.has(node)) return",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "dfs"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-dfs-recursive-call",
+    "prompt": "Type a recursive DFS call for each neighbor next.",
+    "expected": "for (const next of graph[node]) dfs(next)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 4,
+    "tags": ["algorithms", "dfs"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-quicksort-partition-swap",
+    "prompt": "Type array destructuring swap for arr[i] and arr[j].",
+    "expected": "[arr[i], arr[j]] = [arr[j], arr[i]]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["algorithms", "sorting"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-quicksort-pivot",
+    "prompt": "Type a pivot selection from the right edge of arr.",
+    "expected": "const pivot = arr[right]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 1,
+    "tags": ["algorithms", "sorting"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-merge-loop",
+    "prompt": "Type the merge loop condition while both arrays have remaining items.",
+    "expected": "while (i < left.length && j < right.length) {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["algorithms", "sorting"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-heap-parent",
+    "prompt": "Type zero-indexed heap parent index calculation.",
+    "expected": "const parent = Math.floor((index - 1) / 2)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["algorithms", "heap"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-heap-left-child",
+    "prompt": "Type zero-indexed heap left child index calculation.",
+    "expected": "const left = 2 * index + 1",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "heap"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-heap-right-child",
+    "prompt": "Type zero-indexed heap right child index calculation.",
+    "expected": "const right = 2 * index + 2",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "heap"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-dp-table-init",
+    "prompt": "Type code to create a DP array of length n + 1 filled with 0.",
+    "expected": "const dp = Array(n + 1).fill(0)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "dynamic-programming"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-algo-dp-recurrence",
+    "prompt": "Type Fibonacci-style DP recurrence assignment for i.",
+    "expected": "dp[i] = dp[i - 1] + dp[i - 2]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["algorithms", "dynamic-programming"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-algo-union-find-find",
+    "prompt": "Type path compression assignment inside find for x.",
+    "expected": "parent[x] = find(parent[x])",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["algorithms", "union-find"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-algo-graph-indegree",
+    "prompt": "Type code to increment indegree for neighbor next.",
+    "expected": "indegree.set(next, (indegree.get(next) ?? 0) + 1)",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 5,
+    "tags": ["algorithms", "graphs"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-ts-array-type",
+    "prompt": "Type a TypeScript string array variable named names.",
+    "expected": "const names: string[] = []",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["typescript", "syntax"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-ts-record-type",
+    "prompt": "Type a TypeScript Record from string to number named counts.",
+    "expected": "const counts: Record<string, number> = {}",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["typescript", "types"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-ts-function-type",
+    "prompt": "Type a TypeScript function type from number to boolean.",
+    "expected": "type Predicate = (value: number) => boolean",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["typescript", "types"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-ts-generic-function",
+    "prompt": "Type a generic identity function signature in TypeScript.",
+    "expected": "function identity<T>(value: T): T",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["typescript", "generics"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-ts-interface",
+    "prompt": "Type an interface User with id string.",
+    "expected": "interface User { id: string }",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["typescript", "types"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-sql-select-where",
+    "prompt": "Type SQL to select all columns from users where id equals parameter 1.",
+    "expected": "SELECT * FROM users WHERE id = $1",
+    "normalizers": ["whitespace", "semicolons", "casing"],
+    "threshold": 2,
+    "tags": ["sql", "queries"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-sql-insert-user",
+    "prompt": "Type SQL to insert name and email into users with two parameters.",
+    "expected": "INSERT INTO users (name, email) VALUES ($1, $2)",
+    "normalizers": ["whitespace", "semicolons", "casing"],
+    "threshold": 4,
+    "tags": ["sql", "queries"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-sql-count-group",
+    "prompt": "Type SQL to count orders grouped by user_id.",
+    "expected": "SELECT user_id, COUNT(*) FROM orders GROUP BY user_id",
+    "normalizers": ["whitespace", "semicolons", "casing"],
+    "threshold": 4,
+    "tags": ["sql", "aggregation"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-sql-inner-join",
+    "prompt": "Type SQL inner join between users u and orders o on user id.",
+    "expected": "SELECT * FROM users u JOIN orders o ON o.user_id = u.id",
+    "normalizers": ["whitespace", "semicolons", "casing"],
+    "threshold": 5,
+    "tags": ["sql", "joins"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-http-get-line",
+    "prompt": "Type the HTTP/1.1 request line for GET /api/users.",
+    "expected": "GET /api/users HTTP/1.1",
+    "normalizers": ["whitespace", "casing"],
+    "threshold": 1,
+    "tags": ["networking", "http"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-http-json-header",
+    "prompt": "Type the HTTP header for JSON content type.",
+    "expected": "Content-Type: application/json",
+    "normalizers": ["whitespace", "casing"],
+    "threshold": 2,
+    "tags": ["networking", "http"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-http-bearer-header",
+    "prompt": "Type an Authorization header using bearer token variable TOKEN.",
+    "expected": "Authorization: Bearer TOKEN",
+    "normalizers": ["whitespace"],
+    "threshold": 2,
+    "tags": ["networking", "http"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-regex-email-basic",
+    "prompt": "Type a basic regex fragment for non-space chars around @.",
+    "expected": "\\S+@\\S+",
+    "normalizers": ["whitespace"],
+    "threshold": 1,
+    "tags": ["regex", "strings"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-regex-digits",
+    "prompt": "Type a regex fragment matching one or more digits.",
+    "expected": "\\d+",
+    "normalizers": ["whitespace"],
+    "threshold": 0,
+    "tags": ["regex", "strings"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-regex-word-boundary",
+    "prompt": "Type a regex fragment for a word boundary, word chars, then word boundary.",
+    "expected": "\\b\\w+\\b",
+    "normalizers": ["whitespace"],
+    "threshold": 1,
+    "tags": ["regex", "strings"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-shell-pipe-grep",
+    "prompt": "Type a shell pipeline to list files then grep for js.",
+    "expected": "ls | grep js",
+    "normalizers": ["whitespace"],
+    "threshold": 2,
+    "tags": ["shell", "unix"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-shell-exit-code",
+    "prompt": "Type shell syntax to print the previous command exit code.",
+    "expected": "echo $?",
+    "normalizers": ["whitespace"],
+    "threshold": 0,
+    "tags": ["shell", "unix"],
+    "difficulty": 1
+  },
+  {
+    "id": "drill-shell-redirect-stderr",
+    "prompt": "Type shell syntax to redirect stderr to errors.log.",
+    "expected": "2> errors.log",
+    "normalizers": ["whitespace"],
+    "threshold": 1,
+    "tags": ["shell", "unix"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-os-mutex-lock",
+    "prompt": "Type pseudocode to enter a critical section guarded by mutex.",
+    "expected": "mutex.lock(); criticalSection(); mutex.unlock()",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 5,
+    "tags": ["os", "concurrency"],
+    "difficulty": 2
+  },
+  {
+    "id": "drill-os-producer-wait",
+    "prompt": "Type pseudocode for a producer waiting while buffer is full.",
+    "expected": "while (buffer.isFull()) wait()",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["os", "concurrency"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-os-consumer-wait",
+    "prompt": "Type pseudocode for a consumer waiting while buffer is empty.",
+    "expected": "while (buffer.isEmpty()) wait()",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 3,
+    "tags": ["os", "concurrency"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-security-constant-time-compare",
+    "prompt": "Type the accumulator update for byte-wise constant-time compare.",
+    "expected": "diff |= left[i] ^ right[i]",
+    "normalizers": ["whitespace", "semicolons"],
+    "threshold": 2,
+    "tags": ["security", "crypto"],
+    "difficulty": 3
+  },
+  {
+    "id": "drill-security-escape-html",
+    "prompt": "Type replacement for less-than in HTML escaping.",
+    "expected": "value.replaceAll(\"<\", \"&lt;\")",
+    "normalizers": ["whitespace", "quotes", "semicolons"],
+    "threshold": 3,
+    "tags": ["security", "xss"],
+    "difficulty": 2
+  }
+]
