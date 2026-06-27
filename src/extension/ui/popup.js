@@ -329,6 +329,15 @@ function renderControls(state) {
         }),
     );
 
+    const healthLabel = createElement('div', { className: 'field-label' });
+    healthLabel.append(
+        createElement('span', { text: 'Message health' }),
+        createElement('span', {
+            className: 'small',
+            text: `${Number(state.messageFailureCount || 0)} failed runtime messages`,
+        }),
+    );
+
     panel.append(
         createSectionHead(
             'Controls',
@@ -359,7 +368,7 @@ function renderControls(state) {
             }),
         ]),
     );
-    panel.querySelector('.field-grid').append(durationLabel, bypassLabel);
+    panel.querySelector('.field-grid').append(durationLabel, bypassLabel, healthLabel);
 }
 
 function renderSupportedSites(state) {

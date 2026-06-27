@@ -7,18 +7,7 @@
     let latestState = null;
     let sessionExpiryTimer = null;
 
-    async function sendMessage(message) {
-        const response = browserApi.runtime.sendMessage(message);
-        if (response && typeof response.then === 'function') {
-            return response;
-        }
-
-        return new Promise((resolve) => {
-            browserApi.runtime.sendMessage(message, (callbackResponse) => {
-                resolve(callbackResponse || {});
-            });
-        });
-    }
+    const sendMessage = globalThis.DorsoMessaging.sendRuntimeMessage;
 
     async function getStorageValue(key) {
         const response = browserApi.storage.local.get([key]);

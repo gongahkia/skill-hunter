@@ -51,6 +51,8 @@ test('generated extension manifests have the expected review shape', async (t) =
             assert.equal(manifest.version, packageJson.version.split('-')[0]);
             assert.equal(manifest.version_name, packageJson.version);
             assert.deepEqual(manifest.host_permissions, expectedHostPermissions);
+            assert.equal(manifest.content_scripts[0].js[0], 'extension/lib/messaging.js');
+            assert.equal(manifest.content_scripts[1].js[0], 'extension/lib/messaging.js');
 
             assert.deepEqual(manifest.content_security_policy, {
                 extension_pages: "script-src 'self'; object-src 'self'",

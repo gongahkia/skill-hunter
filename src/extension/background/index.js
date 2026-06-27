@@ -232,6 +232,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
             STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP,
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
+            STORAGE_KEYS.MESSAGE_FAILURE_COUNT,
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.UI_MESSAGE,
         ]);
@@ -334,6 +335,7 @@ import leetcodeProvider from '../lib/providers/leetcode-provider.js';
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             supportedTargets: CHATBOT_TARGETS,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
+            messageFailureCount: Number(stored[STORAGE_KEYS.MESSAGE_FAILURE_COUNT] || 0),
             leetcodeDetectionWarning: getLeetCodeDetectionWarning(stored),
         };
     }

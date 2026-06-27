@@ -13,12 +13,12 @@
             return;
         }
 
-        browserApi.runtime.sendMessage({
+        globalThis.DorsoMessaging.sendRuntimeMessage({
             action: 'submissionResult',
             source: 'leetcode',
             slug,
             success,
-        });
+        }).catch(() => {});
     }
 
     function getSubmissionStatusFromDocument() {

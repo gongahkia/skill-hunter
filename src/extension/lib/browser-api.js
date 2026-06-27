@@ -15,10 +15,7 @@ function callbackToPromise(invoker) {
 }
 
 export async function sendRuntimeMessage(message) {
-    const response = browserApi.runtime.sendMessage(message);
-    return isPromise(response) ? response : callbackToPromise((done) => {
-        browserApi.runtime.sendMessage(message, done);
-    });
+    return globalThis.DorsoMessaging.sendRuntimeMessage(message);
 }
 
 export async function getStorageValues(keys) {

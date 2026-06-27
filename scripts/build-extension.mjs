@@ -89,12 +89,12 @@ function getManifest(browser) {
         content_scripts: [
             {
                 matches: CHATBOT_MATCH_PATTERNS,
-                js: ['extension/content/chatbot-gate.js'],
+                js: ['extension/lib/messaging.js', 'extension/content/chatbot-gate.js'],
                 run_at: 'document_start',
             },
             {
                 matches: [leetCodePattern],
-                js: ['extension/content/leetcode.js'],
+                js: ['extension/lib/messaging.js', 'extension/content/leetcode.js'],
                 run_at: 'document_idle',
             },
         ],
