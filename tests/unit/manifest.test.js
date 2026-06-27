@@ -48,13 +48,9 @@ test('generated extension manifests have the expected review shape', async (t) =
                 assert.ok(Object.hasOwn(manifest, field), `${browser} missing ${field}`);
             }
 
-            assert.equal(manifest.version, packageJson.version);
+            assert.equal(manifest.version, packageJson.version.split('-')[0]);
+            assert.equal(manifest.version_name, packageJson.version);
             assert.deepEqual(manifest.host_permissions, expectedHostPermissions);
-
-            if (browser === 'firefox') {
-                assert.equal(manifest.content_security_policy, "script-src 'self'; object-src 'self'");
-                return;
-            }
 
             assert.deepEqual(manifest.content_security_policy, {
                 extension_pages: "script-src 'self'; object-src 'self'",

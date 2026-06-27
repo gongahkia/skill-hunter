@@ -12,6 +12,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const manifestVersion = packageJson.version.split('-')[0];
 const extensionRoot = path.join(repoRoot, 'src', 'extension');
 const sharedRoot = path.join(repoRoot, 'src', 'shared');
 const distRoot = path.join(repoRoot, 'dist');
@@ -70,7 +71,8 @@ function getManifest(browser) {
     const baseManifest = {
         manifest_version: 3,
         name: 'Dorso',
-        version: packageJson.version,
+        version: manifestVersion,
+        version_name: packageJson.version,
         description: 'Protect selected AI chatbot sites until a matching LeetCode challenge is solved.',
         permissions: ['storage'],
         host_permissions: getHostPermissions(),
@@ -113,7 +115,9 @@ function getManifest(browser) {
 
     return {
         ...baseManifest,
-        content_security_policy: "script-src 'self'; object-src 'self'",
+        content_security_policy: {
+            extension_pages: "script-src 'self'; object-src 'self'",
+        },
         background: {
             scripts: ['extension/background/index.js'],
             type: 'module',
