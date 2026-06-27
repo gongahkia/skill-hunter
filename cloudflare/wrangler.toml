@@ -2,3 +2,11 @@ name = "dorso-badge"
 main = "src/worker.js"
 compatibility_date = "2026-06-27"
 workers_dev = true
+
+[env.staging]
+name = "dorso-badge-staging"
+workers_dev = true
+
+[env.production]
+name = "dorso-badge"
+workers_dev = true

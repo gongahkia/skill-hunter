@@ -2,7 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - codex/**
+    tags:
+      - 'release/*'
   pull_request:
 
 jobs:
@@ -33,3 +37,43 @@ jobs:
       - name: Build extension bundles
         run: |
           npm run build
+
+  deploy-badge-staging:
+    if: startsWith(github.ref, 'refs/tags/release/')
+    needs: shared-js
+    runs-on: ubuntu-latest
+    environment: cloudflare-staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy badge worker to staging
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: cloudflare
+          command: deploy --env staging
+          environment: staging
+          secrets: |
+            CF_HMAC_SECRET
+        env:
+          CF_HMAC_SECRET: ${{ secrets.CF_HMAC_SECRET }}
+
+  deploy-badge-production:
+    if: startsWith(github.ref, 'refs/tags/release/')
+    needs: deploy-badge-staging
+    runs-on: ubuntu-latest
+    environment: cloudflare-production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy badge worker to production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: cloudflare
+          command: deploy --env production
+          environment: production
+          secrets: |
+            CF_HMAC_SECRET
+        env:
+          CF_HMAC_SECRET: ${{ secrets.CF_HMAC_SECRET }}
