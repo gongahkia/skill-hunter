@@ -1,0 +1,3503 @@
+[
+  {
+    "id": "mcq-big-o-001",
+    "prompt": "What is the time complexity of scanning every element of an array once?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n log n)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-002",
+    "prompt": "What is the time complexity of binary search on a sorted array?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "search"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-003",
+    "prompt": "What is the usual time complexity of comparing every pair in an n-item list?",
+    "choices": [
+      "O(n)",
+      "O(log n)",
+      "O(n^2)",
+      "O(2^n)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "loops"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-004",
+    "prompt": "If an algorithm does two separate full passes over n items, what is the asymptotic time?",
+    "choices": [
+      "O(1)",
+      "O(n)",
+      "O(n^2)",
+      "O(log n)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-005",
+    "prompt": "Which term dominates n^2 + n log n + 50 for large n?",
+    "choices": [
+      "50",
+      "n log n",
+      "n^2",
+      "n"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "dominance"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-006",
+    "prompt": "What is the extra space complexity of sorting an array in place with heap sort?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "big-o",
+      "complexity",
+      "sorting"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-007",
+    "prompt": "What is the average time complexity of lookup in a well-sized hash table?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n log n)"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "big-o",
+      "complexity",
+      "hash-table"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-008",
+    "prompt": "What is the worst-case lookup time in a hash table when all keys collide?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "hash-table"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-009",
+    "prompt": "Which growth rate is smallest for large n?",
+    "choices": [
+      "O(n)",
+      "O(log n)",
+      "O(n log n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "growth"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-010",
+    "prompt": "Which growth rate is largest for large n?",
+    "choices": [
+      "O(n log n)",
+      "O(n^2)",
+      "O(2^n)",
+      "O(n^3)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "growth"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-011",
+    "prompt": "A loop halves n on each iteration. What is its time complexity?",
+    "choices": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "loops"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-012",
+    "prompt": "A nested loop runs n times outside and log n times inside. What is the time complexity?",
+    "choices": [
+      "O(n)",
+      "O(log n)",
+      "O(n log n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "loops"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-013",
+    "prompt": "What does amortized O(1) push on a dynamic array mean?",
+    "choices": [
+      "Every push costs exactly one operation",
+      "The average cost over many pushes is constant",
+      "The worst push is constant",
+      "Memory use is constant"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "arrays"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-014",
+    "prompt": "Which operation is O(n) for a contiguous dynamic array?",
+    "choices": [
+      "Read by index",
+      "Append when capacity remains",
+      "Insert at the front",
+      "Read length"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-015",
+    "prompt": "What is the time complexity of merge sort in the usual comparison model?",
+    "choices": [
+      "O(n)",
+      "O(n log n)",
+      "O(n^2)",
+      "O(log n)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "sorting"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-016",
+    "prompt": "What is the best-case time complexity of quicksort with balanced partitions?",
+    "choices": [
+      "O(n)",
+      "O(n log n)",
+      "O(n^2)",
+      "O(log n)"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "sorting"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-017",
+    "prompt": "What is the worst-case time complexity of quicksort with consistently terrible pivots?",
+    "choices": [
+      "O(n log n)",
+      "O(n)",
+      "O(n^2)",
+      "O(log n)"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "sorting"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-018",
+    "prompt": "Which algorithmic pattern often produces O(2^n) time?",
+    "choices": [
+      "Single pass",
+      "Balanced tree search",
+      "Trying all subsets",
+      "Hash lookup"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "big-o",
+      "complexity",
+      "recursion"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-019",
+    "prompt": "Why are constant factors usually dropped in Big-O notation?",
+    "choices": [
+      "They never affect runtime",
+      "Big-O describes growth rate as n becomes large",
+      "They are impossible to measure",
+      "They only apply to memory"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "analysis"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-big-o-020",
+    "prompt": "Which statement is true about O(n) and O(2n)?",
+    "choices": [
+      "O(2n) is a different asymptotic class",
+      "Both are O(n)",
+      "O(n) always runs twice as fast",
+      "Neither is linear"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "big-o",
+      "complexity",
+      "analysis"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-001",
+    "prompt": "What does a dynamic array usually store to make append efficient?",
+    "choices": [
+      "A sorted index only",
+      "Capacity larger than current length",
+      "A pointer per element",
+      "A hash per slot"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "arrays",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-002",
+    "prompt": "What problem does separate chaining solve in a hash table?",
+    "choices": [
+      "Recursive calls",
+      "Hash collisions",
+      "Stack overflow",
+      "Disk fragmentation"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "hash-table",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-003",
+    "prompt": "In open addressing, where are collided hash-table keys stored?",
+    "choices": [
+      "In linked lists outside the table",
+      "In other slots of the same table",
+      "Only on disk",
+      "In a balanced tree always"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "hash-table",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-004",
+    "prompt": "Why do hash tables resize?",
+    "choices": [
+      "To keep load factor within a useful range",
+      "To sort keys",
+      "To remove all nulls",
+      "To make keys immutable"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "hash-table",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-005",
+    "prompt": "What is the core invariant of a min-heap?",
+    "choices": [
+      "Every parent is <= its children",
+      "Every parent is >= its children",
+      "The array is globally sorted",
+      "Leaves must be equal"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "heap",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-006",
+    "prompt": "How is a binary heap commonly represented?",
+    "choices": [
+      "As a linked list only",
+      "As an array with index arithmetic",
+      "As a hash map",
+      "As a stack frame chain"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "heap",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-007",
+    "prompt": "What does a queue normally return first?",
+    "choices": [
+      "Most recently added item",
+      "Least recently added item",
+      "Largest item",
+      "Smallest item"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "queue",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-008",
+    "prompt": "What does a stack normally return first?",
+    "choices": [
+      "Most recently added item",
+      "Least recently added item",
+      "Median item",
+      "Random item"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "stack",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-009",
+    "prompt": "What pointer is required for a singly linked list node?",
+    "choices": [
+      "next",
+      "previous",
+      "parent",
+      "capacity"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "linked-list",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-010",
+    "prompt": "What extra pointer does a doubly linked list node usually have?",
+    "choices": [
+      "hash",
+      "previous",
+      "height",
+      "color only"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "linked-list",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-011",
+    "prompt": "What does a trie optimize for?",
+    "choices": [
+      "Numeric sorting only",
+      "Prefix lookup over strings",
+      "Matrix multiplication",
+      "Random shuffling"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "data-structures",
+      "trie",
+      "strings"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-012",
+    "prompt": "What is stored on each edge or node in a trie path?",
+    "choices": [
+      "A character or token step",
+      "A database transaction",
+      "A thread id",
+      "A file descriptor"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "trie",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-013",
+    "prompt": "What invariant does a binary search tree maintain?",
+    "choices": [
+      "Left subtree values are <= node and right subtree values are >= node",
+      "Every level is full",
+      "Children are always equal",
+      "Nodes are stored in insertion order only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "tree",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-014",
+    "prompt": "Why do balanced trees rotate?",
+    "choices": [
+      "To preserve search-order while reducing height",
+      "To hash keys faster",
+      "To remove duplicate values only",
+      "To convert nodes into arrays"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "tree",
+      "internals"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-015",
+    "prompt": "What does a union-find structure track?",
+    "choices": [
+      "Connected components under merges",
+      "Sorted key order",
+      "Regex capture groups",
+      "Process page tables"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "union-find",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-016",
+    "prompt": "What does path compression improve in union-find?",
+    "choices": [
+      "The depth of future find operations",
+      "The hash quality of keys",
+      "The number of graph vertices",
+      "The stability of sorting"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "union-find",
+      "complexity"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-017",
+    "prompt": "What is an adjacency list best at storing?",
+    "choices": [
+      "Sparse graphs",
+      "Only complete graphs",
+      "Only trees with one root",
+      "Only sorted arrays"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "graph",
+      "internals"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-018",
+    "prompt": "What is an adjacency matrix best at answering quickly?",
+    "choices": [
+      "Whether a specific edge exists",
+      "The next stack frame",
+      "A regex match index",
+      "The newest queue item"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "graph",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-019",
+    "prompt": "What does an LRU cache usually combine?",
+    "choices": [
+      "Hash map plus linked list",
+      "Heap plus trie only",
+      "Queue plus recursion only",
+      "Array plus binary search only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "cache",
+      "internals"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-data-structures-020",
+    "prompt": "Why can deleting from the middle of an array be O(n)?",
+    "choices": [
+      "Later elements may need shifting",
+      "The length cannot change",
+      "Indexes are impossible to compute",
+      "Arrays always hash keys"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "data-structures",
+      "arrays",
+      "complexity"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-001",
+    "prompt": "What does JavaScript `typeof null` return?",
+    "choices": [
+      "null",
+      "object",
+      "undefined",
+      "boolean"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "quirks"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-002",
+    "prompt": "Which value is falsy in JavaScript?",
+    "choices": [
+      "[]",
+      "{}",
+      "\"0\"",
+      "0"
+    ],
+    "answerIndex": 3,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "truthiness"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-003",
+    "prompt": "What does `===` avoid compared with `==`?",
+    "choices": [
+      "Function calls",
+      "Type coercion",
+      "Object allocation",
+      "Lexical scoping"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "equality"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-004",
+    "prompt": "What does `let` provide that `var` does not?",
+    "choices": [
+      "Block scope",
+      "Automatic deep freeze",
+      "Runtime type checking",
+      "Network isolation"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "scope"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-005",
+    "prompt": "What is a closure?",
+    "choices": [
+      "A function plus access to its lexical environment",
+      "A class without methods",
+      "A rejected promise",
+      "A JSON parser"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "closures"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-006",
+    "prompt": "What does `Promise.all` do when one input rejects?",
+    "choices": [
+      "Waits forever",
+      "Resolves with null",
+      "Rejects with that failure",
+      "Ignores the failure"
+    ],
+    "answerIndex": 2,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "async"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-007",
+    "prompt": "What does `await` pause?",
+    "choices": [
+      "The whole OS thread always",
+      "The async function continuation",
+      "All tabs in the browser",
+      "The event loop permanently"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "async"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-008",
+    "prompt": "What is optional chaining useful for?",
+    "choices": [
+      "Skipping nullish property access failures",
+      "Sorting arrays",
+      "Creating workers",
+      "Parsing CSS"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "syntax"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-009",
+    "prompt": "What does `??` check?",
+    "choices": [
+      "Falsy values",
+      "Only null or undefined",
+      "Only empty strings",
+      "Only zero"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "syntax"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-010",
+    "prompt": "What does TypeScript erase at runtime by default?",
+    "choices": [
+      "Type annotations",
+      "All functions",
+      "All objects",
+      "Import paths"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "runtime"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-011",
+    "prompt": "What does a TypeScript union type represent?",
+    "choices": [
+      "A value that may be one of several types",
+      "A merged Git branch",
+      "A SQL join",
+      "A thread lock"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "types"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-012",
+    "prompt": "What does `unknown` force before use in TypeScript?",
+    "choices": [
+      "Type narrowing or assertion",
+      "Automatic serialization",
+      "Stack allocation",
+      "Promise resolution"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "types"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-013",
+    "prompt": "What does `never` often represent in TypeScript?",
+    "choices": [
+      "A value that should be unreachable",
+      "A nullable string",
+      "Any JSON value",
+      "A browser event"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "types"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-014",
+    "prompt": "What is structural typing?",
+    "choices": [
+      "Compatibility based on shape",
+      "Compatibility based only on class name",
+      "Runtime reflection only",
+      "A database schema rule"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "types"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-015",
+    "prompt": "What does `as const` usually preserve?",
+    "choices": [
+      "Literal types and readonly structure",
+      "Network sockets",
+      "Mutable array capacity",
+      "Promise state"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "typescript",
+      "types"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-016",
+    "prompt": "What is event-loop microtask ordering usually used by?",
+    "choices": [
+      "Promise callbacks",
+      "CSS selectors",
+      "SQL indexes",
+      "Heap rotations"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "event-loop"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-017",
+    "prompt": "Which expression creates a shallow copy of an array?",
+    "choices": [
+      "[...items]",
+      "items.deep()",
+      "copy items",
+      "Array.lock(items)"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-018",
+    "prompt": "What does `Array.prototype.map` return?",
+    "choices": [
+      "A new array of callback results",
+      "A boolean",
+      "The first match",
+      "The original length only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-019",
+    "prompt": "What does `Array.prototype.reduce` carry between iterations?",
+    "choices": [
+      "An accumulator",
+      "A CSS rule",
+      "A network request",
+      "A stack trace only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "arrays"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-ts-020",
+    "prompt": "What does `Object.freeze` do shallowly?",
+    "choices": [
+      "Prevents direct mutation of own properties",
+      "Recursively freezes all nested objects always",
+      "Deletes all keys",
+      "Converts object to JSON"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "js-ts",
+      "javascript",
+      "objects"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-001",
+    "prompt": "What is a race condition?",
+    "choices": [
+      "Correct ordering by design",
+      "Output depending on uncontrolled timing",
+      "A single-threaded loop",
+      "A sorted queue"
+    ],
+    "answerIndex": 1,
+    "tags": [
+      "concurrency",
+      "races"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-002",
+    "prompt": "What does a mutex protect?",
+    "choices": [
+      "A critical section",
+      "A CSS selector",
+      "A DNS record",
+      "A type alias"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "locks"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-003",
+    "prompt": "What can happen if two locks are acquired in opposite order?",
+    "choices": [
+      "Deadlock",
+      "Memoization",
+      "Cache warming",
+      "Inlining"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "deadlock"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-004",
+    "prompt": "What does atomic increment prevent?",
+    "choices": [
+      "Lost updates on that increment",
+      "All memory leaks",
+      "All deadlocks",
+      "All IO latency"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "atomic"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-005",
+    "prompt": "What is starvation?",
+    "choices": [
+      "A task waits indefinitely while others keep progressing",
+      "A process exits cleanly",
+      "A cache miss",
+      "A parse error"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "scheduling"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-006",
+    "prompt": "What is a semaphore often used to limit?",
+    "choices": [
+      "Concurrent access count",
+      "File name length",
+      "Object property count",
+      "Regex capture count"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "locks"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-007",
+    "prompt": "What is the main risk of shared mutable state?",
+    "choices": [
+      "Uncoordinated writes can conflict",
+      "Values become immutable",
+      "All reads stop",
+      "Types disappear"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "state"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-008",
+    "prompt": "What does message passing reduce?",
+    "choices": [
+      "Direct shared-memory coordination",
+      "CPU instruction count always",
+      "Network hops always",
+      "Function definitions"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "state"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-009",
+    "prompt": "What does async IO help with?",
+    "choices": [
+      "Waiting without blocking a worker unnecessarily",
+      "Making CPU work disappear",
+      "Skipping error handling",
+      "Sorting faster than O(n)"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "async"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-010",
+    "prompt": "What is backpressure?",
+    "choices": [
+      "A signal that producers should slow down",
+      "A lock-free sorting method",
+      "A hash collision strategy",
+      "A DNS lookup"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "streams"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-011",
+    "prompt": "What is a thread pool?",
+    "choices": [
+      "A fixed group of worker threads reused for jobs",
+      "A set of CSS classes",
+      "A sorted array",
+      "A trie root"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "threads"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-012",
+    "prompt": "What does context switching cost?",
+    "choices": [
+      "Time to save and restore execution state",
+      "Zero by definition",
+      "Only disk space",
+      "Only source lines"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "threads"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-013",
+    "prompt": "What is lock contention?",
+    "choices": [
+      "Multiple workers competing for the same lock",
+      "A compiler warning",
+      "A full disk",
+      "A failed DNS query"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "locks"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-014",
+    "prompt": "What does a condition variable allow?",
+    "choices": [
+      "Waiting until a predicate may be true",
+      "Encrypting memory",
+      "Parsing JSON",
+      "Hashing strings"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "locks"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-015",
+    "prompt": "What is a livelock?",
+    "choices": [
+      "Tasks keep reacting but make no progress",
+      "A task sleeps forever without CPU",
+      "A data structure is empty",
+      "A pointer is null"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "liveness"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-016",
+    "prompt": "What does compare-and-swap do?",
+    "choices": [
+      "Updates only if the current value matches an expected value",
+      "Sorts two arrays",
+      "Encrypts a key",
+      "Parses two tokens"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "atomic"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-017",
+    "prompt": "What is a data race?",
+    "choices": [
+      "Conflicting unsynchronized memory access where at least one access writes",
+      "Two users typing quickly",
+      "A fast network request",
+      "A regex alternation"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "races"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-018",
+    "prompt": "What does idempotent retry mean?",
+    "choices": [
+      "Repeating the operation has the same intended effect",
+      "The retry always gets faster",
+      "The retry skips validation",
+      "The retry mutates more state each time"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "retries"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-019",
+    "prompt": "What is a promise in JavaScript?",
+    "choices": [
+      "A placeholder for a future completion or failure",
+      "A CPU thread",
+      "A database lock",
+      "A type-only interface"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "javascript",
+      "async"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-concurrency-020",
+    "prompt": "What does cancellation need to be safe?",
+    "choices": [
+      "A defined cleanup or observation point",
+      "A larger stack only",
+      "A sorted map",
+      "A random delay"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "concurrency",
+      "cancellation"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-001",
+    "prompt": "What is virtual memory?",
+    "choices": [
+      "An address abstraction per process",
+      "Only RAM soldered to the board",
+      "A JavaScript object",
+      "A network protocol"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-002",
+    "prompt": "What is a page fault?",
+    "choices": [
+      "Access to a page not currently mapped for the process",
+      "A syntax error",
+      "A failed DNS response",
+      "A branch misprediction only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-003",
+    "prompt": "What does a system call do?",
+    "choices": [
+      "Transitions from user code to kernel service",
+      "Runs CSS",
+      "Compiles TypeScript only",
+      "Sorts a heap"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "kernel"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-004",
+    "prompt": "What is a process?",
+    "choices": [
+      "An isolated running program instance",
+      "A single function call",
+      "A SQL table",
+      "A hash bucket"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "process"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-005",
+    "prompt": "What is a thread?",
+    "choices": [
+      "A schedulable execution path inside a process",
+      "A disk partition",
+      "An IP packet",
+      "A regex token"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "threads"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-006",
+    "prompt": "What does the scheduler choose?",
+    "choices": [
+      "Which runnable task gets CPU time",
+      "Which CSS file loads",
+      "Which SQL index exists",
+      "Which object key hashes"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "scheduling"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-007",
+    "prompt": "What is a file descriptor?",
+    "choices": [
+      "A small handle for an open file or IO resource",
+      "The full file contents",
+      "A CSS selector",
+      "A CPU register only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "files"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-008",
+    "prompt": "What does buffering often improve?",
+    "choices": [
+      "Amortizing many small IO operations",
+      "Eliminating all writes",
+      "Preventing all crashes",
+      "Sorting files"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "io"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-009",
+    "prompt": "What is thrashing?",
+    "choices": [
+      "Excessive paging that leaves little time for useful work",
+      "A successful cache hit",
+      "A short function",
+      "A valid pointer"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-010",
+    "prompt": "What does copy-on-write delay?",
+    "choices": [
+      "Copying shared data until a write occurs",
+      "All function calls",
+      "All network reads",
+      "All page faults"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-011",
+    "prompt": "What is kernel space?",
+    "choices": [
+      "Privileged memory/execution area for the OS kernel",
+      "The browser cache",
+      "A JSON namespace",
+      "A user-only heap"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "kernel"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-012",
+    "prompt": "What is user space?",
+    "choices": [
+      "Where ordinary application code runs with limited privileges",
+      "Only GPU firmware",
+      "Only the bootloader",
+      "The page table itself"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "kernel"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-013",
+    "prompt": "What does an interrupt let hardware do?",
+    "choices": [
+      "Signal the CPU that attention is needed",
+      "Rename a file automatically",
+      "Parse SQL",
+      "Merge arrays"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "hardware"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-014",
+    "prompt": "What is a memory leak?",
+    "choices": [
+      "Allocated memory remains reachable or unreleased longer than intended",
+      "A fast allocation",
+      "A compacted heap",
+      "A cache hit"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-015",
+    "prompt": "What is swapping?",
+    "choices": [
+      "Moving memory pages between RAM and storage",
+      "Changing two variable names",
+      "Rotating a tree",
+      "Comparing hash keys"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "memory"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-016",
+    "prompt": "What does an environment variable provide?",
+    "choices": [
+      "Process configuration inherited from its environment",
+      "A CPU cache line",
+      "A database row lock",
+      "A binary search step"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "process"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-017",
+    "prompt": "What is standard input?",
+    "choices": [
+      "A conventional input stream for a process",
+      "The only network socket",
+      "A browser cookie",
+      "A heap pointer"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "io"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-018",
+    "prompt": "What does exit code 0 conventionally mean?",
+    "choices": [
+      "Success",
+      "Permission denied always",
+      "Segmentation fault always",
+      "Timeout always"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "process"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-019",
+    "prompt": "What is a signal?",
+    "choices": [
+      "A notification delivered to a process",
+      "A SQL query plan",
+      "A hash function",
+      "A DOM node"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "process"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-os-basics-020",
+    "prompt": "What does permission mode usually control?",
+    "choices": [
+      "Who may read, write, or execute a file",
+      "CPU clock speed",
+      "Array length",
+      "Promise state"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "os-basics",
+      "os",
+      "files"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-001",
+    "prompt": "What does DNS resolve?",
+    "choices": [
+      "Names to addresses",
+      "JSON to objects",
+      "Threads to processes",
+      "Arrays to heaps"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "dns"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-002",
+    "prompt": "What does TCP provide?",
+    "choices": [
+      "Reliable ordered byte stream",
+      "Unreliable datagrams only",
+      "HTML parsing",
+      "Disk scheduling"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "tcp"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-003",
+    "prompt": "What does UDP avoid compared with TCP?",
+    "choices": [
+      "Connection setup and ordered reliability",
+      "IP addresses",
+      "Ports",
+      "Packets"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "udp"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-004",
+    "prompt": "What does TLS primarily provide?",
+    "choices": [
+      "Encrypted authenticated transport",
+      "Faster sorting",
+      "Disk persistence",
+      "Thread pooling"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "tls"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-005",
+    "prompt": "What is an HTTP status code in the 500 range?",
+    "choices": [
+      "Server-side error class",
+      "Successful response",
+      "Client-side redirect only",
+      "DNS record type"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "http"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-006",
+    "prompt": "What is an HTTP status code in the 400 range?",
+    "choices": [
+      "Client request error class",
+      "Successful response",
+      "TLS handshake only",
+      "Cache hit only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "http"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-007",
+    "prompt": "What does HTTP GET conventionally mean?",
+    "choices": [
+      "Retrieve a representation",
+      "Delete a resource",
+      "Open a TCP socket manually",
+      "Encrypt a certificate"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "http"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-008",
+    "prompt": "What does idempotent HTTP PUT imply?",
+    "choices": [
+      "Repeating the same request has the same intended resource state",
+      "It cannot fail",
+      "It is always cached",
+      "It never sends a body"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "http"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-009",
+    "prompt": "What is latency?",
+    "choices": [
+      "Time before a response or event is observed",
+      "Bytes per second only",
+      "Packet size",
+      "Port count"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "performance"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-010",
+    "prompt": "What is throughput?",
+    "choices": [
+      "Amount transferred per unit time",
+      "Handshake count only",
+      "DNS TTL only",
+      "Header count"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "performance"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-011",
+    "prompt": "What does a CDN cache near users?",
+    "choices": [
+      "Static or cacheable content",
+      "Only source code comments",
+      "Only private keys",
+      "Only CPU registers"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "cdn"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-012",
+    "prompt": "What is a reverse proxy commonly used for?",
+    "choices": [
+      "Routing requests to backend services",
+      "Compiling JavaScript",
+      "Running SQL joins",
+      "Allocating stack frames"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "proxy"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-013",
+    "prompt": "What does a load balancer distribute?",
+    "choices": [
+      "Traffic across multiple targets",
+      "Source lines across files",
+      "Memory pages across variables",
+      "Regex groups across captures"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "load-balancing"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-014",
+    "prompt": "What does a port identify?",
+    "choices": [
+      "An application endpoint on a host",
+      "A DNS hostname only",
+      "A file permission bit",
+      "A heap object"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "tcp"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-015",
+    "prompt": "What is a socket?",
+    "choices": [
+      "An endpoint for network communication",
+      "A SQL index",
+      "A browser tab",
+      "A stack frame"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "sockets"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-016",
+    "prompt": "What does exponential backoff reduce?",
+    "choices": [
+      "Retry pressure during failures",
+      "Payload size always",
+      "TLS certificate length",
+      "Port conflicts always"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "retries"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-017",
+    "prompt": "What does a timeout protect against?",
+    "choices": [
+      "Waiting indefinitely",
+      "All bad data",
+      "All packet loss",
+      "All memory leaks"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "reliability"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-018",
+    "prompt": "What is a cache-control max-age value?",
+    "choices": [
+      "How long a response can be considered fresh",
+      "The maximum TCP port",
+      "A TLS key size",
+      "A DNS label count"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "cache"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-019",
+    "prompt": "What does CORS govern in browsers?",
+    "choices": [
+      "Cross-origin requests readable by web pages",
+      "CPU scheduling",
+      "Database indexing",
+      "Filesystem permissions"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "browser"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-networking-020",
+    "prompt": "What is a webhook?",
+    "choices": [
+      "An HTTP callback sent when an event happens",
+      "A heap pointer",
+      "A recursive function",
+      "A DNS resolver"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "networking",
+      "http"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-001",
+    "prompt": "What does SELECT choose?",
+    "choices": [
+      "Rows and columns to return",
+      "A thread to run",
+      "A CSS selector",
+      "A TCP port"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "queries"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-002",
+    "prompt": "What does WHERE filter?",
+    "choices": [
+      "Rows before result output",
+      "Database files only",
+      "Network packets",
+      "JavaScript imports"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "queries"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-003",
+    "prompt": "What does an INNER JOIN return?",
+    "choices": [
+      "Rows with matches on both joined sides",
+      "Only unmatched left rows",
+      "Only unmatched right rows",
+      "Every possible row without a predicate always"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "joins"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-004",
+    "prompt": "What does a LEFT JOIN preserve?",
+    "choices": [
+      "Rows from the left side",
+      "Only rows from the right side",
+      "Only indexes",
+      "Only primary keys"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "joins"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-005",
+    "prompt": "What is a primary key?",
+    "choices": [
+      "A column or columns that uniquely identify a row",
+      "A password",
+      "A memory address",
+      "A CSS id"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "schema"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-006",
+    "prompt": "What is a foreign key?",
+    "choices": [
+      "A reference to a key in another table",
+      "A random string",
+      "A TLS certificate",
+      "A heap allocation"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "schema"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-007",
+    "prompt": "What does an index usually improve?",
+    "choices": [
+      "Lookup and filtering speed for indexed patterns",
+      "Disk capacity",
+      "Query correctness always",
+      "Table name length"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "indexes"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-008",
+    "prompt": "What tradeoff does an index introduce?",
+    "choices": [
+      "Extra storage and write maintenance cost",
+      "No read benefit",
+      "No disk use",
+      "No schema dependency"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "indexes"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-009",
+    "prompt": "What does GROUP BY define?",
+    "choices": [
+      "Groups used by aggregate functions",
+      "Thread groups",
+      "Network subnets",
+      "Heap levels"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "aggregation"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-010",
+    "prompt": "What does COUNT(*) count?",
+    "choices": [
+      "Rows in each result group or result set",
+      "Only non-null strings",
+      "Only primary keys",
+      "Only indexes"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "aggregation"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-011",
+    "prompt": "What does HAVING filter?",
+    "choices": [
+      "Groups after aggregation",
+      "Rows before joins only",
+      "Column names",
+      "Database users"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "aggregation"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-012",
+    "prompt": "What is a transaction?",
+    "choices": [
+      "A group of operations treated as one unit of work",
+      "A single SELECT keyword only",
+      "A network packet",
+      "A browser event"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "transactions"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-013",
+    "prompt": "What does atomicity mean in ACID?",
+    "choices": [
+      "All-or-nothing transaction behavior",
+      "Rows are sorted",
+      "Indexes are unique",
+      "Queries are cached"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "transactions"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-014",
+    "prompt": "What does isolation control?",
+    "choices": [
+      "How concurrent transactions observe each other",
+      "How strings are encoded",
+      "How DNS resolves",
+      "How files are compressed"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "transactions"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-015",
+    "prompt": "What is SQL injection?",
+    "choices": [
+      "Untrusted input changing query structure",
+      "A faster index",
+      "A database backup",
+      "A normal foreign key"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "security"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-016",
+    "prompt": "What prevents typical SQL injection?",
+    "choices": [
+      "Parameterized queries",
+      "String concatenation with user input",
+      "Longer table names",
+      "More SELECT columns"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "security"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-017",
+    "prompt": "What does NULL represent?",
+    "choices": [
+      "Unknown or missing value",
+      "Zero always",
+      "Empty string always",
+      "False always"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "values"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-018",
+    "prompt": "Why can `= NULL` be wrong in SQL?",
+    "choices": [
+      "NULL comparisons use IS NULL semantics",
+      "NULL is always zero",
+      "NULL cannot be stored",
+      "NULL is a table name"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "values"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-019",
+    "prompt": "What does ORDER BY control?",
+    "choices": [
+      "Result row ordering",
+      "Table creation",
+      "Join type",
+      "Transaction isolation"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "queries"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-sql-020",
+    "prompt": "What does LIMIT usually control?",
+    "choices": [
+      "Maximum number of rows returned",
+      "Maximum column name length",
+      "Maximum database size",
+      "Maximum index count"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "sql",
+      "queries"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-001",
+    "prompt": "What does `.` usually match in a regular expression?",
+    "choices": [
+      "Any single character except newline by default",
+      "Only a period",
+      "Only a digit",
+      "Only whitespace"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "syntax"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-002",
+    "prompt": "What does `*` mean?",
+    "choices": [
+      "Zero or more of the preceding token",
+      "Exactly one token",
+      "Start of string",
+      "End of string"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-003",
+    "prompt": "What does `+` mean?",
+    "choices": [
+      "One or more of the preceding token",
+      "Zero or one of the preceding token",
+      "End of string",
+      "A digit only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-004",
+    "prompt": "What does `?` mean after a token?",
+    "choices": [
+      "Zero or one of the preceding token",
+      "One or more always",
+      "Start of line",
+      "A literal slash"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-005",
+    "prompt": "What does `^` anchor usually mean outside a character class?",
+    "choices": [
+      "Start of input or line",
+      "End of input only",
+      "Digit",
+      "Whitespace"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "anchors"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-006",
+    "prompt": "What does `$` anchor usually mean?",
+    "choices": [
+      "End of input or line",
+      "Start only",
+      "Any word",
+      "Any digit"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "anchors"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-007",
+    "prompt": "What does `\\d` match in many regex flavors?",
+    "choices": [
+      "A digit",
+      "A letter",
+      "Whitespace",
+      "A word boundary"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "classes"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-008",
+    "prompt": "What does `\\s` match in many regex flavors?",
+    "choices": [
+      "Whitespace",
+      "A digit",
+      "A literal s only",
+      "A word boundary"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "classes"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-009",
+    "prompt": "What does `\\w` commonly match?",
+    "choices": [
+      "Word characters such as letters, digits, underscore",
+      "Only spaces",
+      "Only punctuation",
+      "Only newlines"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "classes"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-010",
+    "prompt": "What does `[abc]` match?",
+    "choices": [
+      "One character: a, b, or c",
+      "The string abc only",
+      "Any digit",
+      "No characters"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "classes"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-011",
+    "prompt": "What does `[^abc]` match inside a character class?",
+    "choices": [
+      "One character that is not a, b, or c",
+      "Start followed by abc",
+      "The string not abc",
+      "Only a caret"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "classes"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-012",
+    "prompt": "What does `(foo|bar)` express?",
+    "choices": [
+      "Alternation between foo and bar",
+      "A character range",
+      "A line ending",
+      "A digit group only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "groups"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-013",
+    "prompt": "What do parentheses usually create?",
+    "choices": [
+      "A capturing group unless marked otherwise",
+      "A file descriptor",
+      "A database join",
+      "A thread lock"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "groups"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-014",
+    "prompt": "What does a non-greedy quantifier like `*?` try to do?",
+    "choices": [
+      "Match as little as possible while allowing the whole pattern to match",
+      "Match only digits",
+      "Disable anchors",
+      "Escape every character"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-015",
+    "prompt": "What does escaping a metacharacter do?",
+    "choices": [
+      "Treats it as a literal character",
+      "Deletes it",
+      "Makes it faster always",
+      "Turns it into a group"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "syntax"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-016",
+    "prompt": "What is a word boundary often written as?",
+    "choices": [
+      "\\b",
+      "\\d",
+      "\\s",
+      "\\A"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "anchors"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-017",
+    "prompt": "What does `{3}` mean after a token?",
+    "choices": [
+      "Exactly three repetitions",
+      "At most three repetitions",
+      "At least four repetitions",
+      "Zero repetitions"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-018",
+    "prompt": "What does `{2,5}` mean after a token?",
+    "choices": [
+      "Between two and five repetitions",
+      "Exactly seven repetitions",
+      "Only two or only five literals",
+      "No repetitions"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "quantifiers"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-019",
+    "prompt": "Why can nested greedy quantifiers be risky?",
+    "choices": [
+      "They can cause heavy backtracking",
+      "They always remove captures",
+      "They disable matching",
+      "They require SQL"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "performance"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-regex-020",
+    "prompt": "What does a lookahead check?",
+    "choices": [
+      "A condition ahead without consuming characters",
+      "A previous database row",
+      "A next CPU thread",
+      "A file permission"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "regex",
+      "lookaround"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-001",
+    "prompt": "What is a base case?",
+    "choices": [
+      "A condition that stops recursion",
+      "A slower loop",
+      "A database index",
+      "A heap root only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-002",
+    "prompt": "What is a recursive case?",
+    "choices": [
+      "The part that calls the function again on smaller or changed input",
+      "The part that opens a socket",
+      "The SQL join predicate",
+      "The static type annotation"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-003",
+    "prompt": "What happens if recursion never reaches a base case?",
+    "choices": [
+      "Stack overflow or nontermination",
+      "Automatic sorting",
+      "Memoization always",
+      "A hash collision only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-004",
+    "prompt": "What data structure does function-call recursion use implicitly?",
+    "choices": [
+      "Call stack",
+      "Hash table",
+      "B-tree",
+      "Bloom filter"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "stack"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-005",
+    "prompt": "What is tail recursion?",
+    "choices": [
+      "The recursive call is the final action",
+      "The function has two base cases",
+      "The function returns a tuple",
+      "The function uses SQL"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "patterns"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-006",
+    "prompt": "What is divide and conquer?",
+    "choices": [
+      "Split problem, solve parts, combine results",
+      "Try every password",
+      "Lock every thread",
+      "Store every row"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "patterns"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-007",
+    "prompt": "Which algorithm commonly uses divide and conquer?",
+    "choices": [
+      "Merge sort",
+      "Linear scan only",
+      "Hash lookup only",
+      "Queue enqueue only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "sorting"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-008",
+    "prompt": "What does recursion depth measure?",
+    "choices": [
+      "Maximum nested calls active at once",
+      "Number of CPU cores",
+      "Number of SQL rows",
+      "Number of object keys"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "stack"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-009",
+    "prompt": "Why can memoization help recursive code?",
+    "choices": [
+      "It reuses results for repeated subproblems",
+      "It removes the base case",
+      "It makes all calls parallel",
+      "It changes syntax only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "memoization"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-010",
+    "prompt": "What is a tree traversal?",
+    "choices": [
+      "A systematic visit of tree nodes",
+      "A SQL transaction",
+      "A network handshake",
+      "A type narrowing step"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "tree"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-011",
+    "prompt": "Which traversal visits left subtree, node, then right subtree?",
+    "choices": [
+      "In-order",
+      "Pre-order",
+      "Post-order",
+      "Level-order"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "tree"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-012",
+    "prompt": "Which traversal visits node before children?",
+    "choices": [
+      "Pre-order",
+      "In-order",
+      "Post-order",
+      "Reverse-order"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "tree"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-013",
+    "prompt": "Which traversal visits children before node?",
+    "choices": [
+      "Post-order",
+      "Pre-order",
+      "In-order",
+      "Random-order"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "tree"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-014",
+    "prompt": "What is backtracking?",
+    "choices": [
+      "Explore a choice, undo it, then try another choice",
+      "Always choose the first option",
+      "Sort with a heap only",
+      "Read bytes from disk"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "backtracking"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-015",
+    "prompt": "What problem shape often fits backtracking?",
+    "choices": [
+      "Constraint search over choices",
+      "Single hash lookup",
+      "One arithmetic addition",
+      "Reading current time"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "backtracking"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-016",
+    "prompt": "What is a recurrence relation?",
+    "choices": [
+      "An equation describing a value using smaller cases",
+      "A network retry header",
+      "A SQL table alias",
+      "A lock type"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "analysis"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-017",
+    "prompt": "What does `T(n)=T(n-1)+O(1)` usually describe?",
+    "choices": [
+      "Linear recursive work",
+      "Constant work",
+      "Quadratic work always",
+      "Exponential work always"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "analysis"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-018",
+    "prompt": "What does `T(n)=2T(n/2)+O(n)` usually resolve to?",
+    "choices": [
+      "O(n log n)",
+      "O(n)",
+      "O(log n)",
+      "O(n^2)"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "analysis"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-019",
+    "prompt": "Why can recursion be less suitable for very deep lists?",
+    "choices": [
+      "Call stack depth can become too large",
+      "Lists cannot be traversed recursively",
+      "Base cases are impossible",
+      "Loops cannot express it"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "stack"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-recursion-020",
+    "prompt": "What is mutual recursion?",
+    "choices": [
+      "Two or more functions call each other recursively",
+      "A function has two parameters",
+      "Two arrays are merged",
+      "Two locks are released"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "recursion",
+      "patterns"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-001",
+    "prompt": "What is overlapping subproblems?",
+    "choices": [
+      "The same smaller problems appear repeatedly",
+      "Every subproblem is unique",
+      "No base cases exist",
+      "Only network calls exist"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-002",
+    "prompt": "What is optimal substructure?",
+    "choices": [
+      "An optimal answer can be built from optimal smaller answers",
+      "Every answer is random",
+      "Sorting is forbidden",
+      "The stack must be empty"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-003",
+    "prompt": "What does memoization store?",
+    "choices": [
+      "Results of subproblems",
+      "Only source code",
+      "Only errors",
+      "Only locks"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "memoization"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-004",
+    "prompt": "What is tabulation?",
+    "choices": [
+      "Bottom-up filling of a table of states",
+      "Deleting states",
+      "A TCP handshake",
+      "A regex group"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "tabulation"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-005",
+    "prompt": "What are DP states?",
+    "choices": [
+      "Variables that identify a subproblem",
+      "CPU registers only",
+      "Database credentials",
+      "CSS rules"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "state"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-006",
+    "prompt": "What is a transition in DP?",
+    "choices": [
+      "A rule that computes a state from other states",
+      "A process exit",
+      "A DNS lookup",
+      "A file rename"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "transition"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-007",
+    "prompt": "What is the base case in DP for Fibonacci often?",
+    "choices": [
+      "Values for n=0 and n=1",
+      "A random pivot",
+      "A hash seed",
+      "A SQL index"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "basics"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-008",
+    "prompt": "Why can bottom-up DP avoid recursion overhead?",
+    "choices": [
+      "It fills states iteratively",
+      "It skips all computation",
+      "It never uses memory",
+      "It removes arrays"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "tabulation"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-009",
+    "prompt": "What does space optimization in DP often reuse?",
+    "choices": [
+      "Only states needed for future transitions",
+      "All past states forever",
+      "A network socket",
+      "A regex engine"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "space"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-010",
+    "prompt": "Which problem is a classic 0/1 DP pattern?",
+    "choices": [
+      "Knapsack",
+      "DNS resolution",
+      "Opening a file",
+      "CSS cascade"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "patterns"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-011",
+    "prompt": "In 0/1 knapsack, each item can be chosen how many times?",
+    "choices": [
+      "At most once",
+      "Unlimited times",
+      "Exactly twice",
+      "Never"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "patterns"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-012",
+    "prompt": "What does longest common subsequence DP compare?",
+    "choices": [
+      "Prefixes of two sequences",
+      "Only one hash key",
+      "Only a process id",
+      "Only file permissions"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "strings"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-013",
+    "prompt": "What does edit distance DP typically compute?",
+    "choices": [
+      "Minimum operations to transform one string into another",
+      "Maximum heap height",
+      "Packet latency",
+      "SQL row count only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "strings"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-014",
+    "prompt": "What does a bitmask DP state often encode?",
+    "choices": [
+      "A subset of items already used or visited",
+      "A TCP port",
+      "A CSS class",
+      "A SQL column type"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "state"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-015",
+    "prompt": "What is one danger in DP implementation?",
+    "choices": [
+      "Using states before their dependencies are computed",
+      "Using variables",
+      "Having a base case",
+      "Using arrays"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "implementation"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-016",
+    "prompt": "Why can DP use much memory?",
+    "choices": [
+      "Many states may need storage",
+      "It never stores values",
+      "It requires one CPU core per state",
+      "It stores only comments"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "space"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-017",
+    "prompt": "What does top-down DP combine?",
+    "choices": [
+      "Recursion plus memoization",
+      "Sorting plus hashing only",
+      "SQL plus DNS",
+      "CSS plus HTML"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "memoization"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-018",
+    "prompt": "What does bottom-up DP require choosing carefully?",
+    "choices": [
+      "Iteration order",
+      "DNS TTL",
+      "Thread name",
+      "Class name"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "tabulation"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-019",
+    "prompt": "What does the recurrence for climbing stairs usually depend on?",
+    "choices": [
+      "The previous one and two step counts",
+      "Only the next network packet",
+      "Only a random number",
+      "Only an SQL index"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "patterns"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-dynamic-programming-020",
+    "prompt": "When is greedy not enough but DP may work?",
+    "choices": [
+      "Local choices can block a globally optimal result",
+      "There is only one possible choice",
+      "No subproblem repeats",
+      "The input is empty only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "dynamic-programming",
+      "dp",
+      "greedy"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  }
+]
