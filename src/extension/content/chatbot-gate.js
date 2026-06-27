@@ -1,6 +1,8 @@
 (function attachChatbotGate() {
     const browserApi = globalThis.browser ?? globalThis.chrome;
     const overlayId = 'dorso-gate-root';
+    const whatIAskedKey = 'WHAT_I_ASKED';
+    const whatIAskedLimit = 200;
     let overlayRoot = null;
     let latestState = null;
     let sessionExpiryTimer = null;
@@ -16,6 +18,51 @@
                 resolve(callbackResponse || {});
             });
         });
+    }
+
+    async function getStorageValue(key) {
+        const response = browserApi.storage.local.get([key]);
+        if (response && typeof response.then === 'function') {
+            const result = await response;
+            return result[key];
+        }
+
+        return new Promise((resolve) => {
+            browserApi.storage.local.get([key], (result) => {
+                resolve(result?.[key]);
+            });
+        });
+    }
+
+    async function setStorageValues(values) {
+        const response = browserApi.storage.local.set(values);
+        if (response && typeof response.then === 'function') {
+            return response;
+        }
+
+        return new Promise((resolve) => {
+            browserApi.storage.local.set(values, resolve);
+        });
+    }
+
+    async function appendWhatIAsked(target, text) {
+        const trimmed = text.trim();
+        if (!trimmed) {
+            return false;
+        }
+
+        const entries = await getStorageValue(whatIAskedKey);
+        const nextEntries = [
+            ...(Array.isArray(entries) ? entries : []),
+            {
+                timestamp: Date.now(),
+                target: target.id,
+                text: trimmed,
+            },
+        ].slice(-whatIAskedLimit);
+
+        await setStorageValues({ [whatIAskedKey]: nextEntries });
+        return true;
     }
 
     async function whenBodyReady() {
@@ -213,6 +260,30 @@
                 margin: 0 0 10px;
                 font-size: 1.3rem;
             }
+            .dorso-intent {
+                display: grid;
+                gap: 10px;
+                margin: 18px 0 0;
+            }
+            .dorso-intent label {
+                color: #66594d;
+                line-height: 1.4;
+            }
+            .dorso-intent textarea {
+                width: 100%;
+                min-height: 78px;
+                resize: vertical;
+                border-radius: 14px;
+                border: 1px solid rgba(25, 20, 17, 0.14);
+                background: #fffdf7;
+                padding: 12px;
+                color: #191411;
+                font: inherit;
+            }
+            .dorso-intent-status {
+                min-height: 1.2em;
+                color: #1b7f5f;
+            }
             .dorso-chip-row {
                 display: flex;
                 flex-wrap: wrap;
@@ -264,6 +335,9 @@
         const backdrop = createElement('div', { className: 'dorso-backdrop' });
         const panel = createElement('div', { className: 'dorso-panel' });
         const challengeCard = createElement('div', { className: 'dorso-card' });
+        const intentForm = createElement('form', { className: 'dorso-intent' });
+        const intentTextarea = createElement('textarea', { id: 'dorsoIntentText' });
+        const intentStatus = createElement('span', { className: 'dorso-intent-status' });
         const chipRow = createElement('div', { className: 'dorso-chip-row' });
         const actionRow = createElement('div', { className: 'dorso-actions' });
         const list = createElement('ul', { className: 'dorso-list' });
@@ -305,6 +379,20 @@
             }),
         );
 
+        intentTextarea.rows = 3;
+        intentForm.append(
+            createElement('label', {
+                text: 'What were you about to ask the chatbot? (optional)',
+            }),
+            intentTextarea,
+            createElement('button', {
+                className: 'dorso-button dorso-button-secondary',
+                id: 'dorsoSaveIntentButton',
+                text: 'Save Locally',
+            }),
+            intentStatus,
+        );
+
         challengeCard.append(
             createElement('p', { className: 'dorso-meta', text: 'Assigned challenge' }),
             createElement('h2', { text: challenge.title }),
@@ -338,7 +426,7 @@
             }));
         }
 
-        panel.append(challengeCard, actionRow, list);
+        panel.append(challengeCard, intentForm, actionRow, list);
 
         backdrop.append(panel);
         shadowRoot.append(style, backdrop);
@@ -351,6 +439,13 @@
         shadowRoot.getElementById('dorsoPauseButton').addEventListener('click', async () => {
             await sendMessage({ action: 'setPaused', isPaused: true });
             await loadState();
+        });
+
+        intentForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const saved = await appendWhatIAsked(target, intentTextarea.value);
+            intentTextarea.value = '';
+            intentStatus.textContent = saved ? 'Saved locally.' : '';
         });
     }
 

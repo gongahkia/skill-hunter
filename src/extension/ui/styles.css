@@ -319,6 +319,13 @@ input[type="text"] {
     background: rgba(25, 20, 17, 0.05);
 }
 
+.list-item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
 .list-item strong {
     display: block;
     margin-bottom: 4px;

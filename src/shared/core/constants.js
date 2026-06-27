@@ -122,6 +122,7 @@ export const STORAGE_KEYS = {
     RECENT_CHALLENGE_SLUGS: 'recentChallengeSlugs',
     ENABLED_TARGET_IDS: 'enabledTargetIds',
     SESSION_DURATION_MS_PREF: 'SESSION_DURATION_MS_PREF',
+    WHAT_I_ASKED: 'WHAT_I_ASKED',
     IS_PAUSED: 'isPaused',
     UI_MESSAGE: 'uiMessage',
 };

@@ -20,3 +20,17 @@ export async function sendRuntimeMessage(message) {
         browserApi.runtime.sendMessage(message, done);
     });
 }
+
+export async function getStorageValues(keys) {
+    const response = browserApi.storage.local.get(keys);
+    return isPromise(response) ? response : callbackToPromise((done) => {
+        browserApi.storage.local.get(keys, done);
+    });
+}
+
+export async function setStorageValues(values) {
+    const response = browserApi.storage.local.set(values);
+    return isPromise(response) ? response : callbackToPromise((done) => {
+        browserApi.storage.local.set(values, done);
+    });
+}

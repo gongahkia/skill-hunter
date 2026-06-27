@@ -2,12 +2,18 @@ import {
     MESSAGE_ACTIONS,
     SESSION_DURATION_MINUTE_OPTIONS,
     SOURCE_LABELS,
+    STORAGE_KEYS,
 } from '../../shared/core/constants.js';
 import { formatDuration } from '../lib/formatters.js';
-import { sendRuntimeMessage } from '../lib/browser-api.js';
+import {
+    getStorageValues,
+    sendRuntimeMessage,
+    setStorageValues,
+} from '../lib/browser-api.js';
 
 let countdownTimer = null;
 let latestState = null;
+let latestWhatIAsked = [];
 
 function clearTimers() {
     if (countdownTimer) {
@@ -68,6 +74,21 @@ function createButtonRow(buttons) {
     const row = createElement('div', { className: 'button-row' });
     buttons.forEach((button) => row.append(button));
     return row;
+}
+
+async function getWhatIAskedEntries() {
+    const result = await getStorageValues([STORAGE_KEYS.WHAT_I_ASKED]);
+    return Array.isArray(result[STORAGE_KEYS.WHAT_I_ASKED])
+        ? result[STORAGE_KEYS.WHAT_I_ASKED]
+        : [];
+}
+
+async function deleteWhatIAskedEntry(timestamp) {
+    const entries = await getWhatIAskedEntries();
+    const nextEntries = entries.filter((entry) => entry.timestamp !== timestamp);
+    await setStorageValues({ [STORAGE_KEYS.WHAT_I_ASKED]: nextEntries });
+    setMessage('Entry deleted.', true);
+    await loadState();
 }
 
 function createChipRow(tags = []) {
@@ -312,7 +333,7 @@ function renderSupportedSites(state) {
     };
 }
 
-function renderDisclosure() {
+function renderDisclosure(entries = []) {
     const panel = document.getElementById('disclosurePanel');
     resetPanel(panel);
 
@@ -343,6 +364,33 @@ function renderDisclosure() {
         createSectionHead('Public Store Build', 'This release keeps the review surface small and local.'),
         list,
     );
+
+    const askedList = createElement('div', { className: 'list' });
+    entries.slice().reverse().forEach((entry) => {
+        const row = createElement('div', { className: 'list-item list-item-actions' });
+        const textBlock = createElement('div');
+        textBlock.append(
+            createElement('strong', { text: entry.target || 'unknown target' }),
+            createElement('span', {
+                className: 'small',
+                text: `${new Date(entry.timestamp).toLocaleString()} - ${entry.text}`,
+            }),
+        );
+        row.append(
+            textBlock,
+            createButton({
+                label: 'Delete',
+                className: 'button-secondary',
+                onClick: () => deleteWhatIAskedEntry(entry.timestamp),
+            }),
+        );
+        askedList.append(row);
+    });
+
+    panel.append(
+        createSectionHead('What I Asked', 'Saved locally on this device.'),
+        entries.length ? askedList : createElement('p', { text: 'No saved prompts.' }),
+    );
 }
 
 async function startChallenge(force = false) {
@@ -356,13 +404,14 @@ async function startChallenge(force = false) {
 async function loadState() {
     const response = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.REQUEST_STATE });
     latestState = response.state;
+    latestWhatIAsked = await getWhatIAskedEntries();
 
     setMessage(latestState.uiMessage, latestState.hasActiveSession);
     renderStatus(latestState);
     renderChallenge(latestState);
     renderControls(latestState);
     renderSupportedSites(latestState);
-    renderDisclosure();
+    renderDisclosure(latestWhatIAsked);
 }
 
 loadState().catch((error) => {
