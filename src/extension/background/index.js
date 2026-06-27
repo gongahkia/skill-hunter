@@ -9,12 +9,17 @@ import {
     SESSION_DURATION_MINUTES,
     STORAGE_KEYS,
     getChatbotDifficultyByUrl,
+    getChatbotTargetByUrl,
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
 import {
     getEmergencyBypassState,
     normalizeEmergencyBypassLimit,
 } from '../../shared/core/emergency-bypass.js';
+import {
+    getTargetOrigin,
+    normalizePerTargetRules,
+} from '../../shared/core/target-rules.js';
 import {
     createStreakState,
     normalizeStreakState,
@@ -149,12 +154,51 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             : DEFAULT_ENABLED_SOURCES.filter((sourceId) => providers[sourceId]);
     }
 
+    function getAllowedTargetRules(value = {}) {
+        return normalizePerTargetRules(value, {
+            targets: CHATBOT_TARGETS,
+            availableSources: Object.keys(providers),
+        });
+    }
+
+    function getChallengeSourcesForRule(rule, enabledSources) {
+        return rule?.sourcesOverride?.length
+            ? getAllowedEnabledSources(rule.sourcesOverride)
+            : getAllowedEnabledSources(enabledSources);
+    }
+
+    function getChallengeDifficultyForRule(rule, targetUrl) {
+        return rule?.difficultyOverride && rule.difficultyOverride !== 'default'
+            ? rule.difficultyOverride
+            : getChatbotDifficultyByUrl(targetUrl);
+    }
+
+    function getChallengeProfile(stored, targetUrl) {
+        const perTargetRules = getAllowedTargetRules(stored[STORAGE_KEYS.PER_TARGET_RULES]);
+        const target = getChatbotTargetByUrl(targetUrl);
+        const targetOrigin = target ? getTargetOrigin(target) : '';
+        const rule = targetOrigin ? perTargetRules[targetOrigin] : null;
+        const enabledSources = getChallengeSourcesForRule(rule, stored[STORAGE_KEYS.ENABLED_SOURCES]);
+        const difficulty = getChallengeDifficultyForRule(rule, targetUrl);
+        return {
+            targetOrigin,
+            ruleSignature: JSON.stringify({
+                targetOrigin,
+                enabledSources,
+                difficulty,
+            }),
+            enabledSources,
+            difficulty,
+        };
+    }
+
     async function ensureInstallStateInner() {
         const stored = await getStorageValues([
             STORAGE_KEYS.INSTALL_ID,
             STORAGE_KEYS.FIRST_STORAGE_WRITE_TIMESTAMP,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.ENABLED_SOURCES,
+            STORAGE_KEYS.PER_TARGET_RULES,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -185,6 +229,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (!Array.isArray(stored[STORAGE_KEYS.ENABLED_SOURCES])) {
             updates[STORAGE_KEYS.ENABLED_SOURCES] = getAllowedEnabledSources();
+        }
+
+        if (!stored[STORAGE_KEYS.PER_TARGET_RULES] || typeof stored[STORAGE_KEYS.PER_TARGET_RULES] !== 'object') {
+            updates[STORAGE_KEYS.PER_TARGET_RULES] = getAllowedTargetRules();
         }
 
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
@@ -277,6 +325,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.ENABLED_SOURCES,
+            STORAGE_KEYS.PER_TARGET_RULES,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -307,36 +356,46 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
     async function persistChallenge(force, targetUrl) {
         const stored = await getStoredState();
-        if (stored[STORAGE_KEYS.CURRENT_CHALLENGE] && !force) {
+        const challengeProfile = getChallengeProfile(stored, targetUrl);
+        if (
+            stored[STORAGE_KEYS.CURRENT_CHALLENGE]
+            && !force
+            && stored[STORAGE_KEYS.CURRENT_CHALLENGE].targetOrigin === challengeProfile.targetOrigin
+            && stored[STORAGE_KEYS.CURRENT_CHALLENGE].ruleSignature === challengeProfile.ruleSignature
+        ) {
             return stored[STORAGE_KEYS.CURRENT_CHALLENGE];
         }
 
         const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
-        const enabledSources = getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]);
-        const provider = providers[enabledSources[Math.floor(Math.random() * enabledSources.length)]];
+        const provider = providers[challengeProfile.enabledSources[Math.floor(Math.random() * challengeProfile.enabledSources.length)]];
         const challenge = await provider.getChallenge({
             recentSlugs,
-            difficulty: getChatbotDifficultyByUrl(targetUrl),
+            difficulty: challengeProfile.difficulty,
         });
+        const storedChallenge = {
+            ...challenge,
+            targetOrigin: challengeProfile.targetOrigin,
+            ruleSignature: challengeProfile.ruleSignature,
+        };
         const nextRecentSlugs = [
             {
-                source: challenge.source,
-                slug: challenge.slug,
+                source: storedChallenge.source,
+                slug: storedChallenge.slug,
                 timestamp: Date.now(),
             },
             ...recentSlugs.filter((entry) => {
-                return entry.source !== challenge.source || entry.slug !== challenge.slug;
+                return entry.source !== storedChallenge.source || entry.slug !== storedChallenge.slug;
             }),
         ].slice(0, RECENT_CHALLENGE_WINDOW);
 
         await setStorageValues({
-            [STORAGE_KEYS.CURRENT_CHALLENGE]: challenge,
+            [STORAGE_KEYS.CURRENT_CHALLENGE]: storedChallenge,
             [STORAGE_KEYS.CHALLENGE_STARTED_AT]: Date.now(),
             [STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]: nextRecentSlugs,
             [STORAGE_KEYS.UI_MESSAGE]: '',
         });
 
-        return challenge;
+        return storedChallenge;
     }
 
     async function clearChallenge(message) {
@@ -381,6 +440,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             solveReceipt: stored[STORAGE_KEYS.LAST_SOLVE_RECEIPT] || null,
             enabledTargetIds: stored[STORAGE_KEYS.ENABLED_TARGET_IDS] || getDefaultEnabledTargetIds(),
             enabledSources: getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]),
+            perTargetRules: getAllowedTargetRules(stored[STORAGE_KEYS.PER_TARGET_RULES]),
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
@@ -411,6 +471,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (Array.isArray(payload?.enabledSources)) {
             updates[STORAGE_KEYS.ENABLED_SOURCES] = getAllowedEnabledSources(payload.enabledSources);
+        }
+
+        if (payload?.perTargetRules && typeof payload.perTargetRules === 'object') {
+            updates[STORAGE_KEYS.PER_TARGET_RULES] = getAllowedTargetRules(payload.perTargetRules);
         }
 
         if (typeof payload?.isPaused === 'boolean') {

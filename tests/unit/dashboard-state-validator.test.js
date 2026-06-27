@@ -14,6 +14,14 @@ function validState() {
         solveReceipt: null,
         enabledTargetIds: ['chatgpt'],
         enabledSources: ['mcq', 'drills'],
+        perTargetRules: {
+            'https://chatgpt.com': {
+                schedule: 'always',
+                customCron: '* 00:00-23:59',
+                difficultyOverride: 'default',
+                sourcesOverride: [],
+            },
+        },
         sessionDurationMinutes: 15,
         emergencyBypassesPerWeek: 2,
         bypassesThisWeek: 0,

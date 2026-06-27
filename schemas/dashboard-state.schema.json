@@ -12,6 +12,7 @@
     "solveReceipt",
     "enabledTargetIds",
     "enabledSources",
+    "perTargetRules",
     "sessionDurationMinutes",
     "emergencyBypassesPerWeek",
     "bypassesThisWeek",
@@ -146,6 +147,31 @@
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "perTargetRules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["schedule", "difficultyOverride", "sourcesOverride"],
+        "properties": {
+          "schedule": {
+            "enum": ["always", "weekdays", "weekends", "custom"]
+          },
+          "customCron": {
+            "type": "string"
+          },
+          "difficultyOverride": {
+            "enum": ["default", "easy", "medium", "hard"]
+          },
+          "sourcesOverride": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     },
     "sessionDurationMinutes": {

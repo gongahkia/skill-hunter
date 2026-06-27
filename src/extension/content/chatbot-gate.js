@@ -162,11 +162,116 @@
         }) || null;
     }
 
+    function getTargetOrigin(target) {
+        const hostname = target?.hostnames?.[0];
+        return hostname ? `https://${hostname}` : '';
+    }
+
+    function getTargetRule(state, target) {
+        return state.perTargetRules?.[getTargetOrigin(target)] || {
+            schedule: 'always',
+            customCron: '* 00:00-23:59',
+            difficultyOverride: 'default',
+            sourcesOverride: [],
+        };
+    }
+
+    function parseTime(value) {
+        const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+        if (!match) {
+            return null;
+        }
+        return (Number(match[1]) * 60) + Number(match[2]);
+    }
+
+    function expandDays(value) {
+        if (value === '*') {
+            return new Set([0, 1, 2, 3, 4, 5, 6]);
+        }
+
+        const days = new Set();
+        for (const segment of value.split(',')) {
+            const range = /^([0-6])-([0-6])$/.exec(segment);
+            if (range) {
+                const start = Number(range[1]);
+                const end = Number(range[2]);
+                if (start > end) {
+                    return null;
+                }
+                for (let day = start; day <= end; day += 1) {
+                    days.add(day);
+                }
+                continue;
+            }
+
+            if (/^[0-6]$/.test(segment)) {
+                days.add(Number(segment));
+                continue;
+            }
+
+            return null;
+        }
+
+        return days.size ? days : null;
+    }
+
+    function isWithinWindow(nowMinutes, startMinutes, endMinutes) {
+        if (startMinutes <= endMinutes) {
+            return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+        }
+
+        return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+    }
+
+    function isCustomRuleActive(customCron, date) {
+        const match = /^(\*|[0-6](?:-[0-6])?(?:,[0-6](?:-[0-6])?)*)\s+([0-2]\d:[0-5]\d)-([0-2]\d:[0-5]\d)$/.exec(customCron);
+        if (!match) {
+            return true;
+        }
+
+        const days = expandDays(match[1]);
+        const startMinutes = parseTime(match[2]);
+        const endMinutes = parseTime(match[3]);
+        if (!days || startMinutes === null || endMinutes === null) {
+            return true;
+        }
+
+        const nowMinutes = (date.getHours() * 60) + date.getMinutes();
+        return days.has(date.getDay()) && isWithinWindow(nowMinutes, startMinutes, endMinutes);
+    }
+
+    function isTargetRuleActive(rule, date = new Date()) {
+        if (rule.schedule === 'weekdays') {
+            const day = date.getDay();
+            return day >= 1
+                && day <= 5
+                && isCustomRuleActive(rule.customCron || '* 00:00-23:59', date);
+        }
+
+        if (rule.schedule === 'weekends') {
+            const day = date.getDay();
+            return day === 0 || day === 6;
+        }
+
+        if (rule.schedule === 'custom') {
+            return isCustomRuleActive(rule.customCron || '* 00:00-23:59', date);
+        }
+
+        return true;
+    }
+
     function renderOverlay(state) {
         const target = getCurrentTarget(state);
         const challenge = state.currentChallenge;
+        const targetRule = target ? getTargetRule(state, target) : null;
 
-        if (state.hasActiveSession || state.isPaused || !target || !state.enabledTargetIds.includes(target.id)) {
+        if (
+            state.hasActiveSession
+            || state.isPaused
+            || !target
+            || !state.enabledTargetIds.includes(target.id)
+            || !isTargetRuleActive(targetRule)
+        ) {
             scheduleRelock(state);
             destroyOverlay();
             return;
@@ -546,8 +651,16 @@
     async function loadState() {
         const response = await sendMessage({ action: 'requestState' });
         latestState = response.state;
+        const target = getCurrentTarget(latestState);
+        const targetRule = target ? getTargetRule(latestState, target) : null;
 
-        if (!latestState.currentChallenge && !latestState.hasActiveSession && !latestState.isPaused) {
+        if (
+            !latestState.hasActiveSession
+            && !latestState.isPaused
+            && target
+            && latestState.enabledTargetIds.includes(target.id)
+            && isTargetRuleActive(targetRule)
+        ) {
             await sendMessage({ action: 'startChallenge', force: false, targetUrl: location.href });
             latestState = (await sendMessage({ action: 'requestState' })).state;
         }

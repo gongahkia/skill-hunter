@@ -6,6 +6,13 @@ import {
 } from '../../shared/core/constants.js';
 import { computeCognitiveIndex } from '../../shared/core/atrophy.js';
 import { EMERGENCY_BYPASS_OPTIONS } from '../../shared/core/emergency-bypass.js';
+import {
+    DEFAULT_TARGET_RULE,
+    TARGET_RULE_DIFFICULTIES,
+    TARGET_RULE_SCHEDULES,
+    getTargetOrigin,
+    normalizeTargetRule,
+} from '../../shared/core/target-rules.js';
 import { formatDuration } from '../lib/formatters.js';
 import {
     getDigestEntries,
@@ -37,8 +44,21 @@ const mainPanelIds = [
     'badgePanel',
     'sourcesPanel',
     'sitesPanel',
+    'rulesPanel',
     'disclosurePanel',
 ];
+const scheduleLabels = {
+    always: 'Always',
+    weekdays: 'Weekdays',
+    weekends: 'Weekends',
+    custom: 'Custom',
+};
+const difficultyLabels = {
+    default: 'Default',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+};
 
 function clearTimers() {
     if (countdownTimer) {
@@ -106,6 +126,18 @@ function createButtonRow(buttons) {
     const row = createElement('div', { className: 'button-row' });
     buttons.forEach((button) => row.append(button));
     return row;
+}
+
+function createSelect(name, value, options, labels) {
+    const select = createElement('select');
+    select.name = name;
+    options.forEach((optionValue) => {
+        const option = createElement('option', { text: labels[optionValue] || optionValue });
+        option.value = optionValue;
+        select.append(option);
+    });
+    select.value = value;
+    return select;
 }
 
 function createSnippetField(label, value) {
@@ -644,6 +676,111 @@ function renderSources(state) {
     };
 }
 
+function renderTargetRules(state) {
+    const form = document.getElementById('rulesForm');
+    const availableSources = state.supportedSources
+        .filter((source) => source.isAvailable)
+        .map((source) => source.id);
+    resetPanel(form);
+
+    const list = createElement('div', { className: 'list' });
+    state.supportedTargets.forEach((target) => {
+        const origin = getTargetOrigin(target);
+        const rule = normalizeTargetRule(state.perTargetRules?.[origin], availableSources);
+        const row = createElement('div', { className: 'list-item target-rule-row' });
+        const controls = createElement('div', { className: 'rule-grid' });
+        const scheduleSelect = createSelect(
+            `${origin}::schedule`,
+            rule.schedule,
+            TARGET_RULE_SCHEDULES,
+            scheduleLabels,
+        );
+        const customLabel = createElement('label', { className: 'field-label' });
+        const customInput = createElement('input', { type: 'text' });
+        const difficultySelect = createSelect(
+            `${origin}::difficultyOverride`,
+            rule.difficultyOverride,
+            TARGET_RULE_DIFFICULTIES,
+            difficultyLabels,
+        );
+        const scheduleLabel = createElement('label', { className: 'field-label' });
+        const difficultyLabel = createElement('label', { className: 'field-label' });
+
+        customInput.name = `${origin}::customCron`;
+        customInput.value = rule.customCron || DEFAULT_TARGET_RULE.customCron;
+        customInput.placeholder = '1-5 09:00-17:00';
+        customLabel.hidden = !['weekdays', 'custom'].includes(rule.schedule);
+        scheduleSelect.addEventListener('change', () => {
+            customLabel.hidden = !['weekdays', 'custom'].includes(scheduleSelect.value);
+        });
+
+        scheduleLabel.append(createElement('span', { text: 'Schedule' }), scheduleSelect);
+        customLabel.append(
+            createElement('span', { text: 'Custom window' }),
+            customInput,
+            createElement('span', { className: 'small', text: 'Format: 1-5 09:00-17:00; 0 is Sunday.' }),
+        );
+        difficultyLabel.append(createElement('span', { text: 'Difficulty' }), difficultySelect);
+        controls.append(scheduleLabel, customLabel, difficultyLabel);
+
+        const sourceGrid = createElement('div', { className: 'rule-source-grid' });
+        state.supportedSources.forEach((source) => {
+            const label = createElement('label', { className: 'checkbox-card' });
+            const checkbox = createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = `${origin}::sourcesOverride`;
+            checkbox.value = source.id;
+            checkbox.checked = rule.sourcesOverride.includes(source.id);
+            checkbox.disabled = !source.isAvailable;
+            label.append(checkbox, createElement('span', {
+                text: source.isAvailable ? source.label : `${source.label} (coming soon)`,
+            }));
+            sourceGrid.append(label);
+        });
+
+        row.append(
+            createElement('strong', { text: target.label }),
+            createElement('span', { className: 'small', text: origin }),
+            controls,
+            createElement('span', { className: 'small', text: 'Source override; leave blank to use global sources.' }),
+            sourceGrid,
+        );
+        list.append(row);
+    });
+
+    form.append(
+        list,
+        createButton({
+            label: 'Save Domain Rules',
+            className: 'button-primary',
+            type: 'submit',
+            onClick: () => {},
+        }),
+    );
+
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const perTargetRules = {};
+        state.supportedTargets.forEach((target) => {
+            const origin = getTargetOrigin(target);
+            perTargetRules[origin] = {
+                schedule: formData.get(`${origin}::schedule`) || DEFAULT_TARGET_RULE.schedule,
+                customCron: formData.get(`${origin}::customCron`) || DEFAULT_TARGET_RULE.customCron,
+                difficultyOverride: formData.get(`${origin}::difficultyOverride`) || DEFAULT_TARGET_RULE.difficultyOverride,
+                sourcesOverride: formData.getAll(`${origin}::sourcesOverride`),
+            };
+        });
+
+        await sendRuntimeMessage({
+            action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+            payload: { perTargetRules },
+        });
+        setMessage('Domain rules saved.', true);
+        await loadState();
+    };
+}
+
 function createOnboardingStep(title, copy) {
     const panel = createElement('section', { className: 'panel' });
     panel.append(createSectionHead(title, copy));
@@ -748,6 +885,7 @@ function renderCorruptedStateFallback() {
     document.getElementById('sharePanel').hidden = true;
     resetPanel(document.getElementById('sitesForm'));
     resetPanel(document.getElementById('sourcesForm'));
+    resetPanel(document.getElementById('rulesForm'));
     setMessage('');
 
     const panel = document.getElementById('statusPanel');
@@ -955,6 +1093,7 @@ async function loadState() {
     await renderBadge(latestState);
     renderSources(latestState);
     renderSupportedSites(latestState);
+    renderTargetRules(latestState);
     renderDisclosure(latestWhatIAsked);
 }
 

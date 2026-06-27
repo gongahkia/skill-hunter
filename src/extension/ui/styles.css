@@ -285,6 +285,25 @@ button:hover,
     font: inherit;
 }
 
+.rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.rule-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.target-rule-row {
+    display: grid;
+    gap: 8px;
+}
+
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
