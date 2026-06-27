@@ -11,6 +11,7 @@ function validState() {
             timeRemaining: 0,
         },
         currentChallenge: null,
+        solveReceipt: null,
         enabledTargetIds: ['chatgpt'],
         enabledSources: ['mcq', 'drills'],
         sessionDurationMinutes: 15,

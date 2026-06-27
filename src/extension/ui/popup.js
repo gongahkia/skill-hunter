@@ -4,6 +4,7 @@ import {
     SOURCE_LABELS,
     STORAGE_KEYS,
 } from '../../shared/core/constants.js';
+import { computeCognitiveIndex } from '../../shared/core/atrophy.js';
 import { EMERGENCY_BYPASS_OPTIONS } from '../../shared/core/emergency-bypass.js';
 import { formatDuration } from '../lib/formatters.js';
 import {
@@ -11,7 +12,12 @@ import {
     renderDigestMarkdown,
     renderDigestSvg,
 } from '../lib/digest-svg.js';
+import { renderReceiptSvg } from '../lib/receipt-svg.js';
 import { createBadgeEmbeds } from '../lib/badge-url.js';
+import {
+    SOLVE_SHARE_TEXT,
+    createSolveShareText,
+} from './share-text.js';
 import validateDashboardState from '../lib/dashboard-state-validator.js';
 import {
     clearStorage,
@@ -126,7 +132,7 @@ function downloadTextFile(filename, content, type) {
     URL.revokeObjectURL(url);
 }
 
-async function downloadDigestPng(svg) {
+async function loadSvgImage(svg) {
     const image = new Image();
     const imageUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     await new Promise((resolve, reject) => {
@@ -134,14 +140,33 @@ async function downloadDigestPng(svg) {
         image.onerror = reject;
         image.src = imageUrl;
     });
+    return image;
+}
+
+async function rasterizeSvgToPng(svg) {
+    const image = await loadSvgImage(svg);
+
+    if (globalThis.OffscreenCanvas) {
+        const canvas = new OffscreenCanvas(800, 400);
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
+        return canvas.convertToBlob({ type: 'image/png' });
+    }
 
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 400;
     const context = canvas.getContext('2d');
     context.drawImage(image, 0, 0);
-
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) {
+        throw new Error('PNG export failed.');
+    }
+    return blob;
+}
+
+async function downloadDigestPng(svg) {
+    const blob = await rasterizeSvgToPng(svg);
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -199,6 +224,57 @@ function createRunMetrics(state) {
         metrics.append(metric);
     });
     return metrics;
+}
+
+function getReceiptSvg(state) {
+    return renderReceiptSvg({
+        ...(state.solveReceipt || {}),
+        currentRun: state.solveReceipt?.currentRun ?? state.currentRun,
+        cognitiveIndex: computeCognitiveIndex({
+            solvesInLast7d: Number(state.currentRun || 0),
+            sourceDiversityRatio: new Set(state.enabledSources || []).size > 1 ? 1 : 0,
+            bypassesThisWeek: Number(state.bypassesThisWeek || 0),
+        }),
+    });
+}
+
+async function copyReceiptImage(state) {
+    if (!globalThis.ClipboardItem || !navigator.clipboard?.write) {
+        throw new Error('Image clipboard unavailable.');
+    }
+
+    const blob = await rasterizeSvgToPng(getReceiptSvg(state));
+    await navigator.clipboard.write([
+        new ClipboardItem({
+            [blob.type]: blob,
+        }),
+    ]);
+}
+
+async function shareReceipt(state) {
+    const text = createSolveShareText(state.solveReceipt);
+    const blob = await rasterizeSvgToPng(getReceiptSvg(state));
+    const file = new File([blob], SOLVE_SHARE_TEXT.imageName, { type: blob.type });
+
+    if (navigator.share) {
+        const shareData = {
+            title: SOLVE_SHARE_TEXT.title,
+            text,
+            files: [file],
+        };
+        if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.share({
+                title: SOLVE_SHARE_TEXT.title,
+                text,
+            });
+        }
+        return;
+    }
+
+    await navigator.clipboard.writeText(text);
+    await copyReceiptImage(state);
 }
 
 function renderStatus(state) {
@@ -304,6 +380,59 @@ function renderChallenge(state) {
                 className: 'button-secondary',
                 id: 'refreshChallengeButton',
                 onClick: () => startChallenge(true),
+            }),
+        ]),
+    );
+}
+
+function renderSolveReceipt(state) {
+    const panel = document.getElementById('sharePanel');
+    resetPanel(panel);
+
+    if (!state.hasActiveSession || !state.solveReceipt) {
+        panel.hidden = true;
+        return;
+    }
+
+    panel.hidden = false;
+    panel.append(
+        createSectionHead(
+            'Solve Receipt',
+            `${state.solveReceipt.problemTitle} • ${state.solveReceipt.sourceLabel}`,
+        ),
+        createButtonRow([
+            createButton({
+                label: 'Share',
+                className: 'button-primary',
+                onClick: async () => {
+                    try {
+                        await shareReceipt(state);
+                        setMessage('Receipt shared.', true);
+                    } catch (error) {
+                        await navigator.clipboard.writeText(createSolveShareText(state.solveReceipt));
+                        setMessage(`Receipt text copied. ${error.message}`, true);
+                    }
+                },
+            }),
+            createButton({
+                label: 'Copy text',
+                className: 'button-secondary',
+                onClick: async () => {
+                    await navigator.clipboard.writeText(createSolveShareText(state.solveReceipt));
+                    setMessage('Receipt text copied.', true);
+                },
+            }),
+            createButton({
+                label: 'Copy image',
+                className: 'button-secondary',
+                onClick: async () => {
+                    try {
+                        await copyReceiptImage(state);
+                        setMessage('Receipt image copied.', true);
+                    } catch (error) {
+                        setMessage(error.message);
+                    }
+                },
             }),
         ]),
     );
@@ -496,9 +625,10 @@ function renderSources(state) {
 }
 
 function renderCorruptedStateFallback() {
-    ['statusPanel', 'challengePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
+    ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
         resetPanel(document.getElementById(panelId));
     });
+    document.getElementById('sharePanel').hidden = true;
     resetPanel(document.getElementById('sitesForm'));
     resetPanel(document.getElementById('sourcesForm'));
     setMessage('');
@@ -691,6 +821,7 @@ async function loadState() {
     setMessage(latestState.uiMessage || latestState.leetcodeDetectionWarning, latestState.hasActiveSession && !latestState.leetcodeDetectionWarning);
     renderStatus(latestState);
     renderChallenge(latestState);
+    renderSolveReceipt(latestState);
     renderControls(latestState);
     await renderBadge(latestState);
     renderSources(latestState);

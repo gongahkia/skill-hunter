@@ -145,6 +145,7 @@ export const STORAGE_KEYS = {
     LAST_SOLVED_TIME: 'lastSolvedTime',
     CURRENT_CHALLENGE: 'currentChallenge',
     CHALLENGE_STARTED_AT: 'challengeStartedAt',
+    LAST_SOLVE_RECEIPT: 'lastSolveReceipt',
     RECENT_CHALLENGE_SLUGS: 'recentChallengeSlugs',
     STREAK_STATE: 'streakState',
     ENABLED_TARGET_IDS: 'enabledTargetIds',

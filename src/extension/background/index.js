@@ -264,6 +264,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.INSTALL_ID,
             STORAGE_KEYS.CURRENT_CHALLENGE,
             STORAGE_KEYS.CHALLENGE_STARTED_AT,
+            STORAGE_KEYS.LAST_SOLVE_RECEIPT,
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
@@ -345,8 +346,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         ]);
     }
 
-    async function startSession(durationMs = null) {
-        const now = Date.now();
+    async function startSession(durationMs = null, now = Date.now()) {
         const sessionDurationMs = durationMs || getValidSessionDurationMs(await getStorageValue(STORAGE_KEYS.SESSION_DURATION_MS_PREF));
         await setStorageValues({
             [STORAGE_KEYS.LAST_SOLVED_TIME]: now,
@@ -369,6 +369,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             hasActiveSession: await hasActiveSession(),
             session: await getSessionInfo(),
             currentChallenge: stored[STORAGE_KEYS.CURRENT_CHALLENGE] || null,
+            solveReceipt: stored[STORAGE_KEYS.LAST_SOLVE_RECEIPT] || null,
             enabledTargetIds: stored[STORAGE_KEYS.ENABLED_TARGET_IDS] || getDefaultEnabledTargetIds(),
             enabledSources: getAllowedEnabledSources(stored[STORAGE_KEYS.ENABLED_SOURCES]),
             sessionDurationMinutes: getSessionDurationMinutes(
@@ -461,13 +462,21 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             };
         }
 
-        await startSession();
+        const solvedAt = Date.now();
+        await startSession(null, solvedAt);
         const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE]);
         const updates = {
             [STORAGE_KEYS.STREAK_STATE]: streakState,
+            [STORAGE_KEYS.LAST_SOLVE_RECEIPT]: {
+                problemTitle: currentChallenge.title,
+                sourceLabel: currentChallenge.source_label || currentChallenge.source,
+                timeToSolveMs: Math.max(0, solvedAt - Number(stored[STORAGE_KEYS.CHALLENGE_STARTED_AT] || solvedAt)),
+                solvedAt: new Date(solvedAt).toISOString(),
+                currentRun: streakState.currentRun,
+            },
         };
         if (currentChallenge.source === 'leetcode') {
-            updates[STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP] = Date.now();
+            updates[STORAGE_KEYS.LAST_LC_SUBMISSION_TIMESTAMP] = solvedAt;
         }
 
         await setStorageValues(updates);
@@ -504,6 +513,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         await setStorageValues({
             [STORAGE_KEYS.BYPASS_WEEK_START]: emergencyBypassState.weekStart,
             [STORAGE_KEYS.BYPASSES_USED_THIS_WEEK]: emergencyBypassState.used + 1,
+            [STORAGE_KEYS.LAST_SOLVE_RECEIPT]: null,
             [STORAGE_KEYS.UI_MESSAGE]: `Emergency bypass used. ${emergencyBypassState.remaining - 1} remaining this week.`,
         });
 

@@ -9,6 +9,7 @@
     "hasActiveSession",
     "session",
     "currentChallenge",
+    "solveReceipt",
     "enabledTargetIds",
     "enabledSources",
     "sessionDurationMinutes",
@@ -98,6 +99,37 @@
             },
             "supports_verification": {
               "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "solveReceipt": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["problemTitle", "sourceLabel", "timeToSolveMs", "solvedAt", "currentRun"],
+          "properties": {
+            "problemTitle": {
+              "type": "string"
+            },
+            "sourceLabel": {
+              "type": "string"
+            },
+            "timeToSolveMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "solvedAt": {
+              "type": "string"
+            },
+            "currentRun": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         }
