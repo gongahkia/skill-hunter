@@ -153,6 +153,49 @@
         return element;
     }
 
+    function getWheelDeltaY(event, scrollElement) {
+        if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+            return event.deltaY * 16;
+        }
+
+        if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+            return event.deltaY * scrollElement.clientHeight;
+        }
+
+        return event.deltaY;
+    }
+
+    function isolateOverlayScroll(scrollElement) {
+        let lastTouchY = null;
+
+        scrollElement.addEventListener('wheel', (event) => {
+            event.stopPropagation();
+            if (!event.cancelable) {
+                return;
+            }
+
+            event.preventDefault();
+            scrollElement.scrollTop += getWheelDeltaY(event, scrollElement);
+        }, { passive: false });
+
+        scrollElement.addEventListener('touchstart', (event) => {
+            lastTouchY = event.touches[0]?.clientY ?? null;
+            event.stopPropagation();
+        }, { passive: true });
+
+        scrollElement.addEventListener('touchmove', (event) => {
+            event.stopPropagation();
+            if (lastTouchY === null || !event.cancelable) {
+                return;
+            }
+
+            const nextY = event.touches[0]?.clientY ?? lastTouchY;
+            event.preventDefault();
+            scrollElement.scrollTop += lastTouchY - nextY;
+            lastTouchY = nextY;
+        }, { passive: false });
+    }
+
     function getCurrentTarget(state) {
         return state.supportedTargets.find((target) => {
             return target.matches.some((pattern) => {
@@ -320,6 +363,8 @@
                 overflow-x: hidden;
                 overflow-y: scroll;
                 overscroll-behavior: contain;
+                scrollbar-gutter: stable;
+                -webkit-overflow-scrolling: touch;
             }
             .dorso-panel {
                 width: min(720px, 100%);
@@ -465,6 +510,7 @@
         `;
 
         const backdrop = createElement('div', { className: 'dorso-backdrop' });
+        isolateOverlayScroll(backdrop);
         const panel = createElement('div', { className: 'dorso-panel' });
         const challengeCard = createElement('div', { className: 'dorso-card' });
         const intentForm = createElement('form', { className: 'dorso-intent' });
