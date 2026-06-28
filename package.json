@@ -8,6 +8,7 @@
     "build:chrome": "node scripts/build-extension.mjs chrome",
     "build:firefox": "node scripts/build-extension.mjs firefox",
     "build:safari": "node scripts/build-extension.mjs safari",
+    "build:userscript": "node scripts/build-userscript.mjs",
     "sync:safari-wrapper": "node scripts/sync-safari-wrapper.mjs",
     "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
     "build:dashboard-validator": "node scripts/build-dashboard-validator.mjs",
