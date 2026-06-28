@@ -242,6 +242,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
             STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
             STORAGE_KEYS.AI_FAST,
+            STORAGE_KEYS.LEADERBOARD_REPO_URL,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -292,6 +293,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (!stored[STORAGE_KEYS.AI_FAST] || typeof stored[STORAGE_KEYS.AI_FAST] !== 'object') {
             updates[STORAGE_KEYS.AI_FAST] = DEFAULT_AI_FAST_STATE;
+        }
+
+        if (typeof stored[STORAGE_KEYS.LEADERBOARD_REPO_URL] !== 'string') {
+            updates[STORAGE_KEYS.LEADERBOARD_REPO_URL] = '';
         }
 
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
@@ -396,6 +401,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
             STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
             STORAGE_KEYS.AI_FAST,
+            STORAGE_KEYS.LEADERBOARD_REPO_URL,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -517,6 +523,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             cliStatusLastExportedAt: stored[STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT] || null,
             cliStatusExportError: stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] || '',
             aiFast,
+            leaderboardRepoUrl: stored[STORAGE_KEYS.LEADERBOARD_REPO_URL] || '',
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
@@ -576,6 +583,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (typeof payload?.hasCompletedOnboarding === 'boolean') {
             updates[STORAGE_KEYS.ONBOARDING_COMPLETED] = payload.hasCompletedOnboarding;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(payload || {}, 'leaderboardRepoUrl')) {
+            updates[STORAGE_KEYS.LEADERBOARD_REPO_URL] = String(payload.leaderboardRepoUrl || '').trim();
         }
 
         if (SESSION_DURATION_MS_OPTIONS.includes(payload?.sessionDurationMsPref)) {

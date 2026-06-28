@@ -1,12 +1,23 @@
 const MAX_STATE_AGE_MS = 90 * 24 * 60 * 60 * 1000;
 const CACHE_CONTROL = 'public, max-age=86400';
+const LEADERBOARD_CACHE_CONTROL = 'public, max-age=86400';
+const LEADERBOARD_LIMIT = 50;
 
-function jsonResponse(body, status) {
+function getCorsHeaders() {
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'content-type, x-dorso-signature',
+    };
+}
+
+function jsonResponse(body, status, headers = {}) {
     return new Response(JSON.stringify(body), {
         status,
         headers: {
             'Content-Type': 'application/json; charset=utf-8',
             'Cache-Control': 'no-store',
+            ...headers,
         },
     });
 }
@@ -69,6 +80,23 @@ function parseState(encodedState) {
         longestRun: Number(state.longestRun),
         installIdHash: String(state.installIdHash || ''),
         timestamp,
+    };
+}
+
+function parseLeaderboardPayload(body) {
+    const payload = JSON.parse(body);
+    const timestamp = Number(payload.timestamp);
+    if (!Number.isFinite(timestamp)) {
+        throw new Error('Invalid timestamp.');
+    }
+
+    return {
+        repoHash: String(payload.repoHash || ''),
+        installIdHash: String(payload.installIdHash || ''),
+        score: clamp(Math.round(Number(payload.score || 0)), 0, 100),
+        longestRun: Math.max(0, Math.trunc(Number(payload.longestRun || 0))),
+        timestamp,
+        updatedAt: new Date(timestamp).toISOString(),
     };
 }
 
@@ -145,8 +173,109 @@ async function handleBadgeRequest(request, env) {
     });
 }
 
+function normalizeLeaderboard(entries) {
+    return entries
+        .sort((left, right) => {
+            return right.score - left.score
+                || right.longestRun - left.longestRun
+                || right.timestamp - left.timestamp;
+        })
+        .slice(0, LEADERBOARD_LIMIT)
+        .map((entry, index) => ({
+            rank: index + 1,
+            installIdHash: entry.installIdHash,
+            score: entry.score,
+            longestRun: entry.longestRun,
+            updatedAt: entry.updatedAt,
+        }));
+}
+
+async function handleLeaderboardRequest(request, env) {
+    const url = new URL(request.url);
+    const match = url.pathname.match(/^\/leaderboard\/([a-f0-9]{64})\.json$/);
+    if (!match) {
+        return jsonResponse({ error: 'not_found' }, 404, getCorsHeaders());
+    }
+
+    if (request.method === 'OPTIONS') {
+        return new Response(null, {
+            status: 204,
+            headers: getCorsHeaders(),
+        });
+    }
+
+    if (!env.LEADERBOARD) {
+        return jsonResponse({ error: 'missing_leaderboard_kv' }, 500, getCorsHeaders());
+    }
+
+    const repoHash = match[1];
+    const key = `leaderboard:${repoHash}`;
+    if (request.method === 'GET') {
+        const stored = await env.LEADERBOARD.get(key, 'json');
+        return jsonResponse({
+            repoHash,
+            entries: normalizeLeaderboard(stored?.entries || []),
+        }, 200, {
+            ...getCorsHeaders(),
+            'Cache-Control': LEADERBOARD_CACHE_CONTROL,
+        });
+    }
+
+    if (request.method !== 'POST') {
+        return jsonResponse({ error: 'method_not_allowed' }, 405, getCorsHeaders());
+    }
+
+    if (!env.CF_HMAC_SECRET) {
+        return jsonResponse({ error: 'missing_secret' }, 500, getCorsHeaders());
+    }
+
+    const body = await request.text();
+    const sig = request.headers.get('x-dorso-signature') || '';
+    const expectedSig = await signState(env.CF_HMAC_SECRET, body);
+    if (!safeEqual(expectedSig, sig)) {
+        return jsonResponse({ error: 'invalid_signature' }, 401, getCorsHeaders());
+    }
+
+    let entry;
+    try {
+        entry = parseLeaderboardPayload(body);
+    } catch (error) {
+        return jsonResponse({ error: 'invalid_payload' }, 400, getCorsHeaders());
+    }
+
+    if (entry.repoHash !== repoHash || !/^[a-f0-9]{64}$/.test(entry.installIdHash)) {
+        return jsonResponse({ error: 'invalid_payload' }, 400, getCorsHeaders());
+    }
+
+    if (Date.now() - entry.timestamp > MAX_STATE_AGE_MS) {
+        return jsonResponse({ error: 'expired_state' }, 410, getCorsHeaders());
+    }
+
+    const stored = await env.LEADERBOARD.get(key, 'json');
+    const entries = [
+        entry,
+        ...(stored?.entries || []).filter((item) => item.installIdHash !== entry.installIdHash),
+    ];
+    const normalizedEntries = normalizeLeaderboard(entries);
+    await env.LEADERBOARD.put(key, JSON.stringify({
+        repoHash,
+        entries: normalizedEntries,
+        updatedAt: new Date().toISOString(),
+    }));
+
+    return jsonResponse({
+        repoHash,
+        entries: normalizedEntries,
+    }, 200, getCorsHeaders());
+}
+
 export default {
     fetch(request, env) {
+        const url = new URL(request.url);
+        if (url.pathname.startsWith('/leaderboard/')) {
+            return handleLeaderboardRequest(request, env);
+        }
+
         return handleBadgeRequest(request, env);
     },
 };

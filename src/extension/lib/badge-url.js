@@ -41,9 +41,55 @@ function normalizeBaseUrl(baseUrl) {
     return String(baseUrl || 'https://dorso.dev').replace(/\/+$/, '');
 }
 
+function normalizeRepoUrl(repoUrl) {
+    const parsedUrl = new URL(String(repoUrl || '').trim());
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        throw new Error('Repository URL must use HTTP or HTTPS.');
+    }
+
+    parsedUrl.hash = '';
+    parsedUrl.search = '';
+    return parsedUrl.toString().replace(/\/$/, '').replace(/\.git$/, '');
+}
+
 function getLongestRun(state) {
     const longestRun = Number(state?.longestRun || 0);
     return Number.isFinite(longestRun) ? Math.max(0, Math.trunc(longestRun)) : 0;
+}
+
+export async function createLeaderboardSubmission({
+    dashboardState,
+    repoUrl,
+    secret,
+    baseUrl = 'https://dorso.dev',
+    timestamp = Date.now(),
+} = {}) {
+    if (!secret) {
+        return {
+            available: false,
+            reason: 'Leaderboard signing unavailable in this build.',
+        };
+    }
+
+    const normalizedRepoUrl = normalizeRepoUrl(repoUrl);
+    const repoHash = await sha256Hex(normalizedRepoUrl);
+    const body = JSON.stringify({
+        repoHash,
+        installIdHash: await sha256Hex(String(dashboardState?.installId || 'unknown-install')),
+        score: computeCognitiveIndex({
+            bypassesThisWeek: Number(dashboardState?.bypassesThisWeek || 0),
+        }),
+        longestRun: getLongestRun(dashboardState),
+        timestamp,
+    });
+
+    return {
+        available: true,
+        repoHash,
+        endpoint: `${normalizeBaseUrl(baseUrl)}/leaderboard/${repoHash}.json`,
+        body,
+        sig: await signBadgeState(secret, body),
+    };
 }
 
 export async function createBadgeEmbeds({

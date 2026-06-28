@@ -18,6 +18,7 @@
     "cliStatusLastExportedAt",
     "cliStatusExportError",
     "aiFast",
+    "leaderboardRepoUrl",
     "sessionDurationMinutes",
     "emergencyBypassesPerWeek",
     "bypassesThisWeek",
@@ -229,6 +230,9 @@
           }
         }
       }
+    },
+    "leaderboardRepoUrl": {
+      "type": "string"
     },
     "sessionDurationMinutes": {
       "type": "number",

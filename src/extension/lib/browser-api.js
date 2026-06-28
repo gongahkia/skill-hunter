@@ -38,3 +38,18 @@ export async function clearStorage() {
         browserApi.storage.local.clear(done);
     });
 }
+
+export async function requestOptionalHostPermission(origin) {
+    if (!browserApi.permissions?.request) {
+        return true;
+    }
+
+    const response = browserApi.permissions.request({
+        origins: [`${String(origin).replace(/\/$/, '')}/*`],
+    });
+    return isPromise(response) ? response : callbackToPromise((done) => {
+        browserApi.permissions.request({
+            origins: [`${String(origin).replace(/\/$/, '')}/*`],
+        }, done);
+    });
+}

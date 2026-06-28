@@ -37,6 +37,7 @@ function validState() {
                 drillsCompleted: 0,
             },
         },
+        leaderboardRepoUrl: '',
         sessionDurationMinutes: 15,
         emergencyBypassesPerWeek: 2,
         bypassesThisWeek: 0,

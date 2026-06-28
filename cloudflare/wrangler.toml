@@ -3,10 +3,25 @@ main = "src/worker.js"
 compatibility_date = "2026-06-27"
 workers_dev = true
 
+[[kv_namespaces]]
+binding = "LEADERBOARD"
+id = "replace-with-production-kv-id"
+preview_id = "replace-with-preview-kv-id"
+
 [env.staging]
 name = "dorso-badge-staging"
 workers_dev = true
 
+[[env.staging.kv_namespaces]]
+binding = "LEADERBOARD"
+id = "replace-with-staging-kv-id"
+preview_id = "replace-with-staging-preview-kv-id"
+
 [env.production]
 name = "dorso-badge"
 workers_dev = true
+
+[[env.production.kv_namespaces]]
+binding = "LEADERBOARD"
+id = "replace-with-production-kv-id"
+preview_id = "replace-with-production-preview-kv-id"

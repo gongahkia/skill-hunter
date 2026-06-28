@@ -22,7 +22,10 @@ import {
     renderDigestSvg,
 } from '../lib/digest-svg.js';
 import { renderReceiptSvg } from '../lib/receipt-svg.js';
-import { createBadgeEmbeds } from '../lib/badge-url.js';
+import {
+    createBadgeEmbeds,
+    createLeaderboardSubmission,
+} from '../lib/badge-url.js';
 import {
     SOLVE_SHARE_TEXT,
     createSolveShareText,
@@ -31,6 +34,7 @@ import validateDashboardState from '../lib/dashboard-state-validator.js';
 import {
     clearStorage,
     getStorageValues,
+    requestOptionalHostPermission,
     sendRuntimeMessage,
     setStorageValues,
 } from '../lib/browser-api.js';
@@ -1102,6 +1106,75 @@ async function renderBadge(state) {
             }),
         ]),
     );
+
+    const leaderboardForm = createElement('form', { className: 'form-grid' });
+    const repoLabel = createElement('label', { className: 'field-label' });
+    const repoInput = createElement('input', { type: 'text' });
+    repoInput.value = state.leaderboardRepoUrl || '';
+    repoInput.placeholder = 'https://github.com/user/repo';
+    repoLabel.append(
+        createElement('span', { text: 'Leaderboard repo URL' }),
+        repoInput,
+        createElement('span', { className: 'small', text: 'Opt-in; Dorso posts only anonymous hashes and score fields.' }),
+    );
+    leaderboardForm.append(
+        repoLabel,
+        createButtonRow([
+            createButton({
+                label: 'Submit Score',
+                className: 'button-primary',
+                type: 'submit',
+                onClick: () => {},
+            }),
+        ]),
+    );
+    leaderboardForm.onsubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const submission = await createLeaderboardSubmission({
+                dashboardState: state,
+                repoUrl: repoInput.value,
+                secret: config.hmacSecret,
+                baseUrl: config.baseUrl,
+            });
+            if (!submission.available) {
+                throw new Error(submission.reason);
+            }
+
+            const endpointOrigin = new URL(submission.endpoint).origin;
+            const granted = await requestOptionalHostPermission(endpointOrigin);
+            if (!granted) {
+                throw new Error('Leaderboard host permission was not granted.');
+            }
+
+            const response = await fetch(submission.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-dorso-signature': submission.sig,
+                },
+                body: submission.body,
+            });
+            if (!response.ok) {
+                throw new Error(`Leaderboard submit failed: HTTP ${response.status}`);
+            }
+
+            await sendRuntimeMessage({
+                action: MESSAGE_ACTIONS.SAVE_SETTINGS,
+                payload: {
+                    leaderboardRepoUrl: repoInput.value,
+                },
+            });
+            setMessage('Leaderboard score submitted.', true);
+            await loadState();
+        } catch (error) {
+            setMessage(error.message || 'Leaderboard submit failed.');
+        }
+    };
+    panel.append(createSectionHead(
+        'Leaderboard',
+        'Opt in to a public repo-scoped leaderboard.',
+    ), leaderboardForm);
 }
 
 function renderDisclosure(entries = []) {

@@ -70,6 +70,7 @@ function getManifest(browser) {
         version_name: packageJson.version,
         description: 'Protect selected AI chatbot sites until a coding challenge is solved.',
         permissions: ['storage', 'downloads', 'alarms'],
+        optional_host_permissions: ['https://dorso.dev/*'],
         host_permissions: getHostPermissions(),
         icons: {
             16: actionIcons[16],

@@ -59,6 +59,19 @@ flowchart TD
     F --> G[human, JSON, or prompt output]
 ```
 
+## Leaderboard Flow
+
+```mermaid
+flowchart TD
+    A[popup repo URL input] --> B[hash repo URL locally]
+    B --> C[build anonymous score payload]
+    C --> D[request optional Dorso host permission]
+    D --> E[POST signed payload to Worker]
+    E --> F[Worker verifies HMAC]
+    F --> G[KV top-50 rows per repo hash]
+    G --> H[GET leaderboard JSON]
+```
+
 ## Storage
 
 All extension runtime state is stored in `chrome.storage.local`. The background script treats storage as authoritative because MV3 service workers can be stopped and restarted between events.

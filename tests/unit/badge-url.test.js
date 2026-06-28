@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createBadgeEmbeds } from '../../src/extension/lib/badge-url.js';
+import {
+    createBadgeEmbeds,
+    createLeaderboardSubmission,
+} from '../../src/extension/lib/badge-url.js';
 
 function decodeBase64Url(value) {
     const normalized = value.replaceAll('-', '+').replaceAll('_', '/');
@@ -44,4 +47,26 @@ test('createBadgeEmbeds reports unavailable without secret', async () => {
         available: false,
         reason: 'Badge signing unavailable in this build.',
     });
+});
+
+test('createLeaderboardSubmission signs anonymous repo-scoped payload', async () => {
+    const submission = await createLeaderboardSubmission({
+        dashboardState: {
+            installId: 'dorso-install-test',
+            bypassesThisWeek: 0,
+            longestRun: 9,
+        },
+        repoUrl: 'https://github.com/gongahkia/dorso.git',
+        secret: 'test-secret',
+        baseUrl: 'https://badge.example.test',
+        timestamp: 1782499200000,
+    });
+
+    const body = JSON.parse(submission.body);
+    assert.equal(submission.available, true);
+    assert.match(submission.endpoint, new RegExp(`^https://badge\\.example\\.test/leaderboard/${body.repoHash}\\.json$`));
+    assert.equal(body.repoHash.length, 64);
+    assert.equal(body.installIdHash.length, 64);
+    assert.equal(body.longestRun, 9);
+    assert.equal(submission.sig.length > 20, true);
 });

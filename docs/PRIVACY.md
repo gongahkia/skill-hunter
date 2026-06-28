@@ -29,6 +29,8 @@ Optional CLI export writes a local JSON file using the browser downloads API. Th
 
 Exception: the optional SVG badge uses a stateless Cloudflare Worker documented in [cloudflare/README.md](../cloudflare/README.md). Badge state is HMAC-signed and encoded into the URL; the Worker does not keep per-user server-side state.
 
+Optional leaderboard submission is opt-in. Dorso hashes the repository URL locally, requests permission for the Dorso Worker host, and sends only the repo hash, anonymous install hash, score, longest run, and timestamp.
+
 ## No Tracking
 
 Dorso has no analytics, no telemetry, and no third-party scripts. It does not send chatbot page content, LeetCode submissions, settings, or install identifiers to analytics services.

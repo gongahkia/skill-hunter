@@ -6,6 +6,13 @@ Serves signed, cacheable SVG badges at:
 GET /badge/<base64url-state>.svg?sig=<base64url-hmac>
 ```
 
+Also serves opt-in repo-scoped leaderboards:
+
+```text
+POST /leaderboard/<repo-hash>.json
+GET /leaderboard/<repo-hash>.json
+```
+
 `state` is base64url-encoded JSON:
 
 ```json
@@ -47,6 +54,24 @@ Responses use:
 Content-Type: image/svg+xml; charset=utf-8
 Cache-Control: public, max-age=86400
 ```
+
+## Leaderboard
+
+The extension hashes the repository URL locally and posts only:
+
+```json
+{
+  "repoHash": "sha256(repo-url)",
+  "installIdHash": "anonymous-install-hash",
+  "score": 87,
+  "longestRun": 14,
+  "timestamp": 1782499200000
+}
+```
+
+The POST body is signed with `CF_HMAC_SECRET` in the `x-dorso-signature` header. The Worker stores only the top 50 rows per repo hash in the `LEADERBOARD` KV namespace. `GET /leaderboard/<repo-hash>.json` returns ranked JSON and does not require a signature.
+
+Before deploy, replace the placeholder KV namespace IDs in `wrangler.toml`.
 
 ## Rotation
 

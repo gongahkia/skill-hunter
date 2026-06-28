@@ -1,7 +1,7 @@
 "use strict";
 export const validate = validate20;
 export default validate20;
-const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","perTargetRules","cliStatusExportEnabled","cliStatusExportPath","cliStatusLastExportedAt","cliStatusExportError","aiFast","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","hasCompletedOnboarding","supportedTargets","supportedSources","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"perTargetRules":{"type":"object","additionalProperties":{"type":"object","additionalProperties":true,"required":["schedule","difficultyOverride","sourcesOverride"],"properties":{"schedule":{"enum":["always","weekdays","weekends","custom"]},"customCron":{"type":"string"},"difficultyOverride":{"enum":["default","easy","medium","hard"]},"sourcesOverride":{"type":"array","items":{"type":"string"}}}}},"cliStatusExportEnabled":{"type":"boolean"},"cliStatusExportPath":{"type":"string"},"cliStatusLastExportedAt":{"type":["string","null"]},"cliStatusExportError":{"type":"string"},"aiFast":{"type":"object","additionalProperties":true,"required":["active","durationHours","startedAt","endsAt","remainingMs","plannedSummary"],"properties":{"active":{"type":"boolean"},"durationHours":{"type":"integer","enum":[24,168,720]},"startedAt":{"type":"string"},"endsAt":{"type":"string"},"remainingMs":{"type":"number","minimum":0},"plannedSummary":{"type":"object","additionalProperties":true,"required":["solves","drillsCompleted"],"properties":{"solves":{"type":"integer","minimum":0},"drillsCompleted":{"type":"integer","minimum":0}}}}},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"hasCompletedOnboarding":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
+const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","perTargetRules","cliStatusExportEnabled","cliStatusExportPath","cliStatusLastExportedAt","cliStatusExportError","aiFast","leaderboardRepoUrl","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","hasCompletedOnboarding","supportedTargets","supportedSources","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"perTargetRules":{"type":"object","additionalProperties":{"type":"object","additionalProperties":true,"required":["schedule","difficultyOverride","sourcesOverride"],"properties":{"schedule":{"enum":["always","weekdays","weekends","custom"]},"customCron":{"type":"string"},"difficultyOverride":{"enum":["default","easy","medium","hard"]},"sourcesOverride":{"type":"array","items":{"type":"string"}}}}},"cliStatusExportEnabled":{"type":"boolean"},"cliStatusExportPath":{"type":"string"},"cliStatusLastExportedAt":{"type":["string","null"]},"cliStatusExportError":{"type":"string"},"aiFast":{"type":"object","additionalProperties":true,"required":["active","durationHours","startedAt","endsAt","remainingMs","plannedSummary"],"properties":{"active":{"type":"boolean"},"durationHours":{"type":"integer","enum":[24,168,720]},"startedAt":{"type":"string"},"endsAt":{"type":"string"},"remainingMs":{"type":"number","minimum":0},"plannedSummary":{"type":"object","additionalProperties":true,"required":["solves","drillsCompleted"],"properties":{"solves":{"type":"integer","minimum":0},"drillsCompleted":{"type":"integer","minimum":0}}}}},"leaderboardRepoUrl":{"type":"string"},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"hasCompletedOnboarding":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
 
 function validate20(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 /*# sourceURL="https://dorso.dev/schemas/dashboard-state.schema.json" */;
@@ -17,7 +17,7 @@ evaluated0.items = undefined;
 if(errors === 0){
 if(data && typeof data == "object" && !Array.isArray(data)){
 let missing0;
-if(((((((((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.perTargetRules === undefined) && (missing0 = "perTargetRules"))) || ((data.cliStatusExportEnabled === undefined) && (missing0 = "cliStatusExportEnabled"))) || ((data.cliStatusExportPath === undefined) && (missing0 = "cliStatusExportPath"))) || ((data.cliStatusLastExportedAt === undefined) && (missing0 = "cliStatusLastExportedAt"))) || ((data.cliStatusExportError === undefined) && (missing0 = "cliStatusExportError"))) || ((data.aiFast === undefined) && (missing0 = "aiFast"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.hasCompletedOnboarding === undefined) && (missing0 = "hasCompletedOnboarding"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
+if((((((((((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.perTargetRules === undefined) && (missing0 = "perTargetRules"))) || ((data.cliStatusExportEnabled === undefined) && (missing0 = "cliStatusExportEnabled"))) || ((data.cliStatusExportPath === undefined) && (missing0 = "cliStatusExportPath"))) || ((data.cliStatusLastExportedAt === undefined) && (missing0 = "cliStatusLastExportedAt"))) || ((data.cliStatusExportError === undefined) && (missing0 = "cliStatusExportError"))) || ((data.aiFast === undefined) && (missing0 = "aiFast"))) || ((data.leaderboardRepoUrl === undefined) && (missing0 = "leaderboardRepoUrl"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.hasCompletedOnboarding === undefined) && (missing0 = "hasCompletedOnboarding"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
 validate20.errors = [{instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: missing0},message:"must have required property '"+missing0+"'"}];
 return false;
 }
@@ -1052,12 +1052,24 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.sessionDurationMinutes !== undefined){
-let data50 = data.sessionDurationMinutes;
+if(data.leaderboardRepoUrl !== undefined){
 const _errs115 = errors;
-if(errors === _errs115){
-if(typeof data50 == "number"){
-if(data50 < 1 || isNaN(data50)){
+if(typeof data.leaderboardRepoUrl !== "string"){
+validate20.errors = [{instancePath:instancePath+"/leaderboardRepoUrl",schemaPath:"#/properties/leaderboardRepoUrl/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+return false;
+}
+var valid0 = _errs115 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
+if(data.sessionDurationMinutes !== undefined){
+let data51 = data.sessionDurationMinutes;
+const _errs117 = errors;
+if(errors === _errs117){
+if(typeof data51 == "number"){
+if(data51 < 1 || isNaN(data51)){
 validate20.errors = [{instancePath:instancePath+"/sessionDurationMinutes",schemaPath:"#/properties/sessionDurationMinutes/minimum",keyword:"minimum",params:{comparison: ">=", limit: 1},message:"must be >= 1"}];
 return false;
 }
@@ -1067,51 +1079,30 @@ validate20.errors = [{instancePath:instancePath+"/sessionDurationMinutes",schema
 return false;
 }
 }
-var valid0 = _errs115 === errors;
-}
-else {
-var valid0 = true;
-}
-if(valid0){
-if(data.emergencyBypassesPerWeek !== undefined){
-let data51 = data.emergencyBypassesPerWeek;
-const _errs117 = errors;
-if(!((typeof data51 == "number") && (!(data51 % 1) && !isNaN(data51)))){
-validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
-return false;
-}
-if(errors === _errs117){
-if(typeof data51 == "number"){
-if(data51 > 7 || isNaN(data51)){
-validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/maximum",keyword:"maximum",params:{comparison: "<=", limit: 7},message:"must be <= 7"}];
-return false;
-}
-else {
-if(data51 < 0 || isNaN(data51)){
-validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
-return false;
-}
-}
-}
-}
 var valid0 = _errs117 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
-if(data.bypassesThisWeek !== undefined){
-let data52 = data.bypassesThisWeek;
+if(data.emergencyBypassesPerWeek !== undefined){
+let data52 = data.emergencyBypassesPerWeek;
 const _errs119 = errors;
 if(!((typeof data52 == "number") && (!(data52 % 1) && !isNaN(data52)))){
-validate20.errors = [{instancePath:instancePath+"/bypassesThisWeek",schemaPath:"#/properties/bypassesThisWeek/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
 }
 if(errors === _errs119){
 if(typeof data52 == "number"){
-if(data52 < 0 || isNaN(data52)){
-validate20.errors = [{instancePath:instancePath+"/bypassesThisWeek",schemaPath:"#/properties/bypassesThisWeek/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+if(data52 > 7 || isNaN(data52)){
+validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/maximum",keyword:"maximum",params:{comparison: "<=", limit: 7},message:"must be <= 7"}];
 return false;
+}
+else {
+if(data52 < 0 || isNaN(data52)){
+validate20.errors = [{instancePath:instancePath+"/emergencyBypassesPerWeek",schemaPath:"#/properties/emergencyBypassesPerWeek/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+return false;
+}
 }
 }
 }
@@ -1121,17 +1112,17 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.emergencyBypassesRemaining !== undefined){
-let data53 = data.emergencyBypassesRemaining;
+if(data.bypassesThisWeek !== undefined){
+let data53 = data.bypassesThisWeek;
 const _errs121 = errors;
 if(!((typeof data53 == "number") && (!(data53 % 1) && !isNaN(data53)))){
-validate20.errors = [{instancePath:instancePath+"/emergencyBypassesRemaining",schemaPath:"#/properties/emergencyBypassesRemaining/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+validate20.errors = [{instancePath:instancePath+"/bypassesThisWeek",schemaPath:"#/properties/bypassesThisWeek/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
 }
 if(errors === _errs121){
 if(typeof data53 == "number"){
 if(data53 < 0 || isNaN(data53)){
-validate20.errors = [{instancePath:instancePath+"/emergencyBypassesRemaining",schemaPath:"#/properties/emergencyBypassesRemaining/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+validate20.errors = [{instancePath:instancePath+"/bypassesThisWeek",schemaPath:"#/properties/bypassesThisWeek/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
 return false;
 }
 }
@@ -1142,11 +1133,20 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.bypassWeekStart !== undefined){
+if(data.emergencyBypassesRemaining !== undefined){
+let data54 = data.emergencyBypassesRemaining;
 const _errs123 = errors;
-if(!(typeof data.bypassWeekStart == "number")){
-validate20.errors = [{instancePath:instancePath+"/bypassWeekStart",schemaPath:"#/properties/bypassWeekStart/type",keyword:"type",params:{type: "number"},message:"must be number"}];
+if(!((typeof data54 == "number") && (!(data54 % 1) && !isNaN(data54)))){
+validate20.errors = [{instancePath:instancePath+"/emergencyBypassesRemaining",schemaPath:"#/properties/emergencyBypassesRemaining/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
+}
+if(errors === _errs123){
+if(typeof data54 == "number"){
+if(data54 < 0 || isNaN(data54)){
+validate20.errors = [{instancePath:instancePath+"/emergencyBypassesRemaining",schemaPath:"#/properties/emergencyBypassesRemaining/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+return false;
+}
+}
 }
 var valid0 = _errs123 === errors;
 }
@@ -1154,20 +1154,11 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.currentRun !== undefined){
-let data55 = data.currentRun;
+if(data.bypassWeekStart !== undefined){
 const _errs125 = errors;
-if(!((typeof data55 == "number") && (!(data55 % 1) && !isNaN(data55)))){
-validate20.errors = [{instancePath:instancePath+"/currentRun",schemaPath:"#/properties/currentRun/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+if(!(typeof data.bypassWeekStart == "number")){
+validate20.errors = [{instancePath:instancePath+"/bypassWeekStart",schemaPath:"#/properties/bypassWeekStart/type",keyword:"type",params:{type: "number"},message:"must be number"}];
 return false;
-}
-if(errors === _errs125){
-if(typeof data55 == "number"){
-if(data55 < 0 || isNaN(data55)){
-validate20.errors = [{instancePath:instancePath+"/currentRun",schemaPath:"#/properties/currentRun/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
-return false;
-}
-}
 }
 var valid0 = _errs125 === errors;
 }
@@ -1175,17 +1166,17 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.longestRun !== undefined){
-let data56 = data.longestRun;
+if(data.currentRun !== undefined){
+let data56 = data.currentRun;
 const _errs127 = errors;
 if(!((typeof data56 == "number") && (!(data56 % 1) && !isNaN(data56)))){
-validate20.errors = [{instancePath:instancePath+"/longestRun",schemaPath:"#/properties/longestRun/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+validate20.errors = [{instancePath:instancePath+"/currentRun",schemaPath:"#/properties/currentRun/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
 }
 if(errors === _errs127){
 if(typeof data56 == "number"){
 if(data56 < 0 || isNaN(data56)){
-validate20.errors = [{instancePath:instancePath+"/longestRun",schemaPath:"#/properties/longestRun/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+validate20.errors = [{instancePath:instancePath+"/currentRun",schemaPath:"#/properties/currentRun/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
 return false;
 }
 }
@@ -1196,17 +1187,17 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.graceDaysRemaining !== undefined){
-let data57 = data.graceDaysRemaining;
+if(data.longestRun !== undefined){
+let data57 = data.longestRun;
 const _errs129 = errors;
 if(!((typeof data57 == "number") && (!(data57 % 1) && !isNaN(data57)))){
-validate20.errors = [{instancePath:instancePath+"/graceDaysRemaining",schemaPath:"#/properties/graceDaysRemaining/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+validate20.errors = [{instancePath:instancePath+"/longestRun",schemaPath:"#/properties/longestRun/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
 }
 if(errors === _errs129){
 if(typeof data57 == "number"){
 if(data57 < 0 || isNaN(data57)){
-validate20.errors = [{instancePath:instancePath+"/graceDaysRemaining",schemaPath:"#/properties/graceDaysRemaining/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+validate20.errors = [{instancePath:instancePath+"/longestRun",schemaPath:"#/properties/longestRun/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
 return false;
 }
 }
@@ -1217,11 +1208,20 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.isPaused !== undefined){
+if(data.graceDaysRemaining !== undefined){
+let data58 = data.graceDaysRemaining;
 const _errs131 = errors;
-if(typeof data.isPaused !== "boolean"){
-validate20.errors = [{instancePath:instancePath+"/isPaused",schemaPath:"#/properties/isPaused/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+if(!((typeof data58 == "number") && (!(data58 % 1) && !isNaN(data58)))){
+validate20.errors = [{instancePath:instancePath+"/graceDaysRemaining",schemaPath:"#/properties/graceDaysRemaining/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
 return false;
+}
+if(errors === _errs131){
+if(typeof data58 == "number"){
+if(data58 < 0 || isNaN(data58)){
+validate20.errors = [{instancePath:instancePath+"/graceDaysRemaining",schemaPath:"#/properties/graceDaysRemaining/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+return false;
+}
+}
 }
 var valid0 = _errs131 === errors;
 }
@@ -1229,10 +1229,10 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.hasCompletedOnboarding !== undefined){
+if(data.isPaused !== undefined){
 const _errs133 = errors;
-if(typeof data.hasCompletedOnboarding !== "boolean"){
-validate20.errors = [{instancePath:instancePath+"/hasCompletedOnboarding",schemaPath:"#/properties/hasCompletedOnboarding/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+if(typeof data.isPaused !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/isPaused",schemaPath:"#/properties/isPaused/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
 return false;
 }
 var valid0 = _errs133 === errors;
@@ -1241,40 +1241,40 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.supportedTargets !== undefined){
-let data60 = data.supportedTargets;
+if(data.hasCompletedOnboarding !== undefined){
 const _errs135 = errors;
-if(errors === _errs135){
-if(Array.isArray(data60)){
-var valid14 = true;
-const len4 = data60.length;
-for(let i4=0; i4<len4; i4++){
-let data61 = data60[i4];
+if(typeof data.hasCompletedOnboarding !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/hasCompletedOnboarding",schemaPath:"#/properties/hasCompletedOnboarding/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+return false;
+}
+var valid0 = _errs135 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
+if(data.supportedTargets !== undefined){
+let data61 = data.supportedTargets;
 const _errs137 = errors;
 if(errors === _errs137){
-if(data61 && typeof data61 == "object" && !Array.isArray(data61)){
+if(Array.isArray(data61)){
+var valid14 = true;
+const len4 = data61.length;
+for(let i4=0; i4<len4; i4++){
+let data62 = data61[i4];
+const _errs139 = errors;
+if(errors === _errs139){
+if(data62 && typeof data62 == "object" && !Array.isArray(data62)){
 let missing7;
-if((((data61.id === undefined) && (missing7 = "id")) || ((data61.label === undefined) && (missing7 = "label"))) || ((data61.matches === undefined) && (missing7 = "matches"))){
+if((((data62.id === undefined) && (missing7 = "id")) || ((data62.label === undefined) && (missing7 = "label"))) || ((data62.matches === undefined) && (missing7 = "matches"))){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4,schemaPath:"#/properties/supportedTargets/items/required",keyword:"required",params:{missingProperty: missing7},message:"must have required property '"+missing7+"'"}];
 return false;
 }
 else {
-if(data61.id !== undefined){
-const _errs140 = errors;
-if(typeof data61.id !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/id",schemaPath:"#/properties/supportedTargets/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
-return false;
-}
-var valid15 = _errs140 === errors;
-}
-else {
-var valid15 = true;
-}
-if(valid15){
-if(data61.label !== undefined){
+if(data62.id !== undefined){
 const _errs142 = errors;
-if(typeof data61.label !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/label",schemaPath:"#/properties/supportedTargets/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+if(typeof data62.id !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/id",schemaPath:"#/properties/supportedTargets/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid15 = _errs142 === errors;
@@ -1283,20 +1283,32 @@ else {
 var valid15 = true;
 }
 if(valid15){
-if(data61.hostnames !== undefined){
-let data64 = data61.hostnames;
+if(data62.label !== undefined){
 const _errs144 = errors;
-if(errors === _errs144){
-if(Array.isArray(data64)){
-var valid16 = true;
-const len5 = data64.length;
-for(let i5=0; i5<len5; i5++){
+if(typeof data62.label !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/label",schemaPath:"#/properties/supportedTargets/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+return false;
+}
+var valid15 = _errs144 === errors;
+}
+else {
+var valid15 = true;
+}
+if(valid15){
+if(data62.hostnames !== undefined){
+let data65 = data62.hostnames;
 const _errs146 = errors;
-if(typeof data64[i5] !== "string"){
+if(errors === _errs146){
+if(Array.isArray(data65)){
+var valid16 = true;
+const len5 = data65.length;
+for(let i5=0; i5<len5; i5++){
+const _errs148 = errors;
+if(typeof data65[i5] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/hostnames/" + i5,schemaPath:"#/properties/supportedTargets/items/properties/hostnames/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid16 = _errs146 === errors;
+var valid16 = _errs148 === errors;
 if(!valid16){
 break;
 }
@@ -1307,26 +1319,26 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/host
 return false;
 }
 }
-var valid15 = _errs144 === errors;
+var valid15 = _errs146 === errors;
 }
 else {
 var valid15 = true;
 }
 if(valid15){
-if(data61.pathPrefixes !== undefined){
-let data66 = data61.pathPrefixes;
-const _errs148 = errors;
-if(errors === _errs148){
-if(Array.isArray(data66)){
-var valid17 = true;
-const len6 = data66.length;
-for(let i6=0; i6<len6; i6++){
+if(data62.pathPrefixes !== undefined){
+let data67 = data62.pathPrefixes;
 const _errs150 = errors;
-if(typeof data66[i6] !== "string"){
+if(errors === _errs150){
+if(Array.isArray(data67)){
+var valid17 = true;
+const len6 = data67.length;
+for(let i6=0; i6<len6; i6++){
+const _errs152 = errors;
+if(typeof data67[i6] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/pathPrefixes/" + i6,schemaPath:"#/properties/supportedTargets/items/properties/pathPrefixes/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid17 = _errs150 === errors;
+var valid17 = _errs152 === errors;
 if(!valid17){
 break;
 }
@@ -1337,26 +1349,26 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/path
 return false;
 }
 }
-var valid15 = _errs148 === errors;
+var valid15 = _errs150 === errors;
 }
 else {
 var valid15 = true;
 }
 if(valid15){
-if(data61.matches !== undefined){
-let data68 = data61.matches;
-const _errs152 = errors;
-if(errors === _errs152){
-if(Array.isArray(data68)){
-var valid18 = true;
-const len7 = data68.length;
-for(let i7=0; i7<len7; i7++){
+if(data62.matches !== undefined){
+let data69 = data62.matches;
 const _errs154 = errors;
-if(typeof data68[i7] !== "string"){
+if(errors === _errs154){
+if(Array.isArray(data69)){
+var valid18 = true;
+const len7 = data69.length;
+for(let i7=0; i7<len7; i7++){
+const _errs156 = errors;
+if(typeof data69[i7] !== "string"){
 validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/matches/" + i7,schemaPath:"#/properties/supportedTargets/items/properties/matches/items/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid18 = _errs154 === errors;
+var valid18 = _errs156 === errors;
 if(!valid18){
 break;
 }
@@ -1367,7 +1379,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4+"/matc
 return false;
 }
 }
-var valid15 = _errs152 === errors;
+var valid15 = _errs154 === errors;
 }
 else {
 var valid15 = true;
@@ -1383,7 +1395,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets/" + i4,schema
 return false;
 }
 }
-var valid14 = _errs137 === errors;
+var valid14 = _errs139 === errors;
 if(!valid14){
 break;
 }
@@ -1394,46 +1406,34 @@ validate20.errors = [{instancePath:instancePath+"/supportedTargets",schemaPath:"
 return false;
 }
 }
-var valid0 = _errs135 === errors;
+var valid0 = _errs137 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.supportedSources !== undefined){
-let data70 = data.supportedSources;
-const _errs156 = errors;
-if(errors === _errs156){
-if(Array.isArray(data70)){
-var valid19 = true;
-const len8 = data70.length;
-for(let i8=0; i8<len8; i8++){
-let data71 = data70[i8];
+let data71 = data.supportedSources;
 const _errs158 = errors;
 if(errors === _errs158){
-if(data71 && typeof data71 == "object" && !Array.isArray(data71)){
+if(Array.isArray(data71)){
+var valid19 = true;
+const len8 = data71.length;
+for(let i8=0; i8<len8; i8++){
+let data72 = data71[i8];
+const _errs160 = errors;
+if(errors === _errs160){
+if(data72 && typeof data72 == "object" && !Array.isArray(data72)){
 let missing8;
-if((((data71.id === undefined) && (missing8 = "id")) || ((data71.label === undefined) && (missing8 = "label"))) || ((data71.isAvailable === undefined) && (missing8 = "isAvailable"))){
+if((((data72.id === undefined) && (missing8 = "id")) || ((data72.label === undefined) && (missing8 = "label"))) || ((data72.isAvailable === undefined) && (missing8 = "isAvailable"))){
 validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8,schemaPath:"#/properties/supportedSources/items/required",keyword:"required",params:{missingProperty: missing8},message:"must have required property '"+missing8+"'"}];
 return false;
 }
 else {
-if(data71.id !== undefined){
-const _errs161 = errors;
-if(typeof data71.id !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/id",schemaPath:"#/properties/supportedSources/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
-return false;
-}
-var valid20 = _errs161 === errors;
-}
-else {
-var valid20 = true;
-}
-if(valid20){
-if(data71.label !== undefined){
+if(data72.id !== undefined){
 const _errs163 = errors;
-if(typeof data71.label !== "string"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/label",schemaPath:"#/properties/supportedSources/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+if(typeof data72.id !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/id",schemaPath:"#/properties/supportedSources/items/properties/id/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid20 = _errs163 === errors;
@@ -1442,13 +1442,25 @@ else {
 var valid20 = true;
 }
 if(valid20){
-if(data71.isAvailable !== undefined){
+if(data72.label !== undefined){
 const _errs165 = errors;
-if(typeof data71.isAvailable !== "boolean"){
-validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/isAvailable",schemaPath:"#/properties/supportedSources/items/properties/isAvailable/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+if(typeof data72.label !== "string"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/label",schemaPath:"#/properties/supportedSources/items/properties/label/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
 var valid20 = _errs165 === errors;
+}
+else {
+var valid20 = true;
+}
+if(valid20){
+if(data72.isAvailable !== undefined){
+const _errs167 = errors;
+if(typeof data72.isAvailable !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8+"/isAvailable",schemaPath:"#/properties/supportedSources/items/properties/isAvailable/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
+return false;
+}
+var valid20 = _errs167 === errors;
 }
 else {
 var valid20 = true;
@@ -1462,7 +1474,7 @@ validate20.errors = [{instancePath:instancePath+"/supportedSources/" + i8,schema
 return false;
 }
 }
-var valid19 = _errs158 === errors;
+var valid19 = _errs160 === errors;
 if(!valid19){
 break;
 }
@@ -1473,30 +1485,30 @@ validate20.errors = [{instancePath:instancePath+"/supportedSources",schemaPath:"
 return false;
 }
 }
-var valid0 = _errs156 === errors;
+var valid0 = _errs158 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.uiMessage !== undefined){
-const _errs167 = errors;
+const _errs169 = errors;
 if(typeof data.uiMessage !== "string"){
 validate20.errors = [{instancePath:instancePath+"/uiMessage",schemaPath:"#/properties/uiMessage/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid0 = _errs167 === errors;
+var valid0 = _errs169 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.messageFailureCount !== undefined){
-let data76 = data.messageFailureCount;
-const _errs169 = errors;
-if(errors === _errs169){
-if(typeof data76 == "number"){
-if(data76 < 0 || isNaN(data76)){
+let data77 = data.messageFailureCount;
+const _errs171 = errors;
+if(errors === _errs171){
+if(typeof data77 == "number"){
+if(data77 < 0 || isNaN(data77)){
 validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
 return false;
 }
@@ -1506,22 +1518,23 @@ validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPat
 return false;
 }
 }
-var valid0 = _errs169 === errors;
+var valid0 = _errs171 === errors;
 }
 else {
 var valid0 = true;
 }
 if(valid0){
 if(data.leetcodeDetectionWarning !== undefined){
-const _errs171 = errors;
+const _errs173 = errors;
 if(typeof data.leetcodeDetectionWarning !== "string"){
 validate20.errors = [{instancePath:instancePath+"/leetcodeDetectionWarning",schemaPath:"#/properties/leetcodeDetectionWarning/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid0 = _errs171 === errors;
+var valid0 = _errs173 === errors;
 }
 else {
 var valid0 = true;
+}
 }
 }
 }
