@@ -37,6 +37,7 @@ import {
     normalizeStreakState,
     recordSolve,
 } from '../../shared/core/streak.js';
+import aocProvider, { normalizeAocAnswerHashes } from '../lib/providers/aoc-provider.js';
 import drillsProvider from '../lib/providers/drills-provider.js';
 import eulerProvider from '../lib/providers/euler-provider.js';
 import leetcodeProvider from '../lib/providers/leetcode-provider.js';
@@ -47,10 +48,12 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
     const RECENT_CHALLENGE_WINDOW = 5;
     const LEETCODE_STALENESS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
     const CLI_STATUS_EXPORT_ALARM = 'dorso-cli-status-export';
+    const AOC_ORIGIN = 'https://adventofcode.com';
     const providers = {
         mcq: mcqProvider,
         drills: drillsProvider,
         leetcode: leetcodeProvider,
+        aoc: aocProvider,
         euler: eulerProvider,
     };
     let ensureInstallStatePromise = null;
@@ -112,6 +115,23 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         }
 
         return callbackToPromise((done) => browserApi.downloads.download(options, done));
+    }
+
+    async function hasHostPermission(origin) {
+        if (!browserApi.permissions?.contains) {
+            return true;
+        }
+
+        const response = browserApi.permissions.contains({
+            origins: [`${String(origin).replace(/\/$/, '')}/*`],
+        });
+        return isPromise(response)
+            ? response
+            : callbackToPromise((done) => {
+                browserApi.permissions.contains({
+                    origins: [`${String(origin).replace(/\/$/, '')}/*`],
+                }, done);
+            });
     }
 
     async function sha256Hex(value) {
@@ -250,6 +270,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.STREAK_STATE,
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.ONBOARDING_COMPLETED,
+            STORAGE_KEYS.AOC_ANSWER_HASHES,
         ]);
         const updates = {};
         const hasExistingInstallState = Boolean(
@@ -325,6 +346,14 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (typeof stored[STORAGE_KEYS.ONBOARDING_COMPLETED] !== 'boolean') {
             updates[STORAGE_KEYS.ONBOARDING_COMPLETED] = hasExistingInstallState;
+        }
+
+        const normalizedAocAnswerHashes = normalizeAocAnswerHashes(stored[STORAGE_KEYS.AOC_ANSWER_HASHES]);
+        if (
+            !stored[STORAGE_KEYS.AOC_ANSWER_HASHES]
+            || JSON.stringify(stored[STORAGE_KEYS.AOC_ANSWER_HASHES]) !== JSON.stringify(normalizedAocAnswerHashes)
+        ) {
+            updates[STORAGE_KEYS.AOC_ANSWER_HASHES] = normalizedAocAnswerHashes;
         }
 
         if (Object.keys(updates).length > 0) {
@@ -412,6 +441,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.ONBOARDING_COMPLETED,
             STORAGE_KEYS.UI_MESSAGE,
+            STORAGE_KEYS.AOC_ANSWER_HASHES,
         ]);
     }
 
@@ -538,6 +568,9 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             hasCompletedOnboarding: Boolean(stored[STORAGE_KEYS.ONBOARDING_COMPLETED]),
             supportedTargets: CHATBOT_TARGETS,
             supportedSources: getSupportedSources(),
+            aocPermissionGranted: await hasHostPermission(AOC_ORIGIN),
+            aocAnswerHashes: normalizeAocAnswerHashes(stored[STORAGE_KEYS.AOC_ANSWER_HASHES]),
+            aocAnswerHashCount: Object.keys(normalizeAocAnswerHashes(stored[STORAGE_KEYS.AOC_ANSWER_HASHES])).length,
             uiMessage: stored[STORAGE_KEYS.UI_MESSAGE] || '',
             messageFailureCount: Number(stored[STORAGE_KEYS.MESSAGE_FAILURE_COUNT] || 0),
             leetcodeDetectionWarning: getLeetCodeDetectionWarning(stored),
@@ -595,6 +628,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (Object.prototype.hasOwnProperty.call(payload || {}, 'emergencyBypassesPerWeek')) {
             updates[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK] = normalizeEmergencyBypassLimit(payload.emergencyBypassesPerWeek);
+        }
+
+        if (Object.prototype.hasOwnProperty.call(payload || {}, 'aocAnswerHashes')) {
+            updates[STORAGE_KEYS.AOC_ANSWER_HASHES] = normalizeAocAnswerHashes(payload.aocAnswerHashes);
         }
 
         if (Object.keys(updates).length > 0) {

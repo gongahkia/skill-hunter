@@ -43,6 +43,7 @@ let countdownTimer = null;
 let latestState = null;
 let latestWhatIAsked = [];
 const redactedWhatIAskedTimestamps = new Set();
+const AOC_ORIGIN = 'https://adventofcode.com';
 const mainPanelIds = [
     'statusPanel',
     'challengePanel',
@@ -158,6 +159,32 @@ function createSnippetField(label, value) {
         input,
     );
     return wrapper;
+}
+
+function formatAocHashText(answerHashes = {}) {
+    return Object.entries(answerHashes)
+        .sort(([leftSlug], [rightSlug]) => leftSlug.localeCompare(rightSlug))
+        .map(([slug, hash]) => `${slug} ${hash}`)
+        .join('\n');
+}
+
+function parseAocHashText(value) {
+    const entries = String(value || '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    const answerHashes = {};
+
+    entries.forEach((line) => {
+        const match = /^(aoc-\d{4}-\d{2}-part-[12])(?:\s+|\s*[:=,]\s*)([a-f0-9]{64})$/i.exec(line);
+        if (!match) {
+            throw new Error(`Invalid Advent of Code hash line: ${line}`);
+        }
+
+        answerHashes[match[1].toLowerCase()] = match[2].toLowerCase();
+    });
+
+    return answerHashes;
 }
 
 async function getWhatIAskedEntries() {
@@ -435,6 +462,29 @@ function renderChallenge(state) {
             id: 'openChallengeButton',
             onClick: () => {
                 window.open(challenge.url, '_blank', 'noopener,noreferrer');
+            },
+        }));
+    }
+    if (challenge.source === 'aoc') {
+        buttons.push(createButton({
+            label: 'Check AoC Completion',
+            className: 'button-primary',
+            id: 'checkAocButton',
+            onClick: async (event) => {
+                event.currentTarget.disabled = true;
+                const result = await sendRuntimeMessage({
+                    action: MESSAGE_ACTIONS.SUBMISSION_RESULT,
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: { method: 'session' },
+                });
+                setMessage(
+                    result.success
+                        ? 'Advent of Code completion verified.'
+                        : (result.message || result.error || 'Advent of Code completion not verified.'),
+                    Boolean(result.success),
+                );
+                await loadState();
             },
         }));
     }
@@ -809,8 +859,44 @@ function renderSources(state) {
         checkboxGrid.append(label);
     });
 
+    const aocSettings = createElement('div', { className: 'list-item' });
+    const aocHashLabel = createElement('label', { className: 'field-label' });
+    const aocHashInput = createElement('textarea');
+    aocHashInput.name = 'aocAnswerHashes';
+    aocHashInput.rows = 5;
+    aocHashInput.placeholder = 'aoc-2025-01-part-1 64-char-sha256';
+    aocHashInput.value = formatAocHashText(state.aocAnswerHashes);
+    aocHashLabel.append(
+        createElement('span', { text: 'Advent of Code answer hashes' }),
+        aocHashInput,
+        createElement('span', {
+            className: 'small',
+            text: `${state.aocAnswerHashCount || 0} saved. Optional fallback when session-page verification is unavailable.`,
+        }),
+    );
+    aocSettings.append(
+        createElement('strong', { text: 'Advent of Code' }),
+        createElement('span', {
+            className: 'small',
+            text: state.aocPermissionGranted ? 'AoC permission granted.' : 'AoC permission not granted.',
+        }),
+        createButtonRow([
+            createButton({
+                label: 'Grant AoC Permission',
+                className: 'button-secondary',
+                onClick: async () => {
+                    const granted = await requestOptionalHostPermission(AOC_ORIGIN);
+                    setMessage(granted ? 'Advent of Code permission granted.' : 'Advent of Code permission not granted.', granted);
+                    await loadState();
+                },
+            }),
+        ]),
+        aocHashLabel,
+    );
+
     form.append(
         checkboxGrid,
+        aocSettings,
         createButton({
             label: 'Save Sources',
             className: 'button-primary',
@@ -823,11 +909,20 @@ function renderSources(state) {
         event.preventDefault();
         const formData = new FormData(form);
         const enabledSourcesValue = formData.getAll('enabledSources');
+        let aocAnswerHashes = {};
+
+        try {
+            aocAnswerHashes = parseAocHashText(formData.get('aocAnswerHashes'));
+        } catch (error) {
+            setMessage(error.message);
+            return;
+        }
 
         await sendRuntimeMessage({
             action: MESSAGE_ACTIONS.SAVE_SETTINGS,
             payload: {
                 enabledSources: enabledSourcesValue,
+                aocAnswerHashes,
             },
         });
         setMessage('Challenge sources saved.', true);

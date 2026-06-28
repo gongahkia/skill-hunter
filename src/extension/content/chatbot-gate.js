@@ -529,7 +529,9 @@
 
         const verificationCopy = challenge.source === 'leetcode'
             ? 'The overlay disappears automatically once LeetCode reports an accepted submission for this exact problem.'
-            : 'The overlay disappears after the local answer verifies.';
+            : (challenge.source === 'aoc'
+                ? 'Solve the assigned Advent of Code part, then use session verification or the saved local hash fallback.'
+                : 'The overlay disappears after the local answer verifies.');
         [
             verificationCopy,
             'Use the Dorso toolbar popup to change which supported sites stay protected.',
@@ -656,6 +658,53 @@
                 await loadState();
             });
             challengeCard.append(drillForm);
+        }
+
+        if (challenge.source === 'aoc') {
+            const aocStatus = createElement('span', { className: 'dorso-intent-status' });
+            const aocVerifyButton = createElement('button', {
+                className: 'dorso-button dorso-button-secondary',
+                text: 'Check AoC Completion',
+            });
+            aocVerifyButton.type = 'button';
+            aocVerifyButton.addEventListener('click', async (event) => {
+                event.currentTarget.disabled = true;
+                const result = await sendMessage({
+                    action: 'submissionResult',
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: { method: 'session' },
+                });
+                aocStatus.textContent = result?.success
+                    ? 'Completion verified.'
+                    : (result?.message || result?.error || 'Completion not verified.');
+                await loadState();
+            });
+
+            const answerForm = createElement('form', { className: 'dorso-intent' });
+            const answerInput = createElement('input');
+            answerInput.type = 'text';
+            answerInput.autocomplete = 'off';
+            answerInput.placeholder = 'Local answer fallback';
+            answerForm.append(
+                answerInput,
+                createElement('button', {
+                    className: 'dorso-button dorso-button-secondary',
+                    text: 'Submit Local Answer',
+                }),
+                aocStatus,
+            );
+            answerForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                await sendMessage({
+                    action: 'submissionResult',
+                    source: challenge.source,
+                    slug: challenge.slug,
+                    submission: { answer: answerInput.value },
+                });
+                await loadState();
+            });
+            challengeCard.append(aocVerifyButton, answerForm);
         }
 
         if (challenge.selection_mode === 'link_out_hash') {

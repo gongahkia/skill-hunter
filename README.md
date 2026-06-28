@@ -34,7 +34,7 @@ Optional CLI export writes a local JSON status file under the browser Downloads 
 - Optional `@dorso/cli` Node companion
 - Local `chrome.storage.local` state
 - JSON challenge packs with AJV schema validation
-- MCQ, drill, LeetCode, and Project Euler challenge providers
+- MCQ, drill, LeetCode, Advent of Code, and Project Euler challenge providers
 - GitHub Actions for CI
 - Optional Cloudflare Worker for signed SVG badges
 

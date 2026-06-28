@@ -1,0 +1,1738 @@
+[
+  {
+    "id": "aoc-2023-01-part-1",
+    "year": 2023,
+    "day": 1,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2023-01-part-2",
+    "year": 2023,
+    "day": 1,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2023-02-part-1",
+    "year": 2023,
+    "day": 2,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2023-02-part-2",
+    "year": 2023,
+    "day": 2,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2023-03-part-1",
+    "year": 2023,
+    "day": 3,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2023-03-part-2",
+    "year": 2023,
+    "day": 3,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2023-04-part-1",
+    "year": 2023,
+    "day": 4,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2023-04-part-2",
+    "year": 2023,
+    "day": 4,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2023-05-part-1",
+    "year": 2023,
+    "day": 5,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2023-05-part-2",
+    "year": 2023,
+    "day": 5,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2023-06-part-1",
+    "year": 2023,
+    "day": 6,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2023-06-part-2",
+    "year": 2023,
+    "day": 6,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2023-07-part-1",
+    "year": 2023,
+    "day": 7,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2023-07-part-2",
+    "year": 2023,
+    "day": 7,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2023-08-part-1",
+    "year": 2023,
+    "day": 8,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2023-08-part-2",
+    "year": 2023,
+    "day": 8,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2023-09-part-1",
+    "year": 2023,
+    "day": 9,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2023-09-part-2",
+    "year": 2023,
+    "day": 9,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2023-10-part-1",
+    "year": 2023,
+    "day": 10,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2023-10-part-2",
+    "year": 2023,
+    "day": 10,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2023-11-part-1",
+    "year": 2023,
+    "day": 11,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2023-11-part-2",
+    "year": 2023,
+    "day": 11,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2023-12-part-1",
+    "year": 2023,
+    "day": 12,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-12"
+    ]
+  },
+  {
+    "id": "aoc-2023-12-part-2",
+    "year": 2023,
+    "day": 12,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-12"
+    ]
+  },
+  {
+    "id": "aoc-2023-13-part-1",
+    "year": 2023,
+    "day": 13,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/13",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-13"
+    ]
+  },
+  {
+    "id": "aoc-2023-13-part-2",
+    "year": 2023,
+    "day": 13,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/13",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-13"
+    ]
+  },
+  {
+    "id": "aoc-2023-14-part-1",
+    "year": 2023,
+    "day": 14,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/14",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-14"
+    ]
+  },
+  {
+    "id": "aoc-2023-14-part-2",
+    "year": 2023,
+    "day": 14,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/14",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-14"
+    ]
+  },
+  {
+    "id": "aoc-2023-15-part-1",
+    "year": 2023,
+    "day": 15,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/15",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-15"
+    ]
+  },
+  {
+    "id": "aoc-2023-15-part-2",
+    "year": 2023,
+    "day": 15,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/15",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-15"
+    ]
+  },
+  {
+    "id": "aoc-2023-16-part-1",
+    "year": 2023,
+    "day": 16,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/16",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-16"
+    ]
+  },
+  {
+    "id": "aoc-2023-16-part-2",
+    "year": 2023,
+    "day": 16,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/16",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-16"
+    ]
+  },
+  {
+    "id": "aoc-2023-17-part-1",
+    "year": 2023,
+    "day": 17,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/17",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-17"
+    ]
+  },
+  {
+    "id": "aoc-2023-17-part-2",
+    "year": 2023,
+    "day": 17,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/17",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-17"
+    ]
+  },
+  {
+    "id": "aoc-2023-18-part-1",
+    "year": 2023,
+    "day": 18,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/18",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-18"
+    ]
+  },
+  {
+    "id": "aoc-2023-18-part-2",
+    "year": 2023,
+    "day": 18,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/18",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-18"
+    ]
+  },
+  {
+    "id": "aoc-2023-19-part-1",
+    "year": 2023,
+    "day": 19,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/19",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-19"
+    ]
+  },
+  {
+    "id": "aoc-2023-19-part-2",
+    "year": 2023,
+    "day": 19,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/19",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-19"
+    ]
+  },
+  {
+    "id": "aoc-2023-20-part-1",
+    "year": 2023,
+    "day": 20,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/20",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-20"
+    ]
+  },
+  {
+    "id": "aoc-2023-20-part-2",
+    "year": 2023,
+    "day": 20,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/20",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-20"
+    ]
+  },
+  {
+    "id": "aoc-2023-21-part-1",
+    "year": 2023,
+    "day": 21,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/21",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-21"
+    ]
+  },
+  {
+    "id": "aoc-2023-21-part-2",
+    "year": 2023,
+    "day": 21,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/21",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-21"
+    ]
+  },
+  {
+    "id": "aoc-2023-22-part-1",
+    "year": 2023,
+    "day": 22,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/22",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-22"
+    ]
+  },
+  {
+    "id": "aoc-2023-22-part-2",
+    "year": 2023,
+    "day": 22,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/22",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-22"
+    ]
+  },
+  {
+    "id": "aoc-2023-23-part-1",
+    "year": 2023,
+    "day": 23,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/23",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-23"
+    ]
+  },
+  {
+    "id": "aoc-2023-23-part-2",
+    "year": 2023,
+    "day": 23,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/23",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-23"
+    ]
+  },
+  {
+    "id": "aoc-2023-24-part-1",
+    "year": 2023,
+    "day": 24,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/24",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-24"
+    ]
+  },
+  {
+    "id": "aoc-2023-24-part-2",
+    "year": 2023,
+    "day": 24,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/24",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-24"
+    ]
+  },
+  {
+    "id": "aoc-2023-25-part-1",
+    "year": 2023,
+    "day": 25,
+    "part": 1,
+    "url": "https://adventofcode.com/2023/day/25",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-25"
+    ]
+  },
+  {
+    "id": "aoc-2023-25-part-2",
+    "year": 2023,
+    "day": 25,
+    "part": 2,
+    "url": "https://adventofcode.com/2023/day/25",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2023",
+      "day-25"
+    ]
+  },
+  {
+    "id": "aoc-2024-01-part-1",
+    "year": 2024,
+    "day": 1,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2024-01-part-2",
+    "year": 2024,
+    "day": 1,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2024-02-part-1",
+    "year": 2024,
+    "day": 2,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2024-02-part-2",
+    "year": 2024,
+    "day": 2,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2024-03-part-1",
+    "year": 2024,
+    "day": 3,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2024-03-part-2",
+    "year": 2024,
+    "day": 3,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2024-04-part-1",
+    "year": 2024,
+    "day": 4,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2024-04-part-2",
+    "year": 2024,
+    "day": 4,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2024-05-part-1",
+    "year": 2024,
+    "day": 5,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2024-05-part-2",
+    "year": 2024,
+    "day": 5,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2024-06-part-1",
+    "year": 2024,
+    "day": 6,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2024-06-part-2",
+    "year": 2024,
+    "day": 6,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2024-07-part-1",
+    "year": 2024,
+    "day": 7,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2024-07-part-2",
+    "year": 2024,
+    "day": 7,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2024-08-part-1",
+    "year": 2024,
+    "day": 8,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2024-08-part-2",
+    "year": 2024,
+    "day": 8,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2024-09-part-1",
+    "year": 2024,
+    "day": 9,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2024-09-part-2",
+    "year": 2024,
+    "day": 9,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2024-10-part-1",
+    "year": 2024,
+    "day": 10,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2024-10-part-2",
+    "year": 2024,
+    "day": 10,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2024-11-part-1",
+    "year": 2024,
+    "day": 11,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2024-11-part-2",
+    "year": 2024,
+    "day": 11,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2024-12-part-1",
+    "year": 2024,
+    "day": 12,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-12"
+    ]
+  },
+  {
+    "id": "aoc-2024-12-part-2",
+    "year": 2024,
+    "day": 12,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-12"
+    ]
+  },
+  {
+    "id": "aoc-2024-13-part-1",
+    "year": 2024,
+    "day": 13,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/13",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-13"
+    ]
+  },
+  {
+    "id": "aoc-2024-13-part-2",
+    "year": 2024,
+    "day": 13,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/13",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-13"
+    ]
+  },
+  {
+    "id": "aoc-2024-14-part-1",
+    "year": 2024,
+    "day": 14,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/14",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-14"
+    ]
+  },
+  {
+    "id": "aoc-2024-14-part-2",
+    "year": 2024,
+    "day": 14,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/14",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-14"
+    ]
+  },
+  {
+    "id": "aoc-2024-15-part-1",
+    "year": 2024,
+    "day": 15,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/15",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-15"
+    ]
+  },
+  {
+    "id": "aoc-2024-15-part-2",
+    "year": 2024,
+    "day": 15,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/15",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-15"
+    ]
+  },
+  {
+    "id": "aoc-2024-16-part-1",
+    "year": 2024,
+    "day": 16,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/16",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-16"
+    ]
+  },
+  {
+    "id": "aoc-2024-16-part-2",
+    "year": 2024,
+    "day": 16,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/16",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-16"
+    ]
+  },
+  {
+    "id": "aoc-2024-17-part-1",
+    "year": 2024,
+    "day": 17,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/17",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-17"
+    ]
+  },
+  {
+    "id": "aoc-2024-17-part-2",
+    "year": 2024,
+    "day": 17,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/17",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-17"
+    ]
+  },
+  {
+    "id": "aoc-2024-18-part-1",
+    "year": 2024,
+    "day": 18,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/18",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-18"
+    ]
+  },
+  {
+    "id": "aoc-2024-18-part-2",
+    "year": 2024,
+    "day": 18,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/18",
+    "difficulty": 4,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-18"
+    ]
+  },
+  {
+    "id": "aoc-2024-19-part-1",
+    "year": 2024,
+    "day": 19,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/19",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-19"
+    ]
+  },
+  {
+    "id": "aoc-2024-19-part-2",
+    "year": 2024,
+    "day": 19,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/19",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-19"
+    ]
+  },
+  {
+    "id": "aoc-2024-20-part-1",
+    "year": 2024,
+    "day": 20,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/20",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-20"
+    ]
+  },
+  {
+    "id": "aoc-2024-20-part-2",
+    "year": 2024,
+    "day": 20,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/20",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-20"
+    ]
+  },
+  {
+    "id": "aoc-2024-21-part-1",
+    "year": 2024,
+    "day": 21,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/21",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-21"
+    ]
+  },
+  {
+    "id": "aoc-2024-21-part-2",
+    "year": 2024,
+    "day": 21,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/21",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-21"
+    ]
+  },
+  {
+    "id": "aoc-2024-22-part-1",
+    "year": 2024,
+    "day": 22,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/22",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-22"
+    ]
+  },
+  {
+    "id": "aoc-2024-22-part-2",
+    "year": 2024,
+    "day": 22,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/22",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-22"
+    ]
+  },
+  {
+    "id": "aoc-2024-23-part-1",
+    "year": 2024,
+    "day": 23,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/23",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-23"
+    ]
+  },
+  {
+    "id": "aoc-2024-23-part-2",
+    "year": 2024,
+    "day": 23,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/23",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-23"
+    ]
+  },
+  {
+    "id": "aoc-2024-24-part-1",
+    "year": 2024,
+    "day": 24,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/24",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-24"
+    ]
+  },
+  {
+    "id": "aoc-2024-24-part-2",
+    "year": 2024,
+    "day": 24,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/24",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-24"
+    ]
+  },
+  {
+    "id": "aoc-2024-25-part-1",
+    "year": 2024,
+    "day": 25,
+    "part": 1,
+    "url": "https://adventofcode.com/2024/day/25",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-25"
+    ]
+  },
+  {
+    "id": "aoc-2024-25-part-2",
+    "year": 2024,
+    "day": 25,
+    "part": 2,
+    "url": "https://adventofcode.com/2024/day/25",
+    "difficulty": 5,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2024",
+      "day-25"
+    ]
+  },
+  {
+    "id": "aoc-2025-01-part-1",
+    "year": 2025,
+    "day": 1,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2025-01-part-2",
+    "year": 2025,
+    "day": 1,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/1",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-1"
+    ]
+  },
+  {
+    "id": "aoc-2025-02-part-1",
+    "year": 2025,
+    "day": 2,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2025-02-part-2",
+    "year": 2025,
+    "day": 2,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/2",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-2"
+    ]
+  },
+  {
+    "id": "aoc-2025-03-part-1",
+    "year": 2025,
+    "day": 3,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2025-03-part-2",
+    "year": 2025,
+    "day": 3,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/3",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-3"
+    ]
+  },
+  {
+    "id": "aoc-2025-04-part-1",
+    "year": 2025,
+    "day": 4,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2025-04-part-2",
+    "year": 2025,
+    "day": 4,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/4",
+    "difficulty": 1,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-4"
+    ]
+  },
+  {
+    "id": "aoc-2025-05-part-1",
+    "year": 2025,
+    "day": 5,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2025-05-part-2",
+    "year": 2025,
+    "day": 5,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/5",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-5"
+    ]
+  },
+  {
+    "id": "aoc-2025-06-part-1",
+    "year": 2025,
+    "day": 6,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2025-06-part-2",
+    "year": 2025,
+    "day": 6,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/6",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-6"
+    ]
+  },
+  {
+    "id": "aoc-2025-07-part-1",
+    "year": 2025,
+    "day": 7,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2025-07-part-2",
+    "year": 2025,
+    "day": 7,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/7",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-7"
+    ]
+  },
+  {
+    "id": "aoc-2025-08-part-1",
+    "year": 2025,
+    "day": 8,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2025-08-part-2",
+    "year": 2025,
+    "day": 8,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/8",
+    "difficulty": 2,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-8"
+    ]
+  },
+  {
+    "id": "aoc-2025-09-part-1",
+    "year": 2025,
+    "day": 9,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2025-09-part-2",
+    "year": 2025,
+    "day": 9,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/9",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-9"
+    ]
+  },
+  {
+    "id": "aoc-2025-10-part-1",
+    "year": 2025,
+    "day": 10,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2025-10-part-2",
+    "year": 2025,
+    "day": 10,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/10",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-10"
+    ]
+  },
+  {
+    "id": "aoc-2025-11-part-1",
+    "year": 2025,
+    "day": 11,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2025-11-part-2",
+    "year": 2025,
+    "day": 11,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/11",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-11"
+    ]
+  },
+  {
+    "id": "aoc-2025-12-part-1",
+    "year": 2025,
+    "day": 12,
+    "part": 1,
+    "url": "https://adventofcode.com/2025/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-12"
+    ]
+  },
+  {
+    "id": "aoc-2025-12-part-2",
+    "year": 2025,
+    "day": 12,
+    "part": 2,
+    "url": "https://adventofcode.com/2025/day/12",
+    "difficulty": 3,
+    "tags": [
+      "advent-of-code",
+      "programming-puzzle",
+      "year-2025",
+      "day-12"
+    ]
+  }
+]

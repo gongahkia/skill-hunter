@@ -337,7 +337,8 @@ button:disabled:hover {
 
 .field-label select,
 input[type="text"],
-.snippet-field input {
+.snippet-field input,
+textarea {
     width: 100%;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
@@ -349,9 +350,15 @@ input[type="text"],
 
 .field-label select:focus,
 input[type="text"]:focus,
-.snippet-field input:focus {
+.snippet-field input:focus,
+textarea:focus {
     outline: 2px solid var(--primary-60);
     outline-offset: 2px;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
 }
 
 .rule-grid {

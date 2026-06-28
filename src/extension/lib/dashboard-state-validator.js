@@ -1,7 +1,9 @@
 "use strict";
 export const validate = validate20;
 export default validate20;
-const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","perTargetRules","cliStatusExportEnabled","cliStatusExportPath","cliStatusLastExportedAt","cliStatusExportError","aiFast","leaderboardRepoUrl","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","hasCompletedOnboarding","supportedTargets","supportedSources","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"perTargetRules":{"type":"object","additionalProperties":{"type":"object","additionalProperties":true,"required":["schedule","difficultyOverride","sourcesOverride"],"properties":{"schedule":{"enum":["always","weekdays","weekends","custom"]},"customCron":{"type":"string"},"difficultyOverride":{"enum":["default","easy","medium","hard"]},"sourcesOverride":{"type":"array","items":{"type":"string"}}}}},"cliStatusExportEnabled":{"type":"boolean"},"cliStatusExportPath":{"type":"string"},"cliStatusLastExportedAt":{"type":["string","null"]},"cliStatusExportError":{"type":"string"},"aiFast":{"type":"object","additionalProperties":true,"required":["active","durationHours","startedAt","endsAt","remainingMs","plannedSummary"],"properties":{"active":{"type":"boolean"},"durationHours":{"type":"integer","enum":[24,168,720]},"startedAt":{"type":"string"},"endsAt":{"type":"string"},"remainingMs":{"type":"number","minimum":0},"plannedSummary":{"type":"object","additionalProperties":true,"required":["solves","drillsCompleted"],"properties":{"solves":{"type":"integer","minimum":0},"drillsCompleted":{"type":"integer","minimum":0}}}}},"leaderboardRepoUrl":{"type":"string"},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"hasCompletedOnboarding":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
+const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://dorso.dev/schemas/dashboard-state.schema.json","title":"Dorso Dashboard State","type":"object","additionalProperties":true,"required":["installId","hasActiveSession","session","currentChallenge","solveReceipt","enabledTargetIds","enabledSources","perTargetRules","cliStatusExportEnabled","cliStatusExportPath","cliStatusLastExportedAt","cliStatusExportError","aiFast","leaderboardRepoUrl","sessionDurationMinutes","emergencyBypassesPerWeek","bypassesThisWeek","emergencyBypassesRemaining","bypassWeekStart","currentRun","longestRun","graceDaysRemaining","isPaused","hasCompletedOnboarding","supportedTargets","supportedSources","aocPermissionGranted","aocAnswerHashes","aocAnswerHashCount","uiMessage","messageFailureCount","leetcodeDetectionWarning"],"properties":{"installId":{"type":["string","null"]},"hasActiveSession":{"type":"boolean"},"session":{"type":"object","additionalProperties":true,"required":["isActive","timeRemaining"],"properties":{"isActive":{"type":"boolean"},"timeRemaining":{"type":"number","minimum":0},"lastSolvedTime":{"type":"string"},"expiresAt":{"type":"string"}}},"currentChallenge":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["source","slug","title","url","difficulty"],"properties":{"source":{"type":"string"},"source_label":{"type":"string"},"challenge_id":{"type":"string"},"slug":{"type":"string"},"title":{"type":"string"},"url":{"type":"string"},"difficulty":{"type":["string","number"]},"topic_tags":{"type":"array","items":{"type":"string"}},"guidance":{"type":"string"},"selection_mode":{"type":"string"},"supports_verification":{"type":"boolean"}}}]},"solveReceipt":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":true,"required":["problemTitle","sourceLabel","timeToSolveMs","solvedAt","currentRun"],"properties":{"problemTitle":{"type":"string"},"sourceLabel":{"type":"string"},"timeToSolveMs":{"type":"number","minimum":0},"solvedAt":{"type":"string"},"currentRun":{"type":"integer","minimum":0}}}]},"enabledTargetIds":{"type":"array","items":{"type":"string"}},"enabledSources":{"type":"array","items":{"type":"string"}},"perTargetRules":{"type":"object","additionalProperties":{"type":"object","additionalProperties":true,"required":["schedule","difficultyOverride","sourcesOverride"],"properties":{"schedule":{"enum":["always","weekdays","weekends","custom"]},"customCron":{"type":"string"},"difficultyOverride":{"enum":["default","easy","medium","hard"]},"sourcesOverride":{"type":"array","items":{"type":"string"}}}}},"cliStatusExportEnabled":{"type":"boolean"},"cliStatusExportPath":{"type":"string"},"cliStatusLastExportedAt":{"type":["string","null"]},"cliStatusExportError":{"type":"string"},"aiFast":{"type":"object","additionalProperties":true,"required":["active","durationHours","startedAt","endsAt","remainingMs","plannedSummary"],"properties":{"active":{"type":"boolean"},"durationHours":{"type":"integer","enum":[24,168,720]},"startedAt":{"type":"string"},"endsAt":{"type":"string"},"remainingMs":{"type":"number","minimum":0},"plannedSummary":{"type":"object","additionalProperties":true,"required":["solves","drillsCompleted"],"properties":{"solves":{"type":"integer","minimum":0},"drillsCompleted":{"type":"integer","minimum":0}}}}},"leaderboardRepoUrl":{"type":"string"},"sessionDurationMinutes":{"type":"number","minimum":1},"emergencyBypassesPerWeek":{"type":"integer","minimum":0,"maximum":7},"bypassesThisWeek":{"type":"integer","minimum":0},"emergencyBypassesRemaining":{"type":"integer","minimum":0},"bypassWeekStart":{"type":"number"},"currentRun":{"type":"integer","minimum":0},"longestRun":{"type":"integer","minimum":0},"graceDaysRemaining":{"type":"integer","minimum":0},"isPaused":{"type":"boolean"},"hasCompletedOnboarding":{"type":"boolean"},"supportedTargets":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","matches"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"hostnames":{"type":"array","items":{"type":"string"}},"pathPrefixes":{"type":"array","items":{"type":"string"}},"matches":{"type":"array","items":{"type":"string"}}}}},"supportedSources":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["id","label","isAvailable"],"properties":{"id":{"type":"string"},"label":{"type":"string"},"isAvailable":{"type":"boolean"}}}},"aocPermissionGranted":{"type":"boolean"},"aocAnswerHashes":{"type":"object","additionalProperties":{"type":"string","pattern":"^[a-f0-9]{64}$"},"propertyNames":{"pattern":"^aoc-[0-9]{4}-[0-9]{2}-part-[12]$"}},"aocAnswerHashCount":{"type":"integer","minimum":0},"uiMessage":{"type":"string"},"messageFailureCount":{"type":"number","minimum":0},"leetcodeDetectionWarning":{"type":"string"}}};
+const pattern4 = new RegExp("^aoc-[0-9]{4}-[0-9]{2}-part-[12]$", "u");
+const pattern5 = new RegExp("^[a-f0-9]{64}$", "u");
 
 function validate20(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
 /*# sourceURL="https://dorso.dev/schemas/dashboard-state.schema.json" */;
@@ -17,7 +19,7 @@ evaluated0.items = undefined;
 if(errors === 0){
 if(data && typeof data == "object" && !Array.isArray(data)){
 let missing0;
-if((((((((((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.perTargetRules === undefined) && (missing0 = "perTargetRules"))) || ((data.cliStatusExportEnabled === undefined) && (missing0 = "cliStatusExportEnabled"))) || ((data.cliStatusExportPath === undefined) && (missing0 = "cliStatusExportPath"))) || ((data.cliStatusLastExportedAt === undefined) && (missing0 = "cliStatusLastExportedAt"))) || ((data.cliStatusExportError === undefined) && (missing0 = "cliStatusExportError"))) || ((data.aiFast === undefined) && (missing0 = "aiFast"))) || ((data.leaderboardRepoUrl === undefined) && (missing0 = "leaderboardRepoUrl"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.hasCompletedOnboarding === undefined) && (missing0 = "hasCompletedOnboarding"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
+if(((((((((((((((((((((((((((((((((data.installId === undefined) && (missing0 = "installId")) || ((data.hasActiveSession === undefined) && (missing0 = "hasActiveSession"))) || ((data.session === undefined) && (missing0 = "session"))) || ((data.currentChallenge === undefined) && (missing0 = "currentChallenge"))) || ((data.solveReceipt === undefined) && (missing0 = "solveReceipt"))) || ((data.enabledTargetIds === undefined) && (missing0 = "enabledTargetIds"))) || ((data.enabledSources === undefined) && (missing0 = "enabledSources"))) || ((data.perTargetRules === undefined) && (missing0 = "perTargetRules"))) || ((data.cliStatusExportEnabled === undefined) && (missing0 = "cliStatusExportEnabled"))) || ((data.cliStatusExportPath === undefined) && (missing0 = "cliStatusExportPath"))) || ((data.cliStatusLastExportedAt === undefined) && (missing0 = "cliStatusLastExportedAt"))) || ((data.cliStatusExportError === undefined) && (missing0 = "cliStatusExportError"))) || ((data.aiFast === undefined) && (missing0 = "aiFast"))) || ((data.leaderboardRepoUrl === undefined) && (missing0 = "leaderboardRepoUrl"))) || ((data.sessionDurationMinutes === undefined) && (missing0 = "sessionDurationMinutes"))) || ((data.emergencyBypassesPerWeek === undefined) && (missing0 = "emergencyBypassesPerWeek"))) || ((data.bypassesThisWeek === undefined) && (missing0 = "bypassesThisWeek"))) || ((data.emergencyBypassesRemaining === undefined) && (missing0 = "emergencyBypassesRemaining"))) || ((data.bypassWeekStart === undefined) && (missing0 = "bypassWeekStart"))) || ((data.currentRun === undefined) && (missing0 = "currentRun"))) || ((data.longestRun === undefined) && (missing0 = "longestRun"))) || ((data.graceDaysRemaining === undefined) && (missing0 = "graceDaysRemaining"))) || ((data.isPaused === undefined) && (missing0 = "isPaused"))) || ((data.hasCompletedOnboarding === undefined) && (missing0 = "hasCompletedOnboarding"))) || ((data.supportedTargets === undefined) && (missing0 = "supportedTargets"))) || ((data.supportedSources === undefined) && (missing0 = "supportedSources"))) || ((data.aocPermissionGranted === undefined) && (missing0 = "aocPermissionGranted"))) || ((data.aocAnswerHashes === undefined) && (missing0 = "aocAnswerHashes"))) || ((data.aocAnswerHashCount === undefined) && (missing0 = "aocAnswerHashCount"))) || ((data.uiMessage === undefined) && (missing0 = "uiMessage"))) || ((data.messageFailureCount === undefined) && (missing0 = "messageFailureCount"))) || ((data.leetcodeDetectionWarning === undefined) && (missing0 = "leetcodeDetectionWarning"))){
 validate20.errors = [{instancePath,schemaPath:"#/required",keyword:"required",params:{missingProperty: missing0},message:"must have required property '"+missing0+"'"}];
 return false;
 }
@@ -1491,10 +1493,10 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.uiMessage !== undefined){
+if(data.aocPermissionGranted !== undefined){
 const _errs169 = errors;
-if(typeof data.uiMessage !== "string"){
-validate20.errors = [{instancePath:instancePath+"/uiMessage",schemaPath:"#/properties/uiMessage/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+if(typeof data.aocPermissionGranted !== "boolean"){
+validate20.errors = [{instancePath:instancePath+"/aocPermissionGranted",schemaPath:"#/properties/aocPermissionGranted/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"}];
 return false;
 }
 var valid0 = _errs169 === errors;
@@ -1503,18 +1505,65 @@ else {
 var valid0 = true;
 }
 if(valid0){
-if(data.messageFailureCount !== undefined){
-let data77 = data.messageFailureCount;
+if(data.aocAnswerHashes !== undefined){
+let data77 = data.aocAnswerHashes;
 const _errs171 = errors;
 if(errors === _errs171){
-if(typeof data77 == "number"){
-if(data77 < 0 || isNaN(data77)){
-validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+if(data77 && typeof data77 == "object" && !Array.isArray(data77)){
+for(const key1 in data77){
+const _errs173 = errors;
+if(typeof key1 === "string"){
+if(!pattern4.test(key1)){
+const err27 = {instancePath:instancePath+"/aocAnswerHashes",schemaPath:"#/properties/aocAnswerHashes/propertyNames/pattern",keyword:"pattern",params:{pattern: "^aoc-[0-9]{4}-[0-9]{2}-part-[12]$"},message:"must match pattern \""+"^aoc-[0-9]{4}-[0-9]{2}-part-[12]$"+"\"",propertyName:key1};
+if(vErrors === null){
+vErrors = [err27];
+}
+else {
+vErrors.push(err27);
+}
+errors++;
+}
+}
+var valid21 = _errs173 === errors;
+if(!valid21){
+const err28 = {instancePath:instancePath+"/aocAnswerHashes",schemaPath:"#/properties/aocAnswerHashes/propertyNames",keyword:"propertyNames",params:{propertyName: key1},message:"property name must be valid"};
+if(vErrors === null){
+vErrors = [err28];
+}
+else {
+vErrors.push(err28);
+}
+errors++;
+validate20.errors = vErrors;
+return false;
+break;
+}
+}
+if(valid21){
+for(const key2 in data77){
+let data78 = data77[key2];
+const _errs175 = errors;
+if(errors === _errs175){
+if(typeof data78 === "string"){
+if(!pattern5.test(data78)){
+validate20.errors = [{instancePath:instancePath+"/aocAnswerHashes/" + key2.replace(/~/g, "~0").replace(/\//g, "~1"),schemaPath:"#/properties/aocAnswerHashes/additionalProperties/pattern",keyword:"pattern",params:{pattern: "^[a-f0-9]{64}$"},message:"must match pattern \""+"^[a-f0-9]{64}$"+"\""}];
 return false;
 }
 }
 else {
-validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/type",keyword:"type",params:{type: "number"},message:"must be number"}];
+validate20.errors = [{instancePath:instancePath+"/aocAnswerHashes/" + key2.replace(/~/g, "~0").replace(/\//g, "~1"),schemaPath:"#/properties/aocAnswerHashes/additionalProperties/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+return false;
+}
+}
+var valid22 = _errs175 === errors;
+if(!valid22){
+break;
+}
+}
+}
+}
+else {
+validate20.errors = [{instancePath:instancePath+"/aocAnswerHashes",schemaPath:"#/properties/aocAnswerHashes/type",keyword:"type",params:{type: "object"},message:"must be object"}];
 return false;
 }
 }
@@ -1524,16 +1573,73 @@ else {
 var valid0 = true;
 }
 if(valid0){
+if(data.aocAnswerHashCount !== undefined){
+let data79 = data.aocAnswerHashCount;
+const _errs177 = errors;
+if(!((typeof data79 == "number") && (!(data79 % 1) && !isNaN(data79)))){
+validate20.errors = [{instancePath:instancePath+"/aocAnswerHashCount",schemaPath:"#/properties/aocAnswerHashCount/type",keyword:"type",params:{type: "integer"},message:"must be integer"}];
+return false;
+}
+if(errors === _errs177){
+if(typeof data79 == "number"){
+if(data79 < 0 || isNaN(data79)){
+validate20.errors = [{instancePath:instancePath+"/aocAnswerHashCount",schemaPath:"#/properties/aocAnswerHashCount/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+return false;
+}
+}
+}
+var valid0 = _errs177 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
+if(data.uiMessage !== undefined){
+const _errs179 = errors;
+if(typeof data.uiMessage !== "string"){
+validate20.errors = [{instancePath:instancePath+"/uiMessage",schemaPath:"#/properties/uiMessage/type",keyword:"type",params:{type: "string"},message:"must be string"}];
+return false;
+}
+var valid0 = _errs179 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
+if(data.messageFailureCount !== undefined){
+let data81 = data.messageFailureCount;
+const _errs181 = errors;
+if(errors === _errs181){
+if(typeof data81 == "number"){
+if(data81 < 0 || isNaN(data81)){
+validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"}];
+return false;
+}
+}
+else {
+validate20.errors = [{instancePath:instancePath+"/messageFailureCount",schemaPath:"#/properties/messageFailureCount/type",keyword:"type",params:{type: "number"},message:"must be number"}];
+return false;
+}
+}
+var valid0 = _errs181 === errors;
+}
+else {
+var valid0 = true;
+}
+if(valid0){
 if(data.leetcodeDetectionWarning !== undefined){
-const _errs173 = errors;
+const _errs183 = errors;
 if(typeof data.leetcodeDetectionWarning !== "string"){
 validate20.errors = [{instancePath:instancePath+"/leetcodeDetectionWarning",schemaPath:"#/properties/leetcodeDetectionWarning/type",keyword:"type",params:{type: "string"},message:"must be string"}];
 return false;
 }
-var valid0 = _errs173 === errors;
+var valid0 = _errs183 === errors;
 }
 else {
 var valid0 = true;
+}
+}
+}
 }
 }
 }
