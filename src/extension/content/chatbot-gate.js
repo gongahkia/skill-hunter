@@ -315,11 +315,15 @@
                 font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                 padding: 28px;
                 box-sizing: border-box;
-                overflow-y: auto;
+                height: 100vh;
+                height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: scroll;
+                overscroll-behavior: contain;
             }
             .dorso-panel {
                 width: min(720px, 100%);
-                margin: 0 auto;
+                margin: 0 auto 28px;
                 background: rgba(255, 255, 255, 0.9);
                 border: 1px solid rgba(229, 231, 235, 0.92);
                 border-radius: 14px;
@@ -327,16 +331,6 @@
                 padding: 24px;
                 box-sizing: border-box;
                 backdrop-filter: blur(14px);
-            }
-            @media (min-height: 760px) {
-                .dorso-backdrop {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .dorso-panel {
-                    margin: 0;
-                }
             }
             .dorso-kicker {
                 margin: 0 0 8px;
