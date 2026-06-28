@@ -29,6 +29,7 @@ Optional CLI export writes a local JSON status file under the browser Downloads 
 ## Tech Stack
 
 - JavaScript ES modules
+- esbuild extension bundling
 - Chrome and Firefox WebExtension APIs
 - Optional `@dorso/cli` Node companion
 - Local `chrome.storage.local` state

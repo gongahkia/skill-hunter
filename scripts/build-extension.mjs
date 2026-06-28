@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { build as esbuild } from 'esbuild';
 import {
     CHATBOT_MATCH_PATTERNS,
     CHATBOT_TARGETS,
@@ -15,6 +16,7 @@ const manifestVersion = packageJson.version.split('-')[0];
 const extensionRoot = path.join(repoRoot, 'src', 'extension');
 const sharedRoot = path.join(repoRoot, 'src', 'shared');
 const distRoot = path.join(repoRoot, 'dist');
+const isDevBuild = process.env.DORSO_BUILD_DEV === '1';
 const leetCodePattern = 'https://leetcode.com/problems/*';
 const iconPath = 'extension/assets/icons/icon-128.png';
 const firefoxAddonId = 'dorso-public-firefox@extensions.gongahkia.com';
@@ -34,24 +36,28 @@ const browserConfigs = {
         outputDir: path.join(distRoot, 'safari'),
     },
 };
-
-const sharedFilter = (sourcePath) => {
-    return ![
-        '__tests__',
-        'api',
-        '.eslintrc.json',
-        '.prettierrc.json',
-        'jest.config.js',
-        'package.json',
-        'package-lock.json',
-        'node_modules',
-        'adapters',
-        'question-manager.js',
-        'session-manager.js',
-        'logger.js',
-        'validator.js',
-    ].some((needle) => sourcePath.includes(needle));
-};
+const bundleEntries = [
+    {
+        entry: path.join(extensionRoot, 'background', 'index.js'),
+        outfile: path.join('extension', 'background', 'index.js'),
+        format: 'esm',
+    },
+    {
+        entry: path.join(extensionRoot, 'content', 'chatbot-gate.js'),
+        outfile: path.join('extension', 'content', 'chatbot-gate.js'),
+        format: 'iife',
+    },
+    {
+        entry: path.join(extensionRoot, 'content', 'leetcode.js'),
+        outfile: path.join('extension', 'content', 'leetcode.js'),
+        format: 'iife',
+    },
+    {
+        entry: path.join(extensionRoot, 'ui', 'popup.js'),
+        outfile: path.join('extension', 'ui', 'popup.js'),
+        format: 'esm',
+    },
+];
 
 function getHostPermissions() {
     const permissions = CHATBOT_TARGETS.flatMap((target) => {
@@ -146,6 +152,34 @@ async function exists(targetPath) {
   }
 }
 
+async function bundleExtensionJs(outputDir) {
+    await Promise.all(bundleEntries.map((entry) => {
+        return esbuild({
+            entryPoints: [entry.entry],
+            outfile: path.join(outputDir, entry.outfile),
+            bundle: true,
+            format: entry.format,
+            platform: 'browser',
+            target: ['chrome120', 'firefox120', 'safari17'],
+            minify: !isDevBuild,
+            sourcemap: isDevBuild ? 'external' : false,
+            legalComments: 'none',
+            treeShaking: true,
+        });
+    }));
+}
+
+async function pruneBundledSources(outputDir) {
+    const outputLibDir = path.join(outputDir, 'extension', 'lib');
+    await rm(outputLibDir, { recursive: true, force: true });
+    await mkdir(outputLibDir, { recursive: true });
+    await cp(
+        path.join(extensionRoot, 'lib', 'messaging.js'),
+        path.join(outputLibDir, 'messaging.js'),
+    );
+    await rm(path.join(outputDir, 'extension', 'ui', 'share-text.js'), { force: true });
+}
+
 async function buildBrowser(browser) {
     const config = browserConfigs[browser];
 
@@ -163,12 +197,9 @@ async function buildBrowser(browser) {
 
     await rm(config.outputDir, { recursive: true, force: true });
     await mkdir(path.join(config.outputDir, 'extension'), { recursive: true });
-    await mkdir(path.join(config.outputDir, 'shared'), { recursive: true });
     await cp(extensionRoot, path.join(config.outputDir, 'extension'), { recursive: true });
-    await cp(sharedRoot, path.join(config.outputDir, 'shared'), {
-        recursive: true,
-        filter: sharedFilter,
-    });
+    await bundleExtensionJs(config.outputDir);
+    await pruneBundledSources(config.outputDir);
     if (await exists(path.join(sharedRoot, 'data'))) {
         await cp(path.join(sharedRoot, 'data'), path.join(config.outputDir, 'data'), {
             recursive: true,

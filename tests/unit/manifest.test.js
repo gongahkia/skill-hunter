@@ -31,6 +31,13 @@ function readManifest(browser) {
     return JSON.parse(fs.readFileSync(new URL(`../../dist/${browser}/manifest.json`, import.meta.url), 'utf8'));
 }
 
+function listFiles(dir) {
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const childPath = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dir);
+        return entry.isDirectory() ? listFiles(childPath) : [childPath.pathname];
+    });
+}
+
 test('generated extension manifests have the expected review shape', async (t) => {
     execFileSync(process.execPath, ['scripts/build-extension.mjs', 'all'], {
         cwd: new URL('../..', import.meta.url),
@@ -52,6 +59,8 @@ test('generated extension manifests have the expected review shape', async (t) =
             assert.deepEqual(manifest.host_permissions, expectedHostPermissions);
             assert.equal(manifest.content_scripts[0].js[0], 'extension/lib/messaging.js');
             assert.equal(manifest.content_scripts[1].js[0], 'extension/lib/messaging.js');
+            assert.equal(fs.existsSync(new URL(`../../dist/${browser}/shared/`, import.meta.url)), false);
+            assert.equal(listFiles(new URL(`../../dist/${browser}/`, import.meta.url)).some((file) => file.endsWith('.map')), false);
 
             assert.deepEqual(manifest.content_security_policy, {
                 extension_pages: "script-src 'self'; object-src 'self'",
