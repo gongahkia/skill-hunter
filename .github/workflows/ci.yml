@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  webext:
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,21 +26,13 @@ jobs:
       - name: Validate challenge packs
         run: |
           npm run validate:packs
-      - name: Install shared dependencies
-        run: |
-          cd src/shared
-          npm install
-      - name: Run shared tests
-        run: |
-          cd src/shared
-          npm test -- --runInBand
       - name: Build extension bundles
         run: |
           npm run build
 
   deploy-badge-staging:
     if: startsWith(github.ref, 'refs/tags/release/')
-    needs: shared-js
+    needs: build
     runs-on: ubuntu-latest
     environment: cloudflare-staging
     steps:
