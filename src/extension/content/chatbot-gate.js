@@ -285,6 +285,11 @@
             return;
         }
 
+        if (!challenge) {
+            destroyOverlay();
+            return;
+        }
+
         clearSessionExpiryTimer();
         injectBaseStyles();
         setDocumentLocked(true);
@@ -305,62 +310,78 @@
                 position: fixed;
                 inset: 0;
                 z-index: 2147483647;
-                background:
-                    radial-gradient(circle at top right, rgba(209, 119, 60, 0.18), transparent 28%),
-                    radial-gradient(circle at bottom left, rgba(115, 62, 28, 0.12), transparent 32%),
-                    linear-gradient(160deg, #f8f4ec 0%, #efe3d4 100%);
-                color: #191411;
-                font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+                background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+                color: #030712;
+                font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                 padding: 28px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                box-sizing: border-box;
+                overflow-y: auto;
             }
             .dorso-panel {
                 width: min(720px, 100%);
-                background: rgba(255, 251, 243, 0.96);
-                border: 1px solid rgba(25, 20, 17, 0.12);
-                border-radius: 24px;
-                box-shadow: 0 16px 40px rgba(54, 34, 20, 0.18);
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(229, 231, 235, 0.92);
+                border-radius: 14px;
+                box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
                 padding: 24px;
+                box-sizing: border-box;
+                backdrop-filter: blur(14px);
+            }
+            @media (min-height: 760px) {
+                .dorso-backdrop {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .dorso-panel {
+                    margin: 0;
+                }
             }
             .dorso-kicker {
                 margin: 0 0 8px;
-                font-size: 0.72rem;
-                letter-spacing: 0.18em;
-                text-transform: uppercase;
-                color: #9a4516;
+                font-size: 12px;
+                font-weight: 500;
+                line-height: 16px;
+                letter-spacing: 0;
+                color: #2563eb;
             }
             .dorso-title {
                 margin: 0;
-                font-size: 2rem;
-                line-height: 1;
+                font-size: 36px;
+                font-weight: 400;
+                line-height: 43px;
+                letter-spacing: 0;
             }
             .dorso-copy,
             .dorso-meta,
             .dorso-note {
-                color: #66594d;
-                line-height: 1.5;
+                color: #4b5563;
+                font-size: 16px;
+                line-height: 26px;
             }
             .dorso-banner {
                 margin: 16px 0 0;
                 padding: 12px 14px;
-                border-radius: 12px;
-                background: #fff1db;
-                border: 1px solid rgba(161, 68, 25, 0.28);
-                color: #713611;
+                border-radius: 14px;
+                background: #eff6ff;
+                border: 1px solid rgba(37, 99, 235, 0.2);
+                color: #2563eb;
                 line-height: 1.4;
             }
             .dorso-card {
                 margin: 18px 0;
                 padding: 18px;
-                border-radius: 18px;
-                background: #fff8ea;
-                border: 1px solid rgba(25, 20, 17, 0.08);
+                border-radius: 14px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
             }
             .dorso-card h2 {
                 margin: 0 0 10px;
-                font-size: 1.3rem;
+                color: #030712;
+                font-size: 18px;
+                font-weight: 400;
+                line-height: 22px;
             }
             .dorso-intent {
                 display: grid;
@@ -368,17 +389,19 @@
                 margin: 18px 0 0;
             }
             .dorso-intent label {
-                color: #66594d;
+                color: #4b5563;
+                font-size: 14px;
                 line-height: 1.4;
             }
             .dorso-intent textarea,
-            .dorso-intent input {
+            .dorso-intent input:not([type="radio"]) {
                 width: 100%;
+                box-sizing: border-box;
                 border-radius: 14px;
-                border: 1px solid rgba(25, 20, 17, 0.14);
-                background: #fffdf7;
-                padding: 12px;
-                color: #191411;
+                border: 1px solid #e5e7eb;
+                background: #ffffff;
+                padding: 14px 16px;
+                color: #030712;
                 font: inherit;
             }
             .dorso-intent textarea {
@@ -387,7 +410,7 @@
             }
             .dorso-intent-status {
                 min-height: 1.2em;
-                color: #1b7f5f;
+                color: #15803d;
             }
             .dorso-chip-row {
                 display: flex;
@@ -397,10 +420,13 @@
             }
             .dorso-chip {
                 display: inline-flex;
-                padding: 6px 11px;
+                padding: 6px 10px;
                 border-radius: 999px;
-                background: rgba(161, 68, 25, 0.08);
-                font-size: 0.88rem;
+                background: #e5eef9;
+                color: #030712;
+                font-size: 12px;
+                font-weight: 500;
+                line-height: 16px;
             }
             .dorso-actions {
                 display: flex;
@@ -416,24 +442,31 @@
                 justify-content: center;
                 border: 0;
                 border-radius: 999px;
-                padding: 12px 18px;
+                min-height: 44px;
+                padding: 8px 18px;
                 font: inherit;
+                font-size: 16px;
+                font-weight: 500;
+                line-height: 24px;
                 text-decoration: none;
                 cursor: pointer;
             }
             .dorso-button-primary,
             .dorso-link-primary {
-                background: linear-gradient(135deg, #a14419, #cb6f35);
-                color: #fff8f3;
+                background: #070709;
+                color: #ffffff;
             }
             .dorso-button-secondary {
-                background: rgba(25, 20, 17, 0.08);
-                color: #191411;
+                background: #ffffff;
+                color: #030712;
+                border: 1px solid #e5e7eb;
             }
             .dorso-list {
                 margin: 18px 0 0;
                 padding-left: 18px;
-                color: #66594d;
+                color: #4b5563;
+                font-size: 14px;
+                line-height: 22px;
             }
         `;
 
