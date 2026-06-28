@@ -13,6 +13,13 @@ import {
     getDefaultEnabledTargetIds,
 } from '../../shared/core/constants.js';
 import {
+    DEFAULT_AI_FAST_STATE,
+    createAiFastCalendar,
+    createAiFastState,
+    normalizeAiFastState,
+    recordAiFastSolve,
+} from '../../shared/core/ai-fast.js';
+import {
     DEFAULT_CLI_STATUS_EXPORT_PATH,
     createCliStatusSnapshot,
     normalizeCliStatusExportPath,
@@ -234,6 +241,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.CLI_STATUS_EXPORT_PATH,
             STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
             STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
+            STORAGE_KEYS.AI_FAST,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -280,6 +288,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (typeof stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] !== 'string') {
             updates[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] = '';
+        }
+
+        if (!stored[STORAGE_KEYS.AI_FAST] || typeof stored[STORAGE_KEYS.AI_FAST] !== 'object') {
+            updates[STORAGE_KEYS.AI_FAST] = DEFAULT_AI_FAST_STATE;
         }
 
         if (!SESSION_DURATION_MS_OPTIONS.includes(stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF])) {
@@ -383,6 +395,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.CLI_STATUS_EXPORT_PATH,
             STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT,
             STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR,
+            STORAGE_KEYS.AI_FAST,
             STORAGE_KEYS.SESSION_DURATION_MS_PREF,
             STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK,
             STORAGE_KEYS.BYPASS_WEEK_START,
@@ -488,6 +501,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
         });
         const streakState = normalizeStreakState(stored[STORAGE_KEYS.STREAK_STATE]);
+        const aiFast = normalizeAiFastState(stored[STORAGE_KEYS.AI_FAST]);
 
         return {
             installId: stored[STORAGE_KEYS.INSTALL_ID] || null,
@@ -502,12 +516,13 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             cliStatusExportPath: normalizeCliStatusExportPath(stored[STORAGE_KEYS.CLI_STATUS_EXPORT_PATH]),
             cliStatusLastExportedAt: stored[STORAGE_KEYS.CLI_STATUS_LAST_EXPORTED_AT] || null,
             cliStatusExportError: stored[STORAGE_KEYS.CLI_STATUS_EXPORT_ERROR] || '',
+            aiFast,
             sessionDurationMinutes: getSessionDurationMinutes(
                 stored[STORAGE_KEYS.SESSION_DURATION_MS_PREF] || SESSION_DURATION_MINUTES * 60 * 1000,
             ),
             emergencyBypassesPerWeek: emergencyBypassState.limit,
             bypassesThisWeek: emergencyBypassState.used,
-            emergencyBypassesRemaining: emergencyBypassState.remaining,
+            emergencyBypassesRemaining: aiFast.active ? 0 : emergencyBypassState.remaining,
             bypassWeekStart: emergencyBypassState.weekStart,
             currentRun: streakState.currentRun,
             longestRun: streakState.longestRun,
@@ -550,7 +565,13 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         }
 
         if (typeof payload?.isPaused === 'boolean') {
-            updates[STORAGE_KEYS.IS_PAUSED] = payload.isPaused;
+            const aiFast = normalizeAiFastState(await getStorageValue(STORAGE_KEYS.AI_FAST));
+            if (aiFast.active && payload.isPaused) {
+                updates[STORAGE_KEYS.IS_PAUSED] = false;
+                updates[STORAGE_KEYS.UI_MESSAGE] = 'AI fast is active. Pause is unavailable.';
+            } else {
+                updates[STORAGE_KEYS.IS_PAUSED] = payload.isPaused;
+            }
         }
 
         if (typeof payload?.hasCompletedOnboarding === 'boolean') {
@@ -628,6 +649,63 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         }
     }
 
+    async function startAiFast(durationHours) {
+        await ensureInstallState();
+        await setStorageValues({
+            [STORAGE_KEYS.AI_FAST]: createAiFastState(durationHours),
+            [STORAGE_KEYS.IS_PAUSED]: false,
+            [STORAGE_KEYS.UI_MESSAGE]: 'AI fast started. Emergency bypass and pause are unavailable until it ends.',
+        });
+        return {
+            success: true,
+            state: await getDashboardState(),
+        };
+    }
+
+    async function exportAiFastCalendar() {
+        try {
+            await ensureInstallState();
+            const stored = await getStoredState();
+            const aiFast = normalizeAiFastState(stored[STORAGE_KEYS.AI_FAST]);
+            if (!aiFast.startedAt) {
+                return {
+                    success: false,
+                    error: 'No AI fast has been started.',
+                    state: await getDashboardState(),
+                };
+            }
+
+            if (aiFast.active) {
+                return {
+                    success: false,
+                    error: 'AI fast is still active.',
+                    state: await getDashboardState(),
+                };
+            }
+
+            const startedDate = new Date(aiFast.startedAt).toISOString().slice(0, 10);
+            const ics = createAiFastCalendar(aiFast);
+            const downloadId = await downloadUrl({
+                url: `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`,
+                filename: `dorso/ai-fast-${startedDate}.ics`,
+                conflictAction: 'overwrite',
+                saveAs: false,
+            });
+
+            return {
+                success: true,
+                downloadId,
+                state: await getDashboardState(),
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message || 'AI fast calendar export failed.',
+                state: await getDashboardState(),
+            };
+        }
+    }
+
     async function grantAccess(message) {
         const stored = await getStoredState();
         const currentChallenge = stored[STORAGE_KEYS.CURRENT_CHALLENGE];
@@ -673,6 +751,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE]);
         const updates = {
             [STORAGE_KEYS.STREAK_STATE]: streakState,
+            [STORAGE_KEYS.AI_FAST]: recordAiFastSolve(stored[STORAGE_KEYS.AI_FAST], currentChallenge, solvedAt),
             [STORAGE_KEYS.LAST_SOLVE_RECEIPT]: {
                 problemTitle: currentChallenge.title,
                 sourceLabel: currentChallenge.source_label || currentChallenge.source,
@@ -698,6 +777,18 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
     async function useEmergencyBypass() {
         await ensureInstallState();
         const stored = await getStoredState();
+        const aiFast = normalizeAiFastState(stored[STORAGE_KEYS.AI_FAST]);
+        if (aiFast.active) {
+            await setStorageValues({
+                [STORAGE_KEYS.UI_MESSAGE]: 'AI fast is active. Emergency bypass is unavailable.',
+            });
+            return {
+                success: false,
+                error: 'AI_FAST_ACTIVE',
+                state: await getDashboardState(),
+            };
+        }
+
         const emergencyBypassState = getEmergencyBypassState({
             limit: stored[STORAGE_KEYS.EMERGENCY_BYPASSES_PER_WEEK],
             weekStart: stored[STORAGE_KEYS.BYPASS_WEEK_START],
@@ -750,6 +841,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
                     state: await getDashboardState(),
                 };
             }
+            case MESSAGE_ACTIONS.START_AI_FAST:
+                return startAiFast(message.durationHours);
+            case MESSAGE_ACTIONS.EXPORT_AI_FAST_ICS:
+                return exportAiFastCalendar();
             case MESSAGE_ACTIONS.SUBMISSION_RESULT:
                 if (message.source && message.slug) {
                     return grantAccess(message);

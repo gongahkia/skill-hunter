@@ -26,6 +26,17 @@ function validState() {
         cliStatusExportPath: 'dorso/status.json',
         cliStatusLastExportedAt: null,
         cliStatusExportError: '',
+        aiFast: {
+            active: false,
+            durationHours: 24,
+            startedAt: '',
+            endsAt: '',
+            remainingMs: 0,
+            plannedSummary: {
+                solves: 0,
+                drillsCompleted: 0,
+            },
+        },
         sessionDurationMinutes: 15,
         emergencyBypassesPerWeek: 2,
         bypassesThisWeek: 0,

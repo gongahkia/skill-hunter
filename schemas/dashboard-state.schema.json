@@ -17,6 +17,7 @@
     "cliStatusExportPath",
     "cliStatusLastExportedAt",
     "cliStatusExportError",
+    "aiFast",
     "sessionDurationMinutes",
     "emergencyBypassesPerWeek",
     "bypassesThisWeek",
@@ -189,6 +190,45 @@
     },
     "cliStatusExportError": {
       "type": "string"
+    },
+    "aiFast": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["active", "durationHours", "startedAt", "endsAt", "remainingMs", "plannedSummary"],
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "durationHours": {
+          "type": "integer",
+          "enum": [24, 168, 720]
+        },
+        "startedAt": {
+          "type": "string"
+        },
+        "endsAt": {
+          "type": "string"
+        },
+        "remainingMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "plannedSummary": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["solves", "drillsCompleted"],
+          "properties": {
+            "solves": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drillsCompleted": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
     },
     "sessionDurationMinutes": {
       "type": "number",

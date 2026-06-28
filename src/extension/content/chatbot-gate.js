@@ -260,6 +260,16 @@
         return true;
     }
 
+    function isGateActiveForState(state, target, targetRule) {
+        const fastActive = Boolean(state.aiFast?.active);
+        return Boolean(
+            target
+            && state.enabledTargetIds.includes(target.id)
+            && (!state.isPaused || fastActive)
+            && (fastActive || isTargetRuleActive(targetRule))
+        );
+    }
+
     function renderOverlay(state) {
         const target = getCurrentTarget(state);
         const challenge = state.currentChallenge;
@@ -267,10 +277,8 @@
 
         if (
             state.hasActiveSession
-            || state.isPaused
             || !target
-            || !state.enabledTargetIds.includes(target.id)
-            || !isTargetRuleActive(targetRule)
+            || !isGateActiveForState(state, target, targetRule)
         ) {
             scheduleRelock(state);
             destroyOverlay();
@@ -474,7 +482,7 @@
             text: 'Get Another',
         }));
 
-        if (Number(state.emergencyBypassesRemaining) > 0) {
+        if (!state.aiFast?.active && Number(state.emergencyBypassesRemaining) > 0) {
             actionRow.append(createElement('button', {
                 className: 'dorso-button dorso-button-secondary',
                 id: 'dorsoBypassButton',
@@ -482,13 +490,15 @@
             }));
         }
 
-        actionRow.append(
-            createElement('button', {
-                className: 'dorso-button dorso-button-secondary',
-                id: 'dorsoPauseButton',
-                text: 'Pause Dorso',
-            }),
-        );
+        if (!state.aiFast?.active) {
+            actionRow.append(
+                createElement('button', {
+                    className: 'dorso-button dorso-button-secondary',
+                    id: 'dorsoPauseButton',
+                    text: 'Pause Dorso',
+                }),
+            );
+        }
 
         intentTextarea.rows = 3;
         intentForm.append(
@@ -619,6 +629,13 @@
             }));
         }
 
+        if (state.aiFast?.active) {
+            panel.append(createElement('p', {
+                className: 'dorso-banner',
+                text: 'AI fast is active. Emergency bypass and pause are unavailable.',
+            }));
+        }
+
         panel.append(challengeCard, intentForm, actionRow, list);
 
         backdrop.append(panel);
@@ -635,7 +652,7 @@
             await loadState();
         });
 
-        shadowRoot.getElementById('dorsoPauseButton').addEventListener('click', async () => {
+        shadowRoot.getElementById('dorsoPauseButton')?.addEventListener('click', async () => {
             await sendMessage({ action: 'setPaused', isPaused: true });
             await loadState();
         });
@@ -656,10 +673,7 @@
 
         if (
             !latestState.hasActiveSession
-            && !latestState.isPaused
-            && target
-            && latestState.enabledTargetIds.includes(target.id)
-            && isTargetRuleActive(targetRule)
+            && isGateActiveForState(latestState, target, targetRule)
         ) {
             await sendMessage({ action: 'startChallenge', force: false, targetUrl: location.href });
             latestState = (await sendMessage({ action: 'requestState' })).state;

@@ -5,6 +5,7 @@ import {
     STORAGE_KEYS,
 } from '../../shared/core/constants.js';
 import { computeCognitiveIndex } from '../../shared/core/atrophy.js';
+import { AI_FAST_DURATION_HOURS } from '../../shared/core/ai-fast.js';
 import { EMERGENCY_BYPASS_OPTIONS } from '../../shared/core/emergency-bypass.js';
 import {
     DEFAULT_TARGET_RULE,
@@ -42,6 +43,7 @@ const mainPanelIds = [
     'statusPanel',
     'challengePanel',
     'controlPanel',
+    'fastPanel',
     'cliPanel',
     'badgePanel',
     'sourcesPanel',
@@ -369,18 +371,23 @@ function renderStatus(state) {
     }
 
     clearTimers();
+    const fastActive = Boolean(state.aiFast?.active);
     panel.append(
         createElement('span', {
             className: 'status-pill',
-            text: state.isPaused ? 'Paused' : 'Protecting',
+            text: fastActive ? 'AI Fast' : (state.isPaused ? 'Paused' : 'Protecting'),
         }),
         createElement('h2', {
-            text: state.isPaused ? 'Dorso is paused.' : 'Dorso is protecting selected sites.',
+            text: fastActive
+                ? 'AI fast is active.'
+                : (state.isPaused ? 'Dorso is paused.' : 'Dorso is protecting selected sites.'),
         }),
         createElement('p', {
-            text: state.isPaused
-                ? 'Protected chatbot sites are temporarily open until you resume Dorso.'
-                : 'Visit a selected chatbot site and Dorso will require challenge verification before the page becomes usable.',
+            text: fastActive
+                ? 'Selected chatbot sites stay locked behind challenge verification until the fast ends.'
+                : (state.isPaused
+                    ? 'Protected chatbot sites are temporarily open until you resume Dorso.'
+                    : 'Visit a selected chatbot site and Dorso will require challenge verification before the page becomes usable.'),
         }),
         createRunMetrics(state),
     );
@@ -556,6 +563,20 @@ function renderControls(state) {
         }),
     );
 
+    const pauseButton = createButton({
+        label: state.isPaused ? 'Resume Dorso' : 'Pause Dorso',
+        className: 'button-primary',
+        id: 'pauseButton',
+        onClick: async () => {
+            await sendRuntimeMessage({
+                action: MESSAGE_ACTIONS.SET_PAUSED,
+                isPaused: !state.isPaused,
+            });
+            await loadState();
+        },
+    });
+    pauseButton.disabled = Boolean(state.aiFast?.active);
+
     panel.append(
         createSectionHead(
             'Controls',
@@ -563,18 +584,7 @@ function renderControls(state) {
         ),
         createElement('div', { className: 'field-grid' }),
         createButtonRow([
-            createButton({
-                label: state.isPaused ? 'Resume Dorso' : 'Pause Dorso',
-                className: 'button-primary',
-                id: 'pauseButton',
-                onClick: async () => {
-                    await sendRuntimeMessage({
-                        action: MESSAGE_ACTIONS.SET_PAUSED,
-                        isPaused: !state.isPaused,
-                    });
-                    await loadState();
-                },
-            }),
+            pauseButton,
             createButton({
                 label: 'Clear Message',
                 className: 'button-secondary',
@@ -587,6 +597,81 @@ function renderControls(state) {
         ]),
     );
     panel.querySelector('.field-grid').append(durationLabel, bypassLabel, healthLabel);
+
+    if (state.aiFast?.active) {
+        panel.append(createElement('p', {
+            className: 'small',
+            text: 'AI fast is active. Pause and emergency bypass are unavailable.',
+        }));
+    }
+}
+
+function renderAiFast(state) {
+    const panel = document.getElementById('fastPanel');
+    resetPanel(panel);
+
+    const aiFast = state.aiFast || {};
+    const durationSelect = createElement('select');
+    AI_FAST_DURATION_HOURS.forEach((hours) => {
+        const option = createElement('option', { text: hours === 24 ? '24h' : `${Math.round(hours / 24)}d` });
+        option.value = String(hours);
+        durationSelect.append(option);
+    });
+    durationSelect.value = String(aiFast.durationHours || 24);
+
+    const durationLabel = createElement('label', { className: 'field-label' });
+    durationLabel.append(createElement('span', { text: 'Duration' }), durationSelect);
+    const summary = aiFast.plannedSummary || { solves: 0, drillsCompleted: 0 };
+    const details = createElement('div', { className: 'list' });
+    details.append(
+        createElement('div', {
+            className: 'list-item',
+            text: aiFast.active
+                ? `Ends ${new Date(aiFast.endsAt).toLocaleString()} (${formatDuration(aiFast.remainingMs)} remaining)`
+                : (aiFast.startedAt ? `Last fast ended ${new Date(aiFast.endsAt).toLocaleString()}` : 'No AI fast recorded.'),
+        }),
+        createElement('div', {
+            className: 'list-item',
+            text: `Solves ${summary.solves || 0} | Drills ${summary.drillsCompleted || 0}`,
+        }),
+    );
+
+    const buttons = [];
+    if (!aiFast.active) {
+        buttons.push(createButton({
+            label: 'Start AI Fast',
+            className: 'button-primary',
+            onClick: async () => {
+                await sendRuntimeMessage({
+                    action: MESSAGE_ACTIONS.START_AI_FAST,
+                    durationHours: Number(durationSelect.value),
+                });
+                await loadState();
+            },
+        }));
+    }
+
+    if (aiFast.startedAt && !aiFast.active) {
+        buttons.push(createButton({
+            label: 'Export ICS',
+            className: 'button-secondary',
+            onClick: async () => {
+                const result = await sendRuntimeMessage({ action: MESSAGE_ACTIONS.EXPORT_AI_FAST_ICS });
+                setMessage(result.success ? 'AI fast calendar exported.' : result.error, Boolean(result.success));
+                await loadState();
+            },
+        }));
+    }
+
+    panel.append(
+        createSectionHead(
+            'AI Fast',
+            aiFast.active ? 'Emergency bypass and pause are locked until the fast ends.' : 'Start a 24h, 7d, or 30d AI fast.',
+        ),
+        durationLabel,
+        details,
+        createButtonRow(buttons),
+    );
 }
 
 function renderCliExport(state) {
@@ -949,7 +1034,7 @@ function renderCorruptedStateFallback() {
     const onboardingPanel = document.getElementById('onboardingPanel');
     resetPanel(onboardingPanel);
     onboardingPanel.hidden = true;
-    ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'cliPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
+    ['statusPanel', 'challengePanel', 'sharePanel', 'controlPanel', 'fastPanel', 'cliPanel', 'badgePanel', 'disclosurePanel'].forEach((panelId) => {
         resetPanel(document.getElementById(panelId));
     });
     document.getElementById('sharePanel').hidden = true;
@@ -1160,6 +1245,7 @@ async function loadState() {
     renderChallenge(latestState);
     renderSolveReceipt(latestState);
     renderControls(latestState);
+    renderAiFast(latestState);
     renderCliExport(latestState);
     await renderBadge(latestState);
     renderSources(latestState);
