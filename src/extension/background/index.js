@@ -33,6 +33,10 @@ import {
     normalizePerTargetRules,
 } from '../../shared/core/target-rules.js';
 import {
+    getChallengeFromEnabledProviders,
+    recordRecentChallenge,
+} from '../../shared/core/challenge-rotation.js';
+import {
     createStreakState,
     normalizeStreakState,
     recordSolve,
@@ -485,8 +489,9 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
         }
 
         const recentSlugs = normalizeRecentChallengeSlugs(stored[STORAGE_KEYS.RECENT_CHALLENGE_SLUGS]);
-        const provider = providers[challengeProfile.enabledSources[Math.floor(Math.random() * challengeProfile.enabledSources.length)]];
-        const challenge = await provider.getChallenge({
+        const challenge = await getChallengeFromEnabledProviders({
+            providers,
+            enabledSources: challengeProfile.enabledSources,
             recentSlugs,
             difficulty: challengeProfile.difficulty,
         });
@@ -495,16 +500,9 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             targetOrigin: challengeProfile.targetOrigin,
             ruleSignature: challengeProfile.ruleSignature,
         };
-        const nextRecentSlugs = [
-            {
-                source: storedChallenge.source,
-                slug: storedChallenge.slug,
-                timestamp: Date.now(),
-            },
-            ...recentSlugs.filter((entry) => {
-                return entry.source !== storedChallenge.source || entry.slug !== storedChallenge.slug;
-            }),
-        ].slice(0, RECENT_CHALLENGE_WINDOW);
+        const nextRecentSlugs = recordRecentChallenge(recentSlugs, storedChallenge, {
+            windowSize: RECENT_CHALLENGE_WINDOW,
+        });
 
         await setStorageValues({
             [STORAGE_KEYS.CURRENT_CHALLENGE]: storedChallenge,

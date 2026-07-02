@@ -114,11 +114,11 @@ export const SOURCE_LABELS = {
 };
 
 export const CHALLENGE_SOURCES = [
-    { id: 'mcq', label: SOURCE_LABELS.mcq },
-    { id: 'drills', label: SOURCE_LABELS.drills },
-    { id: 'leetcode', label: SOURCE_LABELS.leetcode },
-    { id: 'aoc', label: SOURCE_LABELS.aoc },
-    { id: 'euler', label: SOURCE_LABELS.euler },
+    { id: 'mcq', label: SOURCE_LABELS.mcq, tags: ['fundamentals', 'offline'], difficulties: ['easy', 'medium', 'hard'], enabledByDefault: true },
+    { id: 'drills', label: SOURCE_LABELS.drills, tags: ['type-from-memory', 'offline'], difficulties: ['easy', 'medium', 'hard'], enabledByDefault: true },
+    { id: 'leetcode', label: SOURCE_LABELS.leetcode, tags: ['algorithms', 'link-out'], difficulties: ['easy', 'medium', 'hard'], enabledByDefault: false },
+    { id: 'aoc', label: SOURCE_LABELS.aoc, tags: ['advent-of-code', 'link-out'], difficulties: ['easy', 'medium', 'hard'], enabledByDefault: false },
+    { id: 'euler', label: SOURCE_LABELS.euler, tags: ['project-euler', 'link-out'], difficulties: ['easy', 'medium', 'hard'], enabledByDefault: false },
 ];
 
 export const DEFAULT_ENABLED_SOURCES = ['mcq', 'drills'];
