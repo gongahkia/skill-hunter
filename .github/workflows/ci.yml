@@ -56,6 +56,44 @@ jobs:
         env:
           CF_HMAC_SECRET: ${{ secrets.CF_HMAC_SECRET }}
 
+  sign-firefox-amo:
+    if: startsWith(github.ref, 'refs/tags/release/')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install root dependencies
+        run: |
+          npm ci
+      - name: Build Firefox package and source archive
+        run: |
+          npm run package:release
+      - name: Sign Firefox build on AMO
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+        run: |
+          mkdir -p dist/amo
+          SOURCE_ZIP="dist/artifacts/dorso-$(node -p "require('./package.json').version")-source.zip"
+          npx web-ext sign \
+            --source-dir dist/firefox \
+            --artifacts-dir dist/amo \
+            --channel listed \
+            --api-key "$WEB_EXT_API_KEY" \
+            --api-secret "$WEB_EXT_API_SECRET" \
+            --upload-source-code "$SOURCE_ZIP" \
+            --approval-timeout 900000
+      - name: Upload signed Firefox XPI
+        uses: actions/upload-artifact@v4
+        with:
+          name: dorso-firefox-signed-xpi
+          path: dist/amo/*.xpi
+          if-no-files-found: error
+
   deploy-badge-production:
     if: startsWith(github.ref, 'refs/tags/release/')
     needs: deploy-badge-staging

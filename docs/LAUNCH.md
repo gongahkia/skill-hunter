@@ -88,6 +88,7 @@ Description:
 Reviewer notes:
 
 - Build with `npm ci && npm run package:release`.
+- Release tags run `web-ext sign --channel=listed` with `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET`.
 - Review package: `dist/artifacts/dorso-<version>-firefox.zip`.
 - Source package: `dist/artifacts/dorso-<version>-source.zip`.
 - Source entry points: `src/extension/`, `src/shared/`, `schemas/`, and `scripts/build-extension.mjs`.
