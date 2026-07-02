@@ -1781,6 +1781,186 @@
     "source": "dorso-inhouse"
   },
   {
+    "id": "mcq-async-patterns-001",
+    "prompt": "What does an `async` JavaScript function always return to its caller?",
+    "choices": [
+      "A Promise",
+      "A raw callback",
+      "A Web Worker",
+      "A synchronous iterator"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "javascript",
+      "promises"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-002",
+    "prompt": "How should independent async operations usually be awaited when their results are all needed?",
+    "choices": [
+      "Start them first, then await `Promise.all`",
+      "Await each one before starting the next",
+      "Put them in a `while` loop until complete",
+      "Convert them to global variables"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "javascript",
+      "promises"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-003",
+    "prompt": "When is sequential `await` inside a loop appropriate?",
+    "choices": [
+      "When each step depends on the previous step",
+      "Whenever operations are independent",
+      "Only when errors are impossible",
+      "Only inside browser content scripts"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "control-flow",
+      "javascript"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-004",
+    "prompt": "What does `Promise.allSettled` preserve after mixed success and failure?",
+    "choices": [
+      "One result record per input promise",
+      "Only the first fulfilled value",
+      "Only the first rejection reason",
+      "A single boolean"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "javascript",
+      "promises"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-005",
+    "prompt": "What does `Promise.race` settle with?",
+    "choices": [
+      "The first input promise that settles",
+      "The last fulfilled promise only",
+      "All fulfilled values",
+      "All rejection reasons"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "javascript",
+      "promises"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-006",
+    "prompt": "What is `AbortController` commonly used for in async browser code?",
+    "choices": [
+      "Signaling cancellation to supported operations",
+      "Retrying every failed request forever",
+      "Making promises synchronous",
+      "Persisting data in localStorage"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "cancellation",
+      "browser"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-007",
+    "prompt": "Why add backoff between async retries?",
+    "choices": [
+      "To avoid hammering a failing dependency",
+      "To make exceptions disappear",
+      "To force requests to run on the main thread",
+      "To disable timeout handling"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "retries",
+      "backoff"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-008",
+    "prompt": "What is the safest retry target?",
+    "choices": [
+      "An idempotent operation",
+      "A payment charge with no idempotency key",
+      "A random mutation",
+      "A write that cannot be checked"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "retries",
+      "idempotency"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-009",
+    "prompt": "How are rejected promises handled with `await` inside `try`?",
+    "choices": [
+      "They are caught by the matching `catch` block",
+      "They become fulfilled promises",
+      "They are ignored automatically",
+      "They restart the async function"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "errors",
+      "javascript"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-async-patterns-010",
+    "prompt": "What should timeout logic usually do besides reject locally?",
+    "choices": [
+      "Signal cancellation when the underlying operation supports it",
+      "Leave the operation running forever",
+      "Block the event loop",
+      "Disable future errors"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "async",
+      "timeouts",
+      "cancellation"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
     "id": "mcq-os-basics-001",
     "prompt": "What is virtual memory?",
     "choices": [
