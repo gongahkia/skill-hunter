@@ -68,6 +68,7 @@ Challenge-pack contributions are the best first PRs. Keep prompts original, keep
 The name `Rakuzaichi` references the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
 
 - Dorso is named after the [dorsolateral prefrontal cortex](https://en.wikipedia.org/wiki/Dorsolateral_prefrontal_cortex), the brain region associated with executive control and problem solving.
+- Historical v2.x archive: the `v2.x-final` git tag preserves the pre-v3 server-backed implementation.
 - InfoQ: [Anthropic Study: AI Coding Assistance Reduces Developer Skill Mastery by 17%](https://www.infoq.com/news/2026/02/ai-coding-skill-formation/)
 - Anthropic Research: [How AI assistance impacts the formation of coding skills](https://www.anthropic.com/research/AI-assistance-coding-skills)
 - Architecture notes: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
