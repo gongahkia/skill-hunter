@@ -6,6 +6,8 @@ Dorso challenge packs live in `src/shared/data/` and are validated by JSON Schem
 
 - MCQ schema: `schemas/mcq.schema.json`
 - Drill schema: `schemas/drills.schema.json`
+- Advent of Code metadata schema: `schemas/aoc-problems.schema.json`
+- Project Euler answer-hash schema: `schemas/euler-answers.schema.json`
 - Validation: `npm run validate:packs`
 
 Run validation before opening a PR:
@@ -14,6 +16,15 @@ Run validation before opening a PR:
 npm ci
 npm run validate:packs
 ```
+
+Bundled source map:
+
+| Source | Data file | Schema | Contribution type |
+| --- | --- | --- | --- |
+| Fundamentals MCQ | `src/shared/data/mcq.json` | `schemas/mcq.schema.json` | Original multiple-choice questions |
+| Type-from-memory drills | `src/shared/data/drills.json` | `schemas/drills.schema.json` | Original prompts with exact expected answers |
+| Advent of Code | `src/shared/data/aoc-problems.json` | `schemas/aoc-problems.schema.json` | Metadata and links only |
+| Project Euler | `src/shared/data/euler-answers.json` | `schemas/euler-answers.schema.json` | Problem URLs plus SHA-256 answer hashes |
 
 MCQ item shape:
 
@@ -29,6 +40,13 @@ MCQ item shape:
 }
 ```
 
+MCQ expectations:
+
+- `choices` must contain 2 to 6 plausible answers.
+- `answerIndex` is zero-based and must point at the only correct choice.
+- `source` should be `community` for external challenge-pack PRs.
+- Prefer topic tags such as `big-o`, `hash-table`, `async`, `sql`, or `regex`; add one narrower tag when useful.
+
 Drill item shape:
 
 ```json
@@ -43,12 +61,62 @@ Drill item shape:
 }
 ```
 
+Drill expectations:
+
+- `expected` must be the shortest exact answer that should pass.
+- `normalizers` may include `whitespace`, `quotes`, `semicolons`, and `casing`.
+- `threshold` is the maximum tolerated edit distance after normalizers run.
+- Keep prompts small enough to type from memory without opening docs.
+
+Advent of Code metadata item shape:
+
+```json
+{
+  "id": "aoc-2023-01-part-1",
+  "year": 2023,
+  "day": 1,
+  "part": 1,
+  "url": "https://adventofcode.com/2023/day/1",
+  "difficulty": 1,
+  "tags": ["strings", "parsing"]
+}
+```
+
+Project Euler answer-hash item shape:
+
+```json
+{
+  "id": "pe-001",
+  "url": "https://projecteuler.net/problem=1",
+  "answerHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "difficulty": 1,
+  "tags": ["math", "arithmetic"]
+}
+```
+
+Euler expectations:
+
+- `answerHash` is the lowercase SHA-256 hex digest of the canonical answer string.
+- Reviewers should verify the hash locally without posting the raw answer in comments.
+
 Pack rules:
 
 - Keep prompts original. Do not copy proprietary problem text.
 - Keep IDs stable and lowercase kebab-case.
 - Keep tags lowercase kebab-case.
+- Use difficulty `1` for recall, `2` for basic application, `3` for multi-step reasoning, `4` for advanced implementation details, and `5` only for expert-only items.
+- Do not include raw Project Euler answers; include only SHA-256 hashes.
+- Do not copy Advent of Code statements, examples, inputs, or answers; link to the canonical problem page.
 - Add only JSON data for pack PRs unless code changes are required.
+- Keep topic PRs narrow: one source and one topic per PR.
+
+Good first challenge-pack issues should include:
+
+- Topic and count, for example `Add 10 MCQ questions on hash tables`.
+- Target data file and schema.
+- Expected tags and difficulty range.
+- Validation command: `npm run validate:packs`.
+- Any licensing note needed for that source.
 
 ## Local Extension Run
 
