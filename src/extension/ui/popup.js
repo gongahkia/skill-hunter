@@ -21,6 +21,7 @@ import {
     renderDigestMarkdown,
     renderDigestSvg,
 } from '../lib/digest-svg.js';
+import { renderBadgeSvg } from '../lib/badge-svg.js';
 import { renderReceiptSvg } from '../lib/receipt-svg.js';
 import {
     createBadgeEmbeds,
@@ -249,11 +250,19 @@ async function rasterizeSvgToPng(svg) {
 }
 
 async function downloadDigestPng(svg) {
+    await downloadPngFile('dorso-weekly-digest.png', svg);
+}
+
+async function downloadBadgePng(svg) {
+    await downloadPngFile('dorso-cognitive-index.png', svg);
+}
+
+async function downloadPngFile(filename, svg) {
     const blob = await rasterizeSvgToPng(svg);
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'dorso-weekly-digest.png';
+    link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
 }
@@ -313,12 +322,33 @@ function getReceiptSvg(state) {
     return renderReceiptSvg({
         ...(state.solveReceipt || {}),
         currentRun: state.solveReceipt?.currentRun ?? state.currentRun,
-        cognitiveIndex: computeCognitiveIndex({
-            solvesInLast7d: Number(state.currentRun || 0),
-            sourceDiversityRatio: new Set(state.enabledSources || []).size > 1 ? 1 : 0,
-            bypassesThisWeek: Number(state.bypassesThisWeek || 0),
-        }),
+        cognitiveIndex: getCognitiveIndex(state),
     });
+}
+
+function getCognitiveIndex(state) {
+    return computeCognitiveIndex({
+        solvesInLast7d: Number(state.currentRun || 0),
+        currentRun: Number(state.currentRun || 0),
+        averageTimeToSolveMs: Number(state.solveReceipt?.timeToSolveMs),
+        sourceDiversityRatio: new Set(state.enabledSources || []).size > 1 ? 1 : 0,
+        bypassesThisWeek: Number(state.bypassesThisWeek || 0),
+    });
+}
+
+function getBadgeSvg(state) {
+    return renderBadgeSvg({
+        cognitiveIndex: getCognitiveIndex(state),
+        longestRun: state.longestRun ?? state.currentRun,
+    });
+}
+
+function getLocalBadgeMarkdown() {
+    return '![Dorso Cognitive Index](./dorso-cognitive-index.svg)';
+}
+
+function getLocalBadgeHtml() {
+    return '<img src="./dorso-cognitive-index.svg" alt="Dorso Cognitive Index">';
 }
 
 async function copyReceiptImage(state) {
@@ -1162,6 +1192,35 @@ function renderCorruptedStateFallback() {
 async function renderBadge(state) {
     const panel = document.getElementById('badgePanel');
     resetPanel(panel);
+    const localBadgeSvg = getBadgeSvg(state);
+
+    panel.append(
+        createSectionHead(
+            'Local Badge',
+            'Export a serverless Cognitive Index card for README or social use.',
+        ),
+        createSnippetField('README Markdown', getLocalBadgeMarkdown()),
+        createSnippetField('README HTML', getLocalBadgeHtml()),
+        createButtonRow([
+            createButton({
+                label: 'Download SVG',
+                className: 'button-primary',
+                onClick: () => {
+                    downloadTextFile('dorso-cognitive-index.svg', localBadgeSvg, 'image/svg+xml');
+                    setMessage('Badge SVG downloaded.', true);
+                },
+            }),
+            createButton({
+                label: 'Download PNG',
+                className: 'button-secondary',
+                onClick: async () => {
+                    await downloadBadgePng(localBadgeSvg);
+                    setMessage('Badge PNG downloaded.', true);
+                },
+            }),
+        ]),
+    );
+
     const config = globalThis.DorsoBadgeConfig || {};
     const embeds = await createBadgeEmbeds({
         dashboardState: state,
@@ -1170,37 +1229,36 @@ async function renderBadge(state) {
     });
 
     panel.append(createSectionHead(
-        'Badge',
+        'Hosted Embed',
         'Copy a signed Cognitive Index embed for README use.',
     ));
 
     if (!embeds.available) {
         panel.append(createElement('p', { text: embeds.reason }));
-        return;
+    } else {
+        panel.append(
+            createSnippetField('Markdown', embeds.markdown),
+            createSnippetField('HTML', embeds.html),
+            createButtonRow([
+                createButton({
+                    label: 'Copy Markdown',
+                    className: 'button-primary',
+                    onClick: async () => {
+                        await navigator.clipboard.writeText(embeds.markdown);
+                        setMessage('Badge markdown copied.', true);
+                    },
+                }),
+                createButton({
+                    label: 'Copy HTML',
+                    className: 'button-secondary',
+                    onClick: async () => {
+                        await navigator.clipboard.writeText(embeds.html);
+                        setMessage('Badge HTML copied.', true);
+                    },
+                }),
+            ]),
+        );
     }
-
-    panel.append(
-        createSnippetField('Markdown', embeds.markdown),
-        createSnippetField('HTML', embeds.html),
-        createButtonRow([
-            createButton({
-                label: 'Copy Markdown',
-                className: 'button-primary',
-                onClick: async () => {
-                    await navigator.clipboard.writeText(embeds.markdown);
-                    setMessage('Badge markdown copied.', true);
-                },
-            }),
-            createButton({
-                label: 'Copy HTML',
-                className: 'button-secondary',
-                onClick: async () => {
-                    await navigator.clipboard.writeText(embeds.html);
-                    setMessage('Badge HTML copied.', true);
-                },
-            }),
-        ]),
-    );
 
     const leaderboardForm = createElement('form', { className: 'form-grid' });
     const repoLabel = createElement('label', { className: 'field-label' });

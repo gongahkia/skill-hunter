@@ -57,6 +57,20 @@ function getLongestRun(state) {
     return Number.isFinite(longestRun) ? Math.max(0, Math.trunc(longestRun)) : 0;
 }
 
+function getSourceDiversityRatio(state) {
+    return new Set(state?.enabledSources || []).size > 1 ? 1 : 0;
+}
+
+function getBadgeScore(state) {
+    return computeCognitiveIndex({
+        solvesInLast7d: Number(state?.currentRun || 0),
+        currentRun: Number(state?.currentRun || 0),
+        averageTimeToSolveMs: Number(state?.solveReceipt?.timeToSolveMs),
+        sourceDiversityRatio: getSourceDiversityRatio(state),
+        bypassesThisWeek: Number(state?.bypassesThisWeek || 0),
+    });
+}
+
 export async function createLeaderboardSubmission({
     dashboardState,
     repoUrl,
@@ -76,9 +90,7 @@ export async function createLeaderboardSubmission({
     const body = JSON.stringify({
         repoHash,
         installIdHash: await sha256Hex(String(dashboardState?.installId || 'unknown-install')),
-        score: computeCognitiveIndex({
-            bypassesThisWeek: Number(dashboardState?.bypassesThisWeek || 0),
-        }),
+        score: getBadgeScore(dashboardState),
         longestRun: getLongestRun(dashboardState),
         timestamp,
     });
@@ -106,9 +118,7 @@ export async function createBadgeEmbeds({
     }
 
     const canonicalState = {
-        score: computeCognitiveIndex({
-            bypassesThisWeek: Number(dashboardState?.bypassesThisWeek || 0),
-        }),
+        score: getBadgeScore(dashboardState),
         longestRun: getLongestRun(dashboardState),
         installIdHash: await sha256Hex(String(dashboardState?.installId || 'unknown-install')),
         timestamp,
