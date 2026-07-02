@@ -37,6 +37,12 @@ import {
     normalizeStreakState,
     recordSolve,
 } from '../../shared/core/streak.js';
+import {
+    createSolveMetricsState,
+    normalizeSolveMetricsState,
+    recordFailedSolveAttempt,
+    recordSolveMetric,
+} from '../../shared/core/solve-metrics.js';
 import aocProvider, { normalizeAocAnswerHashes } from '../lib/providers/aoc-provider.js';
 import drillsProvider from '../lib/providers/drills-provider.js';
 import eulerProvider from '../lib/providers/euler-provider.js';
@@ -268,6 +274,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.BYPASS_WEEK_START,
             STORAGE_KEYS.BYPASSES_USED_THIS_WEEK,
             STORAGE_KEYS.STREAK_STATE,
+            STORAGE_KEYS.SOLVE_METRICS,
             STORAGE_KEYS.IS_PAUSED,
             STORAGE_KEYS.ONBOARDING_COMPLETED,
             STORAGE_KEYS.AOC_ANSWER_HASHES,
@@ -338,6 +345,10 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (!stored[STORAGE_KEYS.STREAK_STATE]) {
             updates[STORAGE_KEYS.STREAK_STATE] = createStreakState();
+        }
+
+        if (!stored[STORAGE_KEYS.SOLVE_METRICS]) {
+            updates[STORAGE_KEYS.SOLVE_METRICS] = createSolveMetricsState();
         }
 
         if (typeof stored[STORAGE_KEYS.IS_PAUSED] !== 'boolean') {
@@ -422,6 +433,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             STORAGE_KEYS.LAST_SOLVE_RECEIPT,
             STORAGE_KEYS.RECENT_CHALLENGE_SLUGS,
             STORAGE_KEYS.STREAK_STATE,
+            STORAGE_KEYS.SOLVE_METRICS,
             STORAGE_KEYS.ENABLED_TARGET_IDS,
             STORAGE_KEYS.ENABLED_SOURCES,
             STORAGE_KEYS.PER_TARGET_RULES,
@@ -537,6 +549,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             used: stored[STORAGE_KEYS.BYPASSES_USED_THIS_WEEK],
         });
         const streakState = normalizeStreakState(stored[STORAGE_KEYS.STREAK_STATE]);
+        const solveMetrics = normalizeSolveMetricsState(stored[STORAGE_KEYS.SOLVE_METRICS]);
         const aiFast = normalizeAiFastState(stored[STORAGE_KEYS.AI_FAST]);
 
         return {
@@ -564,6 +577,12 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             currentRun: streakState.currentRun,
             longestRun: streakState.longestRun,
             graceDaysRemaining: streakState.graceDaysRemaining,
+            solveMetrics,
+            solvesThisWeek: solveMetrics.solvesThisWeek,
+            attemptsThisWeek: solveMetrics.attemptsThisWeek,
+            failuresThisWeek: solveMetrics.failuresThisWeek,
+            averageTimeToSolveMs: solveMetrics.averageTimeToSolveMs,
+            failRate: solveMetrics.failRate,
             isPaused: Boolean(stored[STORAGE_KEYS.IS_PAUSED]),
             hasCompletedOnboarding: Boolean(stored[STORAGE_KEYS.ONBOARDING_COMPLETED]),
             supportedTargets: CHATBOT_TARGETS,
@@ -763,6 +782,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
             const expectedSlug = currentChallenge?.slug || '';
             const expectedSource = currentChallenge?.source_label || currentChallenge?.source || message.source;
             await setStorageValues({
+                [STORAGE_KEYS.SOLVE_METRICS]: recordFailedSolveAttempt(stored[STORAGE_KEYS.SOLVE_METRICS]),
                 [STORAGE_KEYS.UI_MESSAGE]: expectedSlug
                     ? `Wrong problem - solve ${expectedSlug} from ${expectedSource}.`
                     : 'Wrong problem - no active challenge is waiting for verification.',
@@ -783,6 +803,7 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         if (!verification.ok) {
             await setStorageValues({
+                [STORAGE_KEYS.SOLVE_METRICS]: recordFailedSolveAttempt(stored[STORAGE_KEYS.SOLVE_METRICS]),
                 [STORAGE_KEYS.UI_MESSAGE]: verification.message || 'Challenge answer did not verify.',
             });
 
@@ -796,15 +817,22 @@ import mcqProvider from '../lib/providers/mcq-provider.js';
 
         const solvedAt = Date.now();
         await startSession(null, solvedAt);
-        const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE]);
+        const solvedAtIso = new Date(solvedAt).toISOString();
+        const timeToSolveMs = Math.max(0, solvedAt - Number(stored[STORAGE_KEYS.CHALLENGE_STARTED_AT] || solvedAt));
+        const streakState = recordSolve(stored[STORAGE_KEYS.STREAK_STATE], { date: solvedAtIso });
+        const solveMetrics = recordSolveMetric(stored[STORAGE_KEYS.SOLVE_METRICS], {
+            date: solvedAtIso,
+            timeToSolveMs,
+        });
         const updates = {
             [STORAGE_KEYS.STREAK_STATE]: streakState,
+            [STORAGE_KEYS.SOLVE_METRICS]: solveMetrics,
             [STORAGE_KEYS.AI_FAST]: recordAiFastSolve(stored[STORAGE_KEYS.AI_FAST], currentChallenge, solvedAt),
             [STORAGE_KEYS.LAST_SOLVE_RECEIPT]: {
                 problemTitle: currentChallenge.title,
                 sourceLabel: currentChallenge.source_label || currentChallenge.source,
-                timeToSolveMs: Math.max(0, solvedAt - Number(stored[STORAGE_KEYS.CHALLENGE_STARTED_AT] || solvedAt)),
-                solvedAt: new Date(solvedAt).toISOString(),
+                timeToSolveMs,
+                solvedAt: solvedAtIso,
                 currentRun: streakState.currentRun,
             },
         };

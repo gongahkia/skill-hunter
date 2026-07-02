@@ -41,6 +41,8 @@ Inputs:
 - `sourceDiversityRatio`: enabled or used challenge-source diversity, normalized to `0-1`.
 - `bypassesThisWeek`: emergency bypass count in the current week.
 
+Metric storage shape is documented in [LOCAL_METRICS.md](./LOCAL_METRICS.md).
+
 Calibration notes:
 
 - Increase the solve weight if consistency matters more than speed.

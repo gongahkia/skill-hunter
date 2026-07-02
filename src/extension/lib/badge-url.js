@@ -63,9 +63,10 @@ function getSourceDiversityRatio(state) {
 
 function getBadgeScore(state) {
     return computeCognitiveIndex({
-        solvesInLast7d: Number(state?.currentRun || 0),
+        solvesInLast7d: Number(state?.solvesThisWeek || state?.currentRun || 0),
         currentRun: Number(state?.currentRun || 0),
-        averageTimeToSolveMs: Number(state?.solveReceipt?.timeToSolveMs),
+        averageTimeToSolveMs: Number(state?.averageTimeToSolveMs || state?.solveReceipt?.timeToSolveMs),
+        failRate: Number(state?.failRate || 0),
         sourceDiversityRatio: getSourceDiversityRatio(state),
         bypassesThisWeek: Number(state?.bypassesThisWeek || 0),
     });

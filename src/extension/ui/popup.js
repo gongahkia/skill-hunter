@@ -306,6 +306,9 @@ function createRunMetrics(state) {
     [
         ['Current run', state.currentRun || 0],
         ['Longest run', state.longestRun || 0],
+        ['Solves/week', state.solvesThisWeek || 0],
+        ['Avg solve', formatDuration(state.averageTimeToSolveMs || 0)],
+        ['Fail rate', `${Math.round(Number(state.failRate || 0) * 100)}%`],
     ].forEach(([label, value]) => {
         const metric = createElement('div', { className: 'metric' });
         metric.title = tooltip;
@@ -328,9 +331,10 @@ function getReceiptSvg(state) {
 
 function getCognitiveIndex(state) {
     return computeCognitiveIndex({
-        solvesInLast7d: Number(state.currentRun || 0),
+        solvesInLast7d: Number(state.solvesThisWeek || state.currentRun || 0),
         currentRun: Number(state.currentRun || 0),
-        averageTimeToSolveMs: Number(state.solveReceipt?.timeToSolveMs),
+        averageTimeToSolveMs: Number(state.averageTimeToSolveMs || state.solveReceipt?.timeToSolveMs),
+        failRate: Number(state.failRate || 0),
         sourceDiversityRatio: new Set(state.enabledSources || []).size > 1 ? 1 : 0,
         bypassesThisWeek: Number(state.bypassesThisWeek || 0),
     });
