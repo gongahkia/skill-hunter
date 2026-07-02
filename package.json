@@ -13,7 +13,7 @@
     "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
     "build:dashboard-validator": "node scripts/build-dashboard-validator.mjs",
     "validate:packs": "node scripts/validate-packs.mjs",
-    "test": "node --test src/shared/__tests__/*.test.js src/extension/lib/__tests__/*.test.js"
+    "test": "node --test src/shared/__tests__/*.test.js src/extension/lib/__tests__/*.test.js src/extension/ui/__tests__/*.test.js"
   },
   "devDependencies": {
     "ajv": "^8.20.0",
