@@ -1,13 +1,11 @@
 # Dorso Firefox Source Submission
 
-This source package corresponds to the Firefox add-on upload:
-
-- `dorso-firefox-2.1.0-amo.zip`
+This file documents the source layout used for Firefox AMO review builds.
 
 ## Build Environment
 
 - Node.js 18+ is sufficient.
-- No third-party build dependencies are required for the Firefox package build.
+- Dependencies are installed from `package-lock.json`.
 
 ## Build Command
 
@@ -31,14 +29,16 @@ The upload artifact can then be packaged from the contents of `dist/firefox`, wi
 
 - `src/extension/`
 - `src/shared/`
+- `schemas/`
 - `scripts/build-extension.mjs`
+- `scripts/validate-packs.mjs`
 - `package.json`
-- `README2.md`
-- `AUDIT.md`
+- `package-lock.json`
+- `README.md`
 
 ## Notes For Reviewers
 
 - This Firefox build is local-only.
-- It does not call the Dorso backend.
+- It does not call any Dorso remote service.
 - It requests only `storage` plus explicit host permissions for supported chatbot sites and LeetCode.
 - `browser_specific_settings.gecko.data_collection_permissions.required` is set to `["none"]`.

@@ -293,7 +293,7 @@ function renderDisclosure() {
     const list = createElement('div', { className: 'list' });
     [
         {
-            title: 'No backend sync',
+            title: 'No remote sync',
             copy: 'This build does not send chatbot URLs, handles, or install identifiers to a remote server.',
         },
         {

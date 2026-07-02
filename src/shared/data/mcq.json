@@ -2511,7 +2511,7 @@
     "id": "mcq-networking-012",
     "prompt": "What is a reverse proxy commonly used for?",
     "choices": [
-      "Routing requests to backend services",
+      "Routing requests to application services",
       "Compiling JavaScript",
       "Running SQL joins",
       "Allocating stack frames"

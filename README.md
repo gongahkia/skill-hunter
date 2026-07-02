@@ -2,7 +2,7 @@
 
 <img src="./asset/reference/demo.gif" width="100%">
 
-Dorso is our local-only CAPTCHA for AI-era programming atrophy: before selected chatbot sites open, we solve a short coding challenge, earn a timed unlock, and keep the evidence on-device. The premise is not anti-AI; it is anti-autopilot. InfoQ's February 2026 summary of Anthropic's randomized controlled trial reports that AI-assisted developers scored 17% lower on skill-mastery checks while productivity gains were not statistically significant, so Dorso turns that finding into a small friction loop that protects deliberate practice without accounts, analytics, or a backend.
+Dorso is our local-only CAPTCHA for AI-era programming atrophy: before selected chatbot sites open, we solve a short coding challenge, earn a timed unlock, and keep the evidence on-device. The premise is not anti-AI; it is anti-autopilot. InfoQ's February 2026 summary of Anthropic's randomized controlled trial reports that AI-assisted developers scored 17% lower on skill-mastery checks while productivity gains were not statistically significant, so Dorso turns that finding into a small friction loop that protects deliberate practice without accounts, analytics, or a Dorso remote service.
 
 Dorso does three things:
 

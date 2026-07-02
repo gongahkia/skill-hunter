@@ -118,7 +118,7 @@ Avoid these phrases in sanitized listings:
 
 `The thesis is simple: AI assistance is useful, but autopilot is expensive. Dorso adds a small deliberate-practice loop before ChatGPT, Claude, Gemini, Perplexity, and similar sites open. Solve the staged challenge, get a timed unlock, and continue working.`
 
-`The v3.0 build is intentionally local-first: no accounts, no analytics, no telemetry, no remote prompt collection, and no backend dependency for the extension flow. Challenge state, timers, settings, and receipts stay in extension storage.`
+`The v3.0 build is intentionally local-first: no accounts, no analytics, no telemetry, no remote prompt collection, and no Dorso remote-service dependency for the extension flow. Challenge state, timers, settings, and receipts stay in extension storage.`
 
 `Challenge sources include bundled fundamentals MCQs, type-from-memory drills, LeetCode verification, Advent of Code metadata, and Project Euler answer hashes. There is also an optional CLI status export and optional badge/leaderboard flow.`
 

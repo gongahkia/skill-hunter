@@ -1,6 +1,6 @@
 # Local Metrics
 
-Dorso stores streaks and solve metrics in `chrome.storage.local`. No account or backend is required.
+Dorso stores streaks and solve metrics in `chrome.storage.local`. No account or remote service is required.
 
 ## Storage Keys
 

@@ -42,9 +42,8 @@ class Logger {
 
         console[consoleMethod](`[${timestamp}] [${level}] [${this.context}]`, message, data);
 
-        // Could also send to backend analytics here
         if (level === 'ERROR') {
-            this._sendToBackend(logEntry);
+            this._dropRemoteLog(logEntry);
         }
     }
 
@@ -64,9 +63,7 @@ class Logger {
         this._log('ERROR', message, data);
     }
 
-    async _sendToBackend(logEntry) {
-        // Optional: Send error logs to backend for monitoring
-        // This is disabled by default to reduce API calls
+    async _dropRemoteLog(_logEntry) {
         return;
     }
 }
