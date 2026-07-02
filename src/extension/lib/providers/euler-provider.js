@@ -1,5 +1,6 @@
 import { ChallengeProvider } from '../../../shared/core/challenge-provider.js';
 import { SOURCE_LABELS } from '../../../shared/core/constants.js';
+import { normalizeNumericAnswer } from '../../../shared/core/numeric-answer.js';
 
 const difficultyBuckets = {
     easy: new Set([1, 2]),
@@ -89,7 +90,7 @@ class EulerProvider extends ChallengeProvider {
     async verify(challenge, submission) {
         const answers = await this.loadAnswers();
         const expected = answers.find((answer) => answer.id === challenge.slug);
-        const actualHash = await sha256Hex(String(submission ?? '').trim());
+        const actualHash = await sha256Hex(normalizeNumericAnswer(submission));
         const ok = Boolean(expected && actualHash === expected.answerHash);
 
         return {

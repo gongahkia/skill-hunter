@@ -1,5 +1,6 @@
 import { ChallengeProvider } from '../../../shared/core/challenge-provider.js';
 import { SOURCE_LABELS, STORAGE_KEYS } from '../../../shared/core/constants.js';
+import { normalizeNumericAnswer } from '../../../shared/core/numeric-answer.js';
 
 const difficultyBuckets = {
     easy: new Set([1, 2]),
@@ -187,7 +188,7 @@ class AocProvider extends ChallengeProvider {
             };
         }
 
-        const actualHash = await sha256Hex(String(submission ?? '').trim());
+        const actualHash = await sha256Hex(normalizeNumericAnswer(submission));
         const ok = actualHash === expected;
         return {
             ok,
