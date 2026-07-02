@@ -720,6 +720,186 @@
     "source": "dorso-inhouse"
   },
   {
+    "id": "mcq-hash-table-001",
+    "prompt": "What is a hash collision?",
+    "choices": [
+      "Two different keys map to the same bucket",
+      "A key cannot be compared",
+      "A table has no empty buckets",
+      "A value is larger than memory"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "collision",
+      "data-structures"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-002",
+    "prompt": "What does load factor usually measure in a hash table?",
+    "choices": [
+      "Number of stored entries relative to bucket capacity",
+      "Maximum key length in bytes",
+      "CPU time per comparison",
+      "Number of fields in each value"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "load-factor",
+      "data-structures"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-003",
+    "prompt": "Why can hash table lookup be expected O(1)?",
+    "choices": [
+      "The hash points near the key's bucket without scanning every entry",
+      "The table is always sorted",
+      "Every lookup performs binary search",
+      "Keys are stored only in a stack"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "lookup",
+      "complexity"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-004",
+    "prompt": "What does separate chaining use to handle collisions?",
+    "choices": [
+      "A per-bucket collection of entries",
+      "A second CPU core",
+      "A recursive call for every key",
+      "A sorted global array only"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "collision",
+      "chaining"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-005",
+    "prompt": "In open addressing, where are collided entries stored?",
+    "choices": [
+      "In other slots inside the table",
+      "Only in linked lists outside the table",
+      "Only on disk",
+      "Only in a priority queue"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "collision",
+      "open-addressing"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-006",
+    "prompt": "Why do open-addressed hash tables often use tombstones after deletion?",
+    "choices": [
+      "To preserve probe sequences for later lookups",
+      "To make every deleted slot permanently unusable",
+      "To sort remaining keys",
+      "To shrink keys to integers"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "deletion",
+      "open-addressing"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-007",
+    "prompt": "What is a common reason to resize a hash table?",
+    "choices": [
+      "The load factor gets too high",
+      "The keys become strings",
+      "The values become objects",
+      "The table has an even number of entries"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "resize",
+      "load-factor"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-008",
+    "prompt": "What can make hash table operations degrade toward O(n)?",
+    "choices": [
+      "Many keys landing in the same collision path",
+      "Using array indexes",
+      "Having constant-time equality checks",
+      "Keeping the table below its resize threshold"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "collision",
+      "complexity"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-009",
+    "prompt": "After a hash locates a candidate bucket, what must lookup still verify?",
+    "choices": [
+      "That the stored key equals the requested key",
+      "That the value is numeric",
+      "That the table is alphabetized",
+      "That the key was inserted last"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "lookup",
+      "equality"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-hash-table-010",
+    "prompt": "What property should a good hash function have for table keys?",
+    "choices": [
+      "It distributes typical keys evenly across buckets",
+      "It returns a different result every time",
+      "It sorts keys lexicographically",
+      "It stores the value without an array"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "hash-table",
+      "hash-function",
+      "data-structures"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
     "id": "mcq-js-ts-001",
     "prompt": "What does JavaScript `typeof null` return?",
     "choices": [
