@@ -20,6 +20,7 @@ const sourceIncludes = [
     'docs/ARCHITECTURE.md',
     'docs/PRIVACY.md',
     'docs/SECURITY.md',
+    'docs/STORE_SUBMISSION.md',
     'schemas',
     'scripts/build-dashboard-validator.mjs',
     'scripts/build-extension.mjs',

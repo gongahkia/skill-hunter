@@ -147,9 +147,12 @@ Avoid these phrases in sanitized listings:
 ## Launch Checklist
 
 - `npm ci`
+- `npm test`
 - `npm run validate:packs`
-- `npm run build`
-- Confirm `dist/chrome` and `dist/firefox` exist.
+- `npm run package:release`
+- `npx web-ext lint --source-dir dist/firefox`
+- Confirm `dist/artifacts/dorso-3.0.0-chrome.zip`, `dist/artifacts/dorso-3.0.0-firefox.zip`, and `dist/artifacts/dorso-3.0.0-source.zip` exist.
+- Follow [Store Submission Runbook](./STORE_SUBMISSION.md).
 - Confirm `docs/PRIVACY.md` and `docs/SECURITY.md` are current.
 - Confirm screenshots match current popup, gate, badge, and digest UI.
 - Submit Chrome Web Store package with Chrome copy.

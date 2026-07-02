@@ -12,18 +12,19 @@ This file documents the source layout used for Firefox AMO review builds.
 From the repository root:
 
 ```bash
-npm run build:firefox
+npm run package:release
 ```
 
 ## Expected Output
 
-The Firefox extension package is generated into:
+The Firefox review artifacts are generated into:
 
 ```bash
-dist/firefox
+dist/artifacts/dorso-<version>-firefox.zip
+dist/artifacts/dorso-<version>-source.zip
 ```
 
-The upload artifact can then be packaged from the contents of `dist/firefox`, with `manifest.json` at the root of the archive.
+The Firefox zip contains `manifest.json` at the root of the archive. The source zip is passed to AMO signing with `web-ext sign --upload-source-code`.
 
 ## Relevant Source Files
 
@@ -31,10 +32,12 @@ The upload artifact can then be packaged from the contents of `dist/firefox`, wi
 - `src/shared/`
 - `schemas/`
 - `scripts/build-extension.mjs`
+- `scripts/package-extension-release.mjs`
 - `scripts/validate-packs.mjs`
 - `package.json`
 - `package-lock.json`
 - `README.md`
+- `docs/STORE_SUBMISSION.md`
 
 ## Notes For Reviewers
 
