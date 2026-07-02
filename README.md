@@ -4,6 +4,18 @@
 
 Dorso is our local-only CAPTCHA for AI-era programming atrophy: before selected chatbot sites open, we solve a short coding challenge, earn a timed unlock, and keep the evidence on-device. The premise is not anti-AI; it is anti-autopilot. InfoQ's February 2026 summary of Anthropic's randomized controlled trial reports that AI-assisted developers scored 17% lower on skill-mastery checks while productivity gains were not statistically significant, so Dorso turns that finding into a small friction loop that protects deliberate practice without accounts, analytics, or a backend.
 
+Dorso does three things:
+
+- Gates selected chatbot sites until a challenge is solved.
+- Rotates local challenge sources: MCQ, drill, LeetCode, Advent of Code, and Project Euler.
+- Shares optional receipts, CLI status, and a signed Cognitive Index badge without sending prompt content to Dorso.
+
+## Screenshots
+
+| Popup | Gate | Badge |
+| --- | --- | --- |
+| ![Dorso popup](./asset/reference/popup.png) | ![Dorso gate](./asset/reference/gate.png) | ![Dorso badge](./asset/reference/badge.png) |
+
 ## Install
 
 ### Chrome / Chromium
@@ -19,6 +31,17 @@ Dorso is our local-only CAPTCHA for AI-era programming atrophy: before selected 
 3. Configure challenge sources and protected chatbot sites from the Dorso popup.
 
 Safari is deferred for v3.0 store polish.
+
+## Badge / Embed
+
+The popup can generate a signed Cognitive Index badge for README or profile embeds.
+
+1. Open the Dorso popup after the extension has runtime state.
+2. Open the badge panel.
+3. Copy the Markdown or HTML snippet.
+4. Paste it into a README, profile, or launch post.
+
+The badge URL encodes the score state and HMAC signature. The optional Cloudflare Worker serves the SVG without storing per-user badge state.
 
 ## Privacy
 
