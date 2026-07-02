@@ -1260,6 +1260,186 @@
     "source": "dorso-inhouse"
   },
   {
+    "id": "mcq-js-closures-001",
+    "prompt": "What does lexical scope mean in JavaScript?",
+    "choices": [
+      "Name lookup depends on where code is written",
+      "Name lookup depends only on who calls the function",
+      "Every variable is global",
+      "Only object properties can be read"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "scope"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-002",
+    "prompt": "Why can a closure read an outer variable after the outer function returns?",
+    "choices": [
+      "The function keeps a reference to its lexical environment",
+      "The variable is copied into JSON",
+      "The variable becomes a global automatically",
+      "The engine reruns the outer function on every read"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "scope"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-003",
+    "prompt": "What scoping behavior makes `var` risky in asynchronous loop callbacks?",
+    "choices": [
+      "`var` has one function-scoped binding shared by the callbacks",
+      "`var` creates a fresh binding for every block",
+      "`var` values cannot be changed",
+      "`var` is available only inside modules"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "var"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-004",
+    "prompt": "What does `let` provide in a `for` loop that helps closure callbacks?",
+    "choices": [
+      "A fresh per-iteration binding",
+      "Automatic promise cancellation",
+      "A global variable",
+      "A sorted callback queue"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "let"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-005",
+    "prompt": "What is the temporal dead zone for `let` and `const`?",
+    "choices": [
+      "The period before initialization where access throws",
+      "The time after a promise resolves",
+      "The delay before garbage collection",
+      "The timeout for a browser event"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "scope",
+      "let"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-006",
+    "prompt": "What is variable shadowing?",
+    "choices": [
+      "An inner declaration hides an outer name",
+      "A value is removed from memory",
+      "A property is converted to a symbol",
+      "A function is moved to another file"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "scope",
+      "shadowing"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-007",
+    "prompt": "Which declaration is block-scoped in JavaScript?",
+    "choices": [
+      "`let`",
+      "`var`",
+      "A function parameter from another function",
+      "An undeclared assignment"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "scope",
+      "let"
+    ],
+    "difficulty": 1,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-008",
+    "prompt": "In an ES module, what is true of top-level `const` declarations?",
+    "choices": [
+      "They are scoped to the module",
+      "They are always added to `window`",
+      "They are deleted after import",
+      "They become function parameters"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "scope",
+      "modules"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-009",
+    "prompt": "Why did older JavaScript often use an IIFE?",
+    "choices": [
+      "To create a private function scope",
+      "To force all code to run asynchronously",
+      "To disable closures",
+      "To parse TypeScript types"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "iife"
+    ],
+    "difficulty": 2,
+    "source": "dorso-inhouse"
+  },
+  {
+    "id": "mcq-js-closures-010",
+    "prompt": "How can a closure accidentally increase memory use?",
+    "choices": [
+      "It can keep captured objects reachable longer than needed",
+      "It always duplicates every captured object",
+      "It disables garbage collection globally",
+      "It stores variables in localStorage"
+    ],
+    "answerIndex": 0,
+    "tags": [
+      "javascript",
+      "closures",
+      "memory"
+    ],
+    "difficulty": 3,
+    "source": "dorso-inhouse"
+  },
+  {
     "id": "mcq-concurrency-001",
     "prompt": "What is a race condition?",
     "choices": [
