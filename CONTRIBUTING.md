@@ -136,6 +136,14 @@ npm run build:firefox
 
 Then open `about:debugging#/runtime/this-firefox`, choose Load Temporary Add-on, and select `dist/firefox/manifest.json`.
 
+Release review artifacts:
+
+```console
+npm run package:release
+```
+
+This writes Chrome, Firefox, and source-review zip files under `dist/artifacts`.
+
 ## Bug Reports
 
 Include:

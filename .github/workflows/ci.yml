@@ -26,9 +26,15 @@ jobs:
       - name: Validate challenge packs
         run: |
           npm run validate:packs
-      - name: Build extension bundles
+      - name: Build and package extension artifacts
         run: |
-          npm run build
+          npm run package:release
+      - name: Upload extension artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dorso-extension-artifacts
+          path: dist/artifacts/*.zip
+          if-no-files-found: error
 
   deploy-badge-staging:
     if: startsWith(github.ref, 'refs/tags/release/')

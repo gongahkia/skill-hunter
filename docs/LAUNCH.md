@@ -87,8 +87,9 @@ Description:
 
 Reviewer notes:
 
-- Build with `npm ci && npm run build:firefox`.
-- Review package: `dist/firefox`.
+- Build with `npm ci && npm run package:release`.
+- Review package: `dist/artifacts/dorso-<version>-firefox.zip`.
+- Source package: `dist/artifacts/dorso-<version>-source.zip`.
 - Source entry points: `src/extension/`, `src/shared/`, `schemas/`, and `scripts/build-extension.mjs`.
 - Privacy details: `docs/PRIVACY.md`.
 - Security reporting: `docs/SECURITY.md`.
