@@ -31,6 +31,7 @@ import {
     SOLVE_SHARE_TEXT,
     createSolveShareText,
 } from './share-text.js';
+import { getSourceSelection } from './source-selection.js';
 import validateDashboardState from '../lib/dashboard-state-validator.js';
 import {
     clearStorage,
@@ -942,8 +943,13 @@ function renderSources(state) {
     form.onsubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData(form);
-        const enabledSourcesValue = formData.getAll('enabledSources');
+        const sourceSelection = getSourceSelection(formData.getAll('enabledSources'));
         let aocAnswerHashes = {};
+
+        if (!sourceSelection.hasSelection) {
+            setMessage(sourceSelection.message);
+            return;
+        }
 
         try {
             aocAnswerHashes = parseAocHashText(formData.get('aocAnswerHashes'));
@@ -955,7 +961,7 @@ function renderSources(state) {
         await sendRuntimeMessage({
             action: MESSAGE_ACTIONS.SAVE_SETTINGS,
             payload: {
-                enabledSources: enabledSourcesValue,
+                enabledSources: sourceSelection.enabledSources,
                 aocAnswerHashes,
             },
         });
@@ -1147,10 +1153,17 @@ function renderOnboarding(state) {
     form.onsubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData(form);
+        const sourceSelection = getSourceSelection(formData.getAll('enabledSources'));
+
+        if (!sourceSelection.hasSelection) {
+            setMessage(sourceSelection.message);
+            return;
+        }
+
         await sendRuntimeMessage({
             action: MESSAGE_ACTIONS.SAVE_SETTINGS,
             payload: {
-                enabledSources: formData.getAll('enabledSources'),
+                enabledSources: sourceSelection.enabledSources,
                 enabledTargetIds: formData.getAll('enabledTargetIds'),
                 hasCompletedOnboarding: true,
             },
