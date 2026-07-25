@@ -1,128 +1,70 @@
-# Makefile for Skill Hunter development
+PYTHON ?= .venv/bin/python
+PIP ?= .venv/bin/pip
+NPM ?= npm --prefix src/be-sure-ance-app
+DATA_DIR ?= src/be-sure-ance-app/public/data
+PROBE_INSURERS ?= aia,chubb,china_life,iii,sunlife,tokio_marine,uoi
+SMOKE_INSURERS ?= great_eastern,hsbc,singlife
+VENV_STAMP := .venv/.deps.stamp
 
-.PHONY: all install dev build package firefox-package package-source firefox-source-package firefox-submit-prep safari-build test lint format clean ci help
+.PHONY: help setup venv npm-install playwright scrape scrape-full scrape-smoke probe-scrapers export-local build-local dev lint format-check counts clean-data
 
-VERSION := $(shell node -p "require('./package.json').version")
-FIREFOX_ARTIFACTS_DIR := submission/firefox/artifacts
-FIREFOX_PACKAGE := $(FIREFOX_ARTIFACTS_DIR)/skill-hunter-firefox-v$(VERSION).xpi
-FIREFOX_SOURCE_PACKAGE := $(FIREFOX_ARTIFACTS_DIR)/skill-hunter-firefox-source-v$(VERSION).zip
-
-# Default target
-all: help
-
-# Install dependencies
-install:
-	npm install
-
-# Development build with watch mode
-dev:
-	npm run dev
-
-# Production build
-build:
-	npm run build
-
-# Run tests
-test:
-	npm test
-
-# Run tests in watch mode
-test-watch:
-	npm run test:watch
-
-# Lint code
-lint:
-	npm run lint
-
-# Fix linting issues
-lint-fix:
-	npm run lint:fix
-
-# Format code
-format:
-	npm run format
-
-# Type check
-type-check:
-	npm run type-check
-
-# Local CI-equivalent quality gate
-ci:
-	npm run ci
-
-# Rebuild the bundled citation-graph indexes from a case corpus
-# Usage: make citation-index CORPUS=/path/to/corpus_dir_or_file
-citation-index:
-	@if [ -z "$(CORPUS)" ]; then echo "CORPUS=<path> required"; exit 2; fi
-	node scripts/build-citation-index.mjs "$(CORPUS)" src/assets/citations/
-
-# Clean build artifacts
-clean:
-	rm -rf dist/
-	rm -rf node_modules/
-	rm -rf coverage/
-	rm -f *.log
-
-# Clean and rebuild
-rebuild: clean install build
-
-# Package extension for distribution
-package: build
-	cd dist && zip -r ../skill-hunter-v$(VERSION).zip .
-
-# Package the Firefox add-on artifact for AMO upload
-firefox-package: build
-	mkdir -p $(FIREFOX_ARTIFACTS_DIR)
-	cd dist && zip -r ../$(FIREFOX_PACKAGE) .
-
-# Package readable source for Firefox review
-firefox-source-package:
-	mkdir -p $(FIREFOX_ARTIFACTS_DIR)
-	python3 scripts/package_firefox_source.py $(FIREFOX_SOURCE_PACKAGE)
-
-# Prepare both Firefox AMO submission artifacts
-firefox-submit-prep: firefox-package firefox-source-package
-
-# Backwards-compatible alias for Firefox review source packaging
-package-source: firefox-source-package
-
-# Build the Safari container app without signing
-safari-build:
-	xcodebuild -project "safari/Skill Hunter/Skill Hunter.xcodeproj" \
-		-scheme "Skill Hunter" \
-		-configuration Debug \
-		CODE_SIGNING_ALLOWED=NO build
-
-# Help target
 help:
-	@echo "Skill Hunter - Makefile Commands"
-	@echo "================================="
-	@echo ""
-	@echo "Development:"
-	@echo "  make install      - Install dependencies"
-	@echo "  make dev          - Start development build with watch mode"
-	@echo "  make build        - Create production build"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test         - Run all tests"
-	@echo "  make test-watch   - Run tests in watch mode"
-	@echo ""
-	@echo "Code Quality:"
-	@echo "  make lint         - Lint code"
-	@echo "  make lint-fix     - Fix linting issues"
-	@echo "  make format       - Format code with Prettier"
-	@echo "  make type-check   - Run TypeScript type checking"
-	@echo "  make ci           - Run local CI-equivalent checks"
-	@echo ""
-	@echo "Maintenance:"
-	@echo "  make clean        - Remove build artifacts"
-	@echo "  make rebuild      - Clean and rebuild"
-	@echo "  make package      - Package extension for distribution"
-	@echo "  make firefox-package - Build the AMO uploadable .xpi artifact"
-	@echo "  make firefox-source-package - Package readable source for Firefox review"
-	@echo "  make firefox-submit-prep - Create both Firefox submission artifacts"
-	@echo "  make package-source - Alias for Firefox source packaging"
-	@echo "  make safari-build - Build the Safari container app without code signing"
-	@echo ""
-	@echo "Help:"
-	@echo "  make help         - Show this help message"
+	@printf '%s\n' \
+		'Targets:' \
+		'  setup           create .venv, install Python deps, Chromium, npm deps' \
+		'  scrape          full live scrape, then export app-data.json' \
+		'  scrape-smoke    bounded stable live scrape/export' \
+		'  probe-scrapers  dry-run selected scrapers without local writes' \
+		'  export-local    export current local tables to app-data.json' \
+		'  build-local     export local data and build frontend' \
+		'  dev             run Vite locally' \
+		'  counts          print local app-data table counts' \
+		'  lint            run frontend lint' \
+		'  format-check    run frontend Prettier check'
+
+setup: venv npm-install playwright
+
+venv: $(VENV_STAMP)
+
+$(VENV_STAMP): requirements.txt
+	test -x $(PYTHON) || python3 -m venv .venv
+	$(PIP) install -r requirements.txt
+	touch $(VENV_STAMP)
+
+npm-install:
+	$(NPM) ci
+
+playwright: venv
+	$(PYTHON) -m playwright install chromium
+
+scrape: scrape-full
+
+scrape-full: venv
+	BE_SURE_ANCE_DATA_DIR=$(DATA_DIR) $(PYTHON) -m src.lib.static_app_data --run-scrapers --output $(DATA_DIR)/app-data.json
+
+scrape-smoke: venv
+	PYTHON=$(PYTHON) $(NPM) run scrape:data:smoke
+
+probe-scrapers: venv
+	BE_SURE_ANCE_DATA_DIR=/tmp/be-sure-ance-probe $(PYTHON) -m src.scrapers.run_all --dry-run --only $(PROBE_INSURERS)
+
+export-local: venv
+	$(PYTHON) -m src.lib.static_app_data --output $(DATA_DIR)/app-data.json
+
+build-local: venv
+	PYTHON=$(PYTHON) $(NPM) run build:local
+
+dev:
+	$(NPM) run dev -- --host 127.0.0.1
+
+lint:
+	$(NPM) run lint
+
+format-check:
+	$(NPM) run format:check
+
+counts: venv
+	$(PYTHON) -c 'import json; from pathlib import Path; payload=json.loads((Path("$(DATA_DIR)") / "app-data.json").read_text()); [print(f"{key}: {len(value)}") for key, value in payload.get("tables", {}).items()]'
+
+clean-data:
+	rm -rf $(DATA_DIR)/tables $(DATA_DIR)/storage $(DATA_DIR)/app-data.json

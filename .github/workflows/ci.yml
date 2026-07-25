@@ -1,48 +1,60 @@
-name: Skill Hunter CI/CD on Push
+name: ci
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
   pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  quality:
+  python:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: '22'
-          cache: 'npm'
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check Python formatting
+        run: black --check src tests scripts
+
+      - name: Lint Python
+        run: ruff check src tests scripts
+
+      - name: Run unit and offline golden tests
+        run: python3 -m unittest discover -s tests -p "test_*.py"
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: src/be-sure-ance-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: src/be-sure-ance-app/package-lock.json
+
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Lint frontend
         run: npm run lint
 
-      - name: Type check
-        run: npm run type-check
+      - name: Check frontend formatting
+        run: npm run format:check
 
-      - name: Run tests
-        run: npm test -- --runInBand
-
-      - name: Build extension
+      - name: Build frontend
+        env:
+          VITE_STATIC_DATA_PATH: /data/app-data.json
+          VITE_SITE_ORIGIN: https://example.com
         run: npm run build
-
-      - name: Package Firefox source archive
-        run: make firefox-source-package
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: skill-hunter-build
-          path: |
-            dist
-            submission/firefox/artifacts
