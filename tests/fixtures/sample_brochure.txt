@@ -1,4 +1,0 @@
-Panel Hospitals: Sample Hospital; Example Medical Centre.
-Exclusions: Pre-existing conditions; self-inflicted injury.
-Waiting Period: 90 days waiting period for specified conditions.
-Claims: Submit hospitalisation claim within 30 days. Claims processed within 10 working days.
