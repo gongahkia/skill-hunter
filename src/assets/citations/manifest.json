@@ -1,0 +1,17 @@
+{
+  "builtAt": "2026-06-02T08:05:00.105Z",
+  "acts": [
+    {
+      "slug": "CPC2010",
+      "name": "Criminal Procedure Code",
+      "sections": 2,
+      "citations": 2
+    },
+    {
+      "slug": "PC1871",
+      "name": "Penal Code",
+      "sections": 1,
+      "citations": 1
+    }
+  ]
+}
