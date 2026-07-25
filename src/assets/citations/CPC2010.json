@@ -1,0 +1,28 @@
+{
+  "actSlug": "CPC2010",
+  "actName": "Criminal Procedure Code",
+  "builtAt": "2026-06-02T08:05:00.102Z",
+  "sourceCorpusSize": 9,
+  "sections": {
+    "pr406-he-": [
+      {
+        "citation": "[2026] SGHC 47",
+        "title": "LIM OON KUIN v PUBLIC PROSECUTOR",
+        "year": 2026,
+        "court": "SGHC",
+        "url": "https://www.elitigation.sg/gd/s/2026_SGHC_47",
+        "snippet": "…be heard on 24 October 2025, the filing of CM 58 was in contravention of s 406(2) of the CPC , which requires at least seven clear days between the service of the notice of…"
+      }
+    ],
+    "pr380-he-": [
+      {
+        "citation": "[2026] SGHC 64",
+        "title": "SANTOS-TUMALIP MARIA MONALYN BAGAPORO v PUBLIC PROSECUTOR",
+        "year": 2026,
+        "court": "SGHC",
+        "url": "https://www.elitigation.sg/gd/s/2026_SGHC_64",
+        "snippet": "…27 November 2025 (see [2(c)] above), she was barred from appealing against her sentence. Nonetheless, s 380(1) of the CPC empowers the appellate court to permit a person who is debarred from appealing (on grounds…"
+      }
+    ]
+  }
+}

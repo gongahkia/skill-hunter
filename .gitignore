@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+safari/build/
+DerivedData/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.xcuserstate
+xcuserdata/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Testing
+coverage/
+.jest-cache/
+
+# Misc
+*.zip
+CLAUDE.md
