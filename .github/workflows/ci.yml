@@ -1,116 +1,24 @@
-name: CI
+name: Judgeman CI/CD on Push
 
 on:
   push:
-    branches:
-      - main
-      - codex/**
-    tags:
-      - 'release/*'
-      - 'v*'
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/webext
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install root dependencies
-        run: |
-          npm ci
-      - name: Validate challenge packs
-        run: |
-          npm run validate:packs
-      - name: Build and package extension artifacts
-        run: |
-          npm run package:release
-      - name: Upload extension artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dorso-extension-artifacts
-          path: dist/artifacts/*.zip
-          if-no-files-found: error
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-  deploy-badge-staging:
-    if: startsWith(github.ref, 'refs/tags/release/') || startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-    environment: cloudflare-staging
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy badge worker to staging
-        uses: cloudflare/wrangler-action@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          workingDirectory: cloudflare
-          command: deploy --env staging
-          environment: staging
-          secrets: |
-            CF_HMAC_SECRET
-        env:
-          CF_HMAC_SECRET: ${{ secrets.CF_HMAC_SECRET }}
+          node-version: "22"
+          cache: npm
 
-  sign-firefox-amo:
-    if: startsWith(github.ref, 'refs/tags/release/') || startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install root dependencies
-        run: |
-          npm ci
-      - name: Build Firefox package and source archive
-        run: |
-          npm run package:release
-      - name: Sign Firefox build on AMO
-        env:
-          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
-          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
-        run: |
-          mkdir -p dist/amo
-          SOURCE_ZIP="dist/artifacts/dorso-$(node -p "require('./package.json').version")-source.zip"
-          npx web-ext sign \
-            --source-dir dist/firefox \
-            --artifacts-dir dist/amo \
-            --channel listed \
-            --api-key "$WEB_EXT_API_KEY" \
-            --api-secret "$WEB_EXT_API_SECRET" \
-            --upload-source-code "$SOURCE_ZIP" \
-            --approval-timeout 900000
-      - name: Upload signed Firefox XPI
-        uses: actions/upload-artifact@v4
-        with:
-          name: dorso-firefox-signed-xpi
-          path: dist/amo/*.xpi
-          if-no-files-found: error
+      - name: Install dependencies
+        run: npm ci
 
-  deploy-badge-production:
-    if: startsWith(github.ref, 'refs/tags/release/') || startsWith(github.ref, 'refs/tags/v')
-    needs: deploy-badge-staging
-    runs-on: ubuntu-latest
-    environment: cloudflare-production
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy badge worker to production
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          workingDirectory: cloudflare
-          command: deploy --env production
-          environment: production
-          secrets: |
-            CF_HMAC_SECRET
-        env:
-          CF_HMAC_SECRET: ${{ secrets.CF_HMAC_SECRET }}
+      - name: Run unit tests
+        run: npm test

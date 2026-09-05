@@ -1,75 +1,84 @@
-# Dorso
+[![judgeman_1.0.0](https://img.shields.io/badge/judgeman_1.0-passing-10B981)](https://github.com/gongahkia/judgeman/releases/tag/1.0)
+[![judgeman_2.0.0](https://img.shields.io/badge/judgeman_2.0-passing-059669)](https://github.com/gongahkia/judgeman/releases/tag/2.0)
+[![judgeman_3.0.0](https://img.shields.io/badge/judgeman_3.0-passing-047857)](https://github.com/gongahkia/judgeman/releases/tag/3.0)
+[![judgeman_4.0.0](https://img.shields.io/badge/judgeman_4.0-passing-065F46)](https://github.com/gongahkia/judgeman/releases/tag/4.0)
+![](https://github.com/gongahkia/judgeman/actions/workflows/ci.yml/badge.svg)
 
-<img src="./asset/reference/demo.gif" width="100%">
+# `Judgeman`
 
-Dorso is our local-only CAPTCHA for AI-era programming atrophy: before selected chatbot sites open, we solve a short coding challenge, earn a timed unlock, and keep the evidence on-device. The premise is not anti-AI; it is anti-autopilot. InfoQ's February 2026 summary of Anthropic's randomized controlled trial reports that AI-assisted developers scored 17% lower on skill-mastery checks while productivity gains were not statistically significant, so Dorso turns that finding into a small friction loop that protects deliberate practice without accounts, analytics, or a Dorso remote service.
+Browser extension that formats cases to be more readable.
 
-Dorso does three things:
+## Motivation
 
-- Gates selected chatbot sites until a challenge is solved.
-- Rotates local challenge sources: MCQ, drill, LeetCode, Advent of Code, and Project Euler.
-- Shares optional receipts, CLI status, and a signed Cognitive Index badge without sending prompt content to Dorso.
+[ELIT](https://www.elitigation.sg/_layouts/IELS/HomePage/Pages/Home.aspx) is one of the largest publicly available repositories for Singapore's law cases. However, the website is hard to navigate through and makes cases difficult to read. Important information is often lost in walls of text.
+
+`Judgeman` reduces the overly complex DOM structure of the webpage to one that is easily understood and can be parsed by lawyers and programmers alike.
+
+## Purpose
+
+* BLUF, important case information is laid bare
+* Speed up reading cases on ELIT
+* Browser extension with small source code binary
+* Supported on most browsers
 
 ## Screenshots
 
-| Popup | Gate | Badge |
-| --- | --- | --- |
-| ![Dorso popup](./asset/reference/popup.png) | ![Dorso gate](./asset/reference/gate.png) | ![Dorso badge](./asset/reference/badge.png) |
+<div align="center">
+    <img src="./asset/1.png" width="45%">
+    <img src="./asset/2.png" width="45%">
+</div>
 
-## Install
+![](./asset/3.png)
+![](./asset/4.png)
 
-### Chrome / Chromium
+## Installation
 
-1. Run `npm ci && npm run build:chrome`.
-2. Open `chrome://extensions`, enable Developer mode, choose Load unpacked, and select `dist/chrome`.
-3. Configure challenge sources and protected chatbot sites from the Dorso popup.
+### CLI
 
-## Origins
+```console
+$ git clone https://github.com/gongahkia/judgeman
+$ cd judgeman
+$ rm -r README.md sample
+```
 
-1. Run `npm ci && npm run build:firefox`.
-2. Open `about:debugging#/runtime/this-firefox`, choose Load Temporary Add-on, and select `dist/firefox/manifest.json`.
-3. Configure challenge sources and protected chatbot sites from the Dorso popup.
+### GUI
 
-Safari is deferred for v3.0 store polish.
+1. Click *Code*.
 
-## Badge / Embed
+![](./archive/judgeman_v1/asset/install-1.png)
 
-The popup can generate a signed Cognitive Index badge for README or profile embeds.
+2. Click *Download ZIP*.
 
-1. Open the Dorso popup after the extension has runtime state.
-2. Open the badge panel.
-3. Copy the Markdown or HTML snippet.
-4. Paste it into a README, profile, or launch post.
+![](./archive/judgeman_v1/asset/install-2.png)
 
-The badge URL encodes the score state and HMAC signature. The optional Cloudflare Worker serves the SVG without storing per-user badge state.
+3. Unzip the ZIP file. 
+
+## Usage
+
+### Firefox
+1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
+2. Click *load temporary add-on*.
+3. Open the `judgeman` repo, select `manifest.json`.
+4. Open any **elit** page.
+5. Click the toggle button.
+
+### Chrome
+
+1. Copy and paste this link in the search bar *chrome://extensions/*.
+2. Toggle *Developer mode* on.
+3. Click *load unpacked*.
+4. Open the `judgeman` repo, click *select*.
+5. Open any **elit** page.
+6. Click the toggle button.
+
+Support for other browsers like Opera, Vivaldi have not been extensively tested, but this extension should work. Open an issue for further support.
 
 ## Privacy
 
-Dorso stores challenge state, timers, settings, solve receipts, and saved prompt notes in browser extension storage. The extension has no accounts, no analytics, no telemetry, and no remote problem-statement fetch path. The optional SVG badge is stateless: badge state is HMAC-signed into the URL and served by a Cloudflare Worker without per-user storage. Details: [docs/PRIVACY.md](./docs/PRIVACY.md).
+`Judgeman` is an offline-first reader for Singapore's ELIT. There is no telemetry, no remote logging, and no account.
 
-Optional CLI export writes a local JSON status file under the browser Downloads directory for `dorso status`; it does not send status to a server.
+## References
 
-## Tech Stack
+The name `Judgeman` is in reference to the cursed technique of [Hiromi Higuruma](https://jujutsu-kaisen.fandom.com/wiki/Hiromi_Higuruma) (日車寛見), a defense attorney who rose to prominence in the [culling game arc](https://jujutsu-kaisen.fandom.com/wiki/Culling_Game_Arc) of the manga series [Jujutsu Kaisen](https://jujutsu-kaisen.fandom.com/wiki/Jujutsu_Kaisen_Wiki).
 
-- JavaScript ES modules
-- esbuild extension bundling
-- Chrome and Firefox WebExtension APIs
-- Optional `@dorso/cli` Node companion
-- Local `chrome.storage.local` state
-- JSON challenge packs with AJV schema validation
-- MCQ, drill, LeetCode, Advent of Code, and Project Euler challenge providers
-- GitHub Actions for CI
-- Optional Cloudflare Worker for signed SVG badges
-
-## Contributing
-
-Challenge-pack contributions are the best first PRs. Keep prompts original, keep IDs stable, validate with `npm run validate:packs`, and follow [CONTRIBUTING.md](./CONTRIBUTING.md). Issue templates include a dedicated challenge-pack path under `.github/ISSUE_TEMPLATE/`.
-
-The name `Rakuzaichi` references the [Rakuzaichi Auction House](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Auction_House) (楽座市) owned by the [Sazanami Clan](https://kagurabachi.fandom.com/wiki/Sazanami_Clan) (漣家), the main setting for the [Rakuzaichi Arc](https://kagurabachi.fandom.com/wiki/Rakuzaichi_Arc) of [Kagurabachi](https://kagurabachi.fandom.com/wiki/Kagurabachi_Wiki).
-
-- Dorso is named after the [dorsolateral prefrontal cortex](https://en.wikipedia.org/wiki/Dorsolateral_prefrontal_cortex), the brain region associated with executive control and problem solving.
-- Historical v2.x archive: the `v2.x-final` git tag preserves the pre-v3 server-backed implementation.
-- InfoQ: [Anthropic Study: AI Coding Assistance Reduces Developer Skill Mastery by 17%](https://www.infoq.com/news/2026/02/ai-coding-skill-formation/)
-- Anthropic Research: [How AI assistance impacts the formation of coding skills](https://www.anthropic.com/research/AI-assistance-coding-skills)
-- Architecture notes: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-- Screenshots: [popup](./asset/reference/popup.png), [gate](./asset/reference/gate.png), [badge](./asset/reference/badge.png), [digest](./asset/reference/digest.png)
+![](https://64.media.tumblr.com/2a449b56b7bf13ef94308fa4708b71fc/9f2fa11c67b698f5-4b/s1280x1920/83db52625d6df7b945b482183d12542a561407ab.png)

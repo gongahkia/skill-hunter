@@ -1,25 +1,21 @@
 {
-  "name": "dorso",
-  "version": "3.0.0",
+  "name": "judgeman-store-safe",
   "private": true,
-  "license": "MIT",
+  "version": "4.1.0",
+  "description": "Store-safe packaging, tests, and tooling for the Judgeman browser extension.",
   "scripts": {
-    "build": "npm run build:chrome && npm run build:firefox",
+    "icons": "python3 scripts/generate-icons.py",
+    "build": "node scripts/build-extension.mjs all",
     "build:chrome": "node scripts/build-extension.mjs chrome",
     "build:firefox": "node scripts/build-extension.mjs firefox",
+    "package:firefox": "node scripts/package-firefox-submission.mjs",
+    "lint:firefox": "npx --yes web-ext lint --source-dir dist/firefox",
     "build:safari": "node scripts/build-extension.mjs safari",
-    "build:userscript": "node scripts/build-userscript.mjs",
-    "package:release": "npm run build && node scripts/package-extension-release.mjs",
-    "sync:safari-wrapper": "node scripts/sync-safari-wrapper.mjs",
-    "build:safari-app": "npm run build:safari && npm run sync:safari-wrapper",
-    "build:dashboard-validator": "node scripts/build-dashboard-validator.mjs",
-    "validate:packs": "node scripts/validate-packs.mjs",
-    "test": "node --test src/shared/__tests__/*.test.js src/extension/lib/__tests__/*.test.js src/extension/ui/__tests__/*.test.js"
+    "safari:project": "node scripts/generate-safari-project.mjs",
+    "test": "node --test tests/*.test.js",
+    "verify": "npm run build && npm test"
   },
   "devDependencies": {
-    "ajv": "^8.20.0",
-    "ajv-cli": "^5.0.0",
-    "esbuild": "^0.28.1",
-    "web-ext": "^10.4.0"
+    "jsdom": "^26.1.0"
   }
 }
