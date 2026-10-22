@@ -20,7 +20,8 @@
     }
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "content_scripts": [
     {
@@ -39,13 +40,17 @@
         "annotations.js",
         "caseToolkit.js",
         "extractor.js",
+        "panelStyles.js",
         "contentApp.js",
         "contentScript.js"
       ],
-      "css": [
-        "panel.css"
-      ],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "background": {
+    "scripts": [
+      "annotationStore.js",
+      "background.js"
+    ]
+  }
 }

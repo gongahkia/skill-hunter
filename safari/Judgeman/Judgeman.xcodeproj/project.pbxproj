@@ -27,6 +27,17 @@
 		3C579D572F6D1DD500D6B381 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C579D4D2F6D1DD500D6B381 /* popup.css */; };
 		3C579D582F6D1DD500D6B381 /* panel.css in Resources */ = {isa = PBXBuildFile; fileRef = 3C579D4E2F6D1DD500D6B381 /* panel.css */; };
 		3C579D592F6D1DD500D6B381 /* contentScript.js in Resources */ = {isa = PBXBuildFile; fileRef = 3C579D4F2F6D1DD500D6B381 /* contentScript.js */; };
+		6F4685A9D7C605955CF9D433 /* annotationStore.js in Resources */ = {isa = PBXBuildFile; fileRef = A2AA37417B5DF95C49322C29 /* annotationStore.js */; };
+		C478D55A42AD444574287570 /* annotations.js in Resources */ = {isa = PBXBuildFile; fileRef = 7D7E0256ED38484BA40807B5 /* annotations.js */; };
+		8FCD0AA6BA65EF86BB4625BD /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 9E672B49886D6A9272BE0A9F /* background.js */; };
+		7069407FA3F7D90A09FAD868 /* caseToolkit.js in Resources */ = {isa = PBXBuildFile; fileRef = F28C7557C8846AF79FB3000B /* caseToolkit.js */; };
+		F95B28B7D9015138A05755F9 /* citationAdapters.js in Resources */ = {isa = PBXBuildFile; fileRef = 4D7E79ED6C8C6461A204878A /* citationAdapters.js */; };
+		A16BACB237AEEF62A1A1C266 /* citationLinker.js in Resources */ = {isa = PBXBuildFile; fileRef = 6F8889DC104A783AF542A957 /* citationLinker.js */; };
+		1879A05937E157F5DC0B7A9A /* fieldOverlay.js in Resources */ = {isa = PBXBuildFile; fileRef = A4BFDCF2EFA96A7CD49A65E6 /* fieldOverlay.js */; };
+		90A542F6663ABD35E6E2EDBB /* inlineCitations.js in Resources */ = {isa = PBXBuildFile; fileRef = 16507E73D14F3252947ACADC /* inlineCitations.js */; };
+		93DE4EA6649985585861A82B /* inlineStatutes.js in Resources */ = {isa = PBXBuildFile; fileRef = 02148E9F4533B61F3211A6B6 /* inlineStatutes.js */; };
+		372DA5CD43356810036460B0 /* logger.js in Resources */ = {isa = PBXBuildFile; fileRef = 09D158C3B7407B54CE6EFC50 /* logger.js */; };
+		9EDE69D7B07C1ADDB8CA20B4 /* panelStyles.js in Resources */ = {isa = PBXBuildFile; fileRef = 5F8513E3DED855FF4A93B8E5 /* panelStyles.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +88,17 @@
 		3C579D4D2F6D1DD500D6B381 /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = Resources/popup.css; sourceTree = "<group>"; };
 		3C579D4E2F6D1DD500D6B381 /* panel.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = panel.css; path = Resources/panel.css; sourceTree = "<group>"; };
 		3C579D4F2F6D1DD500D6B381 /* contentScript.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = contentScript.js; path = Resources/contentScript.js; sourceTree = "<group>"; };
+		A2AA37417B5DF95C49322C29 /* annotationStore.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = annotationStore.js; path = Resources/annotationStore.js; sourceTree = "<group>"; };
+		7D7E0256ED38484BA40807B5 /* annotations.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = annotations.js; path = Resources/annotations.js; sourceTree = "<group>"; };
+		9E672B49886D6A9272BE0A9F /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = Resources/background.js; sourceTree = "<group>"; };
+		F28C7557C8846AF79FB3000B /* caseToolkit.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = caseToolkit.js; path = Resources/caseToolkit.js; sourceTree = "<group>"; };
+		4D7E79ED6C8C6461A204878A /* citationAdapters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = citationAdapters.js; path = Resources/citationAdapters.js; sourceTree = "<group>"; };
+		6F8889DC104A783AF542A957 /* citationLinker.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = citationLinker.js; path = Resources/citationLinker.js; sourceTree = "<group>"; };
+		A4BFDCF2EFA96A7CD49A65E6 /* fieldOverlay.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = fieldOverlay.js; path = Resources/fieldOverlay.js; sourceTree = "<group>"; };
+		16507E73D14F3252947ACADC /* inlineCitations.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = inlineCitations.js; path = Resources/inlineCitations.js; sourceTree = "<group>"; };
+		02148E9F4533B61F3211A6B6 /* inlineStatutes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = inlineStatutes.js; path = Resources/inlineStatutes.js; sourceTree = "<group>"; };
+		09D158C3B7407B54CE6EFC50 /* logger.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = logger.js; path = Resources/logger.js; sourceTree = "<group>"; };
+		5F8513E3DED855FF4A93B8E5 /* panelStyles.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = panelStyles.js; path = Resources/panelStyles.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +174,17 @@
 		3C579D452F6D1DD500D6B381 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				5F8513E3DED855FF4A93B8E5 /* panelStyles.js */,
+				09D158C3B7407B54CE6EFC50 /* logger.js */,
+				02148E9F4533B61F3211A6B6 /* inlineStatutes.js */,
+				16507E73D14F3252947ACADC /* inlineCitations.js */,
+				A4BFDCF2EFA96A7CD49A65E6 /* fieldOverlay.js */,
+				6F8889DC104A783AF542A957 /* citationLinker.js */,
+				4D7E79ED6C8C6461A204878A /* citationAdapters.js */,
+				F28C7557C8846AF79FB3000B /* caseToolkit.js */,
+				9E672B49886D6A9272BE0A9F /* background.js */,
+				7D7E0256ED38484BA40807B5 /* annotations.js */,
+				A2AA37417B5DF95C49322C29 /* annotationStore.js */,
 				3C579D462F6D1DD500D6B381 /* browserApi.js */,
 				3C579D472F6D1DD500D6B381 /* popup.js */,
 				3C579D482F6D1DD500D6B381 /* extractor.js */,
@@ -266,6 +299,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EDE69D7B07C1ADDB8CA20B4 /* panelStyles.js in Resources */,
+				372DA5CD43356810036460B0 /* logger.js in Resources */,
+				93DE4EA6649985585861A82B /* inlineStatutes.js in Resources */,
+				90A542F6663ABD35E6E2EDBB /* inlineCitations.js in Resources */,
+				1879A05937E157F5DC0B7A9A /* fieldOverlay.js in Resources */,
+				A16BACB237AEEF62A1A1C266 /* citationLinker.js in Resources */,
+				F95B28B7D9015138A05755F9 /* citationAdapters.js in Resources */,
+				7069407FA3F7D90A09FAD868 /* caseToolkit.js in Resources */,
+				8FCD0AA6BA65EF86BB4625BD /* background.js in Resources */,
+				C478D55A42AD444574287570 /* annotations.js in Resources */,
+				6F4685A9D7C605955CF9D433 /* annotationStore.js in Resources */,
 				3C579D532F6D1DD500D6B381 /* contentApp.js in Resources */,
 				3C579D562F6D1DD500D6B381 /* manifest.json in Resources */,
 				3C579D542F6D1DD500D6B381 /* popup.html in Resources */,

@@ -76,7 +76,6 @@
       "[role='dialog']",
       ".superscript-btn",
       "sup button",
-      "sup",
       ".FootnoteRef"
     ];
     for (const selector of stripSelectors) {
@@ -104,6 +103,8 @@
       caseParties: "",
       caseLegalIssues: [],
       caseBody: {},
+      caseSections: [],
+      caseFootnotes: [],
       caseAnalysis: null,
       extractionErrors: []
     };
@@ -218,52 +219,110 @@
     return false;
   }
 
-  function isHeadingNode(node) {
-    return node.classList?.contains("Judg-Heading-1");
+  const SAFE_SOURCE_TAGS = new Set("a abbr b blockquote br caption col colgroup div em h1 h2 h3 h4 h5 h6 hr i img li ol p pre s small span strong sub sup table tbody td th thead tfoot tr u ul".split(" "));
+  const DROP_SOURCE_TAGS = new Set("script style iframe object embed form input button select textarea link meta base template noscript".split(" "));
+  const SAFE_SOURCE_ATTRS = new Set("id title lang dir colspan rowspan scope headers start value type width height alt".split(" "));
+
+  function sourceHtml(node, stripFootnotes = true) {
+    const clone = node.cloneNode(true);
+    const holder = node.ownerDocument.createElement("div");
+    holder.appendChild(clone);
+    if (stripFootnotes) {
+      for (const drop of clone.querySelectorAll(".modal, .modal-dialog, .modal-fade, [role='dialog'], .FootnoteRef")) drop.remove();
+      for (const button of clone.querySelectorAll(".superscript-btn, sup button")) {
+        const link = node.ownerDocument.createElement("a");
+        link.textContent = button.textContent;
+        const target = button.getAttribute("data-target") || "";
+        if (target.startsWith("#")) link.setAttribute("href", target);
+        button.replaceWith(link);
+      }
+    }
+    const elements = [clone, ...clone.querySelectorAll("*")];
+    for (const el of elements) {
+      const tag = el.localName;
+      if (DROP_SOURCE_TAGS.has(tag)) { el.remove(); continue; }
+      if (!SAFE_SOURCE_TAGS.has(tag)) { el.replaceWith(...el.childNodes); continue; }
+      const href = el.getAttribute(tag === "img" ? "src" : "href");
+      for (const attr of [...el.attributes]) {
+        if (!SAFE_SOURCE_ATTRS.has(attr.name)) el.removeAttribute(attr.name);
+      }
+      if (el.id) el.id = `jm-source-${el.id}`;
+      if ((tag === "a" || tag === "img") && href) {
+        try {
+          const url = new URL(href, node.ownerDocument.URL);
+          if (!["http:", "https:"].includes(url.protocol)) continue;
+          const source = new URL(node.ownerDocument.URL);
+          if (tag === "a" && url.origin === source.origin && url.pathname === source.pathname && url.hash) {
+            el.setAttribute("href", `#jm-source-${decodeURIComponent(url.hash.slice(1))}`);
+          } else {
+            el.setAttribute(tag === "img" ? "src" : "href", url.href);
+            if (tag === "a") {
+              el.setAttribute("target", "_blank");
+              el.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+        } catch (_error) { /* Keep the label, without an unsafe or malformed URL. */ }
+      }
+    }
+    return holder.innerHTML;
   }
 
-  function isBodyNode(node) {
-    if (!node.classList) return false;
-    return (
-      node.classList.contains("Judg-1") ||
-      node.classList.contains("Judg-2") ||
-      node.classList.contains("Judg-List-1") ||
-      node.classList.contains("Judg-Quote-0")
-    );
+  function bodyKind(node) {
+    for (const name of node.classList || []) {
+      if (/^Judg-Heading-\d+$/.test(name)) return "heading";
+      if (/^Judg-(?:\d+|List-\d+|Quote-\d+|Table(?:-\d+)?|Sign)$/.test(name)) return "body";
+    }
+    return null;
   }
 
   function extractBody(documentRef, page) {
-    const bodyContainer = documentRef?.querySelector?.("#divJudgement") || documentRef;
-    const bodyNodes = bodyContainer?.querySelectorAll?.(
-      ".Judg-Heading-1, .Judg-1, .Judg-2, .Judg-List-1, .Judg-Quote-0"
-    ) || [];
-
-    let sectionName = "Introduction";
-    let buffer = [];
-
-    bodyNodes.forEach((node) => {
-      if (isHeadingNode(node)) {
-        if (buffer.length) {
-          page.caseBody[sectionName] = buffer;
-        }
-        sectionName = cleanText(node.textContent) || "Section";
-        buffer = [];
-        return;
+    const judgmentRoot = documentRef?.querySelector?.("#divJudgement");
+    const bodyContainer = judgmentRoot || documentRef?.body || documentRef;
+    // Keep complete source blocks, including unclassified tables and list wrappers.
+    // Selecting descendant classes alone drops cells and changes their reading order.
+    const author = bodyContainer?.querySelector?.(".Judg-Author");
+    const first = author || [...(bodyContainer?.querySelectorAll?.("[class]") || [])].find(node => bodyKind(node));
+    let nodes = [];
+    if (first) {
+      let start = author ? author.nextElementSibling : first;
+      if (!author) {
+        while (start.parentElement && start.parentElement !== bodyContainer) start = start.parentElement;
       }
-      if (isBodyNode(node)) {
+      for (let node = start; node; node = node.nextElementSibling) {
+        if (node.classList.contains("Judg-Lawyers") || node.classList.contains("Judg-EOF")) break;
+        if (!node.matches(".modal, [role='dialog'], script, style, button, nav")) nodes.push(node);
+      }
+    } else if (judgmentRoot) {
+      nodes = [...bodyContainer.children].filter(node => !node.matches("script, style, button, nav, .modal, [role='dialog']"));
+    }
+    let section = {title:"Introduction", level:1, paragraphs:[], paragraphNodes:[]};
+    function finish() {
+      if (!section.paragraphs.length && !section.explicit) return;
+      page.caseSections.push(section);
+      let key = section.title;
+      let suffix = 2;
+      while (Object.prototype.hasOwnProperty.call(page.caseBody, key)) key = `${section.title} (${suffix++})`;
+      Object.defineProperty(page.caseBody, key, {value:section.paragraphs, enumerable:true, writable:true, configurable:true});
+    }
+    for (const node of nodes) {
+      if (bodyKind(node) === "heading") {
+        finish();
+        const level = Number([...node.classList].find(name => /^Judg-Heading-\d+$/.test(name))?.split("-").at(-1)) || 1;
+        section = {title:String(node.textContent || "").trim() || "Section", level, sourceId:node.id || null, paragraphs:[], paragraphNodes:[], explicit:true};
+      } else {
         const text = extractTextWithoutFootnotes(node);
-        if (text) {
-          if (node.classList.contains("Judg-1") || node.classList.contains("Judg-2")) {
-            if (secNumberCheck(text)) buffer.push(text);
-          } else {
-            buffer.push(text);
-          }
-        }
+        if (!text) continue;
+        section.paragraphs.push(text);
+        section.paragraphNodes.push({text, html:sourceHtml(node), sourceId:node.id || null});
       }
-    });
-
-    if (buffer.length) {
-      page.caseBody[sectionName] = buffer;
+    }
+    finish();
+    const footnotes = [...(bodyContainer?.querySelectorAll?.(".modal, [role='dialog']") || [])];
+    for (const note of footnotes) {
+      if (note.parentElement?.closest(".modal, [role='dialog']")) continue;
+      const content = note.querySelector(".modal-body, .FootnoteRef");
+      if (!content) continue;
+      page.caseFootnotes.push({id:note.id || `footnote-${page.caseFootnotes.length + 1}`, text:cleanText(content.textContent), html:sourceHtml(content, false)});
     }
   }
 

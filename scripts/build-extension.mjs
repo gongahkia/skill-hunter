@@ -21,6 +21,8 @@ const COPY_FILES = [
   "inlineStatutes.js",
   "fieldOverlay.js",
   "annotations.js",
+  "annotationStore.js",
+  "background.js",
   "caseToolkit.js",
   "contentApp.js",
   "contentScript.js",
@@ -74,6 +76,7 @@ function createChromeManifest() {
 
 function createFirefoxManifest() {
   const manifest = loadBaseManifest();
+  manifest.background = { scripts: ["annotationStore.js", "background.js"] };
   manifest.browser_specific_settings = {
     gecko: {
       id: FIREFOX_ADDON_ID,
@@ -90,7 +93,9 @@ function createFirefoxManifest() {
 }
 
 function createSafariManifest() {
-  return loadBaseManifest();
+  const manifest = loadBaseManifest();
+  manifest.background = { scripts: ["annotationStore.js", "background.js"] };
+  return manifest;
 }
 
 function writeManifest(targetDir, manifest) {
@@ -105,6 +110,7 @@ function buildTarget(target) {
   const targetDir = path.join(DIST_DIR, target);
   cleanTargetDir(targetDir);
   copySourceFiles(targetDir);
+  fs.writeFileSync(path.join(targetDir, "panelStyles.js"), `globalThis.JudgemanPanelStyles = ${JSON.stringify(fs.readFileSync(path.join(SOURCE_DIR, "panel.css"), "utf8"))};\n`);
 
   if (target === "chrome") {
     writeManifest(targetDir, createChromeManifest());

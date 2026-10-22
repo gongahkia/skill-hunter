@@ -47,6 +47,10 @@
       ? root.JudgemanLogger.createLogger({ namespace: "ContentApp" })
       : createFallbackLogger();
 
+    let readerRootNode = null;
+    let readerShadow = null;
+    const annotationDrafts = new Map();
+
     const OVERLAY_STORAGE_KEY = "judgeman.fieldOverlay.visible";
 
     function loadOverlayVisible() {
@@ -129,7 +133,7 @@
     }
 
     function setStatus(text, tone = "info") {
-      const statusEl = document.getElementById("jm-status");
+      const statusEl = readerShadow?.getElementById("jm-status");
       if (!statusEl) return;
 
       statusEl.textContent = text || "";
@@ -146,14 +150,14 @@
 
     function setCaseTitle(text) {
       const title = text || "Judgeman";
-      const panelTitle = document.getElementById("jm-case-title");
-      const popupTitle = document.getElementById("jm-reader-title");
+      const panelTitle = readerShadow?.getElementById("jm-case-title");
+      const popupTitle = readerShadow?.getElementById("jm-reader-title");
       if (panelTitle) panelTitle.textContent = title;
       if (popupTitle) popupTitle.textContent = title;
     }
 
     function getReaderRoot() {
-      return document.getElementById("judgeman-reader-root");
+      return readerRootNode;
     }
 
     async function copyToClipboard(text) {
@@ -167,7 +171,7 @@
       fallbackInput.setAttribute("readonly", "readonly");
       fallbackInput.style.position = "fixed";
       fallbackInput.style.opacity = "0";
-      document.documentElement.appendChild(fallbackInput);
+      readerShadow.appendChild(fallbackInput);
       fallbackInput.select();
 
       const copied = document.execCommand?.("copy");
@@ -304,39 +308,46 @@
       }
     }
 
-    function buildSectionsContent(page) {
-      let paragraphNumber = 0;
-      let sectionIndex = 0;
-      const fragment = document.createDocumentFragment();
-
-      for (const [title, paragraphs] of Object.entries(page.caseBody)) {
-        const details = createElement("details", {
-          className: "jm-section",
-          id: sectionDomId(title, sectionIndex)
-        });
-        details.open = true;
-        details.appendChild(createElement("summary", { text: title }));
-
-        const body = createElement("div", { className: "jm-section-body" });
-        for (const paragraph of paragraphs) {
-          paragraphNumber += 1;
-          const content = extractorApi.sanitiseParagraph(paragraph);
-          const p = createElement("p", {}, [
-            createElement("span", {
-              className: "jm-paragraph-number",
-              text: `${paragraphNumber}.`
-            }),
-            " "
-          ]);
-          appendParagraphContent(p, content);
-          body.appendChild(p);
-        }
-
-        details.appendChild(body);
-        fragment.appendChild(details);
-        sectionIndex += 1;
+    function appendSourceParagraph(parent, source) {
+      const template = document.createElement("template");
+      template.innerHTML = source.html;
+      const walker = document.createTreeWalker(template.content, window.NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      for (const node of nodes) {
+        if (node.parentElement?.closest("a")) continue;
+        const fragment = document.createDocumentFragment();
+        appendParagraphContent(fragment, node.textContent);
+        node.replaceWith(fragment);
       }
+      parent.appendChild(template.content);
+    }
 
+    function buildSectionsContent(page) {
+      const fragment = document.createDocumentFragment();
+      const sections = page.caseSections || Object.entries(page.caseBody).map(([title, paragraphs]) => ({title, paragraphs}));
+      sections.forEach((section, sectionIndex) => {
+        const details = createElement("details", {className:"jm-section", id:sectionDomId(section.title, sectionIndex)});
+        details.open = true;
+        details.appendChild(createElement("summary", {text:section.title, id:section.sourceId ? `jm-source-${section.sourceId}` : undefined}));
+        const body = createElement("div", {className:"jm-section-body"});
+        section.paragraphs.forEach((paragraph, index) => {
+          const wrapper = createElement("div", {className:"jm-source-paragraph"});
+          const source = section.paragraphNodes?.[index];
+          if (source?.html) appendSourceParagraph(wrapper, source);
+          else appendParagraphContent(wrapper, paragraph);
+          body.appendChild(wrapper);
+        });
+        details.appendChild(body); fragment.appendChild(details);
+      });
+      if (page.caseFootnotes?.length) {
+        const notes = createElement("section", {className:"jm-footnotes"}, [createElement("h3", {text:"Footnotes"})]);
+        for (const note of page.caseFootnotes) {
+          const wrapper = createElement("div", {id:`jm-source-${note.id}`});
+          appendSourceParagraph(wrapper, note); notes.appendChild(wrapper);
+        }
+        fragment.appendChild(notes);
+      }
       return fragment;
     }
 
@@ -348,8 +359,8 @@
     function scrollToSection(title, page) {
       const idx = findSectionIndex(page, title);
       if (idx < 0) return;
-      const id = sectionDomId(title, idx);
-      const el = document.getElementById(id);
+      const id = sectionDomId(page.caseSections?.[idx]?.title || title, idx);
+      const el = readerShadow?.getElementById(id);
       if (!el) return;
       try {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -588,58 +599,59 @@
       if (!annotationsApi) {
         return createElement("p", { className: "jm-empty", text: "Annotations module unavailable." });
       }
-      const caseNum = page.caseNumber || "unknown";
-      const wrapper = createElement("div", { className: "jm-annotations" });
-      const inputRow = createElement("div", { className: "jm-annotation-input" });
-      const textarea = createElement("textarea", {
-        attrs: { placeholder: "Add a note for this case...", rows: "2" }
-      });
-      const addBtn = createElement("button", {
-        className: "jm-btn jm-btn-quiet", text: "Add note", attrs: { type: "button" }
-      });
-      const exportBtn = createElement("button", {
-        className: "jm-btn jm-btn-quiet", text: "Export annotations", attrs: { type: "button" }
-      });
-      inputRow.appendChild(textarea);
-      inputRow.appendChild(addBtn);
-      inputRow.appendChild(exportBtn);
-      wrapper.appendChild(inputRow);
-      const listEl = createElement("ul", { className: "jm-annotation-list" });
-      wrapper.appendChild(listEl);
-      function renderList() {
-        clearNode(listEl);
-        const notes = annotationsApi.load(caseNum);
-        if (notes.length === 0) {
-          listEl.appendChild(createElement("li", { className: "jm-empty", text: "No annotations yet." }));
-          return;
-        }
-        for (const note of notes) {
-          const li = createElement("li", { className: "jm-annotation-item" });
-          li.appendChild(createElement("span", { text: note.text }));
-          li.appendChild(createElement("small", { text: ` (${note.createdAt})` }));
-          const delBtn = createElement("button", {
-            className: "jm-btn jm-btn-quiet", text: "x",
-            attrs: { type: "button", "aria-label": "Delete annotation" }
-          });
-          delBtn.addEventListener("click", () => { annotationsApi.remove(caseNum, note.id); renderList(); });
-          li.appendChild(delBtn);
-          listEl.appendChild(li);
-        }
+      const caseKey = page.caseTitle.match(/\[\d{4}\]\s+SG[A-Z]{1,6}\s+\d+/)?.[0].replace(/\s+/g," ") || window.location.href.split("#")[0];
+      const wrapper = createElement("div", {className:"jm-annotations"});
+      const inputRow = createElement("div", {className:"jm-annotation-input"});
+      const textarea = createElement("textarea", {attrs:{placeholder:"Add a note for this case...", rows:"2", maxlength:annotationsApi.MAX_TEXT}});
+      textarea.value = annotationDrafts.get(caseKey) || "";
+      textarea.addEventListener("input", () => annotationDrafts.set(caseKey,textarea.value));
+      const addBtn = createElement("button", {className:"jm-btn jm-btn-quiet", text:"Add note", attrs:{type:"button"}});
+      const exportBtn = createElement("button", {className:"jm-btn jm-btn-quiet", text:"Export annotations", attrs:{type:"button"}});
+      const status = createElement("p", {className:"jm-annotation-status", attrs:{role:"status"}});
+      inputRow.append(textarea, addBtn, exportBtn); wrapper.append(inputRow, status);
+      const listEl = createElement("ul", {className:"jm-annotation-list"}); wrapper.append(listEl);
+      function failure(error) {
+        status.textContent = describeError(error);
+        status.classList.add("jm-status-error");
       }
-      addBtn.addEventListener("click", () => {
-        const text = textarea.value.trim();
-        if (!text) return;
-        annotationsApi.add(caseNum, text);
-        textarea.value = "";
-        renderList();
-      });
-      exportBtn.addEventListener("click", () => {
-        const bundle = annotationsApi.exportBundle(caseNum, page);
-        void copyToClipboard(JSON.stringify(bundle, null, 2)).then(() => {
-          setStatus("Annotations exported to clipboard.", "success");
-        });
-      });
-      renderList();
+      async function renderList() {
+        try {
+          const notes = await annotationsApi.load(caseKey);
+          clearNode(listEl);
+          if (!notes.length) listEl.append(createElement("li", {className:"jm-empty",text:"No annotations yet."}));
+          for (const note of notes) {
+            const li = createElement("li", {className:"jm-annotation-item"});
+            li.append(createElement("span",{text:note.text}),createElement("small",{text:` (${note.createdAt})`}));
+            const delBtn = createElement("button", {className:"jm-btn jm-btn-quiet",text:"x",attrs:{type:"button","aria-label":"Delete annotation"}});
+            delBtn.addEventListener("click", () => { void (async () => {
+              delBtn.disabled = true;
+              try {await annotationsApi.remove(caseKey,note.id); await renderList();}
+              catch(error) {failure(error); delBtn.disabled=false;}
+            })(); });
+            li.append(delBtn); listEl.append(li);
+          }
+        } catch(error) {failure(error);}
+      }
+      addBtn.addEventListener("click", () => { void (async () => {
+        const draft = textarea.value;
+        if (!draft.trim() || addBtn.disabled) return;
+        addBtn.disabled = true;
+        try {
+          await annotationsApi.add(caseKey,draft);
+          if (textarea.value === draft) {textarea.value=""; if (annotationDrafts.get(caseKey) === draft) annotationDrafts.delete(caseKey);}
+          status.textContent="Annotation saved."; status.classList.remove("jm-status-error");
+          await renderList();
+        } catch(error) {failure(error);}
+        finally {addBtn.disabled=false;}
+      })(); });
+      exportBtn.addEventListener("click", () => { void (async () => {
+        try {
+          const bundle = await annotationsApi.exportBundle(caseKey,page);
+          await copyToClipboard(JSON.stringify(bundle,null,2));
+          status.textContent="Annotations exported to clipboard.";
+        } catch(error) {failure(error);}
+      })(); });
+      void renderList();
       return wrapper;
     }
 
@@ -667,7 +679,7 @@
       ensureReaderRoot();
 
       const readerRoot = getReaderRoot();
-      const readerMain = document.getElementById("jm-reader-main");
+      const readerMain = readerShadow?.getElementById("jm-reader-main");
       const page = state.lastCaseData;
 
       if (!readerRoot || !readerMain || !page) {
@@ -681,7 +693,7 @@
         return;
       }
 
-      const overlaySidebar = document.getElementById("jm-overlay-sidebar");
+      const overlaySidebar = readerShadow?.getElementById("jm-overlay-sidebar");
       if (overlaySidebar) {
         clearNode(overlaySidebar);
         const card = createElement("section", { className: "jm-card" }, [
@@ -885,7 +897,26 @@
         ]
       );
 
-      document.documentElement.appendChild(readerRoot);
+      const host = document.createElement("div");
+      host.id = "judgeman-reader-host";
+      readerShadow = host.attachShadow({mode:"closed"});
+      const style = document.createElement("style");
+      style.textContent = root.JudgemanPanelStyles || "";
+      readerShadow.append(style, readerRoot);
+      readerRootNode = readerRoot;
+      document.documentElement.appendChild(host);
+      readerRoot.addEventListener("click", event => {
+        const link = event.target.closest?.('a[href^="#jm-source-"]');
+        if (!link) return;
+        event.preventDefault();
+        const id = link.getAttribute("href").slice(1);
+        const target = [...readerRoot.querySelectorAll("[id]")].find(node => node.id === id);
+        if (!target) return;
+        for (let parent = target.parentElement; parent && parent !== readerRoot; parent = parent.parentElement) {
+          if (parent.localName === "details") parent.open = true;
+        }
+        target.scrollIntoView?.({block:"center",behavior:"smooth"});
+      });
 
       readerClose.addEventListener("click", () => {
         hideReadableView();
@@ -994,12 +1025,15 @@
       return { ok: false, error: `Unknown request type: ${String(request?.type || "undefined")}` };
     }
 
+    let messageQueue = Promise.resolve();
     function registerMessageListener() {
       if (state.listenerRegistered) return;
       state.listenerRegistered = true;
 
       browserApi.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-        void handleMessage(request)
+        const operation = messageQueue.then(() => handleMessage(request));
+        messageQueue = operation.catch(() => {});
+        void operation
           .then((payload) => {
             sendResponse(payload);
           })
@@ -1046,6 +1080,7 @@
       copyCaseJson,
       copyDiagnostics,
       getCaseData,
+      getReaderRoot,
       hideReadableView,
       refreshCaseData,
       showReadableView,
