@@ -7,20 +7,22 @@ const ROOT = process.cwd();
 const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
 const BUILD_SCRIPT_PATH = path.join(ROOT, "scripts", "build-extension.mjs");
 const DIST_FIREFOX_DIR = path.join(ROOT, "dist", "firefox");
-const SUBMISSION_DIR = path.join(ROOT, "submission", "firefox");
+const SUBMISSION_DIR = path.resolve(process.env.JUDGEMAN_SUBMISSION_DIR || path.join(ROOT, "submission", "firefox"));
 const REQUIRED_SOURCE_INCLUDE = [
   "Makefile",
   "package.json",
   "package-lock.json",
-  "DOC.md",
+  "README.md",
   path.join("scripts", "build-extension.mjs"),
   path.join("scripts", "generate-icons.py"),
+  path.join("scripts", "generate-safari-project.mjs"),
+  path.join("scripts", "safari-resource-references.mjs"),
   path.join("scripts", "package-firefox-submission.mjs"),
   path.join("judgeman_v4", "config"),
   path.join("judgeman_v4", "src"),
   "tests"
 ];
-const OPTIONAL_SOURCE_INCLUDE = ["AUDIT.md", "README2.md"];
+const OPTIONAL_SOURCE_INCLUDE = [];
 
 function run(command, args, options = {}) {
   execFileSync(command, args, {
@@ -39,11 +41,6 @@ function ensureZipAvailable() {
   } catch (error) {
     throw new Error('Missing "zip" command. Install zip before packaging Firefox submission artifacts.');
   }
-}
-
-function resetDir(directory) {
-  fs.rmSync(directory, { recursive: true, force: true });
-  fs.mkdirSync(directory, { recursive: true });
 }
 
 function zipDirectoryContents(sourceDir, outputPath) {
@@ -110,7 +107,7 @@ This archive contains the source used to generate the AMO upload package for Jud
 ## Rebuild Steps
 
 \`\`\`bash
-npm install
+npm ci
 npm run icons
 npm run build:firefox
 npm run package:firefox
@@ -157,24 +154,28 @@ function main() {
   const extensionZipPath = path.join(SUBMISSION_DIR, extensionZipName);
   const sourceZipPath = path.join(SUBMISSION_DIR, sourceZipName);
   const amoMetadataPath = path.join(SUBMISSION_DIR, "amo-metadata.json");
-  const tempStageDir = fs.mkdtempSync(path.join(os.tmpdir(), "judgeman-firefox-source-"));
-
-  resetDir(SUBMISSION_DIR);
-  zipDirectoryContents(DIST_FIREFOX_DIR, extensionZipPath);
+  const stagingRoot = process.env.JUDGEMAN_TEMP_DIR || os.tmpdir();
+  fs.mkdirSync(stagingRoot, {recursive:true});
+  const tempStageDir = fs.mkdtempSync(path.join(stagingRoot, "judgeman-firefox-source-"));
+  const sourceStageDir = path.join(tempStageDir, "source");
+  fs.mkdirSync(sourceStageDir);
 
   try {
-    copyIntoStage(tempStageDir);
-    createSourceReadme(tempStageDir, extensionZipName, sourceZipName, manifest);
-    zipDirectoryContents(tempStageDir, sourceZipPath);
+    // Stage and validate everything before replacing any successful output.
+    copyIntoStage(sourceStageDir);
+    createSourceReadme(sourceStageDir, extensionZipName, sourceZipName, manifest);
+    zipDirectoryContents(sourceStageDir, path.join(tempStageDir, sourceZipName));
+    zipDirectoryContents(DIST_FIREFOX_DIR, path.join(tempStageDir, extensionZipName));
+    fs.writeFileSync(path.join(tempStageDir, "amo-metadata.json"), `${JSON.stringify(createAmoMetadata(manifest), null, 2)}\n`);
+    fs.mkdirSync(SUBMISSION_DIR, {recursive:true});
+    for (const name of [extensionZipName, sourceZipName, "amo-metadata.json"]) {
+      const temporaryOutput = path.join(SUBMISSION_DIR, `.${name}.${process.pid}.tmp`);
+      fs.copyFileSync(path.join(tempStageDir, name), temporaryOutput);
+      fs.renameSync(temporaryOutput, path.join(SUBMISSION_DIR, name));
+    }
   } finally {
     fs.rmSync(tempStageDir, { recursive: true, force: true });
   }
-
-  fs.writeFileSync(
-    amoMetadataPath,
-    `${JSON.stringify(createAmoMetadata(manifest), null, 2)}\n`,
-    "utf8"
-  );
 
   console.log(`Created AMO upload package: ${extensionZipPath}`);
   console.log(`Created AMO source package: ${sourceZipPath}`);

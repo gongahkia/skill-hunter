@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { syncResourceReferences } from "./safari-resource-references.mjs";
 
 const ROOT = process.cwd();
 const SAFARI_SOURCE = path.join(ROOT, "dist", "safari");
@@ -18,6 +19,9 @@ function syncResourcesIntoProject() {
   fs.rmSync(EXTENSION_RESOURCES, { recursive: true, force: true });
   fs.mkdirSync(EXTENSION_RESOURCES, { recursive: true });
   fs.cpSync(SAFARI_SOURCE, EXTENSION_RESOURCES, { recursive: true });
+  const projectPath = path.join(PROJECT_ROOT, "Judgeman.xcodeproj", "project.pbxproj");
+  const files = fs.readdirSync(SAFARI_SOURCE).filter(name => fs.statSync(path.join(SAFARI_SOURCE, name)).isFile());
+  fs.writeFileSync(projectPath, syncResourceReferences(fs.readFileSync(projectPath, "utf8"), files));
 }
 
 function createProjectIfMissing() {

@@ -44,7 +44,7 @@ test("reader overlay preserves the original ELIT DOM while toggling", async () =
   app.start();
   await app.showReadableView();
 
-  const readerRoot = dom.window.document.getElementById("judgeman-reader-root");
+  const readerRoot = app.getReaderRoot();
   assert.ok(readerRoot);
   assert.equal(readerRoot.classList.contains("jm-reader-visible"), true);
   assert.match(dom.window.document.body.innerHTML, /Public Prosecutor v Tan Example/);
