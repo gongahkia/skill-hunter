@@ -5,9 +5,7 @@
 import type { ContentToken, Definition, LegislationMetadata, PageBasicData } from '@/types';
 import { LOGICAL_CONNECTORS, SKILL_HUNTER_IDS } from '@/utils/constants';
 import { logger } from '@/utils/logger';
-
-const STATUTE_TERM_TEMPLATE = (match: string, escapedDefinition: string): string =>
-  `<span class="statute-term" ${SKILL_HUNTER_IDS.TOOLTIP_ATTR}="${escapedDefinition}">${match}</span>`;
+import { renderSourceDocument } from './sourceDocument';
 
 /**
  * Check if a line needs indentation based on its pattern
@@ -112,78 +110,14 @@ export function integrateDefinitions(
   contentTokens: ContentToken[],
   definitions: Definition[]
 ): void {
-  if (definitions.length === 0) {
-    logger.debug('No definitions to integrate');
-    return;
-  }
-
-  // Sort definitions by length to prevent partial matches
-  const sortedDefinitions = sortDefinitionsByLength(definitions);
-
-  // Only process section body tokens
-  const sectionBodyTokens = contentTokens.filter((token) => token.type === 'sectionBody');
-
-  logger.debug(
-    `Processing ${sectionBodyTokens.length} section body tokens with ${sortedDefinitions.length} definitions`
-  );
-
-  sectionBodyTokens.forEach((token) => {
-    const lines = token.content.split('\n');
-
-    const processedLines = lines.map((line) => {
-      // Escape source text before injecting Skill Hunter markup.
-      const modifiedLine = formatLogicalConnectors(escapeHtml(line));
-
-      // Then, split the line into segments (text and HTML tags)
-      const segments = splitPreservingTags(modifiedLine);
-
-      // Process only the text segments (not HTML tags)
-      const processedSegments = segments.map((segment) => {
-        if (segment.isTag) {
-          // Don't process HTML tags
-          return segment.text;
-        }
-
-        let textSegment = segment.text;
-
-        // Defer placeholder expansion until ALL definitions are processed.
-        // Otherwise the second iteration's regex sees the first's expanded
-        // tooltip HTML as plain text and matches terms inside it — producing
-        // nested .statute-term spans visible inside tooltips.
-        const allReplacements = new Map<string, string>();
-        let placeholderCounter = 0;
-
-        sortedDefinitions.forEach((definitionPair) => {
-          const term = Object.keys(definitionPair)[0];
-          if (!term) return;
-
-          const definition = definitionPair[term];
-          if (!definition) return;
-
-          const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'gi');
-
-          textSegment = textSegment.replace(regex, (match) => {
-            const key = `___SH_TERM_${placeholderCounter++}___`;
-            // escapeAttribute === escapeHtml; safe in a double-quoted attr.
-            const escapedDefinition = escapeAttribute(definition);
-            allReplacements.set(key, STATUTE_TERM_TEMPLATE(match, escapedDefinition));
-            return key;
-          });
-        });
-
-        allReplacements.forEach((value, key) => {
-          textSegment = textSegment.replace(key, value);
-        });
-
-        return textSegment;
-      });
-
-      return processedSegments.join('');
-    });
-
-    // Update the token content
-    token.content = processedLines.join('<br>');
+  contentTokens.forEach((token) => {
+    if (token.type === 'sourceDocument') token.definitions = definitions;
+    if (token.type === 'sectionBody') {
+      token.html = renderSourceDocument(
+        escapeHtml(token.content).replace(/\n/g, '<br>'),
+        definitions
+      );
+    }
   });
 }
 
@@ -256,7 +190,7 @@ function rewriteCrossRefSegment(text: string, context: CrossRefContext): string 
   let counter = 0;
 
   const protect = (html: string): string => {
-    const key = ` CR${counter++} `;
+    const key = `\u0000CR${counter++}\u0000`;
     placeholders.set(key, html);
     return key;
   };
@@ -448,6 +382,9 @@ export function generateContentHTML(contentTokens: ContentToken[]): string {
     const escapedId = token.ID ? escapeAttribute(token.ID) : null;
 
     switch (token.type) {
+      case 'sourceDocument':
+        return renderSourceDocument(token.content, token.definitions ?? []);
+
       case 'sectionHeader':
         if (token.ID && sectionNumberFromAnchorId(token.ID)) {
           currentSectionId = token.ID; // refresh section context for nested refs
@@ -455,7 +392,7 @@ export function generateContentHTML(contentTokens: ContentToken[]): string {
         return `<h2 class="section-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h2>`;
 
       case 'sectionBody':
-        return `<div class="section-body">${processContentLines(token.content, { currentSectionId, sectionPreviews })}</div>`;
+        return `<div class="section-body">${processContentLines(token.html ?? escapeHtml(token.content), { currentSectionId, sectionPreviews })}</div>`;
 
       case 'provisionHeader':
         return `<h3 class="provision-header" ${escapedId ? `id="${escapedId}"` : ''}>${escapeHtml(token.content)}</h3>`;

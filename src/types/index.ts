@@ -35,6 +35,7 @@ export interface Definition {
 }
 
 export type ContentTokenType =
+  | 'sourceDocument'
   | 'sectionHeader'
   | 'sectionBody'
   | 'provisionHeader'
@@ -46,6 +47,8 @@ export interface ContentToken {
   type: ContentTokenType;
   ID: string | null;
   content: string;
+  definitions?: Definition[];
+  html?: string;
 }
 
 export interface HTMLContent {

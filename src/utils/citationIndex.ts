@@ -41,12 +41,14 @@ function getExtensionResourceUrl(relativePath: string): string | null {
  * browser extension context.
  */
 export async function loadCitationIndex(actSlug: string): Promise<CitationIndex | null> {
-  if (!actSlug) return null;
+  if (!/^[a-z0-9][a-z0-9-]*$/i.test(actSlug)) return null;
   const resourceUrl = getExtensionResourceUrl(`${CITATION_ASSET_BASE_PATH}${actSlug}.json`);
   if (!resourceUrl) return null;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
   try {
-    const response = await fetch(resourceUrl);
+    const response = await fetch(resourceUrl, { signal: controller.signal });
     if (!response.ok) {
       if (response.status !== 404) {
         indexLogger.warn('Citation index fetch failed', { actSlug, status: response.status });
@@ -54,7 +56,7 @@ export async function loadCitationIndex(actSlug: string): Promise<CitationIndex 
       return null;
     }
     const data = (await response.json()) as CitationIndex;
-    if (!isCitationIndex(data)) {
+    if (!isCitationIndex(data) || data.actSlug !== actSlug) {
       indexLogger.warn('Citation index payload failed shape check', { actSlug });
       return null;
     }
@@ -62,6 +64,8 @@ export async function loadCitationIndex(actSlug: string): Promise<CitationIndex 
   } catch (error) {
     indexLogger.warn('Citation index load threw', { actSlug, error });
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -72,7 +76,26 @@ function isCitationIndex(value: unknown): value is CitationIndex {
     typeof obj.actSlug === 'string' &&
     typeof obj.actName === 'string' &&
     obj.sections !== null &&
-    typeof obj.sections === 'object'
+    typeof obj.sections === 'object' &&
+    !Array.isArray(obj.sections) &&
+    typeof obj.builtAt === 'string' &&
+    Number.isInteger(obj.sourceCorpusSize) &&
+    Number(obj.sourceCorpusSize) >= 0 &&
+    Object.values(obj.sections).every(
+      (entries: unknown) =>
+        Array.isArray(entries) &&
+        entries.every((entry: unknown) => {
+          if (!entry || typeof entry !== 'object') return false;
+          const item = entry as Record<string, unknown>;
+          return (
+            ['citation', 'title', 'court', 'url', 'snippet'].every(
+              (key) => typeof item[key] === 'string'
+            ) &&
+            typeof item.year === 'number' &&
+            Number.isFinite(item.year)
+          );
+        })
+    )
   );
 }
 

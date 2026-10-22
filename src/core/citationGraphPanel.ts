@@ -25,7 +25,13 @@ function escapeAttribute(text: string): string {
  * Render a single citation entry as an <li>.
  */
 export function renderCitationListItem(entry: CitationEntry): string {
-  const url = entry.url ? escapeAttribute(entry.url) : '';
+  let url = '';
+  try {
+    const parsed = new URL(entry.url);
+    if (['http:', 'https:'].includes(parsed.protocol)) url = escapeAttribute(parsed.href);
+  } catch {
+    // Retain citation text even when the corpus contains an invalid URL.
+  }
   const titleHtml = entry.title
     ? `<span class="citation-title">${escapeHtml(entry.title)}</span>`
     : '';

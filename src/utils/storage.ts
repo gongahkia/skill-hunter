@@ -29,17 +29,26 @@ export function createStatuteKeyFromUrl(url: string): string {
   }
 }
 
+function isLegislationNote(value: unknown, statuteKey: string): value is LegislationNote {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Record<string, unknown>;
+  return (
+    item.statuteKey === statuteKey &&
+    typeof item.statuteTitle === 'string' &&
+    typeof item.statuteUrl === 'string' &&
+    typeof item.note === 'string' &&
+    item.note.length <= UX_LIMITS.NOTE_MAX_CHARACTERS &&
+    typeof item.updatedAt === 'string' &&
+    Number.isFinite(Date.parse(item.updatedAt))
+  );
+}
+
 export async function readLegislationNote(statuteKey: string): Promise<LegislationNote | null> {
-  const storageKey = buildStorageKey(statuteKey);
-
+  if (!supportsChromeStorage()) return null;
   try {
-    if (supportsChromeStorage()) {
-      const result = await chrome.storage.local.get(storageKey);
-      return (result[storageKey] as LegislationNote | undefined) ?? null;
-    }
-
-    const serialized = window.localStorage.getItem(storageKey);
-    return serialized ? (JSON.parse(serialized) as LegislationNote) : null;
+    const result = await chrome.storage.local.get(buildStorageKey(statuteKey));
+    const value: unknown = result[buildStorageKey(statuteKey)];
+    return isLegislationNote(value, statuteKey) ? value : null;
   } catch (error) {
     storageLogger.error('Failed to read legislation note', { statuteKey, error });
     return null;
@@ -47,19 +56,10 @@ export async function readLegislationNote(statuteKey: string): Promise<Legislati
 }
 
 export async function saveLegislationNote(note: LegislationNote): Promise<boolean> {
-  const storageKey = buildStorageKey(note.statuteKey);
-
+  // Origin localStorage is readable by the host page. Never put research notes there.
+  if (!supportsChromeStorage() || !isLegislationNote(note, note.statuteKey)) return false;
   try {
-    if (note.note.length > UX_LIMITS.NOTE_MAX_CHARACTERS) {
-      throw new Error(`Note exceeds ${UX_LIMITS.NOTE_MAX_CHARACTERS} character limit`);
-    }
-
-    if (supportsChromeStorage()) {
-      await chrome.storage.local.set({ [storageKey]: note });
-      return true;
-    }
-
-    window.localStorage.setItem(storageKey, JSON.stringify(note));
+    await chrome.storage.local.set({ [buildStorageKey(note.statuteKey)]: note });
     return true;
   } catch (error) {
     storageLogger.error('Failed to save legislation note', { statuteKey: note.statuteKey, error });
