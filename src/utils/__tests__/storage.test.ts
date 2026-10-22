@@ -28,7 +28,22 @@ describe('storage utils', () => {
     expect(key).toContain('?Full');
   });
 
-  it('should save and read legislation notes via localStorage fallback', async () => {
+  it('should save and read legislation notes through extension storage', async () => {
+    const values: Record<string, unknown> = {};
+    Object.defineProperty(globalThis, 'chrome', {
+      configurable: true,
+      value: {
+        storage: {
+          local: {
+            get: jest.fn((key: string) => Promise.resolve({ [key]: values[key] })),
+            set: jest.fn((items: Record<string, unknown>) => {
+              Object.assign(values, items);
+              return Promise.resolve();
+            }),
+          },
+        },
+      },
+    });
     const note: LegislationNote = {
       statuteKey: 'sso.agc.gov.sg/Act/Foo',
       statuteTitle: 'Foo Act',
@@ -42,6 +57,10 @@ describe('storage utils', () => {
 
     const loaded = await readLegislationNote(note.statuteKey);
     expect(loaded).toEqual(note);
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(globalThis, 'chrome');
   });
 
   it('should export notes in markdown format', () => {

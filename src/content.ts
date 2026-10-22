@@ -46,6 +46,7 @@ const contentLogger = logger.withContext('contentScript');
 
 let isSimplified = false;
 let overlayHost: HTMLDivElement | null = null;
+let overlayShadowRoot: ShadowRoot | null = null;
 let originalDocumentTitle = document.title;
 let originalDocumentOverflow = '';
 let statuteKey = '';
@@ -224,7 +225,7 @@ const ICONS = {
 };
 
 function getOverlayShadowRoot(): ShadowRoot | null {
-  return overlayHost?.shadowRoot ?? null;
+  return overlayShadowRoot ?? null;
 }
 
 function updateSearchCountLabel(capped: boolean = false): void {
@@ -406,18 +407,16 @@ function getNearestHeadingForCitation(): HTMLElement | null {
     return null;
   }
 
-  const headings = Array.from(
-    mainContent.querySelectorAll<HTMLElement>('h2.section-header, h3.provision-header')
-  );
+  const headings = Array.from(mainContent.querySelectorAll<HTMLElement>('h2.section-header[id]'));
   if (headings.length === 0) {
     return null;
   }
 
-  const currentOffset = mainContent.scrollTop + 40;
+  const currentOffset = mainContent.getBoundingClientRect().top + 40;
   let nearest: HTMLElement | null = headings[0] ?? null;
 
   headings.forEach((heading) => {
-    if (heading.offsetTop <= currentOffset) {
+    if (heading.getBoundingClientRect().top <= currentOffset) {
       nearest = heading;
     }
   });
@@ -501,6 +500,7 @@ async function persistCurrentNote(): Promise<void> {
   };
 
   const saved = await saveLegislationNote(noteRecord);
+  if (getOverlayShadowRoot() !== shadowRoot) return;
   updateNoteStatus(saved ? `Saved ${new Date().toLocaleTimeString()}` : 'Save failed', !saved);
 }
 
@@ -521,7 +521,17 @@ async function initializeNotePanel(): Promise<void> {
     return;
   }
 
+  let edited = false;
+  noteDraft = '';
+  textarea.addEventListener('input', () => {
+    edited = true;
+    noteDraft = textarea.value;
+    updateNoteCounter();
+    updateNoteStatus('Saving...');
+    scheduleNoteSave();
+  });
   const existingNote = await readLegislationNote(statuteKey);
+  if (getOverlayShadowRoot() !== shadowRoot || edited) return;
   if (existingNote?.note) {
     noteDraft = existingNote.note;
     textarea.value = existingNote.note;
@@ -531,13 +541,6 @@ async function initializeNotePanel(): Promise<void> {
   }
 
   updateNoteCounter();
-
-  textarea.addEventListener('input', () => {
-    noteDraft = textarea.value;
-    updateNoteCounter();
-    updateNoteStatus('Saving...');
-    scheduleNoteSave();
-  });
 }
 
 function generateTimelinePanelHTML(metadata: LegislationMetadata): string {
@@ -609,7 +612,7 @@ async function exportCurrentNote(): Promise<void> {
 
 function handleOverlayClick(event: Event): void {
   const target = event.target;
-  if (!(target instanceof Element) || !overlayHost?.shadowRoot) {
+  if (!(target instanceof Element) || !overlayShadowRoot) {
     return;
   }
 
@@ -687,7 +690,8 @@ function handleOverlayClick(event: Event): void {
     return;
   }
 
-  const targetNode = overlayHost.shadowRoot.getElementById(targetId);
+  event.preventDefault();
+  const targetNode = overlayShadowRoot.getElementById(targetId);
   targetNode?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -837,7 +841,7 @@ async function loadSidebarState(): Promise<void> {
 }
 
 function handleOverlayKeydown(event: KeyboardEvent): void {
-  if (!isSimplified || !overlayHost?.shadowRoot) {
+  if (!isSimplified || !overlayShadowRoot) {
     return;
   }
 
@@ -849,14 +853,14 @@ function handleOverlayKeydown(event: KeyboardEvent): void {
 
   if (event.key === 'Escape') {
     // Search open → close search instead of overlay.
-    const searchBar = overlayHost.shadowRoot.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
+    const searchBar = overlayShadowRoot.getElementById(SKILL_HUNTER_IDS.SEARCH_BAR_ID);
     if (searchBar instanceof HTMLElement && !searchBar.hidden) {
       event.preventDefault();
       closeSearchBar();
       return;
     }
 
-    const target = event.target;
+    const target = overlayShadowRoot.activeElement ?? event.target;
     if (target instanceof HTMLTextAreaElement) {
       return;
     }
@@ -903,7 +907,7 @@ function simplifyPage(): void {
   const host = document.createElement('div');
   host.id = SKILL_HUNTER_IDS.ROOT_HOST;
 
-  const shadowRoot = host.attachShadow({ mode: 'open' });
+  const shadowRoot = host.attachShadow({ mode: 'closed' });
   const styleEl = document.createElement('style');
   styleEl.textContent = mainStyles;
 
@@ -919,6 +923,7 @@ function simplifyPage(): void {
   document.title = simplifiedContent.title;
 
   overlayHost = host;
+  overlayShadowRoot = shadowRoot;
   isSimplified = true;
 
   registerSearchEvents();
@@ -1160,8 +1165,16 @@ function revertPage(): void {
 
   contentLogger.info('Reverting page');
 
+  // Capture pending edits before removing the textarea.
+  if (noteSaveTimeoutId) void persistCurrentNote();
+  if (searchDebounceTimeoutId) {
+    window.clearTimeout(searchDebounceTimeoutId);
+    searchDebounceTimeoutId = null;
+  }
   overlayHost.remove();
   overlayHost = null;
+  overlayShadowRoot = null;
+  cachedSearchTextNodes = null;
   document.documentElement.style.overflow = originalDocumentOverflow;
   document.title = originalDocumentTitle;
 

@@ -91,7 +91,7 @@ function extractTableOfContents(): TableOfContentsItem[] {
   const items: TableOfContentsItem[] = [];
 
   links.forEach((link) => {
-    const text = normalizeText(link.innerText);
+    const text = normalizeText(link.textContent);
     const url = normalizeText(link.href);
     if (text && url) {
       items.push({ referenceText: text, referenceUrl: url });
@@ -179,129 +179,39 @@ export function getLegislationDefinitions(): Definition[] {
   const definitionTerms = new Set<string>();
   const regex = /\u201C([^\u201D]+)\u201D/g;
 
-  const provisionContainers = safeQuerySelectorAll(
-    document,
-    `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
-  );
-
-  provisionContainers.forEach((container) => {
-    const definitionCells = safeQuerySelectorAll(container, SELECTORS.DEFINITION_CELL);
-
-    definitionCells.forEach((cell) => {
-      const sentence = normalizeText(cell.textContent);
-      if (!sentence) {
-        return;
-      }
-
-      regex.lastIndex = 0;
-      const match = regex.exec(sentence);
-      const term = normalizeText(match?.[1]);
-
-      if (!term || definitionTerms.has(term)) {
-        return;
-      }
-
+  const root = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
+  const definitionCells = root ? safeQuerySelectorAll(root, SELECTORS.DEFINITION_CELL) : [];
+  const ambiguous = new Set<string>();
+  definitionCells.forEach((cell) => {
+    const sentence = normalizeText(cell.textContent);
+    regex.lastIndex = 0;
+    const term = normalizeText(regex.exec(sentence)?.[1]);
+    if (!term || ambiguous.has(term)) return;
+    const prior = definitions.find((pair) => Object.prototype.hasOwnProperty.call(pair, term));
+    if (prior && prior[term] !== sentence) {
+      definitions.splice(definitions.indexOf(prior), 1);
+      ambiguous.add(term);
+      return;
+    }
+    if (!definitionTerms.has(term)) {
       definitionTerms.add(term);
       definitions.push({ [term]: sentence });
-    });
+    }
   });
 
   parserLogger.info('Definition extraction completed', {
     count: definitions.length,
-    containerCount: provisionContainers.length,
+    cellCount: definitionCells.length,
   });
 
   return definitions;
 }
 
-function pushToken(content: ContentToken[], token: ContentToken): void {
-  if (!normalizeText(token.content)) {
-    return;
-  }
-
-  content.push(token);
-}
-
-function parseRowsIntoTokens(rows: NodeListOf<Element> | [], content: ContentToken[]): void {
-  rows.forEach((row) => {
-    const sectionHeader = safeQuerySelector(row, SELECTORS.SECTION_HEADER);
-    pushToken(content, {
-      type: 'sectionHeader',
-      ID: normalizeText(sectionHeader?.id) || null,
-      content: normalizeText(sectionHeader?.textContent),
-    });
-
-    const illustrationCell = safeQuerySelector(row, SELECTORS.ILLUSTRATION_CELL);
-    if (illustrationCell) {
-      const innerHTML = illustrationCell.innerHTML;
-      const text = normalizeText(illustrationCell.textContent);
-
-      if (
-        innerHTML.includes('<em>Illustration</em>') ||
-        innerHTML.includes('<em>Illustrations</em>')
-      ) {
-        pushToken(content, { type: 'illustrationHeader', ID: null, content: text });
-      } else {
-        pushToken(content, { type: 'illustrationBody', ID: null, content: text });
-      }
-    }
-
-    const sectionBody = safeQuerySelector(row, SELECTORS.SECTION_BODY);
-    pushToken(content, {
-      type: 'sectionBody',
-      ID: null,
-      content: normalizeText(sectionBody?.textContent),
-    });
-
-    const provisionHeader = safeQuerySelector(row, SELECTORS.PROVISION_HEADER);
-    pushToken(content, {
-      type: 'provisionHeader',
-      ID: normalizeText(provisionHeader?.id) || null,
-      content: normalizeText(provisionHeader?.textContent),
-    });
-
-    const provisionNumber = safeQuerySelector(row, SELECTORS.PROVISION_NUMBER);
-    const provisionNumberDiv = safeQuerySelector(
-      provisionNumber ?? row,
-      SELECTORS.PROVISION_NUMBER_DIV
-    );
-    pushToken(content, {
-      type: 'provisionNumber',
-      ID: normalizeText(provisionNumber?.id) || null,
-      content: normalizeText(provisionNumberDiv?.textContent),
-    });
-  });
-}
-
-/**
- * Extract main legislation content with optimized parsing
- */
+/** Keep the full legislative tree; never guess from unrelated page furniture. */
 export function getLegislationContent(): ContentToken[] {
-  const content: ContentToken[] = [];
-
-  const primaryContainers = safeQuerySelectorAll(
-    document,
-    `${SELECTORS.LEGIS_CONTENT} ${SELECTORS.LEGIS_BODY} ${SELECTORS.PROVISION_CONTAINERS}`
-  );
-
-  const fallbackContainers =
-    primaryContainers.length > 0
-      ? primaryContainers
-      : safeQuerySelectorAll(document, "div[class^='prov']");
-
-  fallbackContainers.forEach((container) => {
-    const rows = safeQuerySelectorAll(container, 'table tbody tr');
-    parseRowsIntoTokens(rows, content);
-  });
-
-  if (content.length === 0) {
+  const root = safeQuerySelector(document, SELECTORS.LEGIS_CONTENT);
+  if (!root || !normalizeText(root.textContent)) {
     throw new DOMParsingError('No readable legislation content could be extracted from this page');
   }
-
-  parserLogger.info('Content extraction completed', {
-    tokenCount: content.length,
-    containerCount: fallbackContainers.length,
-  });
-
-  return content;
+  return [{ type: 'sourceDocument', ID: null, content: root.innerHTML }];
 }

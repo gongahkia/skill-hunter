@@ -408,6 +408,33 @@
   line-height: 1.75;
 }
 
+.source-legislation {
+  font-size: 16px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.source-legislation table {
+  border-collapse: collapse;
+  max-width: 100%;
+}
+
+.source-legislation td,
+.source-legislation th {
+  padding: 4px 8px;
+  vertical-align: top;
+}
+
+.source-legislation table table td,
+.source-legislation table table th {
+  border: 1px solid var(--border-color, #ddd);
+}
+
+.source-legislation img {
+  max-width: 100%;
+  height: auto;
+}
+
 .content-line,
 .indented-line {
   margin-bottom: var(--spacing-sm);
