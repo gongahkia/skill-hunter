@@ -1,24 +1,51 @@
-name: Judgeman CI/CD on Push
+name: Skill Hunter CI/CD on Push
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm test
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test -- --runInBand
+
+      - name: Test citation index
+        run: npm run test:citation-index
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Package Firefox source archive
+        run: make firefox-source-package
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-hunter-build
+          path: |
+            dist
+            submission/firefox/artifacts
