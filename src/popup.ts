@@ -3,6 +3,7 @@
  */
 
 import type { ChromeMessage, ChromeMessageResponse, PageSummary } from '@/types';
+import { ENABLED_KEY } from '@/utils/constants';
 import { handleError } from '@/utils/errorHandler';
 import { logger } from '@/utils/logger';
 
@@ -14,7 +15,6 @@ const PROPERTY_FIELDS = [
   'propDate',
   'propRevised',
   'propPdf',
-  'propCitations',
   'propSource',
 ] as const;
 
@@ -44,7 +44,7 @@ async function sendMessageToActiveTab(message: ChromeMessage): Promise<ChromeMes
     handleError(error, 'popup.sendMessageToActiveTab');
     return {
       status: 'unsupported_page',
-      error: 'Open a supported SSO legislation page.',
+      error: 'Open an SSO legislation or eLitigation judgment page.',
     };
   }
 }
@@ -92,18 +92,14 @@ function truncateUrl(url: string, maxLen = 48): string {
 function renderPageSummary(summary: PageSummary): void {
   setTitle(summary.title, false);
   setPropertyValue('propType', summary.type);
-  setPropertyValue('propStatus', summary.status);
+  setPropertyValue('propStatus', summary.site === 'elit' ? summary.citation : summary.status);
+  const statusLabel = document.getElementById('labelStatus');
+  const revisedLabel = document.getElementById('labelRevised');
+  if (statusLabel) statusLabel.textContent = summary.site === 'elit' ? 'citation' : 'status';
+  if (revisedLabel) revisedLabel.textContent = summary.site === 'elit' ? 'court' : 'revised';
   setPropertyValue('propDate', summary.date);
-  setPropertyValue('propRevised', summary.revisedTitle);
+  setPropertyValue('propRevised', summary.site === 'elit' ? summary.court : summary.revisedTitle);
   setPropertyValue('propPdf', summary.hasPdf ? 'Official PDF available' : 'Not available');
-  setPropertyValue(
-    'propCitations',
-    summary.citationCount > 0
-      ? `${summary.citationCount} case${summary.citationCount === 1 ? '' : 's'} indexed`
-      : summary.actSlug
-        ? 'No indexed citations yet'
-        : 'Index not available'
-  );
   setPropertyValue('propSource', truncateUrl(summary.sourceUrl), { href: summary.sourceUrl });
 }
 
@@ -119,21 +115,25 @@ async function checkPageEligibility(): Promise<void> {
 
   const eligibility = await sendMessageToActiveTab({ action: 'check_supported_page' });
   if (eligibility.status !== 'success') {
-    renderEmptyProperties('Not an SSO page');
-    setButton('unsupported', 'Open an SSO legislation page');
+    renderEmptyProperties('No supported page detected');
+    setButton('unsupported', 'Open SSO or an eLitigation judgment');
     return;
   }
 
   if (!eligibility.supportedPage) {
-    renderEmptyProperties('SSO Whole Document view required');
-    setButton('unsupported', 'Switch to Whole Document view');
+    renderEmptyProperties('Unsupported page');
+    setButton('unsupported', 'Open SSO or an eLitigation judgment');
     return;
   }
 
   const summaryResponse = await sendMessageToActiveTab({ action: 'get_page_summary' });
   if (summaryResponse.status === 'success' && summaryResponse.pageSummary) {
     renderPageSummary(summaryResponse.pageSummary);
-    setButton('ready', 'Open simplified research view');
+    const settings = await chrome.storage.local.get(ENABLED_KEY);
+    setButton(
+      'ready',
+      settings[ENABLED_KEY] === true ? 'Disable inline previews' : 'Enable inline previews'
+    );
     return;
   }
 
@@ -171,13 +171,15 @@ function initialize(): void {
   toggleButton.addEventListener('click', () => {
     if (toggleButton.disabled) return;
     void (async () => {
-      setButton('loading', 'Opening…');
-      const response = await sendMessageToActiveTab({ action: 'toggle_simplified_view' });
-      if (response.status === 'success') {
-        window.close();
-        return;
+      setButton('loading', 'Updating…');
+      try {
+        const settings = await chrome.storage.local.get(ENABLED_KEY);
+        const next = settings[ENABLED_KEY] !== true;
+        await chrome.storage.local.set({ [ENABLED_KEY]: next });
+        setButton('ready', next ? 'Disable inline previews' : 'Enable inline previews');
+      } catch {
+        setButton('error', 'Could not save preview setting');
       }
-      setButton('error', response.error ?? 'Skill Hunter could not access this page');
     })();
   });
 }

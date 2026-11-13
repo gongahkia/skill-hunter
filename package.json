@@ -1,7 +1,7 @@
 {
   "name": "skill-hunter",
   "version": "2.0.0",
-  "description": "Browser extension that formats Singapore legislation to be more readable",
+  "description": "Inline legal reference previews on Singapore Statutes Online and eLitigation",
   "packageManager": "npm@11.11.1",
   "scripts": {
     "dev": "webpack --mode development --watch",
@@ -13,9 +13,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "build:citation-index": "node scripts/build-citation-index.mjs",
-    "test:citation-index": "node --test scripts/__tests__/build-citation-index.test.mjs",
-    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run test:citation-index && npm run build && make firefox-source-package"
+    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run build && make firefox-source-package"
   },
   "keywords": [
     "browser-extension",

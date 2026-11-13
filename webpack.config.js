@@ -11,6 +11,7 @@ module.exports = (env, argv) => {
     entry: {
       popup: './src/popup.ts',
       content: './src/content.ts',
+      background: './src/background.ts',
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
@@ -47,7 +48,6 @@ module.exports = (env, argv) => {
           { from: 'src/popup.html', to: 'popup.html' },
           { from: 'src/local_asset', to: 'local_asset' },
           { from: 'src/styles/popup.css', to: 'styles/popup.css' },
-          { from: 'src/assets/citations', to: 'assets/citations', noErrorOnMissing: true },
         ],
       }),
     ],

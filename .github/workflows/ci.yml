@@ -33,9 +33,6 @@ jobs:
       - name: Run tests
         run: npm test -- --runInBand
 
-      - name: Test citation index
-        run: npm run test:citation-index
-
       - name: Build extension
         run: npm run build
 

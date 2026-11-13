@@ -1,96 +1,60 @@
-/**
- * Core type definitions for Skill Hunter
- */
-
-export interface PageMetadata {
-  url: string;
-  title: string;
-  logoLink: string;
-  characterSet: string;
-  description: string;
-}
-
-export interface TableOfContentsItem {
-  referenceText: string;
-  referenceUrl: string;
-}
-
-export interface PageBasicData {
-  legislationTitle: string;
-  legislationPDFDownloadLink: string;
-  legislationStatus: string;
-  tableOfContents: TableOfContentsItem[];
-}
-
-export interface LegislationMetadata {
-  legislationName: string;
-  legislationDescription: string;
-  legislationDate: string;
-  revisedLegislationName: string;
-  revisedLegislationText: string;
-}
-
-export interface Definition {
-  [term: string]: string;
-}
-
-export type ContentTokenType =
-  | 'sourceDocument'
-  | 'sectionHeader'
-  | 'sectionBody'
-  | 'provisionHeader'
-  | 'provisionNumber'
-  | 'illustrationHeader'
-  | 'illustrationBody';
-
-export interface ContentToken {
-  type: ContentTokenType;
-  ID: string | null;
-  content: string;
-  definitions?: Definition[];
-  html?: string;
-}
-
-export interface HTMLContent {
-  title: string;
-  content: string;
-}
-
-export type SkillHunterMessageAction =
-  | 'toggle_simplified_view'
-  | 'check_supported_page'
-  | 'get_page_summary';
-
-export interface ChromeMessage {
-  action: SkillHunterMessageAction;
-}
-
-export type StatuteType = 'Act' | 'Subsidiary Legislation' | 'Supplement' | 'Unknown';
-
+export type Site = 'sso' | 'elit';
 export interface PageSummary {
+  site: Site;
   title: string;
-  type: StatuteType;
+  type: string;
   status: string;
   date: string;
   revisedTitle: string;
+  court: string;
+  citation: string;
   hasPdf: boolean;
   sourceUrl: string;
-  actSlug: string | null;
-  citationCount: number;
 }
-
+export interface ChromeMessage {
+  action: 'get_page_summary' | 'check_supported_page';
+}
 export interface ChromeMessageResponse {
   status: 'success' | 'error' | 'unsupported_page';
-  isSimplified?: boolean;
+  enabled?: boolean;
   supportedPage?: boolean;
   pageSummary?: PageSummary;
   error?: string;
 }
-
-export type CitationFormat = 'default' | 'bluebook' | 'oscola';
-
+export type Lookup =
+  | { kind: 'document'; url: string }
+  | { kind: 'statute-search'; title: string }
+  | { kind: 'case-search'; phrase: string };
+export interface FetchResponse {
+  ok: boolean;
+  html?: string;
+  url?: string;
+  error?: string;
+}
+export interface Preview {
+  kind: string;
+  title: string;
+  text: string;
+  detail?: string;
+  url?: string;
+  links?: Array<{ title: string; url: string; detail?: string }>;
+}
+export interface Reference {
+  kind: 'statute' | 'case' | 'local' | 'definition' | 'abbreviation' | 'citing';
+  label: string;
+  url?: string;
+  section?: string;
+  act?: string;
+  version?: string;
+  text?: string;
+  target?: Element;
+}
+export interface ReferenceMatch {
+  start: number;
+  end: number;
+  reference: Reference;
+}
 export type LogLevelName = 'debug' | 'info' | 'warn' | 'error';
-
 export interface DiagnosticLogEntry {
   sessionId: string;
   timestamp: string;
@@ -98,41 +62,4 @@ export interface DiagnosticLogEntry {
   context: string;
   message: string;
   data?: unknown;
-}
-
-export interface LegislationNote {
-  statuteKey: string;
-  statuteTitle: string;
-  statuteUrl: string;
-  note: string;
-  updatedAt: string;
-}
-
-export interface CitationEntry {
-  citation: string;
-  title: string;
-  year: number;
-  court: string;
-  url: string;
-  snippet: string;
-}
-
-export interface CitationIndex {
-  actSlug: string;
-  actName: string;
-  builtAt: string;
-  sourceCorpusSize: number;
-  sections: Record<string, CitationEntry[]>;
-}
-
-export interface CitationManifestEntry {
-  slug: string;
-  name: string;
-  sections: number;
-  citations: number;
-}
-
-export interface CitationManifest {
-  builtAt: string;
-  acts: CitationManifestEntry[];
 }
