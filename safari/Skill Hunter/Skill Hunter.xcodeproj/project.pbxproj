@@ -17,15 +17,6 @@
 		3C0DC9D52F6D1E1E00CF55FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9D42F6D1E1E00CF55FD /* Assets.xcassets */; };
 		3C0DC9DC2F6D1E1E00CF55FD /* Skill Hunter Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C0DC9DB2F6D1E1E00CF55FD /* Skill Hunter Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3C0DC9E12F6D1E1E00CF55FD /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0DC9E02F6D1E1E00CF55FD /* SafariWebExtensionHandler.swift */; };
-		3C0DC9F82F6D1E1E00CF55FD /* REFERENCE.md in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9ED2F6D1E1E00CF55FD /* REFERENCE.md */; };
-		3C0DC9F92F6D1E1E00CF55FD /* types in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9EE2F6D1E1E00CF55FD /* types */; };
-		3C0DC9FA2F6D1E1E00CF55FD /* core in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9EF2F6D1E1E00CF55FD /* core */; };
-		3C0DC9FB2F6D1E1E00CF55FD /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F02F6D1E1E00CF55FD /* popup.html */; };
-		3C0DC9FC2F6D1E1E00CF55FD /* utils in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F22F6D1E1E00CF55FD /* utils */; };
-		3C0DC9FD2F6D1E1E00CF55FD /* styles in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F42F6D1E1E00CF55FD /* styles */; };
-		3C0DC9FE2F6D1E1E00CF55FD /* NAPKIN.md in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F52F6D1E1E00CF55FD /* NAPKIN.md */; };
-		3C0DC9FF2F6D1E1E00CF55FD /* local_asset in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F62F6D1E1E00CF55FD /* local_asset */; };
-		3C0DCA002F6D1E1E00CF55FD /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 3C0DC9F72F6D1E1E00CF55FD /* manifest.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,17 +57,6 @@
 		3C0DC9DB2F6D1E1E00CF55FD /* Skill Hunter Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Skill Hunter Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C0DC9E02F6D1E1E00CF55FD /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		3C0DC9E22F6D1E1E00CF55FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C0DC9ED2F6D1E1E00CF55FD /* REFERENCE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = REFERENCE.md; path = ../../../src/REFERENCE.md; sourceTree = "<group>"; };
-		3C0DC9EE2F6D1E1E00CF55FD /* types */ = {isa = PBXFileReference; lastKnownFileType = folder; name = types; path = ../../../src/types; sourceTree = "<group>"; };
-		3C0DC9EF2F6D1E1E00CF55FD /* core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = core; path = ../../../src/core; sourceTree = "<group>"; };
-		3C0DC9F02F6D1E1E00CF55FD /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../src/popup.html; sourceTree = "<group>"; };
-		3C0DC9F12F6D1E1E00CF55FD /* content.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; name = content.ts; path = ../../../src/content.ts; sourceTree = "<group>"; };
-		3C0DC9F22F6D1E1E00CF55FD /* utils */ = {isa = PBXFileReference; lastKnownFileType = folder; name = utils; path = ../../../src/utils; sourceTree = "<group>"; };
-		3C0DC9F32F6D1E1E00CF55FD /* popup.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; name = popup.ts; path = ../../../src/popup.ts; sourceTree = "<group>"; };
-		3C0DC9F42F6D1E1E00CF55FD /* styles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = styles; path = ../../../src/styles; sourceTree = "<group>"; };
-		3C0DC9F52F6D1E1E00CF55FD /* NAPKIN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = NAPKIN.md; path = ../../../src/NAPKIN.md; sourceTree = "<group>"; };
-		3C0DC9F62F6D1E1E00CF55FD /* local_asset */ = {isa = PBXFileReference; lastKnownFileType = folder; name = local_asset; path = ../../../src/local_asset; sourceTree = "<group>"; };
-		3C0DC9F72F6D1E1E00CF55FD /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../src/manifest.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,31 +122,11 @@
 		3C0DC9DF2F6D1E1E00CF55FD /* Skill Hunter Extension */ = {
 			isa = PBXGroup;
 			children = (
-				3C0DC9EC2F6D1E1E00CF55FD /* Resources */,
 				3C0DC9E02F6D1E1E00CF55FD /* SafariWebExtensionHandler.swift */,
 				3C0DC9E22F6D1E1E00CF55FD /* Info.plist */,
 			);
 			path = "Skill Hunter Extension";
 			sourceTree = "<group>";
-		};
-		3C0DC9EC2F6D1E1E00CF55FD /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				3C0DC9ED2F6D1E1E00CF55FD /* REFERENCE.md */,
-				3C0DC9EE2F6D1E1E00CF55FD /* types */,
-				3C0DC9EF2F6D1E1E00CF55FD /* core */,
-				3C0DC9F02F6D1E1E00CF55FD /* popup.html */,
-				3C0DC9F12F6D1E1E00CF55FD /* content.ts */,
-				3C0DC9F22F6D1E1E00CF55FD /* utils */,
-				3C0DC9F32F6D1E1E00CF55FD /* popup.ts */,
-				3C0DC9F42F6D1E1E00CF55FD /* styles */,
-				3C0DC9F52F6D1E1E00CF55FD /* NAPKIN.md */,
-				3C0DC9F62F6D1E1E00CF55FD /* local_asset */,
-				3C0DC9F72F6D1E1E00CF55FD /* manifest.json */,
-			);
-			name = Resources;
-			path = "Skill Hunter Extension";
-			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -199,6 +159,7 @@
 				3C0DC9D72F6D1E1E00CF55FD /* Sources */,
 				3C0DC9D82F6D1E1E00CF55FD /* Frameworks */,
 				3C0DC9D92F6D1E1E00CF55FD /* Resources */,
+				A11000000000000000000001 /* Build WebExtension resources */,
 			);
 			buildRules = (
 			);
@@ -267,19 +228,32 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C0DC9FE2F6D1E1E00CF55FD /* NAPKIN.md in Resources */,
-				3C0DC9F92F6D1E1E00CF55FD /* types in Resources */,
-				3C0DC9FB2F6D1E1E00CF55FD /* popup.html in Resources */,
-				3C0DC9FA2F6D1E1E00CF55FD /* core in Resources */,
-				3C0DCA002F6D1E1E00CF55FD /* manifest.json in Resources */,
-				3C0DC9FC2F6D1E1E00CF55FD /* utils in Resources */,
-				3C0DC9FF2F6D1E1E00CF55FD /* local_asset in Resources */,
-				3C0DC9FD2F6D1E1E00CF55FD /* styles in Resources */,
-				3C0DC9F82F6D1E1E00CF55FD /* REFERENCE.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A11000000000000000000001 /* Build WebExtension resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build WebExtension resources";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/manifest.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/background.js",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/content.js",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/popup.js",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "/bin/bash \"$SRCROOT/../../scripts/build_safari_resources.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3C0DC9BC2F6D1E1D00CF55FD /* Sources */ = {
@@ -382,7 +356,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -439,7 +413,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -450,6 +424,7 @@
 		3C0DC9E62F6D1E1E00CF55FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
@@ -463,7 +438,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 2.0.0;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -473,9 +448,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -483,6 +456,7 @@
 		3C0DC9E72F6D1E1E00CF55FD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
@@ -496,7 +470,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 2.0.0;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -506,9 +480,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -543,10 +515,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gongahkia.skillhunter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -581,10 +550,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gongahkia.skillhunter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

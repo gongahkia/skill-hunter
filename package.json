@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
+    "build:safari": "npm run build && python3 scripts/prepare_safari.py",
     "test": "jest",
+    "test:safari": "python3 -m unittest discover -s scripts/tests -p 'test_safari*.py'",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run build && make firefox-source-package"
+    "ci": "npm run lint && npm run type-check && npm test -- --runInBand && npm run test:safari && npm run build:safari && make firefox-source-package"
   },
   "keywords": [
     "browser-extension",

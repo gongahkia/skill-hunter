@@ -20,6 +20,10 @@ INCLUDED_PATHS = [
     "package-lock.json",
     "package.json",
     "scripts/package_firefox_source.py",
+    "scripts/prepare_safari.py",
+    "scripts/check_safari_app.py",
+    "scripts/safari_browser_smoke.py",
+    "scripts/tests",
     "tests/fixtures",
     "src/background.ts",
     "src/content.ts",
@@ -42,7 +46,10 @@ def iter_files(relative_path: Path) -> list[Path]:
         raise FileNotFoundError(f"Missing required Firefox source path: {relative_path}")
 
     if full_path.is_dir():
-        return sorted(path for path in full_path.rglob("*") if path.is_file())
+        return sorted(
+            path for path in full_path.rglob("*")
+            if path.is_file() and "__pycache__" not in path.parts
+        )
 
     return [full_path]
 

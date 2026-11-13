@@ -33,8 +33,11 @@ jobs:
       - name: Run tests
         run: npm test -- --runInBand
 
-      - name: Build extension
-        run: npm run build
+      - name: Test Safari packaging
+        run: npm run test:safari
+
+      - name: Build shared extension and validate Safari resources
+        run: npm run build:safari
 
       - name: Package Firefox source archive
         run: make firefox-source-package
@@ -45,4 +48,5 @@ jobs:
           name: skill-hunter-build
           path: |
             dist
+            build/safari-extension
             submission/firefox/artifacts

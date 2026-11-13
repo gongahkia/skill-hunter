@@ -30,6 +30,7 @@ Thumbs.db
 # Testing
 coverage/
 .jest-cache/
+__pycache__/
 
 # Misc
 *.zip
