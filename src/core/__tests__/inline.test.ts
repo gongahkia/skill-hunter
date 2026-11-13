@@ -167,3 +167,46 @@ describe('reference resolution boundaries', () => {
     );
   });
 });
+it('keeps whitespace-only nodes when detecting citations split across elements', () => {
+  const root = fixture();
+  const body = root.querySelector('.prov1Txt') as HTMLElement;
+  body.innerHTML = '<em>section</em> <b>5</b> of the <i>Misuse of Drugs Act 1973</i>';
+  const original = body.textContent;
+  const annotations = new Annotations(root, url);
+  annotations.scan();
+  expect(body.textContent).toBe(original);
+  expect(body.querySelector('[data-skill-hunter-reference]')).not.toBeNull();
+  annotations.clear();
+  expect(body.textContent).toBe(original);
+});
+it('keeps explicit alias editions and offers remote term lookups only with identified scope', () => {
+  document.body.innerHTML =
+    '<div id="divJudgement"><p>Misuse of Drugs Act 1973 (2008 Rev Ed) (the “MDA”).</p><p id="reference">A person under s 5 of the MDA.</p></div>';
+  const root = contentRoot(document) as HTMLElement;
+  const paragraph = document.getElementById('reference') as HTMLElement;
+  const refs = detectReferences(
+    paragraph.textContent ?? '',
+    paragraph,
+    root,
+    'https://www.elitigation.sg/gd/s/2024_SGCA_12'
+  );
+  expect(refs.find((r) => r.reference.kind === 'statute')?.reference.version).toBe('2008 Rev Ed');
+  expect(refs.find((r) => r.reference.kind === 'definition')?.reference).toMatchObject({
+    act: 'Misuse of Drugs Act 1973',
+    section: '5',
+    version: '2008 Rev Ed',
+  });
+  expect(
+    detectReferences('property', paragraph, root, 'https://www.elitigation.sg/gd/s/2024_SGCA_12')
+  ).toHaveLength(0);
+});
+it('uses a native external link’s section label when its URL has no hash', () => {
+  const root = fixture();
+  const a = document.createElement('a');
+  a.href = 'https://sso.agc.gov.sg/Act/MDA1973?ProvIds=pr5-';
+  a.textContent = 'section 5(1)';
+  root.append(a);
+  const ref = detectReferences(a.textContent, a, root, url)[0]?.reference;
+  expect(ref).toMatchObject({ kind: 'statute', section: '5(1)' });
+  expect(a.href).toContain('ProvIds=pr5-');
+});

@@ -15,21 +15,32 @@ function partAt(el: Element, root: Element): string {
 }
 export function extractDefinitions(root: Element): ScopedDefinition[] {
   const result: ScopedDefinition[] = [];
-  for (const cell of Array.from(root.querySelectorAll('.def'))) {
+  let intro = '',
+    section = '',
+    part = '';
+  // One source-order pass. Repeated DOM queries per definition are prohibitively
+  // expensive on large instruments such as the Penal Code.
+  for (const cell of Array.from(root.querySelectorAll('td, .partNo, .def, [id*="-he-"]'))) {
+    if (cell.matches('.partHdr, .partNo')) {
+      part = cleanText(cell);
+      intro = '';
+    }
+    const heading = /^pr(\d+[A-Z]*)-he-$/i.exec(cell.id);
+    if (heading) {
+      section = heading[1] ?? '';
+      intro = '';
+      continue;
+    }
+    if (!cell.matches('.def')) {
+      if (!cell.querySelector('.def, td, [id*="-he-"]')) intro += ` ${cleanText(cell)}`;
+      continue;
+    }
     const text = cleanText(cell);
     const term = /^[“"]([^”"]+)[”"]/.exec(text)?.[1];
     if (!term) continue;
-    // The scope lead-in is in the current interpretation provision, not an arbitrary earlier cell.
-    const section = sectionContext(cell);
-    const preceding = Array.from(root.querySelectorAll('td')).filter(
-      (td) =>
-        !!(td.compareDocumentPosition(cell) & Node.DOCUMENT_POSITION_FOLLOWING) &&
-        sectionContext(td) === section
-    );
-    const intro = preceding.map(cleanText).join(' ');
     let scope = 'act';
     if (/\b(?:this section|this regulation)\b/i.test(intro)) scope = `section:${section}`;
-    else if (/\bthis Part\b/i.test(intro)) scope = `part:${partAt(cell, root)}`;
+    else if (/\bthis Part\b/i.test(intro)) scope = `part:${part}`;
     else if (!/\b(?:this Act|these Regulations|these Rules|this Order)\b/i.test(intro)) continue;
     result.push({ term, text, scope });
   }

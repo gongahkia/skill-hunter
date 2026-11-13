@@ -67,6 +67,7 @@ export function localTarget(root: Element, section: string): Element | undefined
     .find(Boolean);
 }
 export function provisionText(target: Element): string {
+  if (/-ss\w+-/.test(target.id) && cleanText(target)) return cleanText(target);
   // Collect in source order up to the next provision heading, including nested tables.
   const root = target.closest('#legisContent') ?? target.ownerDocument.body;
   const walker = target.ownerDocument.createTreeWalker(
@@ -141,7 +142,10 @@ export function localPreview(target: Element, label: string, url: string): Previ
     kind: 'Cross-reference',
     title: label,
     text: target.closest('#legisContent') ? provisionText(target) : cleanText(target),
-    detail: 'From this page and its displayed version',
+    detail:
+      /-he-$/.test(target.id) && /subsection|paragraph/i.test(label)
+        ? 'Enclosing section context from this page; no exact sub-provision anchor was found.'
+        : 'From this page and its displayed version',
     url,
   };
 }

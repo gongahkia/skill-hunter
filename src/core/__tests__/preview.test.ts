@@ -38,7 +38,8 @@ it('deduplicates on-demand loads in memory, labels current text and clears on di
   expect(a).toEqual(b);
   expect(send).toHaveBeenCalledTimes(1);
   resolver.clear();
-  await resolver.resolve(statute, source);
+  await expect(resolver.resolve(statute, source)).rejects.toThrow('Lookup dismissed');
+  await new PreviewResolver().resolve(statute, source);
   expect(send).toHaveBeenCalledTimes(2);
 });
 it('does not substitute current text for an explicit historical edition', async () => {
@@ -55,9 +56,8 @@ it('retries failed requests, handles blocked content and never invents missing s
   const resolver = new PreviewResolver();
   await expect(resolver.resolve(statute, source)).rejects.toThrow('no readable legislation');
   send.mockResolvedValue({ ok: false, error: 'HTTP 403' });
-  resolver.clear();
-  await expect(resolver.resolve(statute, source)).rejects.toThrow('HTTP 403');
-  await expect(resolver.resolve(statute, source)).rejects.toThrow('HTTP 403');
+  await expect(new PreviewResolver().resolve(statute, source)).rejects.toThrow('HTTP 403');
+  await expect(new PreviewResolver().resolve(statute, source)).rejects.toThrow('HTTP 403');
   expect(send).toHaveBeenCalledTimes(3);
 });
 it('checks live search candidates for the actual Act and section, not section-number prefixes', async () => {

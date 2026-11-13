@@ -16,6 +16,12 @@ function scan(): void {
   scheduled = 0;
   if (!enabled) return;
   observer.disconnect();
+  if (annotations && !annotations.connected) {
+    card?.destroy();
+    card = null;
+    annotations.clear();
+    annotations = null;
+  }
   const root = contentRoot(document);
   if (root && !annotations) {
     annotations = new Annotations(root, location.href);

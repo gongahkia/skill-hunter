@@ -144,7 +144,9 @@ export function detectReferences(
           : {
               kind: parsed.hostname === 'sso.agc.gov.sg' ? 'statute' : 'case',
               url: href,
-              section: /pr(\d+[A-Z]*)/.exec(parsed.hash)?.[1],
+              section:
+                /\b(?:sections?|s\.?)\s+(\d+[A-Z]*(?:\(\w+\))*)/i.exec(text)?.[1] ||
+                /pr(\d+[A-Z]*)/.exec(parsed.hash || parsed.searchParams.get('ProvIds') || '')?.[1],
             }
       );
       return results;
@@ -197,6 +199,22 @@ export function detectReferences(
       text: m[1],
       url: act ? knownActUrl(act) : undefined,
     });
+  }
+  // These are lookup candidates, never bundled definitions. Resolve only when a
+  // paragraph explicitly identifies one Act and a provision establishing scope.
+  if (root.id === 'divJudgement') {
+    const statutoryRefs = results
+      .map((r) => r.reference)
+      .filter((r) => r.kind === 'statute' && r.act && r.section);
+    const acts = new Set(statutoryRefs.map((r) => r.act));
+    const contextRef = acts.size === 1 ? statutoryRefs[0] : undefined;
+    if (contextRef) {
+      const candidates =
+        /\b(?:controlled drugs?|public servant|unfair practice|property|person|document|contract|supplier|consumer|court|company|officer|employee|employer)\b/gi;
+      for (const m of text.matchAll(candidates)) {
+        add(m.index ?? 0, m[0], { ...contextRef, kind: 'definition', text: m[0] });
+      }
+    }
   }
   const glossary = new RegExp(
     `(?<![\\p{L}\\p{N}_])(?:${Object.keys(GLOSSARY)

@@ -10,6 +10,7 @@ export class HoverCard {
   private card = document.createElement('section');
   private active: Element | null = null;
   private sequence = 0;
+  private returningFocus = false;
   private showTimer = 0;
   private hideTimer = 0;
   private resolver = new PreviewResolver();
@@ -76,7 +77,7 @@ export class HoverCard {
   };
   private focus = (event: FocusEvent): void => {
     const target = this.target(event);
-    if (target) void this.show(target);
+    if (target && !this.returningFocus) void this.show(target);
   };
   private out = (event: Event): void => {
     if (!this.target(event)) return;
@@ -131,7 +132,7 @@ export class HoverCard {
     if (focus) this.card.querySelector('button')?.focus();
     let preview: Preview;
     try {
-      preview = await this.resolver.resolve(ref, this.url);
+      preview = await this.resolver.resolve(ref, this.url, () => sequence === this.sequence);
     } catch (error) {
       preview = unavailablePreview(ref, error);
     }
@@ -216,11 +217,9 @@ export class HoverCard {
     const target = this.active;
     this.active = null;
     if (returnFocus && target instanceof HTMLElement) {
+      this.returningFocus = true;
       target.focus();
-      // Focusing the trigger fires focusin; do not immediately reopen the card.
-      ++this.sequence;
-      this.active = null;
-      this.card.hidden = true;
+      this.returningFocus = false;
     }
   }
   destroy(): void {

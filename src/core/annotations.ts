@@ -8,6 +8,9 @@ const SKIP =
 const BLOCK = 'p,td,th,li,blockquote,h1,h2,h3,h4,h5,h6,.Judg-1,.Judg-Quote-0,.Judg-List-1';
 export class Annotations {
   private counter = 0;
+  get connected(): boolean {
+    return this.root.isConnected;
+  }
   private readonly references = new Map<string, Reference>();
   constructor(
     private root: HTMLElement,
@@ -22,8 +25,8 @@ export class Annotations {
     while (walker.nextNode()) {
       const text = walker.currentNode as Text;
       const parent = text.parentElement;
-      if (!parent || parent.closest(`${SKIP},[${ANNOTATION_ATTR}]`) || !text.data.trim()) continue;
-      const block = parent.closest(BLOCK) ?? parent;
+      if (!parent || parent.closest(`${SKIP},[${ANNOTATION_ATTR}]`) || !text.data) continue;
+      const block = parent.closest('a[href]') ?? parent.closest(BLOCK) ?? parent;
       const nodes = groups.get(block) ?? [];
       nodes.push(text);
       groups.set(block, nodes);
@@ -32,6 +35,7 @@ export class Annotations {
     // Compute all ranges before mutation; offsets refer only to original text nodes.
     for (const [block, nodes] of groups) {
       const text = nodes.map((node) => node.data).join('');
+      if (!text.trim()) continue;
       const header = /^pr(\d+[A-Z]*)-he-$/i.exec(block.id);
       const matches = header
         ? [

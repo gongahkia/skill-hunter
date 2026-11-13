@@ -18,11 +18,14 @@ import { definitionFor, extractDefinitions } from './definitions';
 export class PreviewResolver {
   private cache = new Map<string, Promise<Document>>();
   private generation = 0;
+  private disposed = false;
   clear(): void {
+    this.disposed = true;
     this.generation++;
     this.cache.clear();
   }
   private async load(lookup: Lookup): Promise<Document> {
+    if (this.disposed) throw new Error('Lookup dismissed');
     const key = lookupUrl(lookup);
     const existing = this.cache.get(key);
     if (existing) return existing;
@@ -56,7 +59,11 @@ export class PreviewResolver {
     if (matches.length !== 1) throw new Error('No unique matching instrument was found');
     return matches[0]?.url ?? '';
   }
-  async resolve(ref: Reference, pageUrl: string): Promise<Preview> {
+  async resolve(
+    ref: Reference,
+    pageUrl: string,
+    isCurrent = (): boolean => true
+  ): Promise<Preview> {
     if (ref.kind === 'abbreviation')
       return { kind: 'Legal abbreviation', title: ref.label, text: ref.text ?? '', url: ref.url };
     if (ref.kind === 'local' && ref.target)
@@ -69,8 +76,8 @@ export class PreviewResolver {
         detail: 'From this page and its displayed version',
         url: pageUrl,
       };
-    if (ref.kind === 'citing') return this.citingCases(ref);
-    if (ref.kind === 'case') return this.casePreview(ref);
+    if (ref.kind === 'citing') return this.citingCases(ref, isCurrent);
+    if (ref.kind === 'case') return this.casePreview(ref, isCurrent);
     const sourceUrl = await this.statuteUrl(ref);
     // An explicitly mentioned revised edition cannot be assumed to equal the current Act URL.
     if (
@@ -123,12 +130,13 @@ export class PreviewResolver {
       url: url.href,
     };
   }
-  private async casePreview(ref: Reference): Promise<Preview> {
+  private async casePreview(ref: Reference, isCurrent: () => boolean): Promise<Preview> {
     let url = ref.url || caseUrl(ref.label);
     if (!url) {
       const lookup: Lookup = { kind: 'case-search', phrase: `"${ref.label}"` };
       const search = await this.load(lookup);
       for (const candidate of searchCandidates(search, lookupUrl(lookup)).slice(0, 5)) {
+        if (!isCurrent()) throw new Error('Lookup dismissed');
         const doc = await this.load({ kind: 'document', url: candidate.url });
         const head = doc.querySelector('#divJudgement');
         // Only accept a report citation in the case's own header, not a citation in its reasons.
@@ -163,7 +171,7 @@ export class PreviewResolver {
       url,
     };
   }
-  private async citingCases(ref: Reference): Promise<Preview> {
+  private async citingCases(ref: Reference, isCurrent: () => boolean): Promise<Preview> {
     const act = normalizeAct(ref.act ?? '');
     const section = ref.section ?? '';
     const phrase = `"${act.replace(/"/g, '')}" AND ("section ${section}" OR "s ${section}" OR "s. ${section}")`;
@@ -173,6 +181,7 @@ export class PreviewResolver {
     const candidates = searchCandidates(doc, url).slice(0, 5);
     const links: NonNullable<Preview['links']> = [];
     for (const candidate of candidates) {
+      if (!isCurrent()) break;
       try {
         const judgment = await this.load({ kind: 'document', url: candidate.url });
         const root = judgment.querySelector('#divJudgement');
