@@ -31,7 +31,10 @@
         "https://sso.agc.gov.sg/Bills-Supp/*",
         "https://sso.agc.gov.sg/Act-Rev/*",
         "https://www.elitigation.sg/gd/s/*",
-        "https://www.elitigation.sg/gdviewer/s/*"
+        "https://www.elitigation.sg/gdviewer/s/*",
+        "https://sso.agc.gov.sg/act/*",
+        "https://sso.agc.gov.sg/Act",
+        "https://sso.agc.gov.sg/Search/Content*"
       ],
       "js": [
         "content.js"

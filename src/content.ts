@@ -1,8 +1,9 @@
-import type { ChromeMessage, ChromeMessageResponse } from '@/types';
+import type { ChromeMessage, ChromeMessageResponse, FetchResponse } from '@/types';
 import { Annotations } from '@/core/annotations';
 import { HoverCard } from '@/core/card';
 import { contentRoot, pageSummary } from '@/core/sources';
 import { ENABLED_KEY } from '@/utils/constants';
+import { sourceSnapshot } from '@/core/sourceSnapshot';
 import { isSupportedUrl } from '@/utils/network';
 
 let annotations: Annotations | null = null;
@@ -52,6 +53,14 @@ function applyEnabled(value: boolean): void {
     style.remove();
   }
 }
+chrome.runtime.onMessage.addListener(
+  (message: { action?: string }, sender, respond: (response: FetchResponse) => void) => {
+    if (message.action !== 'get_source_document' || sender.id !== chrome.runtime.id || sender.tab)
+      return false;
+    void sourceSnapshot(document, location.href).then(respond);
+    return true;
+  }
+);
 chrome.runtime.onMessage.addListener(
   (message: ChromeMessage, _sender, respond: (response: ChromeMessageResponse) => void) => {
     if (message.action === 'check_supported_page') {

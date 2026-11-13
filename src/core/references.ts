@@ -24,6 +24,9 @@ const ACTS: Record<string, string> = {
   'Consumer Protection (Fair Trading) Act': 'CPFTA2003',
   'Arbitration Act': 'AA2001',
   'Small Claims Tribunals Act': 'SCTA1984',
+  'Competition Act': 'CA2004',
+  'State Courts Act': 'SCA1970',
+  'Insolvency, Restructuring and Dissolution Act': 'IRDA2018',
 };
 export const GLOSSARY: Record<string, string> = {
   'SGHC(A)': 'Appellate Division of the High Court of Singapore',
@@ -111,12 +114,32 @@ export function detectReferences(
       section: m[1],
       url: knownActUrl(act),
       version: m[3] || context.versions.get(m[2] ?? ''),
+      quote: quotedProvision(el, m[1] ?? ''),
     });
   }
   for (const m of text.matchAll(
     /\[\d{4}\]\s+(?:SG[A-Z]+(?:\([AI]\))?\s+\d+|\d+\s+SLR(?:\(R\))?\s+\d+)/g
   )) {
-    add(m.index ?? 0, m[0], { kind: 'case', url: caseUrl(m[0]) });
+    const prefix = text.slice(0, m.index);
+    const italicName = Array.from(el.querySelectorAll('i,em,.font-italic'))
+      .map(cleanText)
+      .reverse()
+      .find((name) => /\sv\s/.test(name) && prefix.trimEnd().endsWith(name));
+    const caseName = italicName || caseNameBefore(prefix);
+    const tail = text.slice((m.index ?? 0) + m[0].length);
+    const pinpoint = /^(?:\s*\([^)]*\))?\s+at\s+\[(\d+)\](?:\s*[–—-]\s*\[(\d+)\])?/.exec(tail);
+    const paragraphs = pinpoint
+      ? Array.from(
+          {
+            length: Math.min(
+              3,
+              Math.max(1, Number(pinpoint[2] || pinpoint[1]) - Number(pinpoint[1]) + 1)
+            ),
+          },
+          (_, i) => String(Number(pinpoint[1]) + i)
+        )
+      : undefined;
+    add(m.index ?? 0, m[0], { kind: 'case', url: caseUrl(m[0]), caseName, paragraphs });
   }
   // Existing native links are decorated, never replaced or intercepted.
   const anchor = el.closest('a[href]');
@@ -200,22 +223,6 @@ export function detectReferences(
       url: act ? knownActUrl(act) : undefined,
     });
   }
-  // These are lookup candidates, never bundled definitions. Resolve only when a
-  // paragraph explicitly identifies one Act and a provision establishing scope.
-  if (root.id === 'divJudgement') {
-    const statutoryRefs = results
-      .map((r) => r.reference)
-      .filter((r) => r.kind === 'statute' && r.act && r.section);
-    const acts = new Set(statutoryRefs.map((r) => r.act));
-    const contextRef = acts.size === 1 ? statutoryRefs[0] : undefined;
-    if (contextRef) {
-      const candidates =
-        /\b(?:controlled drugs?|public servant|unfair practice|property|person|document|contract|supplier|consumer|court|company|officer|employee|employer)\b/gi;
-      for (const m of text.matchAll(candidates)) {
-        add(m.index ?? 0, m[0], { ...contextRef, kind: 'definition', text: m[0] });
-      }
-    }
-  }
   const glossary = new RegExp(
     `(?<![\\p{L}\\p{N}_])(?:${Object.keys(GLOSSARY)
       .sort((a, b) => b.length - a.length)
@@ -226,4 +233,33 @@ export function detectReferences(
   for (const m of text.matchAll(glossary))
     add(m.index ?? 0, m[0], { kind: 'abbreviation', text: GLOSSARY[m[0]], url: GLOSSARY_SOURCE });
   return results.sort((a, b) => a.start - b.start);
+}
+
+/** Case names are taken from the citation's own surrounding text, never guessed from a report number. */
+export function caseNameBefore(prefix: string): string | undefined {
+  const last =
+    prefix
+      .split(/[;:!?]/)
+      .pop()
+      ?.replace(/.*\b(?:see|in|from)\s+(?=[A-Z])/g, '')
+      .trim() ?? '';
+  const match = /([A-Z][A-Za-z0-9 &'’.,()-]*?\s+v\s+[A-Z][A-Za-z0-9 &'’.,()-]*)$/.exec(last);
+  return match?.[1]?.replace(/^.*\(\s*(?=[A-Z])/, '').trim();
+}
+function quotedProvision(el: Element, section: string): string | undefined {
+  const block = el.closest('.Judg-1');
+  if (!block) return undefined;
+  const quotes: string[] = [];
+  let next = block.nextElementSibling;
+  while (next && /\bJudg-Quote-\d+\b/.test(next.className)) {
+    quotes.push(cleanText(next));
+    next = next.nextElementSibling;
+  }
+  if (
+    !quotes.some((line) =>
+      new RegExp(`^${escapeRegex(section.replace(/\(.*/, ''))}\\s*[.．—–]`).test(line)
+    )
+  )
+    return undefined;
+  return quotes.join('\n').slice(0, 7000);
 }

@@ -9,7 +9,7 @@ export function isSupportedUrl(value: string): boolean {
       !u.password &&
       !u.port &&
       ((u.hostname === 'sso.agc.gov.sg' &&
-        /^\/(Act|Act-Rev|SL|Bills-Supp)\/[^/]+\/?$/.test(u.pathname)) ||
+        /^\/(Act|Act-Rev|SL|Bills-Supp)\/[^/]+\/?$/i.test(u.pathname)) ||
         (u.hostname === 'www.elitigation.sg' &&
           /^\/(?:gd|gdviewer)\/s\/\d{4}_SG[A-Z]+_\d+\/?$/.test(u.pathname)))
     );
@@ -18,6 +18,8 @@ export function isSupportedUrl(value: string): boolean {
   }
 }
 export function lookupUrl(lookup: Lookup): string {
+  if (lookup.kind === 'rendered') return lookupUrl(lookup.resource);
+  if (lookup.kind === 'statute-catalogue') return 'https://sso.agc.gov.sg/Act';
   if (lookup.kind === 'document') {
     if (!isSupportedUrl(lookup.url)) throw new Error('Unsupported source URL');
     return lookup.url;
@@ -27,14 +29,18 @@ export function lookupUrl(lookup: Lookup): string {
     throw new Error('Invalid search');
   const url = new URL(
     lookup.kind === 'statute-search'
-      ? 'https://sso.agc.gov.sg/Search'
+      ? 'https://sso.agc.gov.sg/Search/Content'
       : 'https://www.elitigation.sg/gdviewer/Home/Index'
   );
-  if (lookup.kind === 'statute-search') url.searchParams.set('Phrase', phrase);
-  else {
+  if (lookup.kind === 'statute-search') {
+    url.searchParams.set('Phrase', phrase);
+    url.searchParams.set('PhraseType', 'AllTheseWords');
+    url.searchParams.set('Within', 'title');
+    url.searchParams.set('In', 'InForce_Act_SL');
+  } else {
     url.searchParams.set('SearchPhrase', phrase);
     url.searchParams.set('SearchMode', 'True');
-    url.searchParams.set('SortBy', 'DateOfDecision');
+    url.searchParams.set('SortBy', 'Score');
     url.searchParams.set('SortAscending', 'False');
     url.searchParams.set('Filter', 'SUPCT');
   }

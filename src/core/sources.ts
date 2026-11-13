@@ -29,8 +29,15 @@ export function contentRoot(doc: Document): HTMLElement | null {
 }
 export function pageSummary(doc: Document, url: string): PageSummary {
   const elit = new URL(url).hostname === 'www.elitigation.sg';
-  const citation = cleanText(doc.querySelector('.HN-NeutralCit')) || (elit ? doc.title : '');
-  const names = Array.from(doc.querySelectorAll('.HN-CaseName')).map(cleanText);
+  const citation =
+    cleanText(doc.querySelector('.HN-NeutralCit, .Citation')) || (elit ? doc.title : '');
+  const names = Array.from(doc.querySelectorAll('.HN-CaseName, .caseTitle')).map(cleanText);
+  const legacyInfo = (label: string): string => {
+    const row = Array.from(doc.querySelectorAll('#info-table tr')).find(
+      (el) => cleanText(el.querySelector('.txt-label')) === label
+    );
+    return cleanText(row?.querySelector('.txt-body'));
+  };
   return {
     site: elit ? 'elit' : 'sso',
     title: elit
@@ -46,10 +53,17 @@ export function pageSummary(doc: Document, url: string): PageSummary {
           ? 'Supplement'
           : 'Act',
     status: elit ? '' : cleanText(doc.querySelector('.status-value')),
-    date: cleanText(doc.querySelector(elit ? '.Judg-Date-Reserved, .Judg-Date' : '.cDate')),
+    date: elit
+      ? legacyInfo('Decision Date') ||
+        cleanText(doc.querySelector('.Judg-Date-Reserved, .Judg-Date')).match(
+          /\d{1,2}\s+[A-Za-z]+\s+\d{4}/
+        )?.[0] ||
+        ''
+      : cleanText(doc.querySelector('.cDate')),
     revisedTitle: cleanText(doc.querySelector('.revdHdr')),
     court: elit
-      ? doc.querySelector('.HN-Coram')?.childNodes[0]?.textContent?.split('—')[0]?.trim() || ''
+      ? doc.querySelector('.HN-Coram')?.childNodes[0]?.textContent?.split('—')[0]?.trim() ||
+        legacyInfo('Tribunal/Court')
       : '',
     citation,
     hasPdf: !!doc.querySelector('a[href*="/pdf"], .fa-file-pdf-o'),
@@ -86,10 +100,17 @@ export function provisionText(target: Element): string {
       node.matches('td[class*="Hdr"], .partHdr, [id*="-he-"]')
     )
       break;
+    if (collecting && node instanceof Element && node !== target && node.matches('tr,p,li,br,div'))
+      out += '\n';
     if (collecting && node instanceof Text) out += node.data;
     if (out.length > 7000) break;
   }
-  return out.replace(/\s+/g, ' ').trim().slice(0, 7000);
+  return out
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n')
+    .slice(0, 7000);
 }
 export function sectionContext(el: Element): string | undefined {
   const root = el.closest('#legisContent');
@@ -104,7 +125,7 @@ export function sectionContext(el: Element): string | undefined {
 }
 export function judgmentParagraph(root: Element, number: string): Element | undefined {
   return Array.from(root.querySelectorAll('.Judg-1')).find((p) =>
-    new RegExp(`^${escapeRegex(number)}(?:\\s|\\u2003)`).test(p.textContent ?? '')
+    new RegExp(`^${escapeRegex(number)}(?:\\s|\\u2003)`).test(cleanText(p))
   );
 }
 export function sourceLink(value: string, base: string): string | undefined {
@@ -147,5 +168,34 @@ export function localPreview(target: Element, label: string, url: string): Previ
         ? 'Enclosing section context from this page; no exact sub-provision anchor was found.'
         : 'From this page and its displayed version',
     url,
+  };
+}
+
+/** Only explicit edition links on SSO's own timeline establish a dated version. */
+export function editionUrl(doc: Document, base: string, edition: string): string | undefined {
+  const year = /\b(\d{4})\b/.exec(edition)?.[1];
+  if (!year) return undefined;
+  const links: string[] = [];
+  for (const a of Array.from(doc.querySelectorAll<HTMLAnchorElement>('a[href]'))) {
+    const context = cleanText(a.closest('li, tr') ?? a.parentElement);
+    if (!new RegExp(`\\b${year}\\s*(?:Rev\\.?\\s*Ed|Revised Edition)`, 'i').test(context)) continue;
+    const url = sourceLink(a.getAttribute('href') ?? '', base);
+    if (url && new URL(url).searchParams.has('RevDate')) links.push(url);
+  }
+  return new Set(links).size === 1 ? links[0] : undefined;
+}
+export function paragraphPreview(
+  root: Element,
+  numbers: string[] = []
+): { text: string; detail: string } {
+  const selected = numbers.length
+    ? numbers.map((number) => judgmentParagraph(root, number)).filter((el): el is Element => !!el)
+    : Array.from(root.querySelectorAll('.Judg-1')).slice(0, 2);
+  const text = selected.map(cleanText).join('\n\n');
+  return {
+    text: text.slice(0, 7000) + (text.length > 7000 ? '…' : ''),
+    detail: numbers.length
+      ? `Paragraph${numbers.length > 1 ? 's' : ''} ${numbers.join(', ')}`
+      : 'Opening paragraphs',
   };
 }

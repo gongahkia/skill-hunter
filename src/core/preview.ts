@@ -1,13 +1,15 @@
-import type { FetchResponse, Lookup, Preview, Reference } from '@/types';
+import type { FetchResponse, Lookup, Preview, Reference, SourceLookup } from '@/types';
 import { lookupUrl } from '@/utils/network';
 import { actAliases, caseUrl, knownActUrl, normalizeAct } from './references';
 import {
   cleanText,
   contentRoot,
+  editionUrl,
   escapeRegex,
   localPreview,
   localTarget,
   pageSummary,
+  paragraphPreview,
   parseHtml,
   provisionText,
   searchCandidates,
@@ -15,6 +17,15 @@ import {
 } from './sources';
 import { definitionFor, extractDefinitions } from './definitions';
 
+function caseNameKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/\blimited\b/g, 'ltd')
+    .replace(/&/g, 'and')
+    .replace(/[^\p{L}\p{N} ]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 export class PreviewResolver {
   private cache = new Map<string, Promise<Document>>();
   private generation = 0;
@@ -26,7 +37,7 @@ export class PreviewResolver {
   }
   private async load(lookup: Lookup): Promise<Document> {
     if (this.disposed) throw new Error('Lookup dismissed');
-    const key = lookupUrl(lookup);
+    const key = `${lookup.kind === 'rendered' ? 'rendered:' : ''}${lookupUrl(lookup)}`;
     const existing = this.cache.get(key);
     if (existing) return existing;
     const generation = this.generation;
@@ -41,23 +52,71 @@ export class PreviewResolver {
       return parseHtml(response.html);
     })();
     this.cache.set(key, request);
-    if (this.cache.size > 16) this.cache.delete(this.cache.keys().next().value as string);
-    // Failures should be retryable on the next activation.
+    if (this.cache.size > 20) this.cache.delete(this.cache.keys().next().value as string);
     void request.catch(() => {
       if (this.cache.get(key) === request) this.cache.delete(key);
     });
     return request;
   }
-  private async statuteUrl(ref: Reference): Promise<string> {
+  private async statuteDocument(url: string, isCurrent: () => boolean): Promise<Document> {
+    if (!isCurrent()) throw new Error('Lookup dismissed');
+    let doc: Document | undefined;
+    try {
+      doc = await this.load({ kind: 'document', url });
+    } catch {
+      /* Read the browser source below. */
+    }
+    if (!isCurrent()) throw new Error('Lookup dismissed');
+    if (!doc || !contentRoot(doc)?.querySelector('[id*="-he-"], td[class*="prov"]'))
+      doc = await this.load({ kind: 'rendered', resource: { kind: 'document', url } });
+    if (!contentRoot(doc)?.textContent?.trim())
+      throw new Error('SSO did not provide readable legislation in the browser.');
+    return doc;
+  }
+  private async statuteUrl(ref: Reference, isCurrent: () => boolean): Promise<string> {
     if (ref.url) return ref.url;
     if (!ref.act) throw new Error('The referenced instrument could not be identified');
-    const lookup: Lookup = { kind: 'statute-search', title: ref.act };
-    const doc = await this.load(lookup);
-    const matches = searchCandidates(doc, lookupUrl(lookup)).filter(
-      (c) => normalizeAct(c.title).toLowerCase() === normalizeAct(ref.act ?? '').toLowerCase()
-    );
-    if (matches.length !== 1) throw new Error('No unique matching instrument was found');
-    return matches[0]?.url ?? '';
+    const lookup: SourceLookup = { kind: 'statute-search', title: ref.act };
+    if (!isCurrent()) throw new Error('Lookup dismissed');
+    let doc: Document;
+    try {
+      doc = await this.load(lookup);
+    } catch {
+      if (!isCurrent()) throw new Error('Lookup dismissed');
+      doc = await this.load({ kind: 'rendered', resource: lookup });
+    }
+    const matches = (source: Document, base: string): string[] =>
+      searchCandidates(source, base)
+        .filter(
+          (c) => normalizeAct(c.title).toLowerCase() === normalizeAct(ref.act ?? '').toLowerCase()
+        )
+        .map((c) => c.url);
+    let urls = matches(doc, lookupUrl(lookup));
+    if (!urls.length) {
+      if (!isCurrent()) throw new Error('Lookup dismissed');
+      doc = await this.load({ kind: 'rendered', resource: lookup });
+      urls = matches(doc, lookupUrl(lookup));
+    }
+    if (!urls.length) {
+      if (!isCurrent()) throw new Error('Lookup dismissed');
+      const catalogue: SourceLookup = { kind: 'statute-catalogue' };
+      try {
+        doc = await this.load(catalogue);
+      } catch {
+        if (!isCurrent()) throw new Error('Lookup dismissed');
+        doc = await this.load({ kind: 'rendered', resource: catalogue });
+      }
+      urls = matches(doc, lookupUrl(catalogue));
+      if (!urls.length) {
+        doc = await this.load({ kind: 'rendered', resource: catalogue });
+        urls = matches(doc, lookupUrl(catalogue));
+      }
+    }
+    if (new Set(urls).size !== 1)
+      throw new Error(
+        'SSO did not return a unique title match. Open the source search to select the instrument.'
+      );
+    return urls[0] ?? '';
   }
   async resolve(
     ref: Reference,
@@ -78,96 +137,134 @@ export class PreviewResolver {
       };
     if (ref.kind === 'citing') return this.citingCases(ref, isCurrent);
     if (ref.kind === 'case') return this.casePreview(ref, isCurrent);
-    const sourceUrl = await this.statuteUrl(ref);
-    // An explicitly mentioned revised edition cannot be assumed to equal the current Act URL.
-    if (
-      ref.version &&
-      !/\/(?:Act-Rev)\//.test(sourceUrl) &&
-      !new URL(sourceUrl).searchParams.has('RevDate')
-    ) {
+    if (ref.quote)
       return {
-        kind: 'Legislation',
-        title: ref.act || ref.label,
-        text: 'The cited historical edition could not be established. Open SSO to select that edition.',
-        detail: `Cited edition: ${ref.version}`,
-        url: sourceUrl,
+        kind: 'Legislation quoted in judgment',
+        title: `${ref.act || ref.label}${ref.section ? ` · section ${ref.section}` : ''}`,
+        text: ref.quote,
+        detail: `Verbatim quotation from this judgment; any omissions are retained.${ref.version ? ` Cited edition: ${ref.version}.` : ''}`,
+        url: pageUrl,
       };
-    }
+    let sourceUrl = await this.statuteUrl(ref, isCurrent);
     const url = new URL(sourceUrl);
     url.searchParams.set('WholeDoc', '1');
-    const doc = await this.load({ kind: 'document', url: url.href });
-    const root = contentRoot(doc);
-    if (!root) throw new Error('SSO returned no readable legislation (access may be blocked)');
-    const summary = pageSummary(doc, url.href);
+    sourceUrl = url.href;
+    let doc = await this.statuteDocument(sourceUrl, isCurrent);
+    let versionWarning = '';
+    if (ref.version && !url.searchParams.has('RevDate') && !url.pathname.startsWith('/Act-Rev/')) {
+      const historical = editionUrl(doc, sourceUrl, ref.version);
+      if (historical) {
+        try {
+          doc = await this.statuteDocument(historical, isCurrent);
+          sourceUrl = historical;
+        } catch {
+          versionWarning = `Cited ${ref.version} could not be loaded. Showing current text, which may differ.`;
+        }
+      } else
+        versionWarning = `Cited ${ref.version} could not be verified. Showing current text, which may differ.`;
+    }
+    const root = contentRoot(doc) as HTMLElement;
+    const summary = pageSummary(doc, sourceUrl);
     if (ref.kind === 'definition') {
-      const defs = extractDefinitions(root);
       const scope = ref.section ? localTarget(root, ref.section) : undefined;
-      const def = definitionFor(ref.text ?? '', scope ?? root, root, defs);
+      const def = definitionFor(ref.text ?? '', scope ?? root, root, extractDefinitions(root));
       if (!def) throw new Error('No unambiguous definition was found in the identified scope');
       return {
         kind: 'Definition',
         title: ref.text ?? ref.label,
         text: def.text,
-        detail: statuteVersion(doc, url.href),
-        url: url.href,
+        detail: versionWarning || statuteVersion(doc, sourceUrl),
+        url: sourceUrl,
       };
     }
-    const hashSection = /pr(\d+[A-Z]*)(?:-ss(\w+))?/.exec(url.hash);
+    const finalUrl = new URL(sourceUrl);
+    const hashSection = /pr(\d+[A-Z]*)(?:-ss(\w+))?/.exec(finalUrl.hash);
     const section =
       ref.section ||
       (hashSection ? `${hashSection[1]}${hashSection[2] ? `(${hashSection[2]})` : ''}` : '');
     const target = section ? localTarget(root, section) : undefined;
     if (section && !target)
       throw new Error('The referenced provision was not found in this version');
-    if (target?.id) url.hash = target.id;
+    if (target?.id) finalUrl.hash = target.id;
     return {
-      kind: 'Legislation',
-      title: summary.title,
+      kind: versionWarning ? 'Legislation · current text' : 'Legislation',
+      title: `${summary.title}${section ? ` · section ${section}` : ''}`,
       text: target
         ? provisionText(target)
         : cleanText(root.querySelector('.longTitle')) || 'Open the source to read this instrument.',
-      detail: `${section ? `Section ${section}. ` : ''}${statuteVersion(doc, url.href)}`,
-      url: url.href,
+      detail: versionWarning || statuteVersion(doc, sourceUrl),
+      url: finalUrl.href,
     };
   }
   private async casePreview(ref: Reference, isCurrent: () => boolean): Promise<Preview> {
     let url = ref.url || caseUrl(ref.label);
+    let nameMatched = false;
     if (!url) {
-      const lookup: Lookup = { kind: 'case-search', phrase: `"${ref.label}"` };
+      const lookup: Lookup = { kind: 'case-search', phrase: ref.caseName || `"${ref.label}"` };
       const search = await this.load(lookup);
-      for (const candidate of searchCandidates(search, lookupUrl(lookup)).slice(0, 5)) {
+      const candidates = searchCandidates(search, lookupUrl(lookup)).slice(0, 10);
+      const matches: Array<{ url: string; doc: Document }> = [];
+      // Only fetch titles matching the parties, rather than ten unrelated citing judgments.
+      const parties = ref.caseName?.split(/\s+v\s+/i).map((s) =>
+        caseNameKey(s)
+          .replace(/\band another.*$/, '')
+          .trim()
+      );
+      for (const candidate of candidates) {
         if (!isCurrent()) throw new Error('Lookup dismissed');
-        const doc = await this.load({ kind: 'document', url: candidate.url });
-        const head = doc.querySelector('#divJudgement');
-        // Only accept a report citation in the case's own header, not a citation in its reasons.
-        const citationHeader = head?.querySelector('.HN-NeutralCit, .HN-CaseName')?.parentElement;
-        const preamble = citationHeader
-          ? Array.from(citationHeader.children)
-              .filter((el) => !el.className.startsWith('Judg-'))
-              .map(cleanText)
-              .join(' ')
-          : '';
-        if (preamble.includes(ref.label)) {
-          url = candidate.url;
-          break;
+        if (parties && !parties.every((party) => caseNameKey(candidate.title).includes(party)))
+          continue;
+        try {
+          const doc = await this.load({ kind: 'document', url: candidate.url });
+          const summary = pageSummary(doc, candidate.url);
+          const nameMatches =
+            !!ref.caseName && caseNameKey(summary.title) === caseNameKey(ref.caseName);
+          const headers = Array.from(doc.querySelectorAll('.HN-NeutralCit, .HN-CaseName'))
+            .map(cleanText)
+            .join(' ');
+          if (nameMatches || headers.includes(ref.label)) matches.push({ url: candidate.url, doc });
+        } catch {
+          /* Try the other matching public judgments. */
         }
       }
-      if (!url)
+      if (matches.length !== 1)
         return {
-          kind: 'Case citation',
-          title: ref.label,
-          text: 'No verified public judgment mapping was found for this report citation.',
+          kind: 'Case search',
+          title: ref.caseName || ref.label,
+          text:
+            matches.length > 1
+              ? 'Several judgments have this case name. Select a source to read the correct one.'
+              : 'The public search did not identify a unique judgment. Open the search results to select it.',
           url: lookupUrl(lookup),
+          links: matches.map((match) => ({
+            title: pageSummary(match.doc, match.url).citation,
+            url: match.url,
+          })),
         };
+      url = matches[0]?.url;
+      nameMatched = !!ref.caseName;
     }
+    if (!url) throw new Error('No judgment source was identified');
     const doc = await this.load({ kind: 'document', url });
-    if (!doc.querySelector('#divJudgement')) throw new Error('No public judgment was returned');
+    const root = doc.querySelector('#divJudgement');
+    if (!root) throw new Error('No public judgment was returned');
     const summary = pageSummary(doc, url);
+    const excerpt = paragraphPreview(root, ref.paragraphs);
     return {
       kind: 'Judgment',
       title: summary.title,
-      text: summary.citation,
-      detail: [summary.court, summary.date].filter(Boolean).join(' · '),
+      text: excerpt.text || 'The requested paragraphs were not found in this public copy.',
+      detail: [
+        summary.citation,
+        summary.court,
+        summary.date,
+        excerpt.detail,
+        nameMatched
+          ? 'Matched by the cited case name; the SLR citation is not independently verified.'
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
       url,
     };
   }

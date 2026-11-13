@@ -21,10 +21,12 @@ export interface ChromeMessageResponse {
   pageSummary?: PageSummary;
   error?: string;
 }
-export type Lookup =
+export type SourceLookup =
   | { kind: 'document'; url: string }
   | { kind: 'statute-search'; title: string }
-  | { kind: 'case-search'; phrase: string };
+  | { kind: 'case-search'; phrase: string }
+  | { kind: 'statute-catalogue' };
+export type Lookup = SourceLookup | { kind: 'rendered'; resource: SourceLookup };
 export interface FetchResponse {
   ok: boolean;
   html?: string;
@@ -48,6 +50,9 @@ export interface Reference {
   version?: string;
   text?: string;
   target?: Element;
+  caseName?: string;
+  paragraphs?: string[];
+  quote?: string;
 }
 export interface ReferenceMatch {
   start: number;

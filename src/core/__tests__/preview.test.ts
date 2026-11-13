@@ -42,23 +42,27 @@ it('deduplicates on-demand loads in memory, labels current text and clears on di
   await new PreviewResolver().resolve(statute, source);
   expect(send).toHaveBeenCalledTimes(2);
 });
-it('does not substitute current text for an explicit historical edition', async () => {
-  const send = mockFetch(() => '');
+it('shows literal current text with a prominent warning when a cited edition cannot be verified', async () => {
+  mockFetch(
+    () =>
+      '<div id="legisContent"><table><tr><td id="pr5-he-">5. Heading</td></tr><tr><td>Current provision wording.</td></tr></table></div>'
+  );
   const result = await new PreviewResolver().resolve(
     { ...statute, version: '2008 Rev Ed' },
     source
   );
-  expect(result.text).toContain('historical edition');
-  expect(send).not.toHaveBeenCalled();
+  expect(result.text).toContain('Current provision wording.');
+  expect(result.kind).toBe('Legislation · current text');
+  expect(result.detail).toContain('2008 Rev Ed could not be verified');
 });
 it('retries failed requests, handles blocked content and never invents missing sections', async () => {
   const send = mockFetch(() => 'Access denied');
   const resolver = new PreviewResolver();
-  await expect(resolver.resolve(statute, source)).rejects.toThrow('no readable legislation');
+  await expect(resolver.resolve(statute, source)).rejects.toThrow('readable legislation');
   send.mockResolvedValue({ ok: false, error: 'HTTP 403' });
   await expect(new PreviewResolver().resolve(statute, source)).rejects.toThrow('HTTP 403');
   await expect(new PreviewResolver().resolve(statute, source)).rejects.toThrow('HTTP 403');
-  expect(send).toHaveBeenCalledTimes(3);
+  expect(send).toHaveBeenCalledTimes(6);
 });
 it('checks live search candidates for the actual Act and section, not section-number prefixes', async () => {
   const send = mockFetch((lookup) => {
@@ -80,5 +84,56 @@ it('searches unknown instruments and refuses ambiguous matches', async () => {
   );
   await expect(
     new PreviewResolver().resolve({ ...statute, url: undefined, act: 'Other Act' }, source)
-  ).rejects.toThrow('No unique');
+  ).rejects.toThrow('unique title match');
+});
+it('resolves a report citation by its printed case name and previews the pinpoint paragraphs', async () => {
+  const name = 'L W Infrastructure Pte Ltd v Lim Chin San Contractors Pte Ltd';
+  const send = mockFetch((lookup) => {
+    if (lookup.kind === 'case-search') {
+      expect(lookup.phrase).toBe(name);
+      return `<a href="/gdviewer/s/2013_SGHC_264">${name}</a>`;
+    }
+    return `<div id="divJudgement"><div class="HN-CaseName">${name}</div><div class="HN-NeutralCit">[2013] SGHC 264</div><div class="Judg-1">28 The tribunal has completed its mandate.</div><div class="Judg-1">29 It cannot reconsider the merits.</div></div>`;
+  });
+  const result = await new PreviewResolver().resolve(
+    { kind: 'case', label: '[2014] 1 SLR 1221', caseName: name, paragraphs: ['28', '29'] },
+    source
+  );
+  expect(result.text).toContain('28 The tribunal has completed its mandate.');
+  expect(result.text).toContain('29 It cannot reconsider the merits.');
+  expect(result.detail).toContain('not independently verified');
+  expect(result.url).toContain('2013_SGHC_264');
+  expect(send).toHaveBeenCalledTimes(2);
+});
+it('shows quoted statutory text from the judgment without a remote lookup', async () => {
+  const send = mockFetch(() => '');
+  const result = await new PreviewResolver().resolve(
+    { ...statute, quote: '5.—(1) Exact quoted text.', version: '2020 Rev Ed' },
+    'https://www.elitigation.sg/gd/s/2024_SGCA_12'
+  );
+  expect(result.text).toBe('5.—(1) Exact quoted text.');
+  expect(result.kind).toContain('quoted');
+  expect(send).not.toHaveBeenCalled();
+});
+it('reads the rendered source when the HTTP response is only a JavaScript shell', async () => {
+  const send = mockFetch((lookup) =>
+    lookup.kind === 'rendered'
+      ? '<div id="legisContent"><table><tr><td id="pr5-he-">5. Duties</td></tr><tr><td>Browser rendered provision.</td></tr></table></div>'
+      : '<div id="legisContent"></div>'
+  );
+  const result = await new PreviewResolver().resolve(statute, source);
+  expect(result.text).toContain('Browser rendered provision.');
+  expect(send).toHaveBeenCalledTimes(2);
+});
+it('uses the edition date explicitly linked from the official timeline', async () => {
+  mockFetch((lookup) => {
+    const historical = lookup.kind === 'document' && lookup.url.includes('RevDate=20211231');
+    return `<ul><li><a href="?RevDate=20211231&WholeDoc=1">31 Dec 2021 · 2020 RevEd</a></li></ul><div id="legisContent"><table><tr><td id="pr5-he-">5. Duties</td></tr><tr><td>${historical ? 'Historical text.' : 'Current text.'}</td></tr></table></div>`;
+  });
+  const result = await new PreviewResolver().resolve(
+    { ...statute, version: '2020 Rev Ed' },
+    source
+  );
+  expect(result.text).toContain('Historical text.');
+  expect(result.url).toContain('RevDate=20211231');
 });

@@ -1,5 +1,7 @@
 import type { FetchResponse, Lookup } from '@/types';
-import { fetchLookup, isSupportedUrl } from '@/utils/network';
+import { renderedSource } from '@/utils/renderedSource';
+import { isSourcePage } from '@/core/sourceSnapshot';
+import { fetchLookup, lookupUrl } from '@/utils/network';
 
 // Two concurrent network requests across all tabs. Do not retain response content.
 let active = 0;
@@ -8,6 +10,7 @@ async function limitedFetch(lookup: Lookup): Promise<FetchResponse> {
   if (active >= 2) await new Promise<void>((resolve) => queue.push(resolve));
   active++;
   try {
+    if (lookup.kind === 'rendered') return await renderedSource(lookupUrl(lookup));
     return await fetchLookup(lookup);
   } finally {
     active--;
@@ -27,7 +30,7 @@ chrome.runtime.onMessage.addListener(
       sender.id !== chrome.runtime.id ||
       !sender.tab ||
       !sender.url ||
-      !isSupportedUrl(sender.url)
+      !isSourcePage(sender.url)
     ) {
       respond({ ok: false, error: 'Unsupported sender' });
       return false;
@@ -37,7 +40,9 @@ chrome.runtime.onMessage.addListener(
       !lookup ||
       typeof lookup !== 'object' ||
       !('kind' in lookup) ||
-      !['document', 'statute-search', 'case-search'].includes(String(lookup.kind))
+      !['document', 'statute-search', 'case-search', 'statute-catalogue', 'rendered'].includes(
+        String(lookup.kind)
+      )
     ) {
       respond({ ok: false, error: 'Invalid lookup' });
       return false;

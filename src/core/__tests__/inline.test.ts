@@ -179,7 +179,7 @@ it('keeps whitespace-only nodes when detecting citations split across elements',
   annotations.clear();
   expect(body.textContent).toBe(original);
 });
-it('keeps explicit alias editions and offers remote term lookups only with identified scope', () => {
+it('keeps explicit alias editions without marking ordinary words as definitions', () => {
   document.body.innerHTML =
     '<div id="divJudgement"><p>Misuse of Drugs Act 1973 (2008 Rev Ed) (the “MDA”).</p><p id="reference">A person under s 5 of the MDA.</p></div>';
   const root = contentRoot(document) as HTMLElement;
@@ -191,11 +191,7 @@ it('keeps explicit alias editions and offers remote term lookups only with ident
     'https://www.elitigation.sg/gd/s/2024_SGCA_12'
   );
   expect(refs.find((r) => r.reference.kind === 'statute')?.reference.version).toBe('2008 Rev Ed');
-  expect(refs.find((r) => r.reference.kind === 'definition')?.reference).toMatchObject({
-    act: 'Misuse of Drugs Act 1973',
-    section: '5',
-    version: '2008 Rev Ed',
-  });
+  expect(refs.some((r) => r.reference.kind === 'definition')).toBe(false);
   expect(
     detectReferences('property', paragraph, root, 'https://www.elitigation.sg/gd/s/2024_SGCA_12')
   ).toHaveLength(0);
@@ -209,4 +205,50 @@ it('uses a native external link’s section label when its URL has no hash', () 
   const ref = detectReferences(a.textContent, a, root, url)[0]?.reference;
   expect(ref).toMatchObject({ kind: 'statute', section: '5(1)' });
   expect(a.href).toContain('ProvIds=pr5-');
+});
+it('retains the case name and paragraph range next to an SLR citation', () => {
+  document.body.innerHTML =
+    '<div id="divJudgement"><p id="p">See <i>L W Infrastructure Pte Ltd v Lim Chin San Contractors Pte Ltd</i> [2014] 1 SLR 1221 (“L W Infrastructure”) at [28]–[29].</p></div>';
+  const root = contentRoot(document) as HTMLElement;
+  const p = document.getElementById('p') as HTMLElement;
+  const refs = detectReferences(
+    p.textContent ?? '',
+    p,
+    root,
+    'https://www.elitigation.sg/gd/s/2024_SGCA_12'
+  );
+  expect(refs[0]?.reference).toMatchObject({
+    kind: 'case',
+    caseName: 'L W Infrastructure Pte Ltd v Lim Chin San Contractors Pte Ltd',
+    paragraphs: ['28', '29'],
+  });
+});
+it('does not add a guessed court definition after an Act citation', () => {
+  document.body.innerHTML =
+    '<div id="divJudgement"><p>Arbitration Act 2001 (2020 Rev Ed) (the “AA”)</p><p id="p">Under s 21 of the AA, the court allowed the application.</p></div>';
+  const root = contentRoot(document) as HTMLElement;
+  const p = document.getElementById('p') as HTMLElement;
+  expect(detectReferences(p.textContent ?? '', p, root, url).map((r) => r.reference.kind)).toEqual([
+    'statute',
+  ]);
+});
+it('captures an adjacent quoted statutory provision as a literal preview', () => {
+  document.body.innerHTML =
+    '<div id="divJudgement"><div class="Judg-1">52 Under s 44 of the Arbitration Act 2001, the provision reads:</div><div class="Judg-Quote-0">Effect of award</div><div class="Judg-Quote-0">44.—(2) The tribunal must not vary the award.</div><div class="Judg-1">53 The next paragraph.</div></div>';
+  const root = contentRoot(document) as HTMLElement;
+  const p = root.querySelector('.Judg-1') as HTMLElement;
+  const ref = detectReferences(p.textContent ?? '', p, root, url)[0]?.reference;
+  expect(ref?.quote).toBe('Effect of award\n44.—(2) The tribunal must not vary the award.');
+});
+it('reads legacy public judgment headers and paragraph anchors', () => {
+  const doc = parseHtml(
+    '<div id="divJudgement"><h2><span class="caseTitle">Example Ltd <em>v</em> Other Ltd</span><span class="Citation">[2013] SGHC 264</span></h2><table id="info-table"><tr><td class="txt-label">Decision Date</td><td class="txt-body">29 November 2013</td></tr><tr><td class="txt-label">Tribunal/Court</td><td class="txt-body">High Court</td></tr></table><p class="Judg-Date">Judgment reserved.</p><p class="Judg-1"><a id="p1_28"></a>28&nbsp;&nbsp;Exact paragraph text.</p></div>'
+  );
+  const summary = pageSummary(doc, 'https://www.elitigation.sg/gd/s/2013_SGHC_264');
+  expect(summary).toMatchObject({
+    title: 'Example Ltd v Other Ltd',
+    citation: '[2013] SGHC 264',
+    court: 'High Court',
+    date: '29 November 2013',
+  });
 });
