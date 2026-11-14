@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/skill_hunter_1.0-deprecated-red)](https://github.com/gongahkia/skill-hunter/releases/tag/1.0) [![](https://img.shields.io/badge/skill_hunter_2.0-passing-green)](https://github.com/gongahkia/skill-hunter/releases/tag/2.0) [![](https://img.shields.io/badge/skill_hunter_3.0-passing-dark_green)](https://github.com/gongahkia/skill-hunter/releases/tag/3.0)
+[![](https://img.shields.io/badge/skill_hunter_3.0-release-dark_green)](https://github.com/gongahkia/skill-hunter/releases/tag/3.0)
 ![](https://github.com/gongahkia/skill-hunter/actions/workflows/ci.yml/badge.svg)
 
 # `Skill Hunter`
@@ -7,23 +7,25 @@
     <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-Browser extension that formats legislation to be more readable.
+Browser extension that previews legal references on Singapore Statutes Online and eLitigation.
 
 ## Motivation
 
-[SSO](https://sso.agc.gov.sg/) is the most-referenced source for lawyers when keeping up to date with Singapore Legislation.
+[SSO](https://sso.agc.gov.sg/) is a source for lawyers when keeping up to date with Singapore Legislation.
 
 Time is often spent poring over definitions and navigating between interpretation and offence sections.
 
-`Skill Hunter` simplifies the heavily-nested DOM structure of the webpage to one that is intuitive and easily understood by lawyers and programmers alike.
+`Skill Hunter` previews definitions, statutory provisions and cited judgments in place.
 
 ## Purpose
 
-* BLUF, offence sections and their limbs are laid bare
+* Statutory provisions and cited judgments are previewed in place
 * Important terms are defined in place
-* Browser extension with tiny source code binary runnable on most machines
+* Original page text and controls are retained
 
 ## Screenshot
+
+Screenshots from the earlier simplified reading view.
 
 ![](./asset/screenshots/1.png)
 ![](./asset/screenshots/2.png)
@@ -31,31 +33,32 @@ Time is often spent poring over definitions and navigating between interpretatio
 
 ## Supported browsers
 
-Find `Skill Hunter` on the [Chrome Web Store](https://chromewebstore.google.com) or [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
+Build the current `Skill Hunter` locally. Find earlier versions on [Firefox browser Add-ons](https://addons.mozilla.org/en-US/firefox/).
 
 | Browser | Status | Link |
 | :--- | :--- | :--- |
-| Firefox | ![](https://img.shields.io/badge/Status-Up-brightgreen) | [addons.mozilla.org/en-US/firefox/addon/skill-hunter/](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) |
-| Google Chrome | ![](https://img.shields.io/badge/Status-Awaiting%20Approval-orange) | NIL |
-| Safari | ![](https://img.shields.io/badge/Status-Unsupported-red) | NIL |
+| Firefox | ![](https://img.shields.io/badge/Status-Local%20build-brightgreen) | [Installation](#installation) |
+| Google Chrome | ![](https://img.shields.io/badge/Status-Local%20build-brightgreen) | [Installation](#installation) |
+| Safari | ![](https://img.shields.io/badge/Status-Development%20build-orange) | [Build and testing](./safari/TESTING.md) |
 
 ## Versions
 
-* `Skill Hunter v2.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/).
-* `Skill Hunter v3.0.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter-2/).
+* The current source is `Skill Hunter v2.0.0`, with inline legal reference previews.
+* Earlier Firefox Add-ons are available as [Skill Hunter](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) and [Skill Hunter 2](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter-2/), with the older simplify workflow.
 
 ## [Presentation](./asset/presentation/class_part.pdf)
 
 ## Installation
 
-Build `Skill Hunter` locally.
+Build `Skill Hunter` locally with Node.js 22+, npm and Make.
 
 ### CLI
 
 ```console
 $ git clone https://github.com/gongahkia/skill-hunter
 $ cd skill-hunter
-$ make
+$ npm ci
+$ make build
 ```
 
 ### GUI
@@ -70,34 +73,40 @@ $ make
 
 3. Unzip the ZIP file.
 
+4. Open a terminal in the unzipped folder, then run `npm ci` and `make build`.
+
 ## Usage
+
+Inline previews start disabled. The setting is saved across supported tabs.
 
 ### Chrome
 
 1. Copy and paste this link in the search bar *chrome://extensions/*.
 2. Toggle *Developer mode* on.
 3. Click *load unpacked*.
-4. Open the `skill-hunter` repo, click *select*.
-5. Open any **SSO** page, then click *Whole Document*.
+4. Open the `skill-hunter` repo, select the built `dist` folder.
+5. Open an **SSO** legislation page, then click *Whole Document*, or open an **eLitigation** judgment.
 
 ![](./asset/screenshots/skill-hunter-installation-3.png)
 
-6. Click the simplify button.
+6. Click the extension icon, then click *Enable inline previews* and hover an underlined reference.
 
 ### Firefox
 
 1. Copy and paste this link in the search bar *about:debugging#/runtime/this-firefox*.
 2. Click *load temporary add-on*.
-3. Open the `skill-hunter` repo, select `manifest.json`.
-4. Open any **SSO** page, then click *Whole Document*.
+3. Open the `skill-hunter` repo, select `dist/manifest.json`.
+4. Open an **SSO** legislation page, then click *Whole Document*, or open an **eLitigation** judgment.
 
 ![](./asset/screenshots/skill-hunter-installation-3.png)
 
-5. Click the simplify button.
+5. Click the extension icon, then click *Enable inline previews* and hover an underlined reference.
 
 ## Browser support
 
-Support for browsers like Opera, Vivaldi have not been extensively tested, but should work while support for Manifest V3 persists. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
+Requires Chrome 121+ or Firefox 140+ (Firefox for Android 142+). Safari development builds require macOS 13.3+.
+
+Support for browsers like Opera and Vivaldi has not been extensively tested. [Open an issue](https://github.com/gongahkia/skill-hunter/issues) for further support.
 
 ## References
 
