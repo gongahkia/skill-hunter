@@ -7,25 +7,24 @@
     <img src="./asset/logo/logo_words.png" width=50% height=50%>
 </p>
 
-Browser extension that previews legal references on Singapore Statutes Online and eLitigation.
+Browser extension that formats [legislation](https://sso.agc.gov.sg/) and [case law](https://www.elitigation.sg/_layouts/IELS/HomePage/Pages/Home.aspx) to be more readable.
 
 ## Motivation
 
-[SSO](https://sso.agc.gov.sg/) is a source for lawyers when keeping up to date with Singapore Legislation.
+[SSO](https://sso.agc.gov.sg/) and [eLitigation](https://www.elitigation.sg/_layouts/IELS/HomePage/Pages/Home.aspx) are two of the most-referenced sources for those practising law in Singapore.
 
 Time is often spent poring over definitions and navigating between interpretation and offence sections.
 
-`Skill Hunter` previews definitions, statutory provisions and cited judgments in place.
+`Skill Hunter` simplifies the heavily-nested DOM structure of these webpages to one that is intuitive and easily understood by lawyers and programmers alike.
 
 ## Purpose
 
-* Statutory provisions and cited judgments are previewed in place
 * Important terms are defined in place
-* Original page text and controls are retained
+* Retains original page text and controls
+* Tiny source code binary runnable on most machines
+* BLUF, offence sections and their limbs are laid bare
 
 ## Screenshot
-
-Screenshots from the earlier simplified reading view.
 
 ![](./asset/screenshots/1.png)
 ![](./asset/screenshots/2.png)
@@ -43,8 +42,8 @@ Build the current `Skill Hunter` locally. Find earlier versions on [Firefox brow
 
 ## Versions
 
-* The current source is `Skill Hunter v2.0.0`, with inline legal reference previews.
-* Earlier Firefox Add-ons are available as [Skill Hunter](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/) and [Skill Hunter 2](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter-2/), with the older simplify workflow.
+* `Skill Hunter v2.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter/).
+* `Skill Hunter v3.0` is available as an Add-on for Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/skill-hunter-2/).
 
 ## [Presentation](./asset/presentation/class_part.pdf)
 
@@ -76,8 +75,6 @@ $ make build
 4. Open a terminal in the unzipped folder, then run `npm ci` and `make build`.
 
 ## Usage
-
-Inline previews start disabled. The setting is saved across supported tabs.
 
 ### Chrome
 
