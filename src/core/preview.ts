@@ -58,7 +58,11 @@ export class PreviewResolver {
     });
     return request;
   }
-  private async statuteDocument(url: string, isCurrent: () => boolean): Promise<Document> {
+  private async statuteDocument(
+    url: string,
+    isCurrent: () => boolean,
+    section?: string
+  ): Promise<Document> {
     if (!isCurrent()) throw new Error('Lookup dismissed');
     let doc: Document | undefined;
     try {
@@ -67,7 +71,12 @@ export class PreviewResolver {
       /* Read the browser source below. */
     }
     if (!isCurrent()) throw new Error('Lookup dismissed');
-    if (!doc || !contentRoot(doc)?.querySelector('[id*="-he-"], td[class*="prov"]'))
+    const root = doc ? contentRoot(doc) : null;
+    if (
+      !root ||
+      !root.querySelector('[id*="-he-"], td[class*="prov"]') ||
+      (section && !localTarget(root, section))
+    )
       doc = await this.load({ kind: 'rendered', resource: { kind: 'document', url } });
     if (!contentRoot(doc)?.textContent?.trim())
       throw new Error('SSO did not provide readable legislation in the browser.');
@@ -149,13 +158,17 @@ export class PreviewResolver {
     const url = new URL(sourceUrl);
     url.searchParams.set('WholeDoc', '1');
     sourceUrl = url.href;
+    const hashSection = /pr(\d+[A-Z]*)(?:-ss(\w+))?/.exec(url.hash);
+    const section =
+      ref.section ||
+      (hashSection ? `${hashSection[1]}${hashSection[2] ? `(${hashSection[2]})` : ''}` : '');
     let doc = await this.statuteDocument(sourceUrl, isCurrent);
     let versionWarning = '';
     if (ref.version && !url.searchParams.has('RevDate') && !url.pathname.startsWith('/Act-Rev/')) {
       const historical = editionUrl(doc, sourceUrl, ref.version);
       if (historical) {
         try {
-          doc = await this.statuteDocument(historical, isCurrent);
+          doc = await this.statuteDocument(historical, isCurrent, section);
           sourceUrl = historical;
         } catch {
           versionWarning = `Cited ${ref.version} could not be loaded. Showing current text, which may differ.`;
@@ -163,7 +176,11 @@ export class PreviewResolver {
       } else
         versionWarning = `Cited ${ref.version} could not be verified. Showing current text, which may differ.`;
     }
-    const root = contentRoot(doc) as HTMLElement;
+    let root = contentRoot(doc) as HTMLElement;
+    if (section && !localTarget(root, section)) {
+      doc = await this.statuteDocument(sourceUrl, isCurrent, section);
+      root = contentRoot(doc) as HTMLElement;
+    }
     const summary = pageSummary(doc, sourceUrl);
     if (ref.kind === 'definition') {
       const scope = ref.section ? localTarget(root, ref.section) : undefined;
@@ -178,13 +195,9 @@ export class PreviewResolver {
       };
     }
     const finalUrl = new URL(sourceUrl);
-    const hashSection = /pr(\d+[A-Z]*)(?:-ss(\w+))?/.exec(finalUrl.hash);
-    const section =
-      ref.section ||
-      (hashSection ? `${hashSection[1]}${hashSection[2] ? `(${hashSection[2]})` : ''}` : '');
     const target = section ? localTarget(root, section) : undefined;
     if (section && !target)
-      throw new Error('The referenced provision was not found in this version');
+      throw new Error('The requested provision could not be located in the retrieved SSO page.');
     if (target?.id) finalUrl.hash = target.id;
     return {
       kind: versionWarning ? 'Legislation · current text' : 'Legislation',

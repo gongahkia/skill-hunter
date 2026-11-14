@@ -125,6 +125,43 @@ it('reads the rendered source when the HTTP response is only a JavaScript shell'
   expect(result.text).toContain('Browser rendered provision.');
   expect(send).toHaveBeenCalledTimes(2);
 });
+it('reads the rendered source when an HTTP response contains other provisions but omits the requested one', async () => {
+  const send = mockFetch((lookup) =>
+    lookup.kind === 'rendered'
+      ? '<div id="legisContent"><table><tr><td id="pr5-he-">5. Duties</td></tr><tr><td>Requested provision from the rendered page.</td></tr></table></div>'
+      : '<div id="legisContent"><table><tr><td id="pr1-he-">1. Short title</td></tr><tr><td>Only part of the document.</td></tr></table></div>'
+  );
+  const result = await new PreviewResolver().resolve(statute, source);
+  expect(result.text).toContain('Requested provision from the rendered page.');
+  expect(send.mock.calls.map(([message]) => (message as { lookup: Lookup }).lookup.kind)).toEqual([
+    'document',
+    'rendered',
+  ]);
+});
+it('uses a linked section anchor when deciding whether to read the rendered source', async () => {
+  const send = mockFetch((lookup) =>
+    lookup.kind === 'rendered'
+      ? '<div id="legisContent"><table><tr><td id="pr5-he-">5. Duties</td></tr><tr><td>Linked provision from the rendered page.</td></tr></table></div>'
+      : '<div id="legisContent"><table><tr><td id="pr1-he-">1. Short title</td></tr></table></div>'
+  );
+  const result = await new PreviewResolver().resolve(
+    { ...statute, section: undefined, url: `${source}#pr5-he-` },
+    source
+  );
+  expect(result.text).toContain('Linked provision from the rendered page.');
+  expect(result.url).toBe(`${source}#pr5-he-`);
+  expect(send).toHaveBeenCalledTimes(2);
+});
+it('reports a retrieval failure when neither response contains the requested provision', async () => {
+  const send = mockFetch(
+    () =>
+      '<div id="legisContent"><table><tr><td id="pr1-he-">1. Short title</td></tr><tr><td>Other provision text.</td></tr></table></div>'
+  );
+  await expect(new PreviewResolver().resolve(statute, source)).rejects.toThrow(
+    'The requested provision could not be located in the retrieved SSO page.'
+  );
+  expect(send).toHaveBeenCalledTimes(2);
+});
 it('uses the edition date explicitly linked from the official timeline', async () => {
   mockFetch((lookup) => {
     const historical = lookup.kind === 'document' && lookup.url.includes('RevDate=20211231');
@@ -136,4 +173,19 @@ it('uses the edition date explicitly linked from the official timeline', async (
   );
   expect(result.text).toContain('Historical text.');
   expect(result.url).toContain('RevDate=20211231');
+});
+it('checks the cited edition before retrying an incomplete current document', async () => {
+  const send = mockFetch((lookup) => {
+    if (lookup.kind === 'rendered') throw new Error('Rendered current page unavailable');
+    if (lookup.kind === 'document' && lookup.url.includes('RevDate=20211231'))
+      return '<div id="legisContent"><table><tr><td id="pr5-he-">5. Duties</td></tr><tr><td>Historical provision text.</td></tr></table></div>';
+    return '<ul><li><a href="?RevDate=20211231&WholeDoc=1">31 Dec 2021 · 2020 RevEd</a></li></ul><div id="legisContent"><table><tr><td id="pr1-he-">1. Short title</td></tr></table></div>';
+  });
+  const result = await new PreviewResolver().resolve(
+    { ...statute, version: '2020 Rev Ed' },
+    source
+  );
+  expect(result.text).toContain('Historical provision text.');
+  expect(result.url).toContain('RevDate=20211231');
+  expect(send).toHaveBeenCalledTimes(2);
 });
