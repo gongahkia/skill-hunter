@@ -5,11 +5,13 @@ import { actAliases, caseUrl, detectReferences } from '../references';
 import { extractDefinitions, definitionFor } from '../definitions';
 import {
   contentRoot,
+  localPreview,
   localTarget,
   pageSummary,
   parseHtml,
   provisionText,
   searchCandidates,
+  sectionContext,
 } from '../sources';
 import { ANNOTATION_ATTR } from '@/utils/constants';
 const url = 'https://sso.agc.gov.sg/Act/Test2026?WholeDoc=1';
@@ -89,6 +91,124 @@ describe('inline reference preservation', () => {
   });
 });
 describe('reference resolution boundaries', () => {
+  it('keeps defined words in SSO section headings plain while annotating their body text', () => {
+    const root = fixture();
+    const heading = document.getElementById('pr3-he-') as HTMLElement;
+    heading.textContent = 'Duties of a person';
+    const annotations = new Annotations(root, url);
+    annotations.scan();
+    expect(heading.querySelector(`[${ANNOTATION_ATTR}]`)).toBeNull();
+    const body = document.getElementById('pr3-ss1-') as HTMLElement;
+    const trigger = body.querySelector(`[${ANNOTATION_ATTR}]`) as Element;
+    expect(annotations.reference(trigger)?.kind).toBe('definition');
+    expect(trigger.textContent).toBe('person');
+    annotations.clear();
+  });
+  it('resolves current SSO heading anchors, section context and enclosing-section fallbacks', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr1-"><span class="noBold"></span><span>Short title</span></td></tr><tr><td class="prov1Txt">First provision.</td></tr><tr><td class="prov1Hdr" id="pr2-"><span class="noBold"></span><span>Interpretation</span></td></tr><tr><td class="prov1Txt" id="reference">Read section 1.</td></tr><tr><td class="prov2Hdr" id="pr3-">Next section</td></tr><tr><td class="prov2Txt">Unrelated provision.</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    const body = document.getElementById('reference') as HTMLElement;
+    const target = localTarget(root, '2(9)') as Element;
+    expect(target?.id).toBe('pr2-');
+    expect(sectionContext(body)).toBe('2');
+    expect(provisionText(target)).toContain('Interpretation');
+    expect(provisionText(target)).not.toContain('Next section');
+    expect(localPreview(target, 'subsection (9)', url).detail).toContain('Enclosing section');
+    const reference = detectReferences(body.textContent ?? '', body, root, url)[0]?.reference;
+    expect(reference?.kind).toBe('local');
+    expect(reference?.target).toBe(document.getElementById('pr1-'));
+  });
+  it('keeps current SSO section-scoped definitions inside their section', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr2-">Interpretation</td></tr><tr><td>In this section —</td></tr><tr><td class="def">“person” means the fixture individual;</td></tr><tr><td id="inside">person</td></tr><tr><td class="prov2Hdr" id="pr3-">Other provision</td></tr><tr><td id="outside">person</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    const defs = extractDefinitions(root);
+    expect(defs[0]?.scope).toBe('section:2');
+    expect(
+      definitionFor('person', document.getElementById('inside') as Element, root, defs)
+    ).toBeDefined();
+    expect(
+      definitionFor('person', document.getElementById('outside') as Element, root, defs)
+    ).toBeUndefined();
+  });
+  it('extracts nested SSO definitions and annotates their use in later Parts', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr2-">Interpretation</td></tr><tr><td class="prov1Txt"><strong>2.</strong><a name="pr2-ps1-"></a><span class="prov2TxtIL">—(1)&nbsp; In this Act, unless the context otherwise requires&nbsp;—<table><tr><td class="def">“supplier” means a fixture person whose business —<table class="p1_1"><tr><td class="p1DefNo">(<em>a</em>)</td><td class="pDefTxt">provides fixture goods;</td></tr><tr><td class="p1DefNo">(<em>b</em>)</td><td class="pDefTxt">manufactures fixture goods;</td></tr></table><table><tr><td class="defSO">and includes the person’s fixture agent;</td></tr></table></td></tr></table><table><tr><td class="def">“contract” means a fixture agreement;</td></tr></table></span></td></tr><tr><td><div class="partNo">PART 2</div></td></tr><tr><td class="partHdr">OTHER PROVISIONS</td></tr><tr><td class="prov2Hdr" id="pr3-">Application</td></tr><tr><td class="prov2Txt" id="use">A supplier enters a contract.</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    const body = document.getElementById('use') as HTMLElement;
+    const defs = extractDefinitions(root);
+    const supplier = definitionFor('supplier', body, root, defs);
+    expect(supplier?.scope).toBe('act');
+    expect(supplier?.text).toContain('provides fixture goods');
+    expect(supplier?.text).toContain('manufactures fixture goods');
+    expect(supplier?.text).toContain('fixture agent');
+    expect(supplier?.text).not.toContain('fixture agreement');
+    const original = root.textContent;
+    const annotations = new Annotations(root, url);
+    annotations.scan();
+    const triggers = Array.from(body.querySelectorAll(`[${ANNOTATION_ATTR}]`));
+    expect(triggers.map((el) => el.textContent)).toEqual(['supplier', 'contract']);
+    expect(annotations.reference(triggers[0])?.text).toBe(supplier?.text);
+    expect(root.querySelector(`.def [${ANNOTATION_ATTR}]`)).toBeNull();
+    annotations.clear();
+    expect(root.textContent).toBe(original);
+  });
+  it('does not take definition scope from clauses inside a preceding definition', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr2-">Interpretation</td></tr><tr><td class="prov1Txt">In this Act —<table><tr><td class="def">“agreement” includes a fixture agreement described by —<table><tr><td>the words “in this section” in a quotation;</td></tr></table></td></tr></table><table><tr><td class="def">“supplier” means a fixture person;</td></tr></table></td></tr><tr><td class="prov2Hdr" id="pr3-">Application</td></tr><tr><td id="use">supplier</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    const defs = extractDefinitions(root);
+    expect(
+      definitionFor('supplier', document.getElementById('use') as Element, root, defs)?.scope
+    ).toBe('act');
+  });
+  it('reads a later local introduction after an Act-wide definition in the same cell', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr2-">Interpretation</td></tr><tr><td class="prov1Txt"><span>In this Act —<table><tr><td class="def">“person” means a fixture individual;</td></tr></table>In this section —<table><tr><td class="def">“supplier” means a fixture person;</td></tr></table></span></td></tr><tr><td class="prov2Hdr" id="pr3-">Application</td></tr><tr><td id="outside">supplier and person</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    const defs = extractDefinitions(root);
+    expect(defs.map(({ term, scope }) => ({ term, scope }))).toEqual([
+      { term: 'person', scope: 'act' },
+      { term: 'supplier', scope: 'section:2' },
+    ]);
+    const outside = document.getElementById('outside') as Element;
+    expect(definitionFor('supplier', outside, root, defs)).toBeUndefined();
+    expect(definitionFor('person', outside, root, defs)?.scope).toBe('act');
+  });
+  it('reads nested definitions inside a provision container with a separate legacy heading', () => {
+    document.body.innerHTML =
+      '<div id="legisContent"><div class="prov1" id="pr2-"><table><tr><td class="prov1Hdr" id="pr2-he-">Interpretation</td></tr><tr><td class="prov1Txt">In this Act —<table><tr><td class="def">“supplier” means a fixture person;</td></tr></table></td></tr></table></div><table><tr><td class="prov1Hdr" id="pr3-he-">Application</td></tr><tr><td id="use">supplier</td></tr></table></div>';
+    const root = contentRoot(document) as HTMLElement;
+    expect(
+      definitionFor(
+        'supplier',
+        document.getElementById('use') as Element,
+        root,
+        extractDefinitions(root)
+      )?.scope
+    ).toBe('act');
+  });
+  it.each([
+    ['pr6-', 'Circumstances surrounding unfair practice'],
+    ['pr8-', 'Voluntary compliance agreement'],
+    ['pr8-he-', 'Voluntary compliance agreement'],
+  ])(
+    'leaves ordinary SSO headings unannotated while preserving references to them (%s)',
+    (id, title) => {
+      document.body.innerHTML = `<div id="legisContent"><table><tr><td class="prov1Hdr" id="${id}"><span class="noBold"></span><span>${title}</span></td></tr><tr><td class="prov1Txt" id="reference">See section ${id === 'pr6-' ? '6' : '8'}.</td></tr></table></div>`;
+      const root = contentRoot(document) as HTMLElement;
+      const original = root.textContent;
+      const annotations = new Annotations(root, url);
+      annotations.scan();
+      expect(document.getElementById(id)?.querySelector(`[${ANNOTATION_ATTR}]`)).toBeNull();
+      const trigger = root.querySelector(`#reference [${ANNOTATION_ATTR}]`) as Element;
+      expect(annotations.reference(trigger)?.kind).toBe('local');
+      expect(annotations.reference(trigger)?.target).toBe(document.getElementById(id));
+      annotations.clear();
+      expect(root.textContent).toBe(original);
+    }
+  );
   it('parses neutral citations including appellate and international court codes', () => {
     expect(caseUrl('[2024] SGCA 12')).toBe('https://www.elitigation.sg/gd/s/2024_SGCA_12');
     expect(caseUrl('[2025] SGHC(A) 14')).toContain('2025_SGHCA_14');

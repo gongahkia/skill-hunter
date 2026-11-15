@@ -1,10 +1,9 @@
 import type { Reference } from '@/types';
 import { ANNOTATION_ATTR } from '@/utils/constants';
 import { detectReferences, referenceContext } from './references';
-import { cleanText } from './sources';
 
 const SKIP =
-  'script,style,noscript,textarea,input,select,button,pre,code,nav,[contenteditable]:not([contenteditable="false"]),[hidden],[aria-hidden="true"],#skill-hunter-previews';
+  'script,style,noscript,textarea,input,select,button,pre,code,nav,[class*="prov"][class*="Hdr"],[contenteditable]:not([contenteditable="false"]),[hidden],[aria-hidden="true"],#skill-hunter-previews';
 const BLOCK = 'p,td,th,li,blockquote,h1,h2,h3,h4,h5,h6,.Judg-1,.Judg-Quote-0,.Judg-List-1';
 export class Annotations {
   private counter = 0;
@@ -36,22 +35,7 @@ export class Annotations {
     for (const [block, nodes] of groups) {
       const text = nodes.map((node) => node.data).join('');
       if (!text.trim()) continue;
-      const header = /^pr(\d+[A-Z]*)-he-$/i.exec(block.id);
-      const matches = header
-        ? [
-            {
-              start: 0,
-              end: text.length,
-              reference: {
-                kind: 'citing' as const,
-                label: text,
-                section: header[1],
-                act: cleanText(document.querySelector('.legis-title, .actHd')) || document.title,
-                url: this.url,
-              },
-            },
-          ]
-        : detectReferences(text, block, this.root, this.url, context);
+      const matches = detectReferences(text, block, this.root, this.url, context);
       let offset = 0;
       const positions = nodes.map((node) => {
         const start = offset;

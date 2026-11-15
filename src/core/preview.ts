@@ -13,6 +13,7 @@ import {
   parseHtml,
   provisionText,
   searchCandidates,
+  sectionNumber,
   statuteVersion,
 } from './sources';
 import { definitionFor, extractDefinitions } from './definitions';
@@ -73,6 +74,7 @@ export class PreviewResolver {
     if (!isCurrent()) throw new Error('Lookup dismissed');
     const root = doc ? contentRoot(doc) : null;
     if (
+      !doc ||
       !root ||
       !root.querySelector('[id*="-he-"], td[class*="prov"]') ||
       (section && !localTarget(root, section))
@@ -205,7 +207,14 @@ export class PreviewResolver {
       text: target
         ? provisionText(target)
         : cleanText(root.querySelector('.longTitle')) || 'Open the source to read this instrument.',
-      detail: versionWarning || statuteVersion(doc, sourceUrl),
+      detail: [
+        versionWarning || statuteVersion(doc, sourceUrl),
+        target && section.includes('(') && sectionNumber(target)
+          ? 'Enclosing section context; no exact sub-provision anchor was found.'
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
       url: finalUrl.href,
     };
   }

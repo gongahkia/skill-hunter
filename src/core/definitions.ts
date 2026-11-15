@@ -1,4 +1,4 @@
-import { cleanText, sectionContext } from './sources';
+import { cleanText, sectionContext, sectionNumber } from './sources';
 export interface ScopedDefinition {
   term: string;
   text: string;
@@ -18,26 +18,44 @@ export function extractDefinitions(root: Element): ScopedDefinition[] {
   let intro = '',
     section = '',
     part = '';
-  // One source-order pass. Repeated DOM queries per definition are prohibitively
-  // expensive on large instruments such as the Penal Code.
-  for (const cell of Array.from(root.querySelectorAll('td, .partNo, .def, [id*="-he-"]'))) {
-    if (cell.matches('.partHdr, .partNo')) {
-      part = cleanText(cell);
-      intro = '';
+  let excluded: Element | null = null;
+  // read introductions in source order, including text around nested definition tables.
+  const walker = root.ownerDocument.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) =>
+        excluded?.contains(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
     }
-    const heading = /^pr(\d+[A-Z]*)-he-$/i.exec(cell.id);
-    if (heading) {
-      section = heading[1] ?? '';
+  );
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node instanceof Text) {
+      intro += node.data;
+      continue;
+    }
+    if (!(node instanceof Element)) continue;
+    if (node.matches('.partHdr, .partNo')) {
+      part = cleanText(node);
       intro = '';
       continue;
     }
-    if (!cell.matches('.def')) {
-      if (!cell.querySelector('.def, td, [id*="-he-"]')) intro += ` ${cleanText(cell)}`;
+    const heading = sectionNumber(node);
+    if (heading && (/-he-$/i.test(node.id) || node.matches('[class*="prov"][class*="Hdr"]'))) {
+      section = heading;
+      intro = '';
+      excluded = node;
       continue;
     }
-    const text = cleanText(cell);
+    if (!node.matches('.def')) {
+      if (node.matches('div,p,br,td,th,tr,li,section')) intro += ' ';
+      continue;
+    }
+    excluded = node;
+    const text = cleanText(node);
     const term = /^[“"]([^”"]+)[”"]/.exec(text)?.[1];
     if (!term) continue;
+    intro = intro.replace(/\s+/g, ' ').trim();
     let scope = 'act';
     if (/\b(?:this section|this regulation)\b/i.test(intro)) scope = `section:${section}`;
     else if (/\bthis Part\b/i.test(intro)) scope = `part:${part}`;

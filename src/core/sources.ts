@@ -70,12 +70,17 @@ export function pageSummary(doc: Document, url: string): PageSummary {
     sourceUrl: url,
   };
 }
+export function sectionNumber(el: Element): string | undefined {
+  return /^pr(\d+[A-Z]*)-(?:he-)?$/i.exec(el.id)?.[1];
+}
 export function localTarget(root: Element, section: string): Element | undefined {
   const parts = section.match(/^(\d+[A-Z]*)(.*)$/i);
   if (!parts) return undefined;
   const base = parts[1]?.toUpperCase();
   const subsection = /^\((\w+)\)/.exec(parts[2] ?? '')?.[1];
-  const ids = subsection ? [`pr${base}-ss${subsection}-`, `pr${base}-he-`] : [`pr${base}-he-`];
+  const ids = subsection
+    ? [`pr${base}-ss${subsection}-`, `pr${base}-he-`, `pr${base}-`]
+    : [`pr${base}-he-`, `pr${base}-`];
   return ids
     .map((id) => Array.from(root.querySelectorAll('[id]')).find((el) => el.id === id))
     .find(Boolean);
@@ -118,8 +123,8 @@ export function sectionContext(el: Element): string | undefined {
   let section: string | undefined;
   for (const candidate of Array.from(root.querySelectorAll('[id]'))) {
     if (candidate.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING) break;
-    const match = /^pr(\d+[A-Z]*)-he-$/i.exec(candidate.id);
-    if (match) section = match[1];
+    const number = sectionNumber(candidate);
+    if (number) section = number;
   }
   return section;
 }
@@ -164,7 +169,7 @@ export function localPreview(target: Element, label: string, url: string): Previ
     title: label,
     text: target.closest('#legisContent') ? provisionText(target) : cleanText(target),
     detail:
-      /-he-$/.test(target.id) && /subsection|paragraph/i.test(label)
+      sectionNumber(target) && /subsection|paragraph/i.test(label)
         ? 'Enclosing section context from this page; no exact sub-provision anchor was found.'
         : 'From this page and its displayed version',
     url,

@@ -23,6 +23,37 @@ function mockFetch(handler: (lookup: Lookup) => string | Promise<string>): jest.
 afterEach(() => {
   Reflect.deleteProperty(globalThis, 'chrome');
 });
+it.each([
+  ['Competition Act 2004', 'CA2004', '3'],
+  ['Road Traffic Act 1961', 'RTA1961', '2'],
+  ['State Courts Act 1970', 'SCA1970', '4'],
+  ['Arbitration Act 2001', 'AA2001', '21'],
+])('reads current SSO section anchors for %s', async (act, slug, section) => {
+  const url = `https://sso.agc.gov.sg/Act/${slug}?WholeDoc=1`;
+  const send = mockFetch(
+    () =>
+      `<div class="actHd">${act}</div><div id="legisContent"><table><tr><td class="prov1Hdr" id="pr${section}-"><span class="noBold"></span><span>Fixture heading</span></td></tr><tr><td class="prov1Txt">Requested provision text.</td></tr><tr><td class="prov1Hdr" id="pr99-">Following provision</td></tr><tr><td class="prov1Txt">Unrelated text.</td></tr></table></div>`
+  );
+  const result = await new PreviewResolver().resolve(
+    { kind: 'statute', label: `section ${section} of the ${act}`, act, section, url },
+    source
+  );
+  expect(result.text).toContain('Requested provision text.');
+  expect(result.text).not.toContain('Following provision');
+  expect(result.url).toBe(`${url}#pr${section}-`);
+  expect(send).toHaveBeenCalledTimes(1);
+});
+it('labels enclosing-section text when a current SSO page has no exact subsection anchor', async () => {
+  mockFetch(
+    () =>
+      '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr5-">Duties</td></tr><tr><td class="prov1Txt">Whole-section context.</td></tr></table></div>'
+  );
+  const result = await new PreviewResolver().resolve({ ...statute, section: '5(9)' }, source);
+  expect(result.text).toContain('Whole-section context.');
+  expect(result.detail).toContain('Enclosing section context');
+  expect(result.detail).toContain('no exact sub-provision anchor');
+  expect(result.url).toBe(`${source}#pr5-`);
+});
 it('deduplicates on-demand loads in memory, labels current text and clears on disable', async () => {
   const send = mockFetch(
     () =>
