@@ -26,9 +26,10 @@ class FixtureHandler(http.server.SimpleHTTPRequestHandler):
 
 
 class WebDriver:
-    def __init__(self, url):
+    def __init__(self, url, timeout=30):
         self.url = url
         self.session = ""
+        self.timeout = timeout
 
     def request(self, path, data=None, method=None):
         request = urllib.request.Request(
@@ -38,7 +39,7 @@ class WebDriver:
             method=method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 value = json.load(response)["value"]
         except urllib.error.HTTPError as error:
             raise RuntimeError(error.read().decode()) from error

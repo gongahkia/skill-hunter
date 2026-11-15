@@ -1,0 +1,61 @@
+{
+  "live": [
+    {
+      "id": "consumer-protection",
+      "url": "https://sso.agc.gov.sg/Act/CPFTA2003?WholeDoc=1",
+      "purpose": "Nested definitions, later Parts, heading exclusions and cross-Act previews",
+      "probes": [
+        { "label": "supplier", "after": "#pr3-, #pr3-he-", "kind": "Definition", "contains": ["employee or agent"] },
+        { "label": "Competition Act", "match": "contains", "kind": "Legislation" }
+      ]
+    },
+    {
+      "id": "employment",
+      "url": "https://sso.agc.gov.sg/Act/EmA1968?WholeDoc=1",
+      "purpose": "Act- and Part-scoped definitions",
+      "probes": [{ "label": "employee", "kind": "Definition" }]
+    },
+    {
+      "id": "penal-code",
+      "url": "https://sso.agc.gov.sg/Act/PC1871?WholeDoc=1",
+      "purpose": "Large-document scanning and local references",
+      "sample": 2
+    },
+    {
+      "id": "part-time-regulations",
+      "url": "https://sso.agc.gov.sg/SL/91-RG8?WholeDoc=1",
+      "purpose": "Subsidiary legislation and multiword definitions",
+      "probes": [{ "label": "similar full-time employee", "kind": "Definition" }]
+    },
+    {
+      "id": "voltas",
+      "url": "https://www.elitigation.sg/gd/s/2024_SGCA_12",
+      "purpose": "Judgment citations, statutory pinpoints and cited editions",
+      "probes": [
+        { "label": "[2022] SGHC 153", "kind": "Judgment" },
+        { "label": "s 21(9) of the Arbitration Act", "match": "contains", "kind": "Legislation" }
+      ]
+    },
+    {
+      "id": "legacy-judgment",
+      "url": "https://www.elitigation.sg/gd/s/2013_SGHC_264",
+      "purpose": "Legacy judgment headers and report-citation search",
+      "probes": [
+        { "label": "[2013] SGHC 264", "kind": "Judgment" },
+        { "label": "[2013] 1 SLR 125", "kind": ["Judgment", "Case search"] }
+      ]
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "legacy-legislation",
+      "fixture": "tests/fixtures/legislation.html",
+      "probes": [{ "label": "person", "kind": "Definition", "contains": ["company and an individual"] }]
+    },
+    {
+      "id": "nested-legislation",
+      "fixture": "tests/fixtures/legislation-nested.html",
+      "probes": [{ "label": "supplier", "after": "#pr3-", "kind": "Definition", "contains": ["fixture goods", "fixture agent"] }]
+    }
+  ]
+}

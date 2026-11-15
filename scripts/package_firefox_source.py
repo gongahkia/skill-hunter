@@ -20,6 +20,8 @@ INCLUDED_PATHS = [
     "package-lock.json",
     "package.json",
     "scripts/package_firefox_source.py",
+    "scripts/audit_sites.py",
+    "scripts/audit_targets.json",
     "scripts/prepare_safari.py",
     "scripts/check_safari_app.py",
     "scripts/safari_browser_smoke.py",

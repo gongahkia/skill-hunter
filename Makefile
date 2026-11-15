@@ -1,6 +1,6 @@
 # Makefile for Skill Hunter development
 
-.PHONY: all install dev build package firefox-package package-source firefox-source-package firefox-submit-prep safari-prepare safari-build safari-check safari-test safari-browser-test test lint format clean ci help
+.PHONY: all install dev build package firefox-package package-source firefox-source-package firefox-submit-prep safari-prepare safari-build safari-check safari-test safari-browser-test audit audit-fixtures test lint format clean ci help
 
 VERSION := $(shell node -p "require('./package.json').version")
 FIREFOX_ARTIFACTS_DIR := submission/firefox/artifacts
@@ -51,6 +51,14 @@ type-check:
 # Local CI-equivalent quality gate
 ci:
 	npm run ci
+
+# Audit the installed extension on supported official pages
+audit: build
+	python3 scripts/audit_sites.py
+
+# Run browser audits without external network access
+audit-fixtures: build
+	python3 scripts/audit_sites.py --fixtures
 
 # Clean build artifacts
 clean:
@@ -122,6 +130,8 @@ help:
 	@echo "  make test-watch   - Run tests in watch mode"
 	@echo "  make safari-test  - Run portable Safari packaging tests"
 	@echo "  make safari-browser-test - Test inline hovers in real Safari (extension APIs simulated)"
+	@echo "  make audit        - Audit the real extension on official SSO and eLitigation pages"
+	@echo "  make audit-fixtures - Audit offline fixtures in Chromium (extension APIs simulated)"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  make lint         - Lint code"

@@ -36,6 +36,9 @@ jobs:
       - name: Test Safari packaging
         run: npm run test:safari
 
+      - name: Test audit configuration and result classification
+        run: npm run test:audit
+
       - name: Build shared extension and validate Safari resources
         run: npm run build:safari
 

@@ -60,6 +60,8 @@ $ npm ci
 $ make build
 ```
 
+For browser audits and test pages, see [Browser audits](./scripts/AUDITING.md).
+
 ### GUI
 
 1. Click *Code*.
