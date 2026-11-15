@@ -26,7 +26,7 @@ export type SourceLookup =
   | { kind: 'statute-search'; title: string }
   | { kind: 'case-search'; phrase: string }
   | { kind: 'statute-catalogue' };
-export type Lookup = SourceLookup | { kind: 'rendered'; resource: SourceLookup };
+export type Lookup = SourceLookup | { kind: 'rendered'; resource: SourceLookup; section?: string };
 export interface FetchResponse {
   ok: boolean;
   html?: string;

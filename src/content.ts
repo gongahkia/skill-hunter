@@ -54,10 +54,14 @@ function applyEnabled(value: boolean): void {
   }
 }
 chrome.runtime.onMessage.addListener(
-  (message: { action?: string }, sender, respond: (response: FetchResponse) => void) => {
+  (
+    message: { action?: string; section?: string },
+    sender,
+    respond: (response: FetchResponse) => void
+  ) => {
     if (message.action !== 'get_source_document' || sender.id !== chrome.runtime.id || sender.tab)
       return false;
-    void sourceSnapshot(document, location.href).then(respond);
+    void sourceSnapshot(document, location.href, 15000, message.section).then(respond);
     return true;
   }
 );

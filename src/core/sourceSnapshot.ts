@@ -1,5 +1,6 @@
 import type { FetchResponse } from '@/types';
 import { isSupportedUrl } from '@/utils/network';
+import { isSectionReference, localTarget } from './sources';
 
 export function isSourcePage(value: string): boolean {
   if (isSupportedUrl(value)) return true;
@@ -16,7 +17,8 @@ export function isSourcePage(value: string): boolean {
 export function sourceSnapshot(
   doc: Document,
   url: string,
-  timeoutMs = 15000
+  timeoutMs = 15000,
+  section?: string
 ): Promise<FetchResponse> {
   return new Promise((resolve) => {
     if (!isSourcePage(url)) {
@@ -25,6 +27,10 @@ export function sourceSnapshot(
     }
     const u = new URL(url);
     const isSearch = ['/Act', '/Search/Content'].includes(u.pathname);
+    if (section !== undefined && (!isSectionReference(section) || isSearch)) {
+      resolve({ ok: false, error: 'Invalid provision request' });
+      return;
+    }
     let settled = false;
     const finish = (response: FetchResponse): void => {
       if (settled) return;
@@ -39,7 +45,8 @@ export function sourceSnapshot(
         ? Array.from(doc.querySelectorAll('a[href]')).some((a) =>
             /\/(?:Act|SL)\//i.test(a.getAttribute('href') ?? '')
           )
-        : !!root?.querySelector('[id*="-he-"], [class*="prov"][class*="Txt"]');
+        : !!root?.querySelector('[id*="-he-"], [class*="prov"][class*="Txt"]') &&
+          (!section || !!(root && localTarget(root, section)));
       if (!ready) return;
       const clone = doc.documentElement.cloneNode(true) as HTMLElement;
       clone
@@ -61,8 +68,9 @@ export function sourceSnapshot(
         finish({
           ok: false,
           url,
-          error:
-            'SSO did not provide readable content in the browser. Open the source to check its availability.',
+          error: section
+            ? `SSO did not provide section ${section} in the browser. Open the source to check its availability.`
+            : 'SSO did not provide readable content in the browser. Open the source to check its availability.',
         }),
       timeoutMs
     );

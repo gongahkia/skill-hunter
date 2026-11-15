@@ -10,7 +10,7 @@ async function limitedFetch(lookup: Lookup): Promise<FetchResponse> {
   if (active >= 2) await new Promise<void>((resolve) => queue.push(resolve));
   active++;
   try {
-    if (lookup.kind === 'rendered') return await renderedSource(lookupUrl(lookup));
+    if (lookup.kind === 'rendered') return await renderedSource(lookupUrl(lookup), lookup.section);
     return await fetchLookup(lookup);
   } finally {
     active--;

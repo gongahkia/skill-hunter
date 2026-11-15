@@ -17,6 +17,19 @@ it('uses a matching already-open source tab without closing it', async () => {
   expect(api.create).not.toHaveBeenCalled();
   expect(api.remove).not.toHaveBeenCalled();
 });
+it('passes the requested provision to the source tab', async () => {
+  const api = tabs([{ id: 5, url }]);
+  expect((await renderedSource(url, '21(9)')).ok).toBe(true);
+  expect(api.sendMessage).toHaveBeenCalledWith(5, {
+    action: 'get_source_document',
+    section: '21(9)',
+  });
+});
+it('rejects invalid provision requests before opening a source tab', async () => {
+  const api = tabs([]);
+  expect((await renderedSource(url, '21#invalid')).ok).toBe(false);
+  expect(api.create).not.toHaveBeenCalled();
+});
 it('opens an inactive source tab and closes it after success or failure', async () => {
   const api = tabs([]);
   await renderedSource(url);

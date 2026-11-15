@@ -1,5 +1,6 @@
 import type { FetchResponse } from '@/types';
 import { isSourcePage } from '@/core/sourceSnapshot';
+import { isSectionReference } from '@/core/sources';
 
 /** A single temporary inactive tab at a time; existing matching tabs are never closed. */
 let rendering = Promise.resolve();
@@ -17,9 +18,11 @@ function sameVersion(a: string, b: string): boolean {
     normalizedQuery(x) === normalizedQuery(y)
   );
 }
-export async function renderedSource(url: string): Promise<FetchResponse> {
+export async function renderedSource(url: string, section?: string): Promise<FetchResponse> {
   if (!isSourcePage(url) || new URL(url).hostname !== 'sso.agc.gov.sg')
     return { ok: false, error: 'Unsupported rendered source' };
+  if (section !== undefined && !isSectionReference(section))
+    return { ok: false, error: 'Invalid provision request' };
   let release: () => void = () => undefined;
   const previous = rendering;
   rendering = new Promise<void>((resolve) => {
@@ -39,6 +42,7 @@ export async function renderedSource(url: string): Promise<FetchResponse> {
       try {
         const result: FetchResponse = await chrome.tabs.sendMessage(tab.id, {
           action: 'get_source_document',
+          ...(section ? { section } : {}),
         });
         if (
           result?.ok &&

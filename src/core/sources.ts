@@ -73,6 +73,9 @@ export function pageSummary(doc: Document, url: string): PageSummary {
 export function sectionNumber(el: Element): string | undefined {
   return /^pr(\d+[A-Z]*)-(?:he-)?$/i.exec(el.id)?.[1];
 }
+export function isSectionReference(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 100 && /^\d+[A-Z]*(?:\(\w+\))*$/i.test(value);
+}
 export function localTarget(root: Element, section: string): Element | undefined {
   const parts = section.match(/^(\d+[A-Z]*)(.*)$/i);
   if (!parts) return undefined;

@@ -169,6 +169,41 @@ it('reads the rendered source when an HTTP response contains other provisions bu
     'rendered',
   ]);
 });
+it('asks the rendered source to wait for the requested Arbitration Act provision', async () => {
+  const send = mockFetch((lookup) =>
+    lookup.kind === 'rendered'
+      ? '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr21-">Jurisdiction</td></tr><tr><td class="prov1Txt">Requested Arbitration Act provision.</td></tr></table></div>'
+      : '<div id="legisContent"><table><tr><td class="prov1Hdr" id="pr1-">Short title</td></tr><tr><td class="prov1Txt">Initially loaded provision.</td></tr></table></div>'
+  );
+  const url = 'https://sso.agc.gov.sg/Act/AA2001?WholeDoc=1';
+  const result = await new PreviewResolver().resolve(
+    {
+      kind: 'statute',
+      label: 's 21(9) of the Arbitration Act 2001 (2020 Rev Ed)',
+      act: 'Arbitration Act 2001',
+      section: '21(9)',
+      version: '2020 Rev Ed',
+      url,
+    },
+    'https://www.elitigation.sg/gd/s/2024_SGCA_12'
+  );
+  expect(result.text).toContain('Requested Arbitration Act provision.');
+  expect(send).toHaveBeenCalledWith({
+    action: 'lookup',
+    lookup: { kind: 'rendered', resource: { kind: 'document', url }, section: '21(9)' },
+  });
+});
+it('does not reuse an incomplete rendered snapshot for a section-specific lookup', async () => {
+  const send = mockFetch((lookup) => {
+    if (lookup.kind !== 'rendered') return '<div id="legisContent"></div>';
+    return lookup.section === '5'
+      ? '<div id="legisContent"><table><tr><td id="pr5-he-">Duties</td></tr><tr><td>Requested provision.</td></tr></table></div>'
+      : '<div id="legisContent"><table><tr><td id="pr1-he-">Short title</td></tr><tr><td>Incomplete rendered page.</td></tr></table></div>';
+  });
+  const result = await new PreviewResolver().resolve(statute, source);
+  expect(result.text).toContain('Requested provision.');
+  expect(send).toHaveBeenCalledTimes(3);
+});
 it('uses a linked section anchor when deciding whether to read the rendered source', async () => {
   const send = mockFetch((lookup) =>
     lookup.kind === 'rendered'

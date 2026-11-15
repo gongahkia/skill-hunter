@@ -38,7 +38,7 @@ export class PreviewResolver {
   }
   private async load(lookup: Lookup): Promise<Document> {
     if (this.disposed) throw new Error('Lookup dismissed');
-    const key = `${lookup.kind === 'rendered' ? 'rendered:' : ''}${lookupUrl(lookup)}`;
+    const key = `${lookup.kind === 'rendered' ? `rendered:${lookup.section ?? ''}:` : ''}${lookupUrl(lookup)}`;
     const existing = this.cache.get(key);
     if (existing) return existing;
     const generation = this.generation;
@@ -79,7 +79,11 @@ export class PreviewResolver {
       !root.querySelector('[id*="-he-"], td[class*="prov"]') ||
       (section && !localTarget(root, section))
     )
-      doc = await this.load({ kind: 'rendered', resource: { kind: 'document', url } });
+      doc = await this.load({
+        kind: 'rendered',
+        resource: { kind: 'document', url },
+        ...(section ? { section } : {}),
+      });
     if (!contentRoot(doc)?.textContent?.trim())
       throw new Error('SSO did not provide readable legislation in the browser.');
     return doc;
