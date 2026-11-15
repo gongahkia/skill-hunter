@@ -259,14 +259,38 @@ class AuditBrowser:
         self.driver.move("viewport", 1, 1)
         self.driver.request("/actions", {"actions": [{"type": "key", "id": "keyboard", "actions": [
             {"type": "keyDown", "value": "\ue00c"}, {"type": "keyUp", "value": "\ue00c"}]}]})
-        target = self.driver.js('const el=Array.from(document.querySelectorAll("[data-skill-hunter-reference]")).find(el=>el.getAttribute("data-skill-hunter-reference")===arguments[0]);if(el)el.scrollIntoView({block:"center"});return el;', reference["id"])
-        if not target:
+        found = self.driver.js('const el=Array.from(document.querySelectorAll("[data-skill-hunter-reference]")).find(el=>el.getAttribute("data-skill-hunter-reference")===arguments[0] && Array.from(el.getClientRects()).some(rect=>rect.width>0 && rect.height>0));if(el)el.scrollIntoView({block:"center",inline:"nearest",behavior:"instant"});return !!el;', reference["id"])
+        if not found:
             raise RuntimeError("The annotated reference disappeared")
-        self.driver.move(target)
+        previous, stable_since = None, time.monotonic()
+        def settled_point():
+            nonlocal previous, stable_since
+            point = self.driver.js('''
+                for(const el of document.querySelectorAll('[data-skill-hunter-reference]')) {
+                    if(el.getAttribute('data-skill-hunter-reference')!==arguments[0])continue;
+                    for(const rect of el.getClientRects()) {
+                        const left=Math.max(0,rect.left),right=Math.min(innerWidth,rect.right);
+                        const top=Math.max(0,rect.top),bottom=Math.min(innerHeight,rect.bottom);
+                        if(right-left<2 || bottom-top<2)continue;
+                        const x=Math.floor((left+right)/2),y=Math.floor((top+bottom)/2);
+                        if(document.elementFromPoint(x,y)?.closest('[data-skill-hunter-reference]')===el)return {x,y};
+                    }
+                }return null;''', reference["id"])
+            if point != previous:
+                previous, stable_since = point, time.monotonic()
+            return point if point and time.monotonic() - stable_since >= 0.3 else None
+        point = wait_for(settled_point, self.timeout, "an unobstructed, settled reference")
+        self.driver.move("viewport", point["x"], point["y"])
+        last_card = None
         def ready_card():
-            card = self.card()
-            return card if card and not card["hidden"] and not card["kind"].startswith("Loading") else None
-        return wait_for(ready_card, self.timeout, "the hover preview")
+            nonlocal last_card
+            last_card = self.card()
+            return last_card if last_card and not last_card["hidden"] and not last_card["kind"].startswith("Loading") else None
+        try:
+            return wait_for(ready_card, self.timeout, "the hover preview")
+        except RuntimeError as error:
+            state = {key: last_card[key] for key in ("hidden", "kind", "title") if last_card and key in last_card}
+            raise RuntimeError(f"{error}; last panel state: {json.dumps(state)}") from error
 
     def screenshot(self, destination):
         destination.write_bytes(base64.b64decode(self.driver.request("/screenshot", method="GET")))
@@ -384,12 +408,15 @@ def audit_target(browser, target, output, capture_html):
                 if reference is None:
                     check("reference_annotated", False, label=probe["label"], source_definition=browser.definition_diagnostic(probe["label"]), screenshot=evidence(f"probe-{index}"))
                     continue
-                card = browser.hover(reference)
-                status = preview_status(card, probe)
-                if status == "passed" and not browser.fixtures and not card.get("links"):
-                    status = "failed"
-                item = {"name": "hover_preview", "label": probe["label"], "status": status, "preview": card}
-                if status != "passed":
+                try:
+                    card = browser.hover(reference)
+                    status = preview_status(card, probe)
+                    if status == "passed" and not browser.fixtures and not card.get("links"):
+                        status = "failed"
+                    item = {"name": "hover_preview", "label": probe["label"], "status": status, "preview": card}
+                except (OSError, RuntimeError) as error:
+                    item = {"name": "hover_preview", "label": probe["label"], "status": "failed", "message": str(error)}
+                if item["status"] != "passed":
                     item["screenshot"] = evidence(f"probe-{index}")
                 result["checks"].append(item)
             if browser.fixtures:

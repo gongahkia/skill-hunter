@@ -4,9 +4,10 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from audit_sites import blocked_document, exit_code, load_targets, overall_status, preview_status, supported_url
+from audit_sites import audit_target, blocked_document, exit_code, load_targets, overall_status, preview_status, supported_url
 from prepare_safari import ROOT
 
 
@@ -63,6 +64,27 @@ class AuditTests(unittest.TestCase):
         self.assertEqual(preview_status(card, {"contains": ["missing continuation"]}), "failed")
         card["links"] = ["javascript:alert(1)"]
         self.assertEqual(preview_status(card, probe), "failed")
+
+    def test_hover_failure_does_not_skip_later_probes_or_cleanup(self):
+        source = {"root": True, "title": "Fixture", "text": "first second", "box": [400, 200], "overflow": "",
+                  "originals_retained": True, "definition_count": 0, "section_anchors": [], "references": []}
+        references = [{"id": "1", "label": "first"}, {"id": "2", "label": "second"}]
+        browser = Mock(fixtures=False, timeout=1)
+        browser.load.return_value = source
+        browser.driver.js.side_effect = [source, {**source, "references": references}, source]
+        browser.hover.side_effect = [RuntimeError("Hover timed out"), {
+            "kind": "Judgment", "title": "Second case", "text": "Readable source text",
+            "links": ["https://www.elitigation.sg/gd/s/2024_SGCA_12"],
+        }]
+        target = {"id": "probe-recovery", "url": "https://www.elitigation.sg/gd/s/2024_SGCA_12",
+                  "probes": [{"label": "first"}, {"label": "second"}]}
+        with tempfile.TemporaryDirectory() as directory:
+            result = audit_target(browser, target, Path(directory), False)
+        previews = [check for check in result["checks"] if check["name"] == "hover_preview"]
+        self.assertEqual([check["status"] for check in previews], ["failed", "passed"])
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(any(check["name"] == "annotations_removed" and check["status"] == "passed" for check in result["checks"]))
+        browser.set_enabled.assert_called_with(False)
 
 
 if __name__ == "__main__":
